@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 122,
+      "benefits_span": "The Cigna plan available in Pinellas County has a $35 monthly premium, a $260 drug deductible and a $4900 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits (25s < 122s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.9583333333333333,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "260",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Medicare number",
+        "date of birth"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. However, the agent collected Medicare number and date of birth, which should not have been shared.",
+      "coaching_note": "Luis did a good job by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment. However, he should avoid collecting sensitive information like Medicare number and date of birth during the initial call. This can be improved by ensuring that only non-sensitive information is collected until the appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review and sign Scope of Appointment, follow up on plan review"
+      }
+    }
+  },
+  "latency_ms": 21114,
+  "usage": {
+    "input_tokens": 1566,
+    "output_tokens": 565,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:17:37Z"
+}

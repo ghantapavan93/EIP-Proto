@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 216,
+      "benefits_span": "The Cigna plan available in Volusia County has a $40 monthly premium, a $20 drug deductible and a $3000 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 216s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "20",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules by delivering the disclaimer before discussing plan benefits and collecting the Scope of Appointment before scheduling the appointment. The call was compliant.",
+      "coaching_note": "Great job, Luis! You effectively followed all the necessary steps and ensured the call was compliant. One suggestion would be to provide a bit more detail about the plans during the initial discussion to help the customer make a more informed decision.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review plan with customer in 5 days"
+      }
+    }
+  },
+  "latency_ms": 18044,
+  "usage": {
+    "input_tokens": 1519,
+    "output_tokens": 506,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:45:42Z"
+}

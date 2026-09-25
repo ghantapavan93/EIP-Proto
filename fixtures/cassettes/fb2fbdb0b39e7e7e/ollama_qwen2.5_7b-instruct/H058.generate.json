@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 34,
+      "benefits_span": "The Cigna plan available in Orange County has a $10 monthly premium, a $300 drug deductible and a $6000 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits (34s < 34s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "300",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before the disclaimer, which is compliant. The Scope of Appointment was collected and the appointment was scheduled within the 72-hour window, also compliant.",
+      "coaching_note": "While the call was compliant, the agent could improve by ensuring the disclaimer is read first. For example, 'Before we discuss the plan details, I need to inform you that we do not offer every plan available in your area. Let me pull up your county.'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Review plan details with customer"
+      }
+    }
+  },
+  "latency_ms": 16066,
+  "usage": {
+    "input_tokens": 1245,
+    "output_tokens": 463,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:20:08Z"
+}

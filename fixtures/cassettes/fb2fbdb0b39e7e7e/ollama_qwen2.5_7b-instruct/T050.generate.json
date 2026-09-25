@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 183,
+      "benefits_span": "The Aetna plan available in Polk County has a $45 monthly premium, a $350 drug deductible and a $3900 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 183s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "350",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX8-XX0-XX96",
+        "09/16/1949"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed all the necessary steps, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. However, the agent should ensure that the customer's Medicare number and date of birth are not shared in the call transcript.",
+      "coaching_note": "Grace did a good job in following the required steps, but it's important to avoid sharing sensitive information like Medicare numbers and dates of birth in the call transcript. Next time, please ensure that all PII is redacted from the transcript.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment"
+      }
+    }
+  },
+  "latency_ms": 18968,
+  "usage": {
+    "input_tokens": 1652,
+    "output_tokens": 550,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:59:39Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 188,
+      "benefits_span": "The Cigna plan available in Pinellas County has a $0 monthly premium, a $475 drug deductible and a $6400 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 188s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "0",
+          "context": "monthly premium"
+        },
+        {
+          "value": "475",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. The agent also used a superlative, stating the plan was the highest-rated in the county, which was substantiated.",
+      "coaching_note": "While the agent did a good job following compliance rules, they could improve by avoiding superlatives that are not substantiated. For example, they could say, 'This plan is highly rated in the county,' instead of 'This is the highest-rated plan.'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review plan with customer in 3 days"
+      }
+    }
+  },
+  "latency_ms": 19275,
+  "usage": {
+    "input_tokens": 1606,
+    "output_tokens": 530,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:16:55Z"
+}

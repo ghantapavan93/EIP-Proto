@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 139,
+      "benefits_span": "The Cigna plan available in Hillsborough County has a $20 monthly premium, a $290 drug deductible and a $5900 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits (25s < 139s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "290",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX7-XX7-XX75",
+        "04/28/1953"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed the required steps but the disclaimer was read after discussing plan benefits, making it non-compliant. The agent also collected the Scope of Appointment and scheduled a follow-up appointment within the required timeframe.",
+      "coaching_note": "Owen should ensure the disclaimer is read before discussing any plan benefits to maintain compliance. Additionally, he should avoid collecting personal information like Medicare numbers and dates of birth during the initial call to prevent data breaches.",
+      "crm_record": {
+        "disposition": "Scheduled Follow-Up",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review and sign Scope of Appointment, discuss plan details"
+      }
+    }
+  },
+  "latency_ms": 20448,
+  "usage": {
+    "input_tokens": 1534,
+    "output_tokens": 545,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:17:16Z"
+}

@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 129,
+      "benefits_span": "The Humana plan available in Lee County has a $35 monthly premium, a $245 drug deductible and a $3800 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 129s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "245",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3800",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX0-XX7-XX37",
+        "11/13/1950"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. The call included a discussion of a Medicare Part D plan with specific details on premiums, deductibles, and out-of-pocket maximums. Personal information was shared, and the agent scheduled a follow-up appointment for 5 days later.",
+      "coaching_note": "Marcus did a good job by delivering the disclaimer and collecting the Scope of Appointment before discussing the plan details. However, the call could be improved by avoiding the sharing of personal information such as the Medicare number and date of birth. Next time, consider using a secure method to obtain this information.",
+      "crm_record": {
+        "disposition": "Scheduled Follow-Up",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, prepare for follow-up call"
+      }
+    }
+  },
+  "latency_ms": 22718,
+  "usage": {
+    "input_tokens": 1571,
+    "output_tokens": 585,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:18:01Z"
+}

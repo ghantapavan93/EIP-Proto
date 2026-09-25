@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 149,
+      "benefits_span": "The Mutual of Omaha plan available in Duval County has a $40 monthly premium, a $310 drug deductible and a $5700 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits (25s < 149s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2.5,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "310",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing plan benefits and collecting the Scope of Appointment before scheduling the appointment. The call was compliant with all rules.",
+      "coaching_note": "Marcus did a great job by ensuring the disclaimer was read before discussing plan benefits. However, he could improve by providing a bit more detail about the plans, such as the network coverage and copay amounts, to give the customer a clearer picture of what they're signing up for.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, plan review in 4 days"
+      }
+    }
+  },
+  "latency_ms": 29287,
+  "usage": {
+    "input_tokens": 3092,
+    "output_tokens": 759,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:45:05Z"
+}

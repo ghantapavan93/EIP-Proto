@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 34,
+      "benefits_span": "The Aetna plan available in Polk County has a $45 monthly premium, a $270 drug deductible and a $3800 maximum out-of-pocket.",
+      "disclaimer_basis": "superlative:before-benefits (34s < 34s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "270",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3800",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is non-compliant. The call did not contain any superlatives.",
+      "coaching_note": "Owen should ensure the disclaimer is read before discussing plan benefits to maintain compliance. For example, he should say, 'Before we discuss the benefits, I need to inform you that we do not offer every plan available in your area. '",
+      "crm_record": {
+        "disposition": "Further Discussion",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Review Scope of Appointment and discuss plan details"
+      }
+    }
+  },
+  "latency_ms": 15551,
+  "usage": {
+    "input_tokens": 1240,
+    "output_tokens": 468,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T08:01:27Z"
+}

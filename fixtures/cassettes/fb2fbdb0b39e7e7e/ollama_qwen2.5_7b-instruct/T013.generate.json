@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 143,
+      "benefits_span": "The Cigna plan available in Lee County has a $5 monthly premium, a $25 drug deductible and a $4300 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 143s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "Let's set your plan review for 4 days from now \u2014 that's 96 hours out, which gives you time to read it.",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$25",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, read the disclaimer before discussing benefits, and collected the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Grace did a great job following all the necessary steps. However, she could improve by clearly stating the appointment time in the Scope of Appointment document. For example, she could say, 'Your appointment is scheduled for 4 days from now, at 96 hours out.' This will ensure there's no confusion about the timing.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with customer on the scheduled appointment and ensure they have read the Scope of Appointment."
+      }
+    }
+  },
+  "latency_ms": 18287,
+  "usage": {
+    "input_tokens": 1431,
+    "output_tokens": 525,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:48:26Z"
+}

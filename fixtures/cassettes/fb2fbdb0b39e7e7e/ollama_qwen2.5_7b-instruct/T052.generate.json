@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 147,
+      "benefits_span": "The Mutual of Omaha plan available in Hillsborough County has a $10 monthly premium, a $120 drug deductible and a $6700 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 147s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "120",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX2-XX0-XX80",
+        "04/16/1953"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. The call included a discussion of plan details and required the customer to provide personal information.",
+      "coaching_note": "Jordan did well in following the necessary steps, but could improve by ensuring the customer's personal information is not shared until after the Scope of Appointment is signed. For example, the Medicare number and date of birth could be collected after the customer signs the Scope of Appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment"
+      }
+    }
+  },
+  "latency_ms": 18534,
+  "usage": {
+    "input_tokens": 1533,
+    "output_tokens": 544,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T08:00:18Z"
+}

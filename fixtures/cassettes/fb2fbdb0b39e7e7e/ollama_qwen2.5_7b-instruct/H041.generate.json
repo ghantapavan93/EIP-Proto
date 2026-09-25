@@ -1,0 +1,44 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 125,
+      "benefits_span": "The Aetna plan available in Pasco County has a $30 monthly premium, a $280 drug deductible and a $4000 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 125s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": "The agent initiated plan discussion before the customer signed the Scope of Appointment.",
+      "soa_wait_compliant": false
+    },
+    "composition": {
+      "summary": "The agent delivered the disclaimer before discussing plan benefits, but did not wait for the customer to sign the Scope of Appointment before proceeding with plan discussion.",
+      "coaching_note": "Grace should ensure that the Scope of Appointment is signed before discussing plan details to comply with the SOA wait period. For example, she could say, 'Before we go over the plan details, could you please sign the Scope of Appointment?'",
+      "crm_record": {
+        "disposition": "Plan Discussion",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with customer to ensure Scope of Appointment is signed and confirm plan selection."
+      }
+    }
+  },
+  "latency_ms": 14892,
+  "usage": {
+    "input_tokens": 1513,
+    "output_tokens": 448,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:14:46Z"
+}

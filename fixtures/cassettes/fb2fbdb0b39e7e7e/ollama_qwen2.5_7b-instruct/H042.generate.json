@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 121,
+      "benefits_span": "The UnitedHealthcare plan available in Polk County has a $45 monthly premium, a $490 drug deductible and a $6700 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 121s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "490",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing plan benefits and collected the Scope of Appointment before proceeding with plan discussion. The call was compliant with all rules.",
+      "coaching_note": "Great job, Marcus! You correctly delivered the disclaimer before discussing plan benefits and collected the Scope of Appointment promptly. To improve, consider scheduling the appointment immediately after the customer signs the Scope of Appointment to ensure a seamless process.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Follow up with Mrs. Lindqvist to schedule the appointment."
+      }
+    }
+  },
+  "latency_ms": 17090,
+  "usage": {
+    "input_tokens": 1482,
+    "output_tokens": 513,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:15:03Z"
+}

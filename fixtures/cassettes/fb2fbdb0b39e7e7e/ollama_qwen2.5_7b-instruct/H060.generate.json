@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": null,
+      "disclaimer_basis": null,
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": null,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Mr. Patel"
+      ]
+    },
+    "composition": {
+      "summary": "The call was about comparing Medicare Supplement plans, but no disclaimer was read before discussing benefits, and no SOA was collected. The agent did not mention any superlatives.",
+      "coaching_note": "Jordan, it's important to ensure that the disclaimer is read before discussing any plan benefits. In this call, the agent started discussing the benefits of Plan G before reading the disclaimer. Next time, make sure to read the disclaimer first, even if the customer seems familiar with the process.",
+      "crm_record": {
+        "disposition": "Informational Call",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Follow up with customer to schedule an appointment"
+      }
+    }
+  },
+  "latency_ms": 10995,
+  "usage": {
+    "input_tokens": 1184,
+    "output_tokens": 321,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:20:32Z"
+}

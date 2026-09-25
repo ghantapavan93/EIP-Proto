@@ -1,0 +1,58 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 61,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 114,
+      "benefits_span": "The Aetna plan available in Lee County has a $35 monthly premium, a $170 drug deductible and a $3600 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "170",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all the rules by delivering the disclaimer before discussing the plan benefits and collecting the Scope of Appointment before scheduling the appointment. The call was compliant.",
+      "coaching_note": "Grace did a great job by ensuring the disclaimer was read before discussing the plan benefits and collecting the Scope of Appointment before scheduling the appointment. To further improve, Grace could consider adding a brief explanation of the Scope of Appointment to ensure the customer fully understands its purpose.",
+      "crm_record": {
+        "disposition": "Scheduled Follow-Up",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Review plan with customer in 4 days"
+      }
+    }
+  },
+  "latency_ms": 15964,
+  "usage": {
+    "input_tokens": 1443,
+    "output_tokens": 488,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:09:01Z"
+}
