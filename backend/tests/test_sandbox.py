@@ -37,9 +37,16 @@ def client(seeded):
 
 
 @pytest.fixture(autouse=True)
-def _fresh_limits():
-    api_sandbox.ARTIFACT_LIMIT.reset()
-    api_sandbox.TRANSCRIPT_LIMIT.reset()
+def _fresh_limits(monkeypatch):
+    """Empty buckets and a frozen limiter clock for every sandbox test.
+
+    With the real clock the limit tests depended on machine speed: 30 artifact checks
+    refill one token every 2 s, so a loaded run that took over 2 s let the 31st request
+    through (seen once in the full suite). Frozen time makes the limit exact.
+    """
+    for bucket in (api_sandbox.ARTIFACT_LIMIT, api_sandbox.TRANSCRIPT_LIMIT):
+        bucket.reset()
+        monkeypatch.setattr(bucket, "clock", lambda: 1_000.0)
     yield
     api_sandbox.ARTIFACT_LIMIT.reset()
     api_sandbox.TRANSCRIPT_LIMIT.reset()
@@ -87,7 +94,7 @@ def test_soa_48h_line_is_stale_over_restrictive_on_oct_1(client):
     assert soa["polarity"] == "ENFORCES" and soa["edge_status"] == "confirmed"
     assert "removed" in soa["reason"] and soa["applies_from"] == OCT_1
     assert soa["regulation_effective"] == "2026-06-01"
-    assert body["summary"] == {"matches": 1, "stale": 1, "current": 0, "rules_touched": 1,
+    assert body["summary"] == {"matches": 1, "stale": 1, "needs_review": 0, "current": 0, "rules_touched": 1,
                                "over_restrictive": 1, "under_restrictive": 0, "reverify": 0}
     assert body["persisted"] is False and body["label"] == "Scheduling script"
     assert body["chars"] == len(SOA_LINE) and len(body["text_sha256"]) == 64
@@ -281,6 +288,33 @@ def test_token_bucket_refills():
     assert bucket.take("u") == pytest.approx(30.0)
     now[0] = 30.0
     assert bucket.take("u") == 0
+
+
+def test_the_artifact_limit_refills_one_check_every_two_seconds_exactly():
+    """The production limit's boundary, on a controlled clock: this is the timing the
+    wall-clock version of the per-user test used to race against."""
+    from backstop.api.ratelimit import TokenBucket
+
+    now = [0.0]
+    bucket = TokenBucket(capacity=30, per_seconds=60, clock=lambda: now[0])
+    assert all(bucket.take("u") == 0 for _ in range(30))
+    assert bucket.take("u") == pytest.approx(2.0)
+    now[0] = 1.99
+    assert bucket.take("u") > 0, "not yet: a full token takes 2 s"
+    now[0] = 4.0  # the refused calls above spent nothing; 4 s buys two tokens
+    assert bucket.take("u") == 0 and bucket.take("u") == 0
+    assert bucket.take("u") > 0
+
+
+def test_a_slow_machine_no_longer_lets_a_request_past_the_limit(client):
+    """Regression for the flake: advance real time by 70 ms per request (a loaded run),
+    and the frozen limiter clock still refuses the 31st."""
+    import time
+
+    for _ in range(30):
+        time.sleep(0.07)
+        assert artifact(client, SOA_LINE, user="analyst").status_code == 200
+    assert artifact(client, SOA_LINE, user="analyst").status_code == 429
 
 
 # ------------------------------------------------------------------ transcript
@@ -505,3 +539,13 @@ def test_transcript_rate_limit(client, monkeypatch):
 
 def test_bad_product_line_is_refused(client, ollama):
     assert transcript(client, product_line="AUTO").status_code == 422
+
+
+def test_a_proposed_reading_is_not_counted_as_stale(client):
+    """Text that drops the wait names the old rule to retire it: a human reads it, and the
+    summary does not call it stale."""
+    body = artifact(client, "Good news: agents no longer need to wait 48 hours after the Scope of "
+                            "Appointment is signed before the appointment.").json()
+    assert body["summary"]["matches"] == 1
+    assert body["summary"]["stale"] == 0 and body["summary"]["needs_review"] == 1
+    assert body["matches"][0]["edge_status"] == "proposed"

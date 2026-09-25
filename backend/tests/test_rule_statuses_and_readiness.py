@@ -138,7 +138,7 @@ def test_loader_accepts_an_open_enacted_version_plus_an_undated_proposal():
     (_doc(_v(1, "in_force", "2025-01-01", vote_date="soon")), "vote_date is not a date"),
     (_doc(_v(1, "in_force", "2025-01-01", deferrals=[{"deferred_to": "2027-01-31"}])), "needs a provision"),
     (_doc(_v(1, "in_force", "2025-01-01", deferrals=[{"provision": "revoke-all"}])), "needs deferred_to"),
-    (_doc(_v(1, "in_force", "2025-01-01"), _v(2, "in_force", "2026-01-01")), "more than one enacted version"),
+    (_doc(_v(1, "in_force", "2025-01-01"), _v(2, "in_force", "2026-01-01")), "overlaps the previous version"),
     (_doc(_v(1, "vacated", "2025-01-01", cls="RESTORES_PRIOR"), _v(2, "bogus", "2026-01-01")), "bad status"),
 ])
 def test_loader_refuses_malformed_versions(doc, message):

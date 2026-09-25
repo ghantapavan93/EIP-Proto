@@ -41,17 +41,30 @@ def test_analyst_sees_what_it_may_and_may_not_do(client):
     for allowed in ("view", "pick_up_tasks", "decide_tasks", "export_evidence", "use_sandbox"):
         assert p[allowed]["allowed"] is True, allowed
     for denied in ("republish", "approve_test_cases", "start_runs", "start_scans", "propose_rule_versions",
-                   "ingest_transcripts", "reload_rules", "check_rule_sources", "open_stale_tasks"):
+                   "ingest_transcripts", "check_rule_sources", "open_stale_tasks"):
         assert p[denied]["allowed"] is False, denied
         assert p[denied]["why"].startswith("Not allowed: only engineer or admin")
+    for admin_only in ADMIN_ONLY:
+        assert p[admin_only]["why"].startswith("Not allowed: only admin")
     assert "two-person rule" in p["approve_test_cases"]["why"]
 
 
-def test_engineer_and_admin_may_do_everything_listed(client):
-    for user in ("engineer", "admin"):
-        body = client.get("/api/me", headers=auth(user)).json()
-        assert all(p["allowed"] for p in body["permissions"]), user
-        assert body["role"] == user
+ADMIN_ONLY = ("reload_rules", "review_access", "checkpoint_audit")
+
+
+def test_engineer_operates_but_does_not_govern(client):
+    p = _perms(client.get("/api/me", headers=auth("engineer")).json())
+    for action, perm in p.items():
+        assert perm["allowed"] is (action not in ADMIN_ONLY), action
+    assert "an admin adopts" in p["reload_rules"]["why"]
+
+
+def test_admin_may_do_everything_listed_and_says_what_it_adds(client):
+    body = client.get("/api/me", headers=auth("admin")).json()
+    assert all(p["allowed"] for p in body["permissions"])
+    roles = {r["role"]: r for r in body["roles"]}
+    assert set(roles["admin"]["can"]) - set(roles["engineer"]["can"]) == set(ADMIN_ONLY)
+    assert "access review" in roles["admin"]["description"]
 
 
 def test_roles_overview_lists_every_role_with_its_actions(client):
@@ -59,7 +72,7 @@ def test_roles_overview_lists_every_role_with_its_actions(client):
     roles = {r["role"]: r for r in body["roles"]}
     assert set(roles) == VALID_ROLES
     assert "decide_tasks" in roles["analyst"]["can"] and "start_runs" not in roles["analyst"]["can"]
-    assert set(roles["engineer"]["can"]) == {p["action"] for p in body["permissions"]}
+    assert set(roles["admin"]["can"]) == {p["action"] for p in body["permissions"]}
     assert all(r["label"] and r["description"] for r in roles.values())
 
 

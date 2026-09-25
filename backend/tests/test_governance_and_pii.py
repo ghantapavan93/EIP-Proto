@@ -93,7 +93,7 @@ def test_an_api_proposal_never_breaks_reload_or_seed(client, settings):
     """The 2026-09-25 repro: propose, then reload and reseed. Both must succeed."""
     assert _propose(client, "superlatives", clause_text="Proposal before a restart.",
                     effective_from="2027-05-01").status_code == 201
-    reload = client.post("/api/rules/reload", headers=auth("engineer"))
+    reload = client.post("/api/rules/reload", headers=auth("admin"))
     assert reload.status_code == 200, reload.text
     cli.seed()  # what the Docker CMD runs on every start; raises typer.Exit(1) on refusal
 

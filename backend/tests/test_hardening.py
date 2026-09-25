@@ -231,8 +231,10 @@ def test_failed_logins_are_throttled_in_the_audit_log(client):
     for _ in range(5):
         assert client.get("/api/rules", headers=auth(long_name, "wrong")).status_code == 401
     rows = client.get("/api/audit?event_type=auth.denied&limit=500", headers=auth("analyst")).json()["items"]
-    mine = [r for r in rows if r["actor"].startswith("zzz")]
+    mine = [r for r in rows if r["actor"] == deps._unknown_user(long_name)]
     assert len(mine) == 1 and len(mine[0]["actor"]) <= 64
+    # An unknown username may be a pasted password: it is hashed, never stored.
+    assert not any("zzz" in r["actor"] for r in rows)
 
 
 @pytest.mark.parametrize("users,expected", [
