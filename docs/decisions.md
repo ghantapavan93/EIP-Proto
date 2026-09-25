@@ -4,6 +4,8 @@ The calls that shaped Backstop and why I made them. AI assistance did much of th
 building (see [`ai-build-ledger.md`](ai-build-ledger.md)); the direction, the scope and
 every trade-off below were mine.
 
+## Project decisions
+
 | Date | Decision | Alternatives considered | Why |
 |---|---|---|---|
 | 2026-09-21 | Answer "full stack or AI workflow?" with a working prototype that is both, built in about 48 hours | A written answer or a slide deck | A running system can be questioned; a description cannot |
@@ -16,3 +18,39 @@ every trade-off below were mine.
 | 2026-09-25 | Before external review, fix the high-risk audit findings and disclose the rest rather than change recorded numbers late | Fix everything at once | Late changes to measured results would be harder to trust than disclosed limitations |
 | 2026-09-25 | Publish the repository with third-party pages reduced to short attributed excerpts, verified to give identical results | Keep it private; publish full page copies | Open for review without redistributing other people's content |
 | 2026-09-25 | Keep AI assistance visible in commit trailers and the build ledger | Remove it | Transparency about how the work was done is part of the work |
+
+## Engineering decisions
+
+The design choices behind the code, in one place. Each links to the record that argues it
+in full.
+
+**Why deterministic gates?** A model should not grade its own consequential behaviour.
+Release decisions come from code that compares output with ground truth and the rule in
+force; a model-as-judge is reported, never allowed to block.
+([ADR-002](adr/ADR-002-ai-boundary.md), [ADR-006](adr/ADR-006-judged-contracts-are-advisory.md))
+
+**Why no silent model fallback?** Changing the provider changes the experiment. If the
+requested model is unavailable, the run records the failure; another model is a new,
+explicitly chosen run configuration, scored by the same contracts.
+([ADR-003](adr/ADR-003-adapters.md))
+
+**Why PostgreSQL rather than a vector database?** The hard problem is relational state
+and history: which rule version was in force, which artifact encodes it, who decided
+what and when. Nothing in it needs similarity search.
+([ADR-004](adr/ADR-004-right-sizing.md))
+
+**Why recorded runs (cassettes)?** Reproducibility. Every measured number replays offline
+without a GPU or an API key, so a reviewer can check it rather than trust it.
+
+**Why no queue yet?** Prototype volume does not justify the infrastructure. Runs are
+synchronous; the production shape (a scheduled worker task) is named in
+[`infra/`](../infra/) and [ADR-004](adr/ADR-004-right-sizing.md).
+
+**Why a person confirms semantic rule links?** A model can find and quote evidence that
+an artifact encodes a rule; it should not decide legal applicability. Proposed links are
+span-verified by code and confirmed by a named reviewer.
+([ADR-002](adr/ADR-002-ai-boundary.md))
+
+**Why rules as append-only YAML in git?** Rule history is evidence. Git gives review,
+blame and diffs; the loader refuses edits to a published version, so the past cannot be
+rewritten quietly. ([ADR-001](adr/ADR-001-rules-as-code.md))
