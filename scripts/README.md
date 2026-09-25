@@ -11,6 +11,7 @@ All scripts change to the repository root first, so they can be run from anywher
 | `demo-tunnel.ps1` | Windows PowerShell | Publish the UI gateway through a Cloudflare Quick Tunnel. |
 | `demo-tunnel.sh` | bash | Same as `demo-tunnel.ps1`. |
 | `demo-keepalive.ps1` | Windows PowerShell | Keep the stack and one Quick Tunnel running unattended for a set number of hours. |
+| `preflight.ps1` | Windows PowerShell | Read-only go/no-go before sending the link: stack health, corpus, calls, passwords, anonymous 401, public pages. |
 
 ## demo-up.ps1 and demo-up.sh
 
@@ -53,6 +54,17 @@ Keeps a public demo available for a number of hours (default 6):
 
 ```
 powershell -ExecutionPolicy Bypass -File scripts\demo-keepalive.ps1 [-Hours 3]
+```
+
+## preflight.ps1
+
+Read-only; safe while reviewers are signed in. Checks deep health, the rule corpus and
+inventory, the development and held-out calls, that no account has a default password,
+that the API refuses anonymous requests, and that the public link serves `/`,
+`/runs/compare`, `/governance` and `/api/health`. Exits 1 on the first failed group.
+
+```
+powershell -ExecutionPolicy Bypass -File scripts\preflight.ps1
 ```
 
 A production deployment would use a named tunnel behind Cloudflare Access or a normal cloud deployment, not a Quick Tunnel. See [../docs/operations.md](../docs/operations.md).
