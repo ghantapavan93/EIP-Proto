@@ -1,0 +1,41 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Signing it now.",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 72
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and delivered before the discussion of any benefits, and the appointment was scheduled 72 hours after the Scope of Appointment was collected.",
+      "coaching_note": "Agent: 'The Mutual of Omaha plan available in Volusia County has a $35 monthly premium, a $350 drug deductible and a $4000 maximum out-of-pocket.' The agent should have used superlatives to emphasize the plan's benefits, such as 'The Mutual of Omaha plan available in Volusia County has the lowest monthly premium of $35, the lowest drug deductible of $350, and the lowest maximum out-of-pocket of $4000 among all plans in your area.'",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Send confirmation email"
+      }
+    }
+  },
+  "latency_ms": 128920,
+  "usage": {
+    "input_tokens": 2715,
+    "output_tokens": 727,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:00Z"
+}

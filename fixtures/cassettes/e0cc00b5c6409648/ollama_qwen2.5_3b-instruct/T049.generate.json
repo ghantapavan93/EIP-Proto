@@ -1,0 +1,45 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 1,
+      "appointment_scheduled": true,
+      "carrier": null,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "numeric_claims": [],
+      "pii_detected": [
+        "1XX8-XX9-XX59",
+        "11/15/1956"
+      ],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "00:50",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Owen, you did a great job delivering the TPMO disclaimer prior to discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "carrier": null,
+        "disposition": "Compliant",
+        "next_step": "Send follow-up email to confirm appointment",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The agent scheduled a follow-up appointment, which was compliant with the waiting period. No superlatives were used."
+    }
+  },
+  "latency_ms": 3081,
+  "usage": {
+    "input_tokens": 1392,
+    "output_tokens": 311,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:23Z"
+}

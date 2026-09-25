@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 119,
+      "benefits_span": "The UnitedHealthcare plan available in Hillsborough County has a $20 monthly premium, a $235 drug deductible and a $6500 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.1,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Honestly, this is the best plan in Hillsborough County, nobody beats it.",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$235",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment immediately after. However, the agent used a superlative that could be misleading.",
+      "coaching_note": "Priya did a good job following the compliance rules. However, the statement 'Honestly, this is the best plan in Hillsborough County, nobody beats it' could be seen as misleading. It's important to provide balanced information to avoid any potential issues.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, plan review in 3 days"
+      }
+    }
+  },
+  "latency_ms": 18447,
+  "usage": {
+    "input_tokens": 1455,
+    "output_tokens": 558,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:59:33Z"
+}

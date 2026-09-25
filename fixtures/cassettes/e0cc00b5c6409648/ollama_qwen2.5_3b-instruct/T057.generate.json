@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 180,
+      "benefits_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.5,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$20 monthly premium",
+          "context": "Cigna plan available in Volusia County"
+        },
+        {
+          "value": "$200 drug deductible",
+          "context": "Cigna plan available in Volusia County"
+        },
+        {
+          "value": "$6600 maximum out-of-pocket",
+          "context": "Cigna plan available in Volusia County"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The call started with a disclaimer, but it was not delivered before the benefits discussion. The Scope of Appointment was collected, and the appointment was scheduled for 1.5 hours later.",
+      "coaching_note": "Grace, you need to deliver the TPMO disclaimer before discussing any benefits. Try saying, 'Before we start, this call is being recorded for quality and compliance. We do not offer every plan available in your area. We will review the Cigna plan available in Volusia County for you. Is that okay?'",
+      "crm_record": {
+        "disposition": "Needs to deliver TPMO disclaimer before discussing benefits",
+        "product_line": "MA",
+        "carrier": "Cigna"
+      }
+    }
+  },
+  "latency_ms": 8534,
+  "usage": {
+    "input_tokens": 2293,
+    "output_tokens": 881,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ],
+    "tool_mode": "disabled: nested schema flattened twice in a row"
+  },
+  "recorded_at": "2026-09-22T06:22:15Z"
+}

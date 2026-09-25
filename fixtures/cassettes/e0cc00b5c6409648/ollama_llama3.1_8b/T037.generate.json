@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 51,
+      "benefits_span": "Both if I can.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$15",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$205",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, scheduling a follow-up call for 4 hours later. The agent delivered the TPMO disclaimer and collected a Scope of Appointment.",
+      "coaching_note": "Marcus, you asked the customer about their priorities, but then immediately started discussing specific plans. Try to keep the conversation more focused on the customer's needs and goals. For example, you could ask the customer to rank their priorities or discuss the trade-offs between different plans.",
+      "crm_record": {
+        "disposition": "Scheduled follow-up call",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Follow-up call in 4 hours"
+      }
+    }
+  },
+  "latency_ms": 55521,
+  "usage": {
+    "input_tokens": 2618,
+    "output_tokens": 921,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:56:43Z"
+}

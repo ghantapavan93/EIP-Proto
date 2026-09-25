@@ -1,0 +1,45 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 2,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "numeric_claims": [],
+      "pii_detected": [
+        "1XX2-XX0-XX40",
+        "09/12/1954"
+      ],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "00:50",
+      "soa_wait_compliant": true,
+      "superlatives": []
+    },
+    "composition": {
+      "coaching_note": "Agent, you did a great job delivering the required disclaimer prior to discussing any benefits. It's important to ensure that customers understand the scope of the insurance plans being discussed. Keep up the good work!",
+      "crm_record": {
+        "carrier": "Elite Insurance Partners",
+        "disposition": "Compliant",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The appointment was scheduled within the required 24-hour window. No superlatives were used, and no numeric claims were made. The customer's Medicare number and date of birth were collected for plan review."
+    }
+  },
+  "latency_ms": 3226,
+  "usage": {
+    "input_tokens": 1474,
+    "output_tokens": 326,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:42Z"
+}

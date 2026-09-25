@@ -1,0 +1,46 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "Okay, that helps narrow it down.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Let's set your plan review for 4 days from now \u2014 that's 96 hours out, which gives you time to read it.",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Grace did a great job adhering to all compliance rules. However, she could improve by providing a bit more detail about the plans during the initial discussion, which might help the customer make a more informed decision.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment"
+      }
+    }
+  },
+  "latency_ms": 33063,
+  "usage": {
+    "input_tokens": 2772,
+    "output_tokens": 612,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-23T08:45:31Z"
+}

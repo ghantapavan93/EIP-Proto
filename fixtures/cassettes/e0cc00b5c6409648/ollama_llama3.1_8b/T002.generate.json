@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Keeping your doctors, or the lowest premium?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$310",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Mr. Chen",
+        "Duval County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who expressed a preference for keeping their current doctors. The agent presented a plan from Mutual of Omaha and scheduled a follow-up appointment for 4 days later.",
+      "coaching_note": "Marcus, you mentioned the 'lowest premium' as a consideration for the customer. However, you didn't provide any specific information about the premium costs. In the future, be sure to provide clear and accurate information about the plans you're presenting.",
+      "crm_record": {
+        "disposition": "Scheduled appointment",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow-up appointment in 4 days"
+      }
+    }
+  },
+  "latency_ms": 71429,
+  "usage": {
+    "input_tokens": 2820,
+    "output_tokens": 970,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:25:02Z"
+}

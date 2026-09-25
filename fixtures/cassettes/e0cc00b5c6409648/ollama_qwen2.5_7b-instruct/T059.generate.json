@@ -1,0 +1,52 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 46,
+      "benefits_span": "Plan G with Cigna in Polk County runs about $160 a month for your age band, and it covers the Part A deductible in full.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$160",
+          "context": "monthly premium"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement Plan G with Cigna without delivering the disclaimer first, which is non-compliant. The agent did not collect a Scope of Appointment or schedule an appointment.",
+      "coaching_note": "Agent Owen should ensure the disclaimer is read before discussing any benefits. This call was non-compliant due to the ordering of the disclaimer and benefits discussion. Next, the agent should always deliver the disclaimer first, followed by the benefits discussion.",
+      "crm_record": {
+        "disposition": "Informational Call",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with customer to provide the disclaimer and discuss benefits."
+      }
+    }
+  },
+  "latency_ms": 13877,
+  "usage": {
+    "input_tokens": 1110,
+    "output_tokens": 382,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:35:19Z"
+}

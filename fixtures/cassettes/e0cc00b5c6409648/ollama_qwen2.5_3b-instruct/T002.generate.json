@@ -1,0 +1,66 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "benefits_started_seconds": 107,
+      "benefits_span": "Let me check the network for your primary care physician.",
+      "benefits_started": 107,
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "soa_seconds": 107,
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "superlatives": [
+        {
+          "text": "The Mutual of Omaha plan available in Duval County has a $40 monthly premium, a $310 drug deductible and a $5700 maximum out-of-pocket.",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$310",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The call started with a required disclosure, followed by a discussion of benefits. The agent collected the Scope of Appointment and scheduled a follow-up appointment. No superlatives were flagged.",
+      "coaching_note": "Agent: 'Let me check the network for your primary care physician.' This is a good practice as it shows the agent is actively gathering information to provide the best possible service. Consider adding a brief introduction to the call to set expectations and gather more information upfront.",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners"
+      }
+    }
+  },
+  "latency_ms": 8043,
+  "usage": {
+    "input_tokens": 2937,
+    "output_tokens": 904,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:13:59Z"
+}

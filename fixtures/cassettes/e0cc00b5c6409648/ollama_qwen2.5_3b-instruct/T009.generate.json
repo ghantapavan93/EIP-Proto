@@ -1,0 +1,38 @@
+{
+  "raw": {
+    "composition": {
+      "coaching_note": "Agent, you did a great job delivering the TPMO disclaimer prior to discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "appointment_scheduled": true,
+        "disclaimer_basis": "ordering:before-benefits",
+        "disclaimer_compliant": true,
+        "soa_wait_compliant": true
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The appointment was scheduled within the required waiting period."
+    },
+    "extraction": {
+      "appointment_hours_after_soa": 24,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_wait_compliant": true
+    }
+  },
+  "latency_ms": 2380,
+  "usage": {
+    "input_tokens": 1306,
+    "output_tokens": 250,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:16:25Z"
+}

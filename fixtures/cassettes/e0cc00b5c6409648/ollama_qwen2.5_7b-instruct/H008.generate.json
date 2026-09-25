@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 186,
+      "benefits_span": "The Cigna plan available in Polk County has a $45 monthly premium, a $180 drug deductible and a $5500 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.8333333333333334,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "180",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivered the disclaimer before discussing benefits, and collected the Scope of Appointment. The customer was scheduled for a plan review in 48 hours.",
+      "coaching_note": "Tamika did a great job following all the necessary steps. However, she could improve by providing more context around the plans, such as explaining the differences in coverage and costs in more detail.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with the customer on the scheduled plan review"
+      }
+    }
+  },
+  "latency_ms": 17863,
+  "usage": {
+    "input_tokens": 1504,
+    "output_tokens": 510,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:47:39Z"
+}

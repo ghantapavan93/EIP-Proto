@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 114,
+      "benefits_span": "I've sent the Scope of Appointment to your email so we can go over specific plans.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Signing it now.",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$35 monthly premium",
+          "context": "Medicare Advantage plan"
+        },
+        {
+          "value": "$75 drug deductible",
+          "context": "Medicare Advantage plan"
+        },
+        {
+          "value": "$6200 maximum out-of-pocket",
+          "context": "Medicare Advantage plan"
+        }
+      ],
+      "pii_detected": [
+        "Nakamura"
+      ]
+    },
+    "composition": {
+      "summary": "The call started with a disclaimer, but it was not delivered before the benefits discussion. The Scope of Appointment was collected, and the appointment was scheduled for 72 hours later. No superlatives were used.",
+      "coaching_note": "Agent: 'I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?' \\n\\nAgent: 'Signing it now.' \\n\\nAgent: 'We'll set the review for Thursday, so roughly 72 hours out.' \\n\\nAgent: 'Thank you, Ms. Nakamura. You'll get a confirmation email from Elite Insurance Partners shortly.' \\n\\nAgent should have delivered the disclaimer before discussing the benefits.",
+      "crm_record": {
+        "disposition": "Needs to deliver the TPMO disclaimer before discussing benefits.",
+        "product_line": "MA",
+        "carrier": "Aetna"
+      }
+    }
+  },
+  "latency_ms": 4539,
+  "usage": {
+    "input_tokens": 1161,
+    "output_tokens": 475,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: nested schema flattened twice in a row"
+  },
+  "recorded_at": "2026-09-22T06:22:20Z"
+}

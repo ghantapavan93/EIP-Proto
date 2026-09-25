@@ -1,0 +1,55 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_basis": null,
+      "soa_collected": true,
+      "soa_span": "AGENT: I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "270",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3800",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plan details without delivering the required disclaimer first. The Scope of Appointment was collected and an appointment was scheduled, but the appointment was set too soon after the SOA.",
+      "coaching_note": "Owen, it's important to ensure the disclaimer is read before discussing any plan benefits. In this call, the agent should have read the disclaimer first, followed by the Scope of Appointment. Additionally, the appointment should be scheduled at least 24 hours after the SOA is collected.",
+      "crm_record": {
+        "disposition": "Further Discussion",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Reschedule appointment to be at least 24 hours after Scope of Appointment is collected."
+      }
+    }
+  },
+  "latency_ms": 14125,
+  "usage": {
+    "input_tokens": 1162,
+    "output_tokens": 393,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:34:40Z"
+}

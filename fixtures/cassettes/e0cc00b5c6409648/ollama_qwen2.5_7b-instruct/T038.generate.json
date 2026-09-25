@@ -1,0 +1,46 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "The premium, honestly.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 6,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed the required steps but the disclaimer was delivered after the benefits discussion, which is non-compliant. The agent also scheduled a plan review appointment for 6 hours later.",
+      "coaching_note": "Priya, ensure the disclaimer is always delivered before discussing any benefits. Also, consider scheduling the appointment closer to the end of the call to save time.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer at scheduled time"
+      }
+    }
+  },
+  "latency_ms": 13029,
+  "usage": {
+    "input_tokens": 1417,
+    "output_tokens": 378,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:29:24Z"
+}

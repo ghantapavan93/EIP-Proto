@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Keeping my doctors.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$195",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Alvarez",
+        "Hillsborough County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who prioritized keeping their doctors. The agent scheduled a follow-up call for 4 hours later to review specific plans.",
+      "coaching_note": "Marcus said, 'Now, what matters most to you \u2014 keeping your doctors, or the lowest premium?' This question may be seen as leading the customer to prioritize keeping their doctors. A more neutral approach could be to ask, 'What are your top priorities for your Medicare coverage?'",
+      "crm_record": {
+        "disposition": "Scheduled follow-up call",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow-up call in 4 hours"
+      }
+    }
+  },
+  "latency_ms": 59034,
+  "usage": {
+    "input_tokens": 2666,
+    "output_tokens": 947,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:54:48Z"
+}

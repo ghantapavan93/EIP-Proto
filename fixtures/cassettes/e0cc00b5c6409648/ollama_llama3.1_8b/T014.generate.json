@@ -1,0 +1,50 @@
+{
+  "raw": {
+    "composition": {
+      "coaching_note": "The agent should deliver the TPMO disclaimer before discussing benefits. The agent said, \"I'm pulling up the formulary for your county now.\" This is a superlative that could be misleading. The agent should say something like, \"I'm checking the formulary for your county now.\"",
+      "crm_record": {
+        "carrier": "UnitedHealthcare",
+        "disposition": "Scheduled Appointment",
+        "next_step": "Send confirmation email to customer",
+        "product_line": "MA"
+      },
+      "summary": "The agent delivered the TPMO disclaimer at 00:25, but discussed benefits at 01:46. The Scope of Appointment was collected at 02:12. The agent scheduled an appointment for 5 days from now, which is 120 hours after the SOA was collected. The customer signed the SOA on the phone."
+    },
+    "extraction": {
+      "appointment_hours_after_soa": 120,
+      "appointment_scheduled": true,
+      "benefits_span": "The UnitedHealthcare plan available in Duval County has a $5 monthly premium, a $230 drug deductible and a $3300 maximum out-of-pocket.",
+      "benefits_started_seconds": 146,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": false,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "numeric_claims": [],
+      "pii_detected": [],
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "flagged": true,
+          "substantiated": true,
+          "text": "I'm pulling up the formulary for your county now."
+        }
+      ]
+    }
+  },
+  "latency_ms": 42026,
+  "usage": {
+    "input_tokens": 1312,
+    "output_tokens": 462,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:35:30Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 188,
+      "benefits_span": "The Cigna plan available in Pinellas County has a $0 monthly premium, a $475 drug deductible and a $6400 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "0",
+          "context": "monthly premium"
+        },
+        {
+          "value": "475",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, discussed benefits after delivering the disclaimer, and collected the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Great job, Owen! You effectively followed all the necessary steps and delivered the disclaimer before discussing benefits. One area for improvement is ensuring the Scope of Appointment is signed before the appointment is scheduled. Next time, try to have the customer sign the document immediately after sending it.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with Mrs. Lindqvist on the scheduled plan review in 3 days."
+      }
+    }
+  },
+  "latency_ms": 16663,
+  "usage": {
+    "input_tokens": 1532,
+    "output_tokens": 504,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:59:50Z"
+}

@@ -1,0 +1,55 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_basis": null,
+      "soa_collected": true,
+      "soa_span": "AGENT: I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "75",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plan details without delivering the required disclaimer and before the Scope of Appointment was collected. The agent scheduled a review appointment for 72 hours later.",
+      "coaching_note": "The agent should ensure the disclaimer is read before discussing any plan benefits. Additionally, the Scope of Appointment should be collected before the appointment is scheduled to avoid any confusion.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Follow up with customer on Thursday for plan review"
+      }
+    }
+  },
+  "latency_ms": 12765,
+  "usage": {
+    "input_tokens": 1161,
+    "output_tokens": 355,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:35:05Z"
+}

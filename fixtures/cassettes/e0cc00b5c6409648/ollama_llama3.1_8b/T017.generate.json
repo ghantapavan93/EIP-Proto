@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 18,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 43,
+      "benefits_span": "The Mutual of Omaha plan available in Duval County has a $20 monthly premium, a $225 drug deductible and a $5000 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "ZIP code",
+        "date of birth month"
+      ]
+    },
+    "composition": {
+      "summary": "Mrs. Dubois was presented with a Mutual of Omaha plan, and an appointment was scheduled for 3 days from now.",
+      "coaching_note": "Priya, you did a great job delivering the disclaimer, but you could improve by not immediately jumping into plan details. Consider taking a moment to review the Scope of Appointment with the customer before discussing benefits.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with Mrs. Dubois in 3 days to review the Scope of Appointment and discuss plan details"
+      }
+    }
+  },
+  "latency_ms": 47798,
+  "usage": {
+    "input_tokens": 2636,
+    "output_tokens": 897,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:38:26Z"
+}

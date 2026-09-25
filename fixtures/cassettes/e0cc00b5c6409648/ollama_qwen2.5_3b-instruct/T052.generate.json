@@ -1,0 +1,39 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 4,
+      "appointment_scheduled": true,
+      "carrier": "Mutual of Omaha",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "02:27",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Agent, you did a great job delivering the TPMO disclaimer prior to discussing any benefits. It's important to ensure that customers understand the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "carrier": "Mutual of Omaha",
+        "disposition": "Compliant",
+        "next_step": "Send confirmation email",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The appointment was scheduled 4 hours after the SOA was collected."
+    }
+  },
+  "latency_ms": 2640,
+  "usage": {
+    "input_tokens": 1410,
+    "output_tokens": 262,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:38Z"
+}

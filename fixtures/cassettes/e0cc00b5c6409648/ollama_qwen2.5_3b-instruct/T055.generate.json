@@ -1,0 +1,44 @@
+{
+  "raw": {
+    "composition": {
+      "coaching_note": "Grace, you need to ensure the TPMO disclaimer is delivered prior to discussing any benefits. In this case, you should have delivered the disclaimer before mentioning the plan details. Here's an example of how you could have phrased it: 'We do not offer every plan available in your area. We will send you a Scope of Appointment to review. Please sign it and we can discuss specific plans.'",
+      "crm_record": {
+        "carrier": "UnitedHealthcare",
+        "disposition": "",
+        "product_line": "MA"
+      },
+      "summary": "The call transcript shows that the disclaimer was not delivered prior to discussing benefits. The Scope of Appointment was collected and the appointment was scheduled, but the disclaimer was not delivered before discussing benefits. The call was compliant with the SOA collection rule."
+    },
+    "extraction": {
+      "appointment_hours_after_soa": 72,
+      "appointment_scheduled": true,
+      "benefits_span": "The UnitedHealthcare plan available in Pinellas County has a $20 monthly premium, a $345 drug deductible and a $3600 maximum out-of-pocket.",
+      "benefits_started_seconds": 180,
+      "carrier": "UnitedHealthcare",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": false,
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "numeric_claims": [],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans.",
+      "soa_wait_compliant": true,
+      "superlatives": []
+    }
+  },
+  "latency_ms": 3628,
+  "usage": {
+    "input_tokens": 1127,
+    "output_tokens": 375,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:56Z"
+}

@@ -1,0 +1,44 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "benefits_started_seconds": 103,
+      "benefits_span": "The Cigna plan available in Lee County has a $30 monthly premium, a $410 drug deductible and a $5700 maximum out-of-pocket.",
+      "benefits_started": false,
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 24
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The disclaimer was delivered and compliant with the ordering:before-benefits basis. The SOA was collected and the appointment was scheduled.",
+      "coaching_note": "Grace, you did a great job delivering the TPMO disclaimer before discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Follow up with the customer for the signed Scope of Appointment and confirm the appointment time."
+      }
+    }
+  },
+  "latency_ms": 6608,
+  "usage": {
+    "input_tokens": 2417,
+    "output_tokens": 685,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:58Z"
+}

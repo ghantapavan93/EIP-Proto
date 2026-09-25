@@ -1,0 +1,68 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 113,
+      "benefits_span": "Now, what matters most to you \u2014 keeping your doctors, or the lowest premium?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1,
+      "soa_exception": null,
+      "superlatives": [
+        {
+          "text": "The Aetna plan available in Hillsborough County has a $0 monthly premium, a $155 drug deductible and a $5400 maximum out-of-pocket.",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "1XX3-XX9-XX23",
+          "context": "CUSTOMER: It's 1XX3-XX9-XX23, and my birthday is 09/17/1950."
+        },
+        {
+          "value": "09/17/1950",
+          "context": "CUSTOMER: It's 1XX3-XX9-XX23, and my birthday is 09/17/1950."
+        },
+        {
+          "value": "72",
+          "context": "AGENT: Let's set your plan review for 3 days from now \u2014 that's 72 hours out, which gives you time to read it."
+        }
+      ],
+      "pii_detected": [
+        "1XX3-XX9-XX23",
+        "09/17/1950"
+      ]
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and delivered before the discussion of any benefits, and the appointment was scheduled after the Scope of Appointment was collected. The call contained a superlative that was not substantiated and did not flag the agent for a superlative issue.",
+      "coaching_note": "Agent, when discussing the Aetna plan, you should have provided more context about the plan's features and benefits to avoid misleading the customer. Try saying something like, 'The Aetna plan available in Hillsborough County has a $0 monthly premium, a $155 drug deductible, and a $5400 maximum out-of-pocket. This plan also includes a $0 copay for generic medications and a $5 copay for brand-name medications.'",
+      "crm_record": {
+        "disposition": "Complete",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners"
+      }
+    }
+  },
+  "latency_ms": 9963,
+  "usage": {
+    "input_tokens": 2855,
+    "output_tokens": 1012,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:52Z"
+}

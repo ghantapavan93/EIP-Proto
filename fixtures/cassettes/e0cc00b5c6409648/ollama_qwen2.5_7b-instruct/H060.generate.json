@@ -1,0 +1,52 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 46,
+      "benefits_span": "Plan G with Humana in Lee County runs about $150 a month for your age band, and it covers the Part A deductible in full.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": null,
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$150",
+          "context": "monthly premium"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement benefits without delivering the disclaimer first, which is non-compliant. The agent did not collect a Scope of Appointment or schedule an appointment.",
+      "coaching_note": "Jordan, it's important to ensure the disclaimer is read before discussing any benefits. This call should be marked as non-compliant due to the order of the disclaimer and benefits discussion. Next time, make sure to deliver the disclaimer first, even if the customer is familiar with Medicare Supplement plans.",
+      "crm_record": {
+        "disposition": "Non-compliant",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Reschedule the call to deliver the disclaimer first and discuss benefits."
+      }
+    }
+  },
+  "latency_ms": 11943,
+  "usage": {
+    "input_tokens": 1110,
+    "output_tokens": 374,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:02:45Z"
+}

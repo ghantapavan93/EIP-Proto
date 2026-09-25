@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Keeping my doctors.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$185",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Mr. Patel",
+        "Orange County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who prioritized keeping their doctors. The agent scheduled a follow-up call for 2 hours later to review specific plans.",
+      "coaching_note": "The agent asked the customer about their priorities, but then immediately started discussing specific plans without fully addressing the customer's concerns. To improve, the agent could ask more open-ended questions to understand the customer's needs and preferences.",
+      "crm_record": {
+        "disposition": "Scheduled Follow-up",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Follow-up call in 2 hours"
+      }
+    }
+  },
+  "latency_ms": 53625,
+  "usage": {
+    "input_tokens": 2644,
+    "output_tokens": 925,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:52:24Z"
+}

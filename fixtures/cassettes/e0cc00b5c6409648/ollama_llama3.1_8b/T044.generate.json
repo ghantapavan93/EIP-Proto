@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "The premium, honestly.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "highest-rated plan in Pasco County",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$295",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Alvarez",
+        "Pasco County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who prioritized the lowest premium. The agent scheduled a plan review for 3 days from now.",
+      "coaching_note": "Marcus stated, 'Based on the CMS 2026 star ratings, this is the highest-rated plan in Pasco County.' However, this statement is flagged as materially misleading because it implies that the plan is the only highest-rated plan in the county, which is not substantiated. To improve, Marcus should rephrase this statement to accurately reflect the plan's rating.",
+      "crm_record": {
+        "disposition": "Scheduled Plan Review",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Schedule Plan Review in 3 days"
+      }
+    }
+  },
+  "latency_ms": 57756,
+  "usage": {
+    "input_tokens": 2686,
+    "output_tokens": 1012,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:03:05Z"
+}

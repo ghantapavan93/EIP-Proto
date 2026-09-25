@@ -1,0 +1,42 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "The Cigna plan available in Volusia County has a $35 monthly premium, a $30 drug deductible and a $5000 maximum out-of-pocket.",
+      "benefits_started_seconds": 205,
+      "benefits_span": "The Cigna plan available in Volusia County has a $35 monthly premium, a $30 drug deductible and a $5000 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and documented before discussing any benefits, and the Scope of Appointment was collected before the benefits discussion. The appointment was scheduled 4 hours after the SOA was collected.",
+      "coaching_note": "Agent: 'I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?' The agent should have waited for the customer to sign the SOA before scheduling the appointment. Next step: Ensure the agent waits for the customer to sign the SOA before scheduling the appointment.",
+      "crm_record": {
+        "disposition": "Compliant",
+        "product_line": "MA",
+        "carrier": "Cigna"
+      }
+    }
+  },
+  "latency_ms": 7414,
+  "usage": {
+    "input_tokens": 2883,
+    "output_tokens": 729,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:22Z"
+}

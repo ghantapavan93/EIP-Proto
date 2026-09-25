@@ -1,0 +1,176 @@
+{
+  "raw": {
+    "type": "object",
+    "properties": {
+      "extraction": {
+        "type": "object",
+        "properties": {
+          "product_line": {
+            "type": "string",
+            "enum": [
+              "MA",
+              "PDP",
+              "MEDIGAP",
+              "LIFE"
+            ]
+          },
+          "carrier": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "disclaimer_delivered": {
+            "type": "boolean"
+          },
+          "disclaimer_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "disclaimer_span": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "benefits_started_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "benefits_span": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "disclaimer_compliant": {
+            "type": "boolean"
+          },
+          "disclaimer_basis": {
+            "type": "string"
+          },
+          "soa_collected": {
+            "type": "boolean"
+          },
+          "soa_span": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "appointment_scheduled": {
+            "type": "boolean"
+          },
+          "appointment_hours_after_soa": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "soa_exception": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "soa_wait_compliant": {
+            "type": "boolean"
+          },
+          "superlatives": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "substantiated": {
+                  "type": "boolean"
+                },
+                "flagged": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "text",
+                "substantiated",
+                "flagged"
+              ]
+            }
+          },
+          "numeric_claims": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "context": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ]
+            }
+          },
+          "pii_detected": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "product_line",
+          "disclaimer_delivered",
+          "disclaimer_compliant",
+          "soa_collected",
+          "appointment_scheduled",
+          "soa_wait_compliant"
+        ]
+      },
+      "composition": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "coaching_note": {
+            "type": "string"
+          },
+          "crm_record": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "summary",
+          "coaching_note",
+          "crm_record"
+        ]
+      }
+    },
+    "required": [
+      "extraction",
+      "composition"
+    ]
+  },
+  "latency_ms": 55992,
+  "usage": {
+    "input_tokens": 2708,
+    "output_tokens": 968,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json:flat",
+    "attempts": [
+      "tool",
+      "json:flat"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:02:07Z"
+}

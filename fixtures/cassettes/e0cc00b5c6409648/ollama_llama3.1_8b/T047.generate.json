@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Keeping my doctors.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "nobody beats it",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$510",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who prioritized keeping their doctors. The agent scheduled a plan review for 2 days from now.",
+      "coaching_note": "The agent made a statement that was flagged as materially misleading: 'Honestly, this is the best plan in Pasco County, nobody beats it.' Consider rephrasing this to focus on the plan's benefits rather than making a comparative claim.",
+      "crm_record": {
+        "disposition": "Scheduled plan review",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Plan review in 2 days"
+      }
+    }
+  },
+  "latency_ms": 55793,
+  "usage": {
+    "input_tokens": 2698,
+    "output_tokens": 947,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:06:04Z"
+}

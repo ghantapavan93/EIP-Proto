@@ -1,0 +1,57 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "Before we start, this call is being recorded for quality and compliance.",
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$160",
+          "context": "monthly premium"
+        }
+      ],
+      "pii_detected": [
+        "Ms. Nakamura",
+        "Plan G",
+        "Polk County"
+      ]
+    },
+    "composition": {
+      "summary": "Ms. Nakamura discussed Medicare Supplement coverage with Owen, scheduling an appointment for a Cigna Plan G quote.",
+      "coaching_note": "Owen: 'Plan G with Cigna in Polk County runs about $160 a month for your age band...' To improve, Owen could provide more context about the age band and how it affects the premium.",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "Quote Request"
+      }
+    }
+  },
+  "latency_ms": 36851,
+  "usage": {
+    "input_tokens": 2144,
+    "output_tokens": 667,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:16:13Z"
+}

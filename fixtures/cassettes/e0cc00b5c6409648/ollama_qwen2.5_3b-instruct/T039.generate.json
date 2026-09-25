@@ -1,0 +1,63 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 257,
+      "benefits_span": "Do you take any brand-name medications I should check?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans.",
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Just a blood pressure pill.",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$25 monthly premium",
+          "context": "Cigna plan available in Duval County"
+        },
+        {
+          "value": "$65 drug deductible",
+          "context": "Cigna plan available in Duval County"
+        },
+        {
+          "value": "$3500 maximum out-of-pocket",
+          "context": "Cigna plan available in Duval County"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The disclaimer was delivered and delivered before the benefits discussion, and the SOA was collected before the benefits discussion. The agent used superlatives appropriately. The CRM record should note the call as compliant and schedule the next step.",
+      "coaching_note": "Agent: 'Since you initiated today's call and asked to proceed, we can review plans now.' This shows the agent is responsive to the customer's needs and can be improved by being more proactive in suggesting the next steps.",
+      "crm_record": {
+        "disposition": "Compliant",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners",
+        "next_step": "Schedule a follow-up call to discuss the selected plan."
+      }
+    }
+  },
+  "latency_ms": 8633,
+  "usage": {
+    "input_tokens": 2895,
+    "output_tokens": 880,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:20:41Z"
+}

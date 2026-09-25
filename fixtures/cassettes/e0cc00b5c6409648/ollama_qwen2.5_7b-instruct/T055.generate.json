@@ -1,0 +1,55 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_basis": null,
+      "soa_collected": true,
+      "soa_span": "AGENT: I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "345",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plan details without delivering the required disclaimer first. The Scope of Appointment was collected and an appointment was scheduled within a reasonable time.",
+      "coaching_note": "Grace should ensure the disclaimer is read before discussing any plan benefits to comply with CMS rules. For example, she should have said, 'We do not offer every plan available in your area, and the plans we discuss may have different benefits and costs. '",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Follow up with Mr. Kowalski on the scheduled review."
+      }
+    }
+  },
+  "latency_ms": 13700,
+  "usage": {
+    "input_tokens": 1172,
+    "output_tokens": 375,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:34:25Z"
+}

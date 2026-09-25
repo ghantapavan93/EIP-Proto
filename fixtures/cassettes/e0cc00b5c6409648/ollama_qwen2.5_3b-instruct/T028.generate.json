@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "The Mutual of Omaha plan available in Pinellas County has a $15 monthly premium, a $365 drug deductible and a $5000 maximum out-of-pocket.",
+      "benefits_started_seconds": 125,
+      "benefits_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans.",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "That premium sounds good.",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$15",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$365",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The disclaimer was delivered and delivered before the benefits discussion, and the appointment was scheduled after the Scope of Appointment was collected. The call did not contain any superlatives or numeric claims that could be considered material misrepresentations.",
+      "coaching_note": "Luis, you did a great job delivering the TPMO disclaimer before discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with the customer for the appointment confirmation email"
+      }
+    }
+  },
+  "latency_ms": 7790,
+  "usage": {
+    "input_tokens": 2425,
+    "output_tokens": 809,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:44Z"
+}

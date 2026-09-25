@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "What matters most to you \u2014 keeping your doctors, or the lowest premium?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Honestly, this is the best plan in Polk County, nobody beats it.",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$45 monthly premium",
+          "context": "UnitedHealthcare plan available in Polk County"
+        },
+        {
+          "value": "$110 drug deductible",
+          "context": "UnitedHealthcare plan available in Polk County"
+        },
+        {
+          "value": "$4000 maximum out-of-pocket",
+          "context": "UnitedHealthcare plan available in Polk County"
+        }
+      ],
+      "pii_detected": [
+        "Alvarez"
+      ]
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and compliant with the ordering:before-benefits basis. The Scope of Appointment was collected before the benefits discussion. A superlative was flagged as potentially misleading.",
+      "coaching_note": "Owen, you flagged a superlative as potentially misleading. Remember, superlatives are permitted but should not be used if they are materially misleading. Consider rephrasing your statement to avoid any potential misinterpretation. For example, you could say, 'The UnitedHealthcare plan available in Polk County is a great option, and it's one of the better plans in the area.'",
+      "crm_record": {
+        "disposition": "Complete",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners"
+      }
+    }
+  },
+  "latency_ms": 8582,
+  "usage": {
+    "input_tokens": 2809,
+    "output_tokens": 885,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:00Z"
+}

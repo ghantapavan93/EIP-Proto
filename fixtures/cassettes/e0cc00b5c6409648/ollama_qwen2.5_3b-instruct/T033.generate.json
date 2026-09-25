@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Signing the Scope of Appointment to your email",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "superlatives": [
+        {
+          "text": "The Cigna plan available in Pinellas County has a $0 monthly premium, a $155 drug deductible and a $6300 maximum out-of-pocket.",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$0",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$155",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Patel"
+      ]
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The disclaimer was delivered and compliant with the ordering:before-benefits basis. The Scope of Appointment was collected and the appointment was scheduled 4 hours after the SOA. No superlatives were flagged.",
+      "coaching_note": "Agent, you did a great job delivering the required disclaimer before discussing any benefits. However, you could have provided more context for the numeric claims, such as explaining what a $0 monthly premium means in the context of the plans being discussed.",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners"
+      }
+    }
+  },
+  "latency_ms": 8060,
+  "usage": {
+    "input_tokens": 2749,
+    "output_tokens": 831,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:20:12Z"
+}

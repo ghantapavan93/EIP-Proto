@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Humana",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 43,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Mr. Kowalski",
+        "Lee County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent failed to deliver the TPMO disclaimer before discussing benefits, but did collect a Scope of Appointment and schedule an appointment.",
+      "coaching_note": "Marcus, you mentioned that you 'got right to it' regarding costs. In the future, please make sure to deliver the TPMO disclaimer before discussing benefits. This can be done immediately after the introduction.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Humana",
+        "next_step": "Follow-up in 5 days"
+      }
+    }
+  },
+  "latency_ms": 44179,
+  "usage": {
+    "input_tokens": 2358,
+    "output_tokens": 803,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:47:50Z"
+}

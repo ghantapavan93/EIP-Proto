@@ -1,0 +1,39 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 2,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "02:19",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Agent, you can improve your coaching by avoiding superlatives like 'the best plan in Pasco County.' This can help avoid misleading customers and maintain a more professional tone. For example, you could say, 'This plan is one of the best options available in Pasco County.'",
+      "crm_record": {
+        "carrier": "Elite Insurance Partners",
+        "disposition": "Compliant",
+        "next_step": "Send confirmation email",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The agent did not use superlatives, and the appointment was scheduled within the required waiting period."
+    }
+  },
+  "latency_ms": 2807,
+  "usage": {
+    "input_tokens": 1377,
+    "output_tokens": 285,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:17Z"
+}

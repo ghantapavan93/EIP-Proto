@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 117,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 134,
+      "benefits_span": "The Aetna plan available in Pinellas County has a $45 monthly premium, a $400 drug deductible and a $6200 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "400",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent provided a disclaimer before discussing benefits and collected the Scope of Appointment, scheduling a plan review in 4 days. The call was compliant with the rules.",
+      "coaching_note": "Tamika did well by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. However, she could improve by ensuring the appointment is scheduled closer to the SOA collection to minimize any potential delays.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with Mr. Okafor on the plan review in 4 days."
+      }
+    }
+  },
+  "latency_ms": 18106,
+  "usage": {
+    "input_tokens": 1392,
+    "output_tokens": 503,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:52:37Z"
+}

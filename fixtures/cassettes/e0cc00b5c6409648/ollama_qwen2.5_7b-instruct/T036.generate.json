@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 120,
+      "benefits_span": "The Aetna plan available in Lee County has a $10 monthly premium, a $20 drug deductible and a $5900 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 6,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$20",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Grace did a great job by adhering to all the necessary compliance rules. However, she could improve by providing a more detailed explanation of the Scope of Appointment to ensure the customer fully understands the next steps.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Review plan with customer"
+      }
+    }
+  },
+  "latency_ms": 16317,
+  "usage": {
+    "input_tokens": 1372,
+    "output_tokens": 476,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:28:53Z"
+}

@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Humana",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Keeping my doctors.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$175",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "Ms. Romero was presented with a Humana plan with a $5 monthly premium, $175 drug deductible, and $6600 maximum out-of-pocket. The plan was scheduled for review in 3 days.",
+      "coaching_note": "Grace, you mentioned 'lowest premium' without substantiating it. Consider providing more context or evidence to support this claim. For example, you could mention the plan's premium compared to others in the market.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "MA",
+        "carrier": "Humana",
+        "next_step": "Review plan in 3 days"
+      }
+    }
+  },
+  "latency_ms": 72520,
+  "usage": {
+    "input_tokens": 2520,
+    "output_tokens": 884,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:36:43Z"
+}

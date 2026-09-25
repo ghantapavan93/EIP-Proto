@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 104,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 127,
+      "benefits_span": "The Cigna plan available in Lee County has a $45 monthly premium, a $530 drug deductible and a $6000 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.1,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "530",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivering the disclaimer before discussing benefits and collecting the Scope of Appointment immediately before scheduling the appointment.",
+      "coaching_note": "Great job, Priya! You effectively followed all the necessary steps and delivered the disclaimer before discussing the benefits. One area for improvement is ensuring the appointment is scheduled at least 24 hours after the Scope of Appointment is collected. Next time, try to schedule the appointment at least a day after collecting the SOA to ensure compliance.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with Ms. Nakamura on the scheduled plan review"
+      }
+    }
+  },
+  "latency_ms": 21289,
+  "usage": {
+    "input_tokens": 1407,
+    "output_tokens": 516,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:23:24Z"
+}

@@ -1,0 +1,48 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 28,
+      "benefits_span": "The Mutual of Omaha plan available in Lee County has a $40 monthly premium, a $180 drug deductible and a $6400 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Mutual of Omaha plans with the customer, who was looking for the lowest premium. The agent delivered the TPMO disclaimer and collected the Scope of Appointment.",
+      "coaching_note": "Owen, you mentioned that the customer's window is closing. Consider asking more questions to understand their specific needs and preferences. For example, you could ask, 'What are your top priorities for a Medicare plan?'",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with the customer to confirm the appointment and provide additional information about the Mutual of Omaha plans"
+      }
+    }
+  },
+  "latency_ms": 51652,
+  "usage": {
+    "input_tokens": 2596,
+    "output_tokens": 857,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:01:11Z"
+}

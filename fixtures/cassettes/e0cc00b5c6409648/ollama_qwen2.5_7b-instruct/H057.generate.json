@@ -1,0 +1,55 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_basis": null,
+      "soa_collected": true,
+      "soa_span": "AGENT: I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.5,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "425",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plan details with Mr. Kowalski, including premiums, deductibles, and out-of-pocket maximums. The Scope of Appointment was collected and an appointment was scheduled for 72 hours later.",
+      "coaching_note": "Jordan did a good job collecting the Scope of Appointment and scheduling the appointment. However, the agent should ensure the disclaimer is read before discussing any plan benefits to maintain compliance.",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with Mr. Kowalski on the scheduled appointment."
+      }
+    }
+  },
+  "latency_ms": 12130,
+  "usage": {
+    "input_tokens": 1171,
+    "output_tokens": 375,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:02:11Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 108,
+      "benefits_span": "The Aetna plan available in Lee County has a $15 monthly premium, a $385 drug deductible and a $4800 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 20,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "15",
+          "context": "monthly premium"
+        },
+        {
+          "value": "385",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4800",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivered the disclaimer before discussing benefits, and collected the Scope of Appointment. The appointment was scheduled for 20 hours later, which is compliant.",
+      "coaching_note": "Great job, Marcus! You followed all the necessary steps and delivered the disclaimer before discussing benefits. One improvement would be to ensure the appointment is scheduled closer to the time of the call to minimize the wait. For example, scheduling it within a few hours would be ideal.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with the customer on the scheduled appointment"
+      }
+    }
+  },
+  "latency_ms": 18374,
+  "usage": {
+    "input_tokens": 1455,
+    "output_tokens": 518,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:55:44Z"
+}

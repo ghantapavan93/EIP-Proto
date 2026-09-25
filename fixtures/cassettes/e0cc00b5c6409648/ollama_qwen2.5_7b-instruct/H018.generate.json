@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 104,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 122,
+      "benefits_span": "The Cigna plan available in Polk County has a $25 monthly premium, a $100 drug deductible and a $3900 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$25",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$100",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$3900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Great job, Priya! You correctly delivered the disclaimer before discussing benefits and collected the Scope of Appointment before scheduling the appointment. To further improve, consider adding a brief explanation of the Scope of Appointment's purpose to ensure the customer understands its importance.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review and sign Scope of Appointment, schedule plan review in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 17503,
+  "usage": {
+    "input_tokens": 1402,
+    "output_tokens": 501,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:50:44Z"
+}

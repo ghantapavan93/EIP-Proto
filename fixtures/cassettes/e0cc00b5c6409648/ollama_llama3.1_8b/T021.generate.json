@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 31,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 32,
+      "benefits_span": "The Cigna plan available in Lee County has a $25 monthly premium, a $470 drug deductible and a $6400 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$25",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$470",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "ZIP code: 33659",
+        "date of birth month: March"
+      ]
+    },
+    "composition": {
+      "summary": "The agent failed to deliver the TPMO disclaimer prior to discussing benefits. The agent did collect a Scope of Appointment and scheduled an appointment for 3 days from now.",
+      "coaching_note": "Owen, you mentioned that you were 'pulling up the formulary for your county now.' However, you didn't actually discuss any benefits until after delivering the disclaimer. To improve, try to discuss benefits immediately after delivering the disclaimer.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Follow-up in 3 days"
+      }
+    }
+  },
+  "latency_ms": 52843,
+  "usage": {
+    "input_tokens": 2694,
+    "output_tokens": 947,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:41:47Z"
+}

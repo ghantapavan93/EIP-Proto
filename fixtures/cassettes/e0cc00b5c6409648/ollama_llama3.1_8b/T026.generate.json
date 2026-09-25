@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 44,
+      "benefits_span": "The Mutual of Omaha plan available in Lee County has a $40 monthly premium, a $480 drug deductible and a $2900 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "ZIP code",
+        "date of birth month"
+      ]
+    },
+    "composition": {
+      "summary": "The agent delivered the TPMO disclaimer before discussing benefits, collected the Scope of Appointment, and scheduled an appointment 4 days from now.",
+      "coaching_note": "Owen, you mentioned that the Mutual of Omaha plan has a $40 monthly premium, a $480 drug deductible, and a $2900 maximum out-of-pocket. While this is accurate, it would be more helpful to provide a clear explanation of what these costs mean for the customer. For example, you could say, 'This plan has a $40 monthly premium, which is a fixed cost that you'll pay each month. The $480 drug deductible means that you'll pay the first $480 of your prescription costs each year, and then the plan will cover the rest. The $2900 maximum out-of-pocket means that you'll never pay more than $2900 in out-of-pocket costs for the year.'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Schedule appointment 4 days from now"
+      }
+    }
+  },
+  "latency_ms": 52857,
+  "usage": {
+    "input_tokens": 2620,
+    "output_tokens": 923,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:47:05Z"
+}

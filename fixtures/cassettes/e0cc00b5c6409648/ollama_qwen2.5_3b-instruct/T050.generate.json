@@ -1,0 +1,63 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 257,
+      "benefits_span": "Do you take any brand-name medications I should check?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_exception": null,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$45 monthly premium",
+          "context": "Aetna plan available in Polk County"
+        },
+        {
+          "value": "$350 drug deductible",
+          "context": "Aetna plan available in Polk County"
+        },
+        {
+          "value": "$3900 maximum out-of-pocket",
+          "context": "Aetcta plan available in Polk County"
+        }
+      ],
+      "pii_detected": [
+        "1XX8-XX0-XX96",
+        "09/16/1949"
+      ]
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and delivered before the discussion of benefits, and the Scope of Appointment was collected before the appointment was scheduled. No superlatives were detected, and the call was compliant with the SOA waiting period.",
+      "coaching_note": "Grace, you did a great job delivering the TPMO disclaimer before discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners",
+        "next_step": "Review the Scope of Appointment and schedule the plan review for 2 days from now."
+      }
+    }
+  },
+  "latency_ms": 9035,
+  "usage": {
+    "input_tokens": 3103,
+    "output_tokens": 907,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:32Z"
+}

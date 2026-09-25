@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "Before we start, this call is being recorded for quality and compliance.",
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "age band",
+        "Mr. Kowalski"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement coverage with the customer, who was considering Plan G with Cigna. The agent provided pricing information and compared carriers by price.",
+      "coaching_note": "Owen, you mentioned that the customer's neighbor has Plan G, but you didn't ask for their specific needs or concerns. Try to ask more questions to understand their situation and provide a better solution.",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "Confirmation email"
+      }
+    }
+  },
+  "latency_ms": 35482,
+  "usage": {
+    "input_tokens": 2156,
+    "output_tokens": 637,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:16:49Z"
+}

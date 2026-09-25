@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 60,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 132,
+      "benefits_span": "The Cigna plan available in Volusia County has a $35 monthly premium, a $485 drug deductible and a $4100 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "485",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4100",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent provided a disclaimer before discussing benefits and collected the Scope of Appointment before scheduling the appointment, adhering to compliance rules. The agent also explained the Cigna plan details clearly.",
+      "coaching_note": "Jordan did well by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. However, the agent could improve by emphasizing the importance of reviewing the Scope of Appointment with the customer to ensure they understand the next steps.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review Scope of Appointment and prepare for plan review"
+      }
+    }
+  },
+  "latency_ms": 18819,
+  "usage": {
+    "input_tokens": 1437,
+    "output_tokens": 502,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:24:42Z"
+}
