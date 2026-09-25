@@ -1,0 +1,46 @@
+code: eip-licensing-footprint
+title: EIP licensing footprint claim ("licensed in N states")
+regulator: EIP
+citation: Internal fact — no external regulator; consistency across owned web properties
+applies_to: [MA, PDP, MEDIGAP, LIFE]
+summary: >
+  Not a CMS rule — an EIP-owned fact that its public estate must state
+  consistently. On 2026-09-21 the MedicareFAQ home page said "Licensed in All
+  50 States" while the About page said "licensed to offer insurance services
+  in 48 states". Both cannot be current. Which one is true is unknown from
+  public evidence; the node is carried as disputed so the review task asks
+  rather than assumes. This is the same graph mechanism applied to an
+  internal fact instead of a regulation.
+source_url: https://www.medicarefaq.com/about-us/
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2021-07-01
+    effective_to: 2025-12-31
+    change_classification: INITIAL
+    clause_text: >
+      [MedicareFAQ About page, read 2026-09-21] "our agents are licensed to
+      offer insurance services in 48 states". Effective date is a placeholder —
+      the page does not date the claim.
+    summary: 48 states.
+    params:
+      states: 48
+    source_url: https://www.medicarefaq.com/about-us/
+  - version: 2
+    status: in_force
+    effective_from: 2026-01-01
+    effective_to: null
+    change_classification: MODIFIES
+    clause_text: >
+      [MedicareFAQ home page, read 2026-09-21] "Licensed in All 50 States".
+      Effective date is a placeholder — the page does not date the claim.
+    summary: All 50 states.
+    params:
+      states: 50
+    disputed: true
+    dispute_note: >
+      Two live pages on the same property disagree (48 vs 50). Backstop does
+      not know which is current; the review task's question is "which claim is
+      true today, and which page is stale?" — not "fix the page".
+    source_url: https://www.medicarefaq.com/
+    git_commit: seed

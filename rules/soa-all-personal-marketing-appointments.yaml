@@ -1,0 +1,72 @@
+code: soa-all-personal-marketing-appointments
+title: Scope of Appointment before every personal marketing appointment, inbound and unscheduled included
+regulator: CMS
+citation: 42 CFR 422.2264(c)(3)(i), (c)(3)(iii)(A)-(B); 422.2274(b)(3), (c)(9)(ii); 423 parallels
+applies_to: [MA, PDP]
+summary: >
+  The hidden tightening inside the CY2027 SOA relief. Everyone read "the 48-hour
+  wait is gone" (soa-48h-wait). CMS also removed the word "scheduled" from
+  422.2264(c)(3)(i): from 2026-10-01 an SOA must be agreed and recorded before
+  every personal marketing appointment, whoever started the contact — outbound,
+  inbound, walk-ins, unscheduled calls, web chats and web forms. CMS describes
+  the change as removing ambiguity; an inbound script that skips the SOA is
+  under-restrictive either way.
+# Rule-level source_url is left empty on purpose: the source watcher needs a frozen
+# snapshot of every rule-level URL (fixtures/sources/), and none is committed yet.
+# Primary sources, with URLs, are on each version.
+source_url: ""
+versions:
+  - version: 1
+    status: in_force
+    # Backstop's history baseline (CY2024), not the origin of the text.
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [paraphrase of the pre-CY2027 text as the CY2027 preamble describes it, 91 FR
+      17456] The plan (or agent or broker) agrees upon and records the Scope of
+      Appointment before a "scheduled" personal marketing appointment;
+      422.2274(b)(3) required it "prior to meeting with potential enrollees".
+    summary: SOA tied to scheduled personal marketing appointments.
+    params:
+      soa_required_for: scheduled_personal_marketing_appointments
+      includes_inbound: false
+    sources:
+      - authority: preamble
+        cite: "91 FR 17456 (CY2027 preamble describing the text it amends)"
+        url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: TIGHTENS
+    clause_text: >
+      [eCFR 42 CFR 422.2264(c)(3)(i), 2026-09-23, quoted] "Prior to the personal
+      marketing appointment, the MA plan (or agent or broker, as applicable) must
+      agree upon and record the Scope of Appointment with the beneficiary(ies).
+      The Scope of Appointment must be in writing for in-person personal marketing
+      appointments." [CY2027 preamble, 91 FR 17459, quoted; it describes the
+      proposal CMS finalized] "an SOA would be required for plan/agent/broker-
+      initiated outbound contact and for beneficiary-initiated inbound contact
+      (including walk-ins, unscheduled calls and web-based chats, and web-based
+      forms)". [paraphrase of (c)(3)(iii)(A)-(B)] An SOA is valid for 12 months;
+      additional lines of business need a separate SOA.
+    summary: >
+      SOA before every personal marketing appointment, inbound and unscheduled
+      included. Written for in-person appointments. Valid 12 months.
+    params:
+      soa_required_for: all_personal_marketing_appointments
+      includes_inbound: true
+      validity_months: 12
+      written_if_in_person: true
+    sources:
+      - authority: primary
+        cite: "eCFR 42 CFR 422.2264(c)(3)(i), (c)(3)(iii)(A)-(B), checked 2026-09-23"
+        url: https://www.ecfr.gov/current/title-42/section-422.2264
+      - authority: preamble
+        cite: "91 FR 17456, 17459 (CY2027 final rule preamble)"
+        url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+    git_commit: seed

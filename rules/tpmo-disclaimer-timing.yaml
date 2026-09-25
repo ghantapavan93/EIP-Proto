@@ -1,0 +1,47 @@
+code: tpmo-disclaimer-timing
+title: TPMO disclaimer — when it must be delivered on a sales call
+regulator: CMS
+citation: 42 CFR 422.2267(e)(41) (and 423.2267(e)(41) for Part D)
+applies_to: [MA, PDP]
+summary: >
+  Third-party marketing organizations must convey the TPMO disclaimer verbally
+  on sales calls. The CY2023 rule (87 FR 27704; still in force under CY2024)
+  tied delivery to a clock (within the first minute); the CY2027 rule replaced the clock with an ordering requirement
+  (prior to the discussion of any benefits). Per the preamble (91 FR 17448-49),
+  a mere mention of a benefit is not a discussion of benefits, and a call with
+  no benefits discussion is not expected to carry the disclaimer.
+source_url: https://www.law.cornell.edu/cfr/text/42/422.2267
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [CY2023 rule, 87 FR 27704, in force through CY2026; paraphrased] The TPMO disclaimer must be
+      conveyed verbally within the first minute of a sales call.
+    summary: Timer basis — first 60 seconds of the call. The CY2023 rule applied from 2022; Backstop's history starts at the CY2024 baseline (2023-09-30).
+    params:
+      basis: timer
+      window_seconds: 60
+    source_url: https://www.federalregister.gov/documents/2022/05/09/2022-09375/
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: MODIFIES
+    clause_text: >
+      [42 CFR 422.2267(e)(41), as amended 91 FR 17583] The disclaimer must be
+      "verbally conveyed ... prior to the discussion of any benefits" on sales
+      calls; electronically when using email, online chat, or other electronic
+      means; prominently displayed on TPMO websites; and included in print and
+      television advertisements.
+    summary: Ordering basis — before any discussion of benefits; the 60-second timer is gone.
+    params:
+      basis: ordering
+      before: benefits_discussion
+    source_url: https://www.law.cornell.edu/cfr/text/42/422.2267
+    git_commit: seed

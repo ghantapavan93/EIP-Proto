@@ -1,0 +1,85 @@
+code: call-recording-retention
+title: Marketing and sales call recording — retention period and scope
+regulator: CMS
+citation: 42 CFR 422.2274(g)(2)(ii)
+applies_to: [MA, PDP]
+summary: >
+  TPMOs must record marketing and sales calls in their entirety. Before CY2027
+  the recording paragraph stated no retention period; CMS applied the general
+  10-year record-retention rule (42 CFR 422.504(d)). The CY2027 rule writes a
+  6-year period into 422.2274(g)(2)(ii) (years 4–6 may be audio or a complete
+  transcript) and drops "enrollment" from the list of calls in that paragraph;
+  the preamble calls enrollment-call retention out of scope. Where enrollment
+  calls now sit is carried as disputed; verify with counsel.
+source_url: https://www.law.cornell.edu/cfr/text/42/422.2274
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2022-10-01
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [42 CFR 422.2274(g)(2)(ii), text from 2023-09-30; eCFR 2026-01-01] "Record
+      all marketing, sales, and enrollment calls, including the audio portion of
+      calls via web-based technology, in their entirety." (The 2022 text read
+      "Records all calls with beneficiaries in their entirety, including the
+      enrollment process.") No period is stated here; CMS advised recordings
+      follow the 10-year retention of 42 CFR 422.504(d) (91 FR 17384 preamble).
+    summary: Record all marketing, sales and enrollment calls; 10-year retention via 422.504(d).
+    params:
+      retention_years: 10
+      retention_source: 42 CFR 422.504(d)
+      scope: all_marketing_sales_and_enrollment_calls
+    source_url: https://www.ecfr.gov/current/title-42/section-422.2274
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: LOOSENS
+    clause_text: >
+      [42 CFR 422.2274(g)(2)(ii), as amended by the CY2027 rule (91 FR 17384;
+      regulatory text at 91 FR 17583), per LII and eCFR] "All marketing and
+      sales calls, including the audio portion of calls conducted via web-based
+      technology, must be recorded and retained in their entirety for a minimum
+      period of 6 years." Years 1–3 audio; years 4–6 audio or a complete
+      transcript. Per the preamble the 6-year limit also covers recordings
+      already stored: marketing/sales calls older than 6 years may be discarded.
+    summary: Retention 6 years, written into the paragraph; enrollment calls dropped from it (disputed).
+    params:
+      retention_years: 6
+      audio_years: 3
+      transcript_allowed_after_years: 3
+      scope: all_marketing_and_sales_calls
+    sources:
+      - authority: primary
+        cite: 42 CFR 422.2274(g)(2)(ii) (eCFR, current)
+        url: https://www.ecfr.gov/current/title-42/section-422.2274
+        reading: All marketing and sales calls recorded in their entirety and retained a minimum of 6 years; years 4-6 audio or a complete transcript.
+      - authority: primary
+        cite: 42 CFR 422.504(d) (general MA record retention)
+        url: https://www.ecfr.gov/current/title-42/section-422.504
+        reading: 10-year retention of books and records. CMS pointed recordings here before CY2027; whether enrollment calls still fall here is the open question.
+      - authority: preamble
+        cite: CY2027 final rule preamble, 91 FR 17384
+        url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+        reading: Enrollment-call retention is out of scope of this change; the 6-year period also covers recordings already stored.
+      - authority: secondary
+        cite: Crowell & Moring client alert, 2026-04-17
+        url: https://www.crowell.com/en/insights/client-alerts/cms-finalizes-cy-2027-medicare-advantage-and-part-d-rule-key-implications-for-plan-sponsors
+        reading: Summarises the reduction to 6 years for marketing and sales calls. Consistent with the primary text.
+    disputed: true
+    dispute_note: >
+      The CY2027 text drops "enrollment" from the calls listed in (g)(2)(ii),
+      and the preamble calls enrollment-call retention "out of scope". It is
+      not settled whether enrollment calls now fall back to the 10-year
+      retention of 42 CFR 422.504(d). (Correction 2026-09-23: an earlier
+      version of this note cited a trade source as saying the rule narrowed
+      recording to enrollment calls; the source, re-read, says the opposite.)
+      Backstop carries the 6-year CFR reading for marketing and sales calls and
+      flags this version for counsel review; nothing downstream silently picks
+      a side.
+    source_url: https://www.law.cornell.edu/cfr/text/42/422.2274
+    git_commit: seed

@@ -1,0 +1,49 @@
+code: soa-educational-events
+title: Scope of Appointment collection at educational events
+regulator: CMS
+citation: 42 CFR 422.2264(c)(1)(ii)(D) (SOA collection) and (c)(2)(i) (educational-event gap)
+applies_to: [MA, PDP]
+summary: >
+  The CY2024 rule barred collecting Scope of Appointment forms at educational
+  events and imposed a 12-hour gap before a marketing event at the same
+  location. The CY2027 rule permits SOA collection at educational events and
+  removes the 12-hour gap, but a beneficiary must be told the educational event
+  is ending and be given a sufficient opportunity to leave before marketing
+  begins (422.2264(c)(2)(i)).
+source_url: https://www.crowell.com/en/insights/client-alerts/cms-finalizes-cy-2027-medicare-advantage-and-part-d-rule-key-implications-for-plan-sponsors
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [CY2024, paraphrased] Scope of Appointment forms and Business Reply Cards
+      may not be collected at educational events; a marketing event may not
+      begin within 12 hours of an educational event at the same location.
+    summary: No SOA collection at educational events; 12-hour gap.
+    params:
+      soa_collection_at_educational_events: prohibited
+      educational_to_marketing_gap_hours: 12
+    source_url: https://www.federalregister.gov/documents/2023/04/12/2023-07115/
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: REMOVES_REQUIREMENT
+    clause_text: >
+      [42 CFR 422.2264(c)(1)(ii)(D) and (c)(2)(i) as amended by the CY2027
+      rule; per eCFR and Crowell & Moring] SOA forms and Business Reply Cards
+      may be collected at educational events; the 12-hour
+      educational-to-marketing gap is eliminated, but beneficiaries must be
+      notified that the educational event is ending and be given a sufficient
+      opportunity to leave before any marketing begins.
+    summary: SOA collection at educational events allowed; gap removed.
+    params:
+      soa_collection_at_educational_events: permitted
+      educational_to_marketing_gap_hours: 0
+    source_url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+    git_commit: seed

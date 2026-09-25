@@ -1,0 +1,53 @@
+code: fl-telesolicitation-hours-frequency
+title: Florida — calling hours 8 a.m. to 8 p.m. and at most 3 calls in 24 hours on the same subject
+regulator: FL
+citation: Fla. Stat. 501.616(6)(a)-(b); 501.604 (the exemptions do not reach 501.616(6))
+applies_to: [MA, PDP, MEDIGAP, LIFE]
+summary: >
+  EIP's home state. Florida's Telemarketing Act exempts licensed insurance
+  agents from most of Part IV, "except ss. 501.608 and 501.616(6) and (7)", so
+  the calling-hours and call-frequency limits reach them. The window ends at
+  8 p.m. in the called person's time zone, an hour earlier than the federal
+  TCPA limit (9 p.m.): two rules, and the stricter one decides. Dialer logs can
+  be checked mechanically.
+# Rule-level source_url is left empty on purpose: the source watcher needs a frozen
+# snapshot of every rule-level URL (fixtures/sources/), and none is committed yet.
+# Primary sources, with URLs, are on each version.
+source_url: ""
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2021-07-01
+    effective_to: null
+    change_classification: INITIAL
+    clause_text: >
+      [Fla. Stat. 501.616(6), 2026, quoted] no commercial telephone solicitation
+      call "before 8 a.m. or after 8 p.m. local time in the called person's time
+      zone"; no "more than three commercial telephone solicitation phone calls
+      from any number to a person over a 24-hour period on the same subject
+      matter or issue, regardless of the phone number used to make the call."
+      [501.604, quoted] the exemptions apply "except ss. 501.608 and 501.616(6)
+      and (7)".
+    summary: 8 a.m.–8 p.m. called-party time; at most 3 calls per 24 hours on the same subject.
+    params:
+      earliest_local: "08:00"
+      latest_local: "20:00"
+      max_calls_per_24h_same_subject: 3
+      federal_tcpa_latest_local: "21:00"
+    disputed: true
+    dispute_note: >
+      Question for counsel: the reach over interstate calls (calls from Florida to
+      other states; calls into Florida) was not verified, nor whether a callback
+      the beneficiary asked for is a "commercial telephone solicitation". The
+      enforcing agency was not confirmed.
+    sources:
+      - authority: primary
+        cite: "Fla. Stat. 501.616 (2026)"
+        url: http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0500-0599/0501/Sections/0501.616.html
+      - authority: primary
+        cite: "Fla. Stat. 501.604 (2026)"
+        url: http://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0500-0599/0501/Sections/0501.604.html
+      - authority: primary
+        cite: "CS/SB 1120 (2021), ch. 2021-185, effective 2021-07-01"
+        url: https://www.flsenate.gov/Session/Bill/2021/1120
+    git_commit: seed

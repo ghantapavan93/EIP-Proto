@@ -1,0 +1,121 @@
+code: agent-broker-compensation
+title: Agent/broker compensation — FMV caps, renewal, referral fees, administrative payments
+regulator: CMS
+citation: 42 CFR 422.2274(a), (c)-(f); 423.2274(a), (c)-(f)
+applies_to: [MA, PDP]
+summary: >
+  How much an MA plan or Part D sponsor may pay an independent agent or broker.
+  The CY2025 rule (89 FR 30448) rewrote it: administrative payments counted as
+  compensation, a fixed fee, and a ban on some contract terms. A court stayed
+  the rewrite on 2024-07-03 and vacated it on 2025-08-18; the government did not
+  appeal. The pre-CY2025 text governs. eCFR still prints the vacated text
+  (checked 2026-09-23), so a tool that reads eCFR alone reads a rule that is not
+  the law. CMS republishes the fair-market-value (FMV) caps each year by memo.
+# Rule-level source_url is left empty on purpose: the source watcher needs a frozen
+# snapshot of every rule-level URL (fixtures/sources/), and none is committed yet.
+# Primary sources, with URLs, are on each version.
+source_url: ""
+versions:
+  - version: 1
+    status: in_force
+    # Backstop's history baseline (CY2024), not the origin of the text. The vacated
+    # CY2025 rewrite (v2) never displaced this version.
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [paraphrase of 42 CFR 422.2274(a), (d)-(f) as in effect before the CY2025
+      rule, per the CMS CY2027 compensation memo] Initial-year compensation to an
+      independent agent or broker at or below fair market value (FMV); renewal
+      compensation at most 50% of FMV; referral/finder's fees limited to amounts
+      CMS publishes; administrative payments are not counted as compensation.
+      FMV amounts are published yearly by memo.
+    summary: >
+      Pre-CY2025 compensation text. FMV amounts for CY2024–CY2026 are not encoded
+      (not re-read in this pass).
+    params:
+      renewal_max_pct_of_fmv: 50
+      admin_payments_counted_as_comp: false
+    sources:
+      - authority: primary
+        cite: "CMS memo, Contract Year 2027 Agent and Broker Compensation Rates, Referral/Finder's Fees, Submissions, and Training and Testing Requirements (2026-06-01) — copy hosted by Ritter; cms.gov original not located"
+        url: https://ritterim.com/documents/cms-memos/memo-agent-broker-compensation-and-training-and-testing-requirements-cy2027.pdf
+        reading: The pre-CY2025 text of 422.2274(a), (c), (d), (e) "remains in effect until further notice".
+  - version: 2
+    status: vacated
+    # The date the CY2025 rewrite was written to apply from. It never took effect:
+    # stayed 2024-07-03, vacated 2025-08-18. A vacated version is outside the
+    # window checks and is never in force.
+    effective_from: 2024-10-01
+    effective_to: null
+    change_classification: TIGHTENS
+    clause_text: >
+      [eCFR 42 CFR 422.2274(e)(2), still printed 2026-09-23, quoted] "Beginning
+      with contract year 2025, administrative payments are included in the
+      calculation of enrollment-based compensation." [paraphrase] With the rest of
+      the CY2025 amendments to 422.2274(a), (c), (d) and (e): a fixed renewal
+      amount and a ban on contract terms that could steer agents.
+    summary: >
+      CY2025 rewrite (89 FR 30448). Stayed 2024-07-03; vacated 2025-08-18 by the
+      N.D. Tex. in Americans for Beneficiary Choice v. HHS, No. 4:24-cv-00439-O
+      (with Council for Medicare Choice v. HHS, No. 4:24-cv-00446-O); not
+      appealed. Never took effect. eCFR still prints the text (checked 2026-09-23).
+    params:
+      admin_payments_counted_as_comp: true
+      contract_terms_ban: true
+      vacatur:
+        stayed_on: "2024-07-03"
+        vacated_on: "2025-08-18"
+        court: N.D. Tex.
+        case: "Americans for Beneficiary Choice v. HHS, No. 4:24-cv-00439-O; Council for Medicare Choice v. HHS, No. 4:24-cv-00446-O"
+        appealed: false
+        cfr_text_still_printed: true
+        checked_on: "2026-09-23"
+    sources:
+      - authority: primary
+        cite: "CMS CY2027 compensation memo (2026-06-01): the court vacated the CY2025 amendments to 422.2274(a), (c), (d), (e); the government did not appeal"
+        url: https://ritterim.com/documents/cms-memos/memo-agent-broker-compensation-and-training-and-testing-requirements-cy2027.pdf
+      - authority: primary
+        cite: "eCFR 42 CFR 422.2274(e)(2) — still prints the vacated text (checked 2026-09-23)"
+        url: https://www.ecfr.gov/current/title-42/section-422.2274
+      - authority: secondary
+        cite: "Center for Medicare Advocacy, 2025-08-28"
+        url: https://medicareadvocacy.org/court-strikes-down-key-medicare-marketing-regulations/
+  - version: 3
+    status: in_force
+    # Backstop's date for the CY2027 compensation cycle (CY2027 marketing opens
+    # 2026-10-01, 422.2263(a)). The memo sets caps for CY2027 enrollments, not a
+    # calendar date.
+    effective_from: 2026-10-01
+    effective_to: null
+    change_classification: RESTORES_PRIOR
+    clause_text: >
+      [CMS CY2027 compensation memo, 2026-06-01, quoted] "the regulatory language
+      within § 422.2274(a), (c), (d), (e) and § 423.2274(a), (c), (d), (e) that was
+      effective prior to the issuance of the CY 2025 Final Rule remains in effect
+      until further notice." [paraphrase of the memo's table] CY2027 FMV, rounded
+      up: MA initial / renewal — national $725 / $363; Connecticut, Pennsylvania,
+      D.C. $816 / $408; California, New Jersey $902 / $451; Puerto Rico, U.S.
+      Virgin Islands $495 / $248. PDP $130 / $65. Referral fees: MA $100, PDP $25.
+      Initial year at or below FMV; renewal at most 50% of FMV.
+    summary: >
+      The vacatur is final and the pre-CY2025 text governs, with the CY2027 caps.
+      Administrative payments are not counted as compensation.
+    params:
+      contract_year: 2027
+      renewal_max_pct_of_fmv: 50
+      admin_payments_counted_as_comp: false
+      fmv_initial: {national: 725, CT_PA_DC: 816, CA_NJ: 902, PR_USVI: 495}
+      fmv_renewal: {national: 363, CT_PA_DC: 408, CA_NJ: 451, PR_USVI: 248}
+      pdp_initial: 130
+      pdp_renewal: 65
+      referral_cap_ma: 100
+      referral_cap_pdp: 25
+    sources:
+      - authority: primary
+        cite: "CMS CY2027 compensation memo (2026-06-01), FMV table and vacatur paragraph"
+        url: https://ritterim.com/documents/cms-memos/memo-agent-broker-compensation-and-training-and-testing-requirements-cy2027.pdf
+      - authority: primary
+        cite: "eCFR 42 CFR 422.2274 (prints the vacated CY2025 text; read with the memo)"
+        url: https://www.ecfr.gov/current/title-42/section-422.2274
+    git_commit: seed

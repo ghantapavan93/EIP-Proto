@@ -1,0 +1,70 @@
+code: tcpa-pewc-one-to-one
+title: TCPA prior express written consent — the one-to-one amendment (vacated)
+regulator: FCC
+citation: 47 CFR 64.1200(f)(9)
+applies_to: [MA, PDP, MEDIGAP, LIFE]
+summary: >
+  The FCC's 2023 amendment would have limited prior express written consent for
+  autodialed or prerecorded telemarketing to one seller at a time, for calls
+  "logically and topically associated" with the consent. The 11th Circuit
+  vacated it on 2025-01-24, three days before it was due to take effect; the FCC
+  removed the text (90 FR 42137, 2025-08-29). The earlier definition governs. A
+  lead form written for one-to-one consent is not wrong, but it cites a rule that
+  never took effect. CMS's own one-recipient-at-a-time rule for TPMO data sharing
+  (tpmo-data-sharing-consent) is separate and in force.
+# Rule-level source_url is left empty on purpose: the source watcher needs a frozen
+# snapshot of every rule-level URL (fixtures/sources/), and none is committed yet.
+# Primary sources, with URLs, are on each version.
+source_url: ""
+versions:
+  - version: 1
+    status: in_force
+    # Backstop's history baseline, not the origin of the definition (which dates
+    # to the FCC's 2012 TCPA order; not re-read in this pass).
+    effective_from: 2023-09-30
+    effective_to: null
+    change_classification: INITIAL
+    clause_text: >
+      [paraphrase of 47 CFR 64.1200(f)(9) as restored by 90 FR 42137] An agreement
+      in writing, bearing the signature of the person called, that clearly
+      authorizes the seller to deliver telemarketing calls using an autodialer or
+      an artificial or prerecorded voice, and includes the number to be called and
+      a disclosure that consent is not a condition of purchase.
+    summary: >
+      The prior express written consent definition in force. No one-seller limit.
+    params:
+      one_to_one: false
+    sources:
+      - authority: primary
+        cite: "90 FR 42137 (2025-08-29): FCC removes the vacated one-to-one text, effective the same day"
+        url: https://www.federalregister.gov/citation/90-FR-42137
+  - version: 2
+    status: vacated
+    # The date the amendment was scheduled to take effect. It never did.
+    effective_from: 2025-01-27
+    effective_to: null
+    change_classification: TIGHTENS
+    clause_text: >
+      [paraphrase of the FCC's 2023 Second Report and Order amendment to
+      64.1200(f)(9)] Consent covers one identified seller at a time, and calls
+      must be logically and topically associated with the interaction in which
+      the consumer gave consent.
+    summary: >
+      Vacated by the 11th Circuit on 2025-01-24 (Insurance Marketing Coalition
+      Ltd. v. FCC, No. 24-10277; mandate 2025-04-30) before it took effect.
+      Text removed by 90 FR 42137 (2025-08-29).
+    params:
+      one_to_one: true
+      logically_topically_associated: true
+      vacatur:
+        vacated_on: "2025-01-24"
+        court: 11th Cir.
+        case: "Insurance Marketing Coalition Ltd. v. FCC, No. 24-10277"
+        mandate_on: "2025-04-30"
+        cfr_text_removed_by: "90 FR 42137 (2025-08-29)"
+        cfr_text_still_printed: false
+    sources:
+      - authority: primary
+        cite: "Insurance Marketing Coalition Ltd. v. FCC, No. 24-10277 (11th Cir. Jan. 24, 2025); text removed by 90 FR 42137 (2025-08-29)"
+        url: https://www.federalregister.gov/citation/90-FR-42137
+    git_commit: seed

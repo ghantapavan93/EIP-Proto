@@ -1,0 +1,61 @@
+code: superlatives
+title: Superlatives in marketing materials and sales language
+regulator: CMS
+citation: 42 CFR 422.2262 (CY2024 prohibition was (a)(1)(ii); general accuracy standard in the section intro and (a)(1)(i))
+applies_to: [MA, PDP]
+summary: >
+  The CY2024 rule prohibited superlatives ("best", "most") unless the material
+  referenced supporting data from the current or prior contract year. The
+  CY2027 rule removes that documentation-in-the-material requirement from
+  2026-10-01. It does NOT make superlatives free-standing permissions: a superlative is still a
+  claim, and claims must be accurate and not misleading; an organisation should
+  still be able to support one if asked. Medigap advertising is
+  state-regulated (NAIC Model 660) and is out of scope for this rule.
+source_url: https://www.crowell.com/en/insights/client-alerts/cms-finalizes-cy-2027-medicare-advantage-and-part-d-rule-key-implications-for-plan-sponsors
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [CY2024, paraphrased] Marketing may not use superlatives unless the
+      superlative is substantiated with supporting data from the current or
+      prior contract year.
+    summary: Superlatives prohibited unless substantiated by data.
+    params:
+      superlatives: prohibited_unless_substantiated
+      substantiation_required: true
+    source_url: https://www.federalregister.gov/documents/2023/04/12/2023-07115/
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: LOOSENS
+    clause_text: >
+      [Paraphrase of the CY2027 final rule per Crowell & Moring (secondary);
+      primary: 42 CFR 422.2262 intro and (a)(1)(i), as amended 91 FR 17583]
+      The prohibition on superlatives in marketing materials without
+      supporting documentation is removed. Materially inaccurate or misleading
+      statements remain prohibited.
+    summary: Documentation need not accompany the material; the claim must still be accurate, non-misleading and supportable.
+    sources:
+      - authority: primary
+        cite: 42 CFR 422.2262 intro and (a)(1)(i) (eCFR, current)
+        url: https://www.ecfr.gov/current/title-42/section-422.2262
+        reading: Marketing may not be materially inaccurate or misleading; the former (a)(1)(ii) superlative-with-documentation rule is gone.
+      - authority: secondary
+        cite: Crowell & Moring client alert, 2026-04-17
+        url: https://www.crowell.com/en/insights/client-alerts/cms-finalizes-cy-2027-medicare-advantage-and-part-d-rule-key-implications-for-plan-sponsors
+        reading: The prohibition on superlatives without supporting documentation is removed.
+    params:
+      superlatives: permitted_if_accurate_and_not_misleading
+      substantiation_required: false
+      documentation_in_material_required: false
+      claim_must_be_supportable: true
+      misleading_still_prohibited: true
+    source_url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+    git_commit: seed
