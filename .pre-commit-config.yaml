@@ -1,0 +1,31 @@
+# Checks that run on every commit once installed: `pip install pre-commit && pre-commit install`.
+# CI runs the full suites; these catch the cheap mistakes before they leave the machine.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^fixtures/
+      - id: end-of-file-fixer
+        exclude: ^fixtures/
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: frontend lint
+        entry: npm --prefix frontend run lint
+        language: system
+        files: ^frontend/src/
+        pass_filenames: false
