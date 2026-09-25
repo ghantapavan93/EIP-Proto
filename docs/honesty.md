@@ -16,16 +16,18 @@ piece real. Written so a skeptical reader can find the seams without asking.
   Paragraph-level citations marked *verify* in `rules/*.yaml` were not re-read
   at paragraph level and should be confirmed before being quoted to a
   regulator.
-- **The public pages.** Six pages on EIP-operated properties were fetched once
-  with an identified user agent, a 2-second delay, and no login, then frozen
-  under `fixtures/pages/`. The edges the scanner found on them are real:
-  - `medicarefaq.com/faqs/scope-of-appointment/` still encodes the 48-hour
-    window ("the standard expectation is 48 hours in advance"; "at least two
-    days before the meeting").
-  - `theelitebrokerage.com` carries the disclaimer wording with the SHIP
-    referral that the CY2027 text drops.
-  - `medicarefaq.com/` says "Licensed in All 50 States"; `/about-us/` says
-    "48 states".
+- **The public pages.** Six public pages were fetched once on 2026-09-21 with
+  an identified user agent, a 2-second delay, and no login. The repository
+  keeps short attributed excerpts of them (only the passages around each
+  rule-bearing sentence) under `fixtures/pages/`; the matches are identical
+  to those on the full pages. What the scanner finds on them is real, and is
+  correct for the rules in force when they were read:
+  - the Scope of Appointment FAQ describes the 48-hour window, which applies
+    until 2026-09-30 and ends on 2026-10-01;
+  - one footer carries the disclaimer wording with the SHIP referral that the
+    CY2027 text changes;
+  - two pages state the licensing footprint with different figures, which
+    Backstop surfaces as a question for the page owner, not a finding.
 - **The code paths.** Rule loading, scanning, matching, staleness, contracts,
   the harness, the review state machine, the audit log, the API, the tests.
 - **The override loop.** A reviewer overrides a result with a reason code,
@@ -174,6 +176,42 @@ piece real. Written so a skeptical reader can find the seams without asking.
   there is no task history table, so there is no burn-down trend line.
 - Nothing here is compliance advice. Backstop surfaces staleness with
   citations; it never opines beyond the quoted rule text.
+
+### Found in the pre-review audit (2026-09-25), deliberately not changed yet
+
+Each item below would change recorded numbers or the demo's run keys, so it is
+disclosed here rather than rushed in before an external review.
+
+- **`C-PII-01` checks the composed fields only** (summary, coaching note, CRM
+  record). 26 recorded outputs put the fabricated Medicare number or date of
+  birth into `extraction.pii_detected`, which the schema reserves for type
+  names; those pass. Fix: scan the extraction fields too. It changes recorded
+  PII counts.
+- **Medigap calls pass `C-TPMO-01` and `C-SOA-01` whatever the model says.** The
+  rules do not apply to Medigap, and the check returns PASS before comparing.
+  The recorded 7B marks two Medigap calls non-compliant (T060 on prompt v2, T059
+  on v3) and the 3B reads T059 and T060 as MA; all are graded PASS, so those
+  false flags are not counted. Fix: compare against ground truth (compliant)
+  instead of returning early. It changes the headline wrong-verdict counts.
+- **Generation settings are not part of a run's identity.** Temperature, max
+  tokens, tool vs JSON mode, the simulated defect profile and the Ollama model
+  digest are not fingerprinted, so a change to any of them alone is invisible
+  to deduplication and attribution. Attribution says so whenever no tracked
+  input differs. Fix: hash a generation fingerprint into the run key. It
+  changes every run key.
+- **Rule applicability is by product line only.** `applies_to` is displayed but
+  not enforced: matchers run on every artifact, and only the Medigap exemption
+  is coded. Jurisdiction, channel and workflow scope are not modelled.
+- **A confirmed LLM-proposed edge keeps the version it was proposed against.**
+  Review confirms it but cannot rebind the version. The proposer is key-gated
+  and not part of the demo.
+- **Review transitions carry no expected state.** A stale browser tab can decide
+  a task another reviewer has picked up (not one already decided: that is a 409).
+- **Ingest has no dry run.** A file is validated all-or-nothing, but there is no
+  preview of rows accepted, rejected, duplicated or redacted before commit.
+- **Runs are synchronous and a live model run has no overall deadline.** Context
+  truncation is not detected (the longest recorded call used about 3,850 of a
+  typical 4,096-token local context).
 
 ## Corrections
 

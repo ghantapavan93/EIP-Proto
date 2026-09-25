@@ -43,7 +43,7 @@ was requested or used.
 | E4 | Vapi is EIP's voice-AI vendor | **UNKNOWN** — named only in a removed 2025 posting; nothing here depends on it | search snippets |
 | E5 | EIP has an eval / prompt-versioning tool today | **UNKNOWN** — no public evidence either way; the JD asks the hire to *create* evaluation approaches | Jobvite |
 | E6 | A rule→artifact registry (even a spreadsheet) exists and is being used for Oct 1 | **UNKNOWN** — this is the kill evidence for the hypothesis | — |
-| E7 | medicarefaq.com/faqs/scope-of-appointment/ encodes the 48-hour window; theelitebrokerage.com carries the SHIP disclaimer wording; home vs About disagree on 48 vs 50 states | FACT | frozen snapshots under fixtures/pages/, fetched 2026-09-21 |
+| E7 | The public SOA FAQ encodes the 48-hour window (correct until 2026-09-30); one footer carries the pre-CY2027 SHIP disclaimer wording; two pages give different licensing-footprint figures | FACT | excerpts under fixtures/pages/, read 2026-09-21 |
 
 ## Design inputs
 

@@ -13,7 +13,7 @@ the source of truth; this page is the map.
 | GET | `/rules/{code}` | one rule with all versions | `RuleOut` |
 | GET | `/rules/{code}/impact?as_of=YYYY-MM-DD&include_proposed=&assume_version=` | **blast radius** as of a date: stale edges (direction + reason + task), healthy edges, contracts, prompt versions that declare the rule. `include_proposed=true` is a **what-if**: evaluate as if the newest *dated* proposal effective on `as_of` were enacted; `assume_version=N` picks proposed version N (an undated proposal is assumed to apply from `as_of`). A what-if writes nothing (no tasks, no audit rows) and returns `hypothetical: true`, `assumed_version`, `note`; without it those are `false` / `null` / `""` | `ImpactOut` + `{hypothetical, assumed_version, note}` |
 | POST | `/rules/{code}/versions` | propose a new rule version (what-if); role engineer/admin | `RuleVersionOut` |
-| POST | `/rules/reload` | reload `rules/*.yaml` (idempotent; refuses in-place edits) | `{rules_created, versions_created, unchanged, files}` |
+| POST | `/rules/reload` | **admin only**: adopt `rules/*.yaml` into the running system (idempotent; refuses in-place edits) | `{rules_created, versions_created, unchanged, files}` |
 | GET | `/assets` | artifact inventory (real pages + labeled synthetic internals) | `AssetOut[]` |
 | GET | `/assets/{code}` | artifact with latest text and its edges | `AssetDetailOut` |
 | POST | `/scans` | run a scan (`{idempotency_key?, live?, as_of?}`); same key → same scan (`deduplicated: true`) | `ScanOut` |
@@ -29,14 +29,17 @@ the source of truth; this page is the map.
 | GET | `/runs/{id}` | one run + per-contract summary | `RunOut` |
 | GET | `/runs/{id}/results?contract=&outcome=&transcript=` | per-transcript × contract outcomes with evidence | `RunResultOut[]` |
 | GET | `/runs/{id}/transcripts/{code}` | transcript text, workflow output, results, verified spans | `RunTranscriptOut` |
-| GET | `/runs/compare?a=&b=` | diff two runs: what changed (prompt/model/rule date/adapter), newly failing/passing cells, per-contract deltas (`a_error`/`b_error` break out ERROR), `failure_definition`, and `statistics`: per contract plus `ALL-BLOCK`, a paired table on shared calls, failure rates with 95% Wilson CIs, exact McNemar p (Fisher exact when the corpus differs), Holm-adjusted p, a plain-language verdict at alpha 0.05 and cautions | `CompareOut` |
+| GET | `/runs/compare?a=&b=` | diff two runs: what changed (prompt/model/rule date/adapter), newly failing/passing cells, per-contract deltas (`a_error`/`b_error` break out ERROR), `failure_definition`, and `statistics`: per contract plus `ALL-BLOCK`, a paired table on shared calls, failure rates with 95% Wilson CIs, exact McNemar p (Fisher exact when the corpus differs), Holm-adjusted p, a plain-language verdict at alpha 0.05 and cautions; and `attribution`: `isolated` (exactly one of prompt, model, rule date, calls scored, contract set, judge, approved overrides changed), `confounded` (two or more; `isolating_pairs` names existing run pairs that move each factor alone, and the statistics cautions lead with it) or `repeat` | `CompareOut` |
 | GET | `/contracts/{code}/metrics?run_id=&corpus=synthetic&rule_date=&trend_limit=50` | one run, or the latest COMPLETE run per model/prompt on `corpus`: outcome counts, failure rate + CI; for C-TPMO-01/C-SOA-01 a per-call confusion matrix (positive = violation) and for C-SUP-01 a per-phrase one, with precision/recall/specificity/F1 and Wilson CIs; per-scenario and per-product-line slices with `notable` flags and `findings`; `trend` of the contract's failure rate across COMPLETE runs, oldest first | `ContractMetricsOut` |
 | GET | `/review?state=&kind=`, `/review/{id}` | review queue (STALE_ASSET, PROPOSED_EDGE, FLAGGED_RESULT, RULE_SOURCE_CHANGED) with allowed transitions for the caller's role | `ReviewTaskOut` |
 | POST | `/review/{id}/transition` | `{to, reason_code?, note}`; illegal → 409 (audit-logged); forbidden → 403 | `ReviewTaskOut` |
 | GET | `/test-cases` | test cases created by overrides | `TestCaseOut[]` |
 | POST | `/test-cases/{id}/approve` | approver ≠ creator; role engineer/admin | `TestCaseOut` |
 | GET | `/audit?entity_type=&event_type=&entity_id=&limit=&offset=` | append-only audit log | `Page{items: AuditOut[], total}` |
-| GET | `/audit/verify` | recompute the SHA-256 hash chain; `ok=false` names the first row that no longer links | `{ok, …}` |
+| GET | `/audit/verify?through_id=&tip=` | recompute the SHA-256 hash chain; `ok=false` names the first row that no longer links. With a checkpoint (both params) it also proves the chain still carries that hash at that row | `{ok, checked, tip, tip_id, checkpoint, …}` |
+| GET | `/admin/access` | **admin only**: every account with role, default-password flag, last recorded action, actions and refusals in 30 days; recent refusals; the permission matrix. Each read is audited (`access.reviewed`) | `AccessReviewOut` |
+| POST | `/admin/audit-checkpoints` | **admin only**: verify the whole chain, then record its tip as a receipt to keep outside the database; 409 while the chain is broken | `AuditCheckpointOut` |
+| GET | `/admin/audit-checkpoints` | **admin only**: checkpoints taken, newest first | `AuditCheckpointOut[]` |
 | GET | `/health/deep` | readiness with substance: db, rules, contracts, transcripts, last scan, adapters (no auth) | `{ready, database, …}` |
 | GET | `/evals/matchers` · `/evals/matchers.md` | matcher precision/recall against the labeled golden set | `{summary, per_rule, cases}` / markdown |
 | GET | `/rules/{code}/sources` | rule-source watch history (hash per check, changed flag, excerpt) | `RuleSourceCheck[]` |
