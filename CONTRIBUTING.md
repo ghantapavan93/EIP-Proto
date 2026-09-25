@@ -8,7 +8,7 @@ Requirements: Python 3.12, Node 22, and Docker if you want the full stack.
 
 ```bash
 python -m venv backend/.venv
-backend/.venv/bin/pip install -e "./backend[dev]"     # Windows: backend\.venv\Scripts\pip
+backend/.venv/bin/pip install -c backend/requirements.lock -e "./backend[dev]"   # Windows: backend\.venv\Scripts\pip
 cd frontend && npm install
 ```
 
@@ -33,6 +33,7 @@ Run the app locally with `backstop demo` then `backstop serve` (backend on :8000
 
 ```bash
 backend/.venv/bin/python -m ruff check backend/backstop backend/tests
+backend/.venv/bin/python -m mypy --config-file backend/pyproject.toml backend/backstop
 backend/.venv/bin/python -m pytest backend/tests -q
 cd frontend && npm run lint && npm run typecheck && npm run test -- --run && npm run build
 ```
