@@ -1,0 +1,46 @@
+# Judge canary set.
+#
+# Six fixed coaching notes with expected score bands. Every run that includes a
+# JUDGED contract re-judges these N times with the same judge. If the canary
+# means move outside their bands while the workflow output did not change,
+# the *judge* drifted — not the workflow. That separation is the whole point:
+# an advisory score that cannot tell its own drift from the system's is noise.
+#
+# Bands are deliberately wide; the canary detects drift, it does not grade.
+
+notes:
+  - id: canary-good-1
+    band: [3.8, 5.0]
+    text: >
+      Dana, you said "Currently we represent 26 organizations which offer 3,740
+      products in your area" before any plan detail — exactly the right order.
+      One improvement: confirm Dr. Patel is in-network before quoting the $25
+      premium so the number lands with context.
+  - id: canary-good-2
+    band: [3.8, 5.0]
+    text: >
+      Marcus, your line "what matters most to you — keeping your doctors, or the
+      lowest premium?" opened the call well. Next time, read the disclaimer
+      before "The Humana plan has a $0 premium" — you had them reversed at 0:25
+      and 0:43.
+  - id: canary-generic-1
+    band: [1.0, 2.6]
+    text: >
+      Good call overall. Keep following the script and remember to be clear
+      with the customer.
+  - id: canary-generic-2
+    band: [1.0, 2.6]
+    text: >
+      Nice job. Stay positive and keep up the energy on your next calls.
+  - id: canary-mid-1
+    band: [2.4, 4.0]
+    text: >
+      Priya, the disclaimer was delivered on time. Consider slowing down when
+      you list the deductible and the out-of-pocket maximum; the customer asked
+      you to repeat both.
+  - id: canary-mid-2
+    band: [2.4, 4.0]
+    text: >
+      Owen, you handled the same-day appointment request correctly by noting
+      the customer initiated the call. Work on confirming the Scope of
+      Appointment was signed before moving to plan specifics.

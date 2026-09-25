@@ -1,0 +1,201 @@
+# Artifact inventory scanned by Backstop.
+#
+# Two kinds of artifact, and the difference is labeled in the data, not in a
+# slide footnote:
+#   real:      public EIP-operated web pages, fetched read-only with an
+#              identified user agent, frozen to fixtures/pages/<code>.html so the
+#              demo never depends on the live network.
+#   synthetic: stand-ins for internal artifacts (Attention scorecard items,
+#              agent scripts, coaching prompts, SFMC templates, training slides,
+#              IVR lines) written in the same schema an integration would use.
+#              Nothing here is EIP's actual internal content.
+
+real_pages:
+  - code: mfaq-home
+    name: MedicareFAQ — home
+    url: https://www.medicarefaq.com/
+    source_system: vercel
+    owner_role: marketing
+  - code: mfaq-about
+    name: MedicareFAQ — About Us
+    url: https://www.medicarefaq.com/about-us/
+    source_system: vercel
+    owner_role: marketing
+  - code: mfaq-soa
+    name: MedicareFAQ — Scope of Appointment FAQ
+    url: https://www.medicarefaq.com/faqs/scope-of-appointment/
+    source_system: vercel
+    owner_role: compliance
+  - code: mfaq-ma-compare
+    name: MedicareFAQ — Key questions when comparing Medicare Advantage plans
+    url: https://www.medicarefaq.com/blog/key-questions-to-ask-when-comparing-medicare-advantage-plans/
+    source_system: vercel
+    owner_role: marketing
+  - code: teb-home
+    name: The Elite Brokerage — home (footer disclaimer)
+    url: https://www.theelitebrokerage.com/
+    source_system: vercel
+    owner_role: compliance
+  - code: mcmp-rates
+    name: MedicareCompared — rates funnel
+    url: https://rates.medicarecompared.com/
+    source_system: netlify
+    owner_role: marketing
+
+synthetic:
+  - code: sc-07
+    type: scorecard_item
+    name: Attention scorecard item SC-07 — TPMO disclaimer timing
+    source_system: attention(synthetic)
+    owner_role: sales-innovation
+    text: >
+      SC-07 (weight 6, compliance): The agent reads the full TPMO disclaimer
+      within the first 60 seconds of the call. Score 0 if the disclaimer is
+      read after the one-minute mark or omitted. Not applicable: inbound
+      customer-service calls with no plan discussion.
+  - code: sc-12
+    type: scorecard_item
+    name: Attention scorecard item SC-12 — SOA lead time
+    source_system: attention(synthetic)
+    owner_role: sales-innovation
+    text: >
+      SC-12 (weight 5, compliance): A Scope of Appointment is documented at
+      least 48 hours before any personal marketing appointment. Score 0 if the
+      appointment is booked inside the 48-hour window unless the customer is a
+      walk-in or is within the last four days of an election period.
+  - code: sc-19
+    type: scorecard_item
+    name: Attention scorecard item SC-19 — Superlatives
+    source_system: attention(synthetic)
+    owner_role: sales-innovation
+    text: >
+      SC-19 (weight 2, compliance): The agent does not use superlatives such as
+      "best", "most", or "number one" unless the claim is substantiated by
+      current or prior-year data cited on the call.
+  - code: sc-03
+    type: scorecard_item
+    name: Attention scorecard item SC-03 — Disclaimer wording
+    source_system: attention(synthetic)
+    owner_role: sales-innovation
+    text: >
+      SC-03 (weight 4, compliance): The disclaimer wording matches CMS text:
+      "We do not offer every plan available in your area. Currently we
+      represent [N] organizations which offer [N] products in your area. Please
+      contact Medicare.gov, 1-800-MEDICARE, or your local State Health
+      Insurance Program (SHIP) to get information on all of your options."
+  - code: script-intro-03
+    type: script_section
+    name: Agent script — INTRO-03 (Medicare Advantage opener)
+    source_system: scripting-platform(synthetic)
+    owner_role: training
+    text: >
+      INTRO-03. "Thanks for calling Elite Insurance Partners, this is {agent}.
+      Before we go any further, I'm required to read a quick disclaimer within
+      the first minute of our call: We do not offer every plan available in
+      your area..." (Read the full disclaimer, then confirm the Scope of
+      Appointment before discussing any plan.)
+  - code: script-soa-02
+    type: script_section
+    name: Agent script — SOA-02 (booking the plan review)
+    source_system: scripting-platform(synthetic)
+    owner_role: training
+    text: >
+      SOA-02. "I'll send the Scope of Appointment now. Once you've signed it,
+      we'll need to wait two business days before we can meet to go over
+      specific plans — unless you'd like to walk in, or your enrollment window
+      closes in the next four days. Which day next week works for you?"
+  - code: coach-prompt-01
+    type: coaching_prompt
+    name: Coaching email generator — prompt v3
+    source_system: internal-llm(synthetic)
+    owner_role: ai-enablement
+    text: >
+      You are a sales coach. Given the call transcript and scorecard, write a
+      120-word coaching email. Flag calls where the disclaimer was not
+      delivered in the first minute. Flag appointments booked less than 48
+      hours after the Scope of Appointment. Quote the agent's own words.
+  - code: sfmc-appt-04
+    type: email_template
+    name: SFMC template APPT-CONFIRM-04 — appointment confirmation
+    source_system: sfmc(synthetic)
+    owner_role: marketing
+    text: >
+      Subject: Your Medicare plan review is confirmed. Hi %%FirstName%%, your
+      appointment with %%AgentName%% is set for %%ApptDate%%. As required by
+      CMS, your appointment is scheduled at least 48 hours after your signed
+      Scope of Appointment. Reply STOP to opt out.
+  - code: train-slide-11
+    type: training_slide
+    name: New-agent training deck — slide 11 (call recording)
+    source_system: lms(synthetic)
+    owner_role: training
+    text: >
+      Slide 11 — Call recording. Every marketing and sales call is recorded
+      in its entirety. Recordings are retained for 10 years. Tell the customer
+      the call is recorded before you begin.
+  - code: train-slide-14
+    type: training_slide
+    name: New-agent training deck — slide 14 (educational events)
+    source_system: lms(synthetic)
+    owner_role: training
+    text: >
+      Slide 14 — Educational events. Do not collect Scope of Appointment forms
+      or Business Reply Cards at educational events. A marketing event may
+      not begin within 12 hours of an educational event at the same location.
+  - code: ivr-02
+    type: ivr_script
+    name: IVR line 02 — recording notice
+    source_system: dialer(synthetic)
+    owner_role: operations
+    text: >
+      "This call is being recorded and will be retained for ten years in
+      accordance with Medicare marketing rules."
+  - code: sc-07b
+    type: scorecard_item
+    name: Attention scorecard item SC-07b — TPMO disclaimer timing (updated draft)
+    source_system: attention(synthetic)
+    owner_role: sales-innovation
+    text: >
+      SC-07b (draft, weight 6, compliance): The agent reads the full TPMO
+      disclaimer prior to the discussion of any benefits. Score 0 if any plan
+      benefit is discussed before the disclaimer is read.
+  # Added 2026-09-25 to demonstrate the compensation, consent, TCPA, SOA-scope and
+  # Florida rules. Synthetic like everything in this list: written for the demo,
+  # not EIP's actual forms, comp plans or dialer settings.
+  - code: lead-form-consent-01
+    type: web_form
+    name: Lead form LF-11 — consent paragraph (synthetic)
+    source_system: web-forms(synthetic)
+    owner_role: marketing
+    text: >
+      LF-11 consent (revised January 2025). Following the FCC one-to-one consent
+      rule, you consent to calls and texts from one seller at a time: Elite
+      Insurance Partners, including by autodialer and prerecorded message.
+      Consent is not a condition of purchase. We may share the information you
+      provide with our marketing partners, who may contact you about Medicare
+      plans; see our partner list.
+  - code: comp-sheet-2027
+    type: comp_schedule
+    name: Agent recruiting one-pager — CY2027 compensation (synthetic)
+    source_system: recruiting(synthetic)
+    owner_role: operations
+    text: >
+      CY2027 compensation for contracted agents. Initial-year MA commission:
+      $725 per enrollment (national), $816 in Connecticut, Pennsylvania and
+      D.C., $902 in California and New Jersey. Renewal commission: $363 per
+      year (national). PDP commission: $130 initial and $65 renewal. Per 42 CFR
+      422.2274(e)(2), carrier administrative payments must be counted as
+      compensation, so marketing and training allowances come out of these
+      caps.
+  - code: dialer-policy-04
+    type: dialer_policy
+    name: Dialer policy DP-04 — outbound web leads (synthetic)
+    source_system: dialer(synthetic)
+    owner_role: operations
+    text: >
+      DP-04 (outbound, new web leads). Dial window: 8am to 9pm in the lead's
+      local time zone, seven days a week. Up to 5 call attempts per lead per day
+      for the first three days. Opt-out keywords: STOP, QUIT, END, CANCEL,
+      UNSUBSCRIBE. Opt-out requests are added to the internal do-not-call list
+      within 30 days. Inbound transfers: no Scope of Appointment is needed when the
+      caller calls in to enroll; go straight to plan options.
