@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 158,
+      "benefits_span": "The Humana plan available in Lee County has a $0 monthly premium, a $470 drug deductible and a $4100 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 158s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "0",
+          "context": "monthly premium"
+        },
+        {
+          "value": "470",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4100",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, read the disclaimer before discussing benefits, and collected the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Grace did a great job following all the necessary steps. However, she could improve by clearly stating the exact time and date for the plan review to avoid any confusion.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer in 4 days"
+      }
+    }
+  },
+  "latency_ms": 19164,
+  "usage": {
+    "input_tokens": 2920,
+    "output_tokens": 540,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-23T09:03:07Z"
+}

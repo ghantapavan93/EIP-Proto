@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 47,
+      "benefits_span": "The Cigna plan available in Duval County has a $25 monthly premium, a $245 drug deductible and a $3700 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$25",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$245",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$3700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Mr. Chen"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, read the disclaimer before discussing benefits, and collected the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Great job, Luis! You correctly read the disclaimer before discussing the benefits and collected the Scope of Appointment promptly. To improve, consider adding a brief reminder about the importance of reviewing the Scope of Appointment before the scheduled appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review Scope of Appointment with customer"
+      }
+    }
+  },
+  "latency_ms": 16611,
+  "usage": {
+    "input_tokens": 1426,
+    "output_tokens": 479,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:46:37Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 117,
+      "benefits_span": "The Humana plan available in Orange County has a $35 monthly premium, a $225 drug deductible and a $3000 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits (25s < 117s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "225",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is non-compliant. The call also included a Scope of Appointment, which was collected before the appointment was scheduled, making it compliant.",
+      "coaching_note": "Priya, it's important to ensure the disclaimer is read before discussing plan benefits. In this call, the disclaimer was read at 25 seconds, but the benefits discussion started at 117 seconds. Next, make sure to read the disclaimer first to maintain compliance.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and confirm plan options with the customer"
+      }
+    }
+  },
+  "latency_ms": 18963,
+  "usage": {
+    "input_tokens": 1561,
+    "output_tokens": 520,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:46:20Z"
+}

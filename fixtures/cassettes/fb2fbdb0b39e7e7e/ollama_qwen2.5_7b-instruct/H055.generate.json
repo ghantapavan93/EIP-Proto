@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 34,
+      "benefits_span": "The UnitedHealthcare plan available in Pasco County has a $30 monthly premium, a $265 drug deductible and a $4400 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits (null < 34s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$265",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is compliant. The Scope of Appointment was collected and the appointment was scheduled within the 72-hour window, also compliant.",
+      "coaching_note": "While the call was compliant, it would be beneficial to ensure the disclaimer is read first to avoid any potential misunderstandings. Owen, remember to always deliver the disclaimer before discussing plan details.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Review plan with customer on Thursday"
+      }
+    }
+  },
+  "latency_ms": 15616,
+  "usage": {
+    "input_tokens": 1246,
+    "output_tokens": 431,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:19:19Z"
+}

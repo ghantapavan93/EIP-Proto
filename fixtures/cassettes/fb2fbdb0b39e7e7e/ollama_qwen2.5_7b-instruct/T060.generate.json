@@ -1,0 +1,52 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_basis": "no-disclaimer (no disclaimer -> non-compliant)",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "150",
+          "context": "monthly premium"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement benefits without first delivering the TPMO disclaimer. The call did not involve any PDP or MA plans, so the rules for those do not apply.",
+      "coaching_note": "Owen, it's important to always deliver the TPMO disclaimer before discussing any plan benefits. In this call, you started with the plan details and premiums, which is non-compliant. Next time, ensure the disclaimer is read first.",
+      "crm_record": {
+        "disposition": "Call completed",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with customer via email"
+      }
+    }
+  },
+  "latency_ms": 11711,
+  "usage": {
+    "input_tokens": 1194,
+    "output_tokens": 355,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T08:02:22Z"
+}

@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_basis": "no-disclaimer (false)",
+      "soa_collected": true,
+      "soa_span": "AGENT: I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "345",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The call was for Medicare Advantage plan information. The agent did not read the disclaimer and discussed plan benefits before sending the Scope of Appointment, which is non-compliant. The appointment was scheduled for 72 hours later.",
+      "coaching_note": "Grace did not read the disclaimer before discussing the plan benefits, which is a compliance issue. She should ensure the disclaimer is read first, followed by the Scope of Appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Follow up with Mr. Kowalski on the scheduled appointment."
+      }
+    }
+  },
+  "latency_ms": 14080,
+  "usage": {
+    "input_tokens": 1250,
+    "output_tokens": 426,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T08:01:11Z"
+}

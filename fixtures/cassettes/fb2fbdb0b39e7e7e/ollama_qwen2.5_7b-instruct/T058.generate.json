@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 34,
+      "benefits_span": "The Aetna plan available in Pasco County has a $35 monthly premium, a $75 drug deductible and a $6200 maximum out-of-pocket.",
+      "disclaimer_basis": "superlative:before-benefits (34s < 34s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3.0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "75",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is compliant with the superlative rule but not the disclaimer rule. The agent collected the Scope of Appointment and scheduled an appointment, both of which were done in a compliant manner.",
+      "coaching_note": "The agent should ensure the disclaimer is read before discussing plan benefits to maintain compliance. For example, the agent could say, 'Before we discuss the details, I need to inform you that we do not offer every plan available in your area, and the information provided is based on the plans we have available.'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Review plan details with customer"
+      }
+    }
+  },
+  "latency_ms": 15822,
+  "usage": {
+    "input_tokens": 1239,
+    "output_tokens": 477,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T08:01:59Z"
+}

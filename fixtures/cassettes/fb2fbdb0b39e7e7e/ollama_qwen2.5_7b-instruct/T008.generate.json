@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 129,
+      "benefits_span": "The Humana plan available in Pasco County has a $30 monthly premium, a $155 drug deductible and a $4500 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 129s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$155",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed the required steps by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. The call was compliant with all rules.",
+      "coaching_note": "Tamika did a great job by ensuring the disclaimer was read before discussing benefits and collecting the Scope of Appointment promptly. A minor improvement would be to confirm the customer's email address before sending the Scope of Appointment to avoid any potential issues.",
+      "crm_record": {
+        "disposition": "Scheduled Follow-Up",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer in 3 days"
+      }
+    }
+  },
+  "latency_ms": 17664,
+  "usage": {
+    "input_tokens": 1568,
+    "output_tokens": 503,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:46:55Z"
+}

@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 48,
+      "benefits_span": "The UnitedHealthcare plan available in Orange County has a $5 monthly premium, a $385 drug deductible and a $6300 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits (25s < 48s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "385",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX5-XX7-XX77",
+        "09/28/1954"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before the disclaimer, which is non-compliant. The call also involved the collection of personal information and scheduling an appointment.",
+      "coaching_note": "Grace should ensure the disclaimer is read before discussing plan benefits. Additionally, she should avoid collecting personal information like Medicare numbers and dates of birth during the initial call.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment"
+      }
+    }
+  },
+  "latency_ms": 19148,
+  "usage": {
+    "input_tokens": 1566,
+    "output_tokens": 508,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:18:21Z"
+}

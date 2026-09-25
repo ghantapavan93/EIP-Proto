@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": false,
+      "disclaimer_seconds": 40,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 25,
+      "benefits_span": "The Mutual of Omaha plan available in Volusia County has a $20 monthly premium, a $230 drug deductible and a $5500 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (40s < 25s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "230",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is non-compliant. The customer was scheduled for a plan review in 72 hours.",
+      "coaching_note": "Luis should ensure the disclaimer is read before discussing plan benefits to maintain compliance. For example, he should say, 'We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options. Now, let me get right to it.'",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "PDP",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Plan review in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 18630,
+  "usage": {
+    "input_tokens": 1314,
+    "output_tokens": 550,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:53:19Z"
+}

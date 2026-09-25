@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 143,
+      "benefits_span": "The UnitedHealthcare plan available in Hillsborough County has a $20 monthly premium, a $235 drug deductible and a $6500 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits (25s < 143s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Honestly, this is the best plan in Hillsborough County, nobody beats it.",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$235",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before reading the disclaimer, which is non-compliant. The agent also used a superlative that was not substantiated.",
+      "coaching_note": "Priya, it's important to ensure the disclaimer is read before discussing plan benefits. Additionally, avoid using superlatives that cannot be substantiated to maintain accuracy and trust with the customer.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Review plan with customer in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 19319,
+  "usage": {
+    "input_tokens": 1529,
+    "output_tokens": 543,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:16:35Z"
+}

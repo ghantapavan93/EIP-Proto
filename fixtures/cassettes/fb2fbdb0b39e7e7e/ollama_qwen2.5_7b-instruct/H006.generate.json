@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 106,
+      "benefits_span": "The Mutual of Omaha plan available in Hillsborough County has a $5 monthly premium, a $270 drug deductible and a $3100 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits (25s < 106s -> non-compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "270",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3100",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before the disclaimer, which is non-compliant. The agent also scheduled the appointment 120 hours after collecting the Scope of Appointment, which is compliant.",
+      "coaching_note": "Owen should ensure the disclaimer is read before discussing plan benefits. He can improve by adhering to the sequence: disclaimer -> Scope of Appointment -> plan discussion.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer in 5 days"
+      }
+    }
+  },
+  "latency_ms": 16373,
+  "usage": {
+    "input_tokens": 1551,
+    "output_tokens": 494,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:04:40Z"
+}

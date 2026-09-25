@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 120,
+      "benefits_span": "The Aetna plan available in Orange County has a $45 monthly premium, a $265 drug deductible and a $3900 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits (25s < 120s -> compliant)",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "265",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, read the disclaimer before discussing benefits, and collected the Scope of Appointment before scheduling the appointment.",
+      "coaching_note": "Jordan did a great job following all the necessary steps. However, the agent could improve by clearly stating the appointment time in minutes or hours to avoid confusion. For example, saying '2 days from now' could be clarified to '48 hours from now'.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with the customer on the scheduled appointment and ensure they have read the Scope of Appointment."
+      }
+    }
+  },
+  "latency_ms": 17154,
+  "usage": {
+    "input_tokens": 1520,
+    "output_tokens": 517,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:05:51Z"
+}

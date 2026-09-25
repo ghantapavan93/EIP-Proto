@@ -1,0 +1,52 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": null,
+      "disclaimer_basis": null,
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "125",
+          "context": "monthly premium"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement (Medigap) plan benefits without delivering the disclaimer first, which is compliant with Medigap rules. The call was brief, focusing on plan details and pricing.",
+      "coaching_note": "Agent Dana should ensure the disclaimer is read before discussing plan benefits to maintain compliance with CMS rules. For example, she should have said, 'Before we discuss the benefits, I need to inform you that we do not offer every plan available in your area, and the information provided is based on the plan you are considering.'",
+      "crm_record": {
+        "disposition": "Informational Call",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with customer via email"
+      }
+    }
+  },
+  "latency_ms": 12465,
+  "usage": {
+    "input_tokens": 1190,
+    "output_tokens": 358,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:20:21Z"
+}
