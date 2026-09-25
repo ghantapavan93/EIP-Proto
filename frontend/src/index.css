@@ -1,0 +1,804 @@
+@import "tailwindcss";
+
+/*
+  Backstop design tokens — navy chrome, one teal accent, a cool canvas under white data surfaces.
+  Every color in the app comes from these variables; no hex literals live
+  outside this file. Swap a value here to re-skin the whole tool.
+*/
+@theme {
+  /* brand chrome */
+  --color-navy: #222c69;
+  --color-slate: #344054;
+  /* the single interactive / selected accent — brand teal for borders,
+     rails, tints and marks. It is 2.6:1 on white, so never use it for text
+     or as the fill under white text: use teal-ink for those. */
+  --color-teal: #3bafbf;
+  /* darker teal for link text, primary button fills and the focus ring:
+     5.61:1 on white · 5.27:1 canvas · 5.13:1 on the 10% teal chip tint;
+     white on it 5.61:1 */
+  --color-teal-ink: #19727d;
+  --color-teal-ink-hover: #145f68; /* white on it 7.33:1 */
+  /* state colors — semantic only, never decoration. The base values are for
+     borders, strokes and tints; the -ink variants are for text and for fills
+     under white text (all ≥4.5:1 on white, canvas, band and their chip tints). */
+  --color-green: #65bc7b;
+  --color-green-ink: #2b7640; /* 5.57:1 white · 5.24:1 canvas · 5.01:1 green/14 chip */
+  --color-red: #ba0000; /* 6.80:1 white · 6.39:1 canvas · 5.87:1 red/8 chip */
+  --color-amber: #d97706;
+  --color-amber-ink: #a84d07; /* 5.63:1 white · 5.29:1 canvas · 4.96:1 amber/12 chip */
+  /* text */
+  --color-ink: #172033; /* 16.27:1 white · 15.29:1 canvas */
+  --color-ink-2: #5b6679; /* secondary: 5.7:1 white · 5.3:1 canvas · 5.1:1 band */
+  --color-ink-3: #5f6a7d; /* tertiary: 5.46:1 white · 5.13:1 canvas · 4.96:1 band · 4.89:1 teal/12 row */
+  --color-footer: #5f6a7d;
+  /* surfaces: pages sit on the cool canvas; data surfaces are white */
+  --color-canvas: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-band: #f2f4f7; /* table headers, quotes, inset wells */
+  --color-hairline: #e4e8ef;
+  --color-input: #cfd5de;
+  /* text on navy */
+  --color-on-navy: #ffffff;
+  --color-on-navy-muted: #b8bdd6; /* 6.92:1 on navy */
+  --color-on-navy-faint: #9aa3c7; /* 5.17:1 on navy — nav group labels */
+
+  /* system-first: no network font. Inter when the machine has it, else the platform UI face. */
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+
+  --text-eyebrow: 11px;
+  --text-table: 13px;
+  --text-body: 14px;
+
+  --radius-ui: 6px;
+  --radius-card: 8px;
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-hero: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+
+  /* motion: ease-out for anything entering, never ease-in; nothing over 300ms
+     except the number tick and the skeleton sweep */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 240ms;
+
+  --spacing-rail: 232px;
+  --spacing-row: 42px;
+  --spacing-topbar: 52px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-ink);
+}
+
+h2,
+h3 {
+  color: var(--color-slate);
+}
+
+/* In @layer base so text-* utilities on a link (nav rail, breadcrumbs,
+   buttons rendered as <a>) win; unlayered, this rule beat every utility. */
+@layer base {
+  a {
+    color: var(--color-teal-ink);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+code,
+kbd,
+pre,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* focus ring: dark teal (5.6:1 on white, ≥3:1 non-text minimum), 2px */
+:focus-visible {
+  outline: 2px solid var(--color-teal-ink);
+  outline-offset: 1px;
+}
+/* on the navy rail the dark teal ring would vanish (1.9:1); use white (12.9:1) */
+.bg-navy :focus-visible {
+  outline-color: var(--color-on-navy);
+}
+
+/* ------------------------------------------------------------- utilities */
+@layer components {
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--color-ink-2);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--color-teal-ink);
+    border-radius: var(--radius-ui);
+    background: var(--color-teal-ink);
+    color: var(--color-on-navy);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 120ms, border-color 120ms, color 120ms;
+  }
+  .btn:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-teal-ink-hover);
+    border-color: var(--color-teal-ink-hover);
+    color: var(--color-on-navy);
+    text-decoration: none;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-outline {
+    background: var(--color-surface);
+    border-color: var(--color-input);
+    color: var(--color-teal-ink);
+  }
+  .btn-outline:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: color-mix(in srgb, var(--color-teal) 8%, var(--color-surface));
+    border-color: var(--color-teal);
+    color: var(--color-teal-ink);
+  }
+  .btn-ghost {
+    background: var(--color-surface);
+    border-color: var(--color-input);
+    color: var(--color-slate);
+  }
+  .btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-band);
+    border-color: var(--color-input);
+    color: var(--color-ink);
+  }
+  .btn-danger {
+    background: var(--color-red);
+    border-color: var(--color-red);
+  }
+  .btn-danger:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: color-mix(in srgb, var(--color-red) 85%, black);
+    border-color: color-mix(in srgb, var(--color-red) 85%, black);
+    color: var(--color-on-navy);
+  }
+  .btn-sm {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .input {
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--color-input);
+    border-radius: var(--radius-ui);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    width: 100%;
+  }
+  .input:focus {
+    border-color: var(--color-teal-ink);
+    outline: 2px solid var(--color-teal-ink);
+    outline-offset: -1px;
+  }
+  textarea.input {
+    height: auto;
+    padding: 6px 10px;
+    line-height: 1.4;
+    resize: vertical;
+  }
+  select.input {
+    padding-right: 24px;
+  }
+
+  .label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--color-ink-2);
+    margin-bottom: 4px;
+  }
+
+  /* A band section no longer paints a stripe: pages sit on the canvas and
+     data surfaces are white cards, so "band" is only section rhythm now. */
+  .band {
+    background: transparent;
+  }
+
+  .hairline {
+    border-color: var(--color-hairline);
+  }
+
+  /* Cards are a hairline ring on white; real shadows are for things that
+     float (popovers, drawers). Hover shifts only the border colour. */
+  .card {
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: none;
+    transition: border-color var(--dur-1) var(--ease-out);
+  }
+  .card-hero {
+    box-shadow: var(--shadow-card);
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tab {
+    height: 34px;
+    padding: 0 12px;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink-2);
+    cursor: pointer;
+    background: none;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .tab[aria-selected="true"] {
+    color: var(--color-teal-ink);
+    border-bottom-color: var(--color-teal-ink);
+  }
+  .tab:hover {
+    color: var(--color-ink);
+  }
+
+  .quote {
+    border-left: 3px solid var(--color-hairline);
+    border-radius: 0 var(--radius-ui) var(--radius-ui) 0;
+    padding: 6px 10px;
+    color: var(--color-ink);
+    font-size: 13px;
+    line-height: 1.5;
+    background: var(--color-band);
+  }
+
+  .mark-span {
+    background: color-mix(in srgb, var(--color-teal) 18%, transparent);
+    border-bottom: 2px solid var(--color-teal);
+    padding: 0 1px;
+  }
+  .mark-span-unverified {
+    background: color-mix(in srgb, var(--color-red) 12%, transparent);
+    border-bottom: 2px solid var(--color-red);
+    padding: 0 1px;
+  }
+
+  /* big numbers: monospace, tabular, tight */
+  .stat {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+}
+
+/* data table: white surface, 42px rows, horizontal rules only, sticky header */
+.dt {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-table);
+  background: var(--color-surface);
+}
+.dt th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-band);
+  color: var(--color-ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-hairline);
+  white-space: nowrap;
+  user-select: none;
+}
+.dt td {
+  height: var(--spacing-row);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-hairline);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.dt > tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+.dt td.wrap {
+  white-space: normal;
+  /* break a single over-long token (URL, hash) rather than overflow; does
+     not lower min-content, so ordinary words still wrap at spaces */
+  overflow-wrap: break-word;
+}
+/* auto-layout headers may wrap onto two lines rather than force the table wider */
+.dt:not(.dt-fixed) th {
+  white-space: normal;
+  line-height: 1.2;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.dt tbody tr[data-clickable="true"] {
+  cursor: pointer;
+}
+.dt tbody tr[data-clickable="true"]:hover,
+.dt tbody tr[data-clickable="true"]:focus-visible {
+  background: color-mix(in srgb, var(--color-teal) 6%, transparent);
+  outline: none;
+}
+/* keyboard focus on a row: a 2px teal-ink edge instead of the (clipped) outline */
+.dt tbody tr[data-clickable="true"]:focus-visible > td:first-child,
+.dt tbody tr[data-selected="true"] > td:first-child {
+  box-shadow: inset 2px 0 0 0 var(--color-teal-ink);
+}
+.dt tbody tr[data-selected="true"] {
+  background: color-mix(in srgb, var(--color-teal) 12%, transparent);
+}
+
+/* primary cell: bold identifier over a quieter secondary line (progressive disclosure) */
+.cell-primary {
+  display: block;
+  padding: 8px 0;
+  line-height: 1.3;
+  white-space: normal;
+}
+.cell-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-ink-2);
+}
+
+/* scrollbars: thin, neutral. In @layer base so a utility such as
+   [scrollbar-width:none] (the status rail) can still hide one. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-input) transparent;
+  }
+}
+
+/* compact variant: many-column tables that must fit 1280px without scrolling */
+.dt-compact th,
+.dt-compact td {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+/* fixed-layout variant: explicit column widths, clipped cells, never a horizontal scroll */
+.dt-fixed {
+  table-layout: fixed;
+  width: 100%;
+}
+.dt-fixed th,
+.dt-fixed td {
+  padding: 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* multi-word headers ("Rule date", "Cost · judge") wrap rather than clip */
+.dt-fixed th {
+  white-space: normal;
+  line-height: 1.2;
+  padding: 4px 6px;
+}
+
+/* numbers in tables line up */
+.dt td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* skeleton cell: a flat bar with a slow left-to-right sweep, only while a request is in flight */
+.sk {
+  display: block;
+  height: 10px;
+  background: var(--color-band);
+  border-radius: 3px;
+}
+
+/* ------------------------------------------------------------- causality motion
+   One ~700ms sequence on the rule blast radius (lib/motion.ts): version chip →
+   counts tick (JS) → affected rows tint amber and fade → task count → gate.
+   Delays mirror CAUSALITY_STEPS. No glow, no scale, no movement. */
+/* chips keep their own fill; the step marker is a 2px outline that fades out */
+@keyframes cz-chip {
+  from {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 1px;
+  }
+  to {
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+  }
+}
+@keyframes cz-row {
+  from {
+    background-color: color-mix(in srgb, var(--color-amber) 16%, transparent);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.cz-version {
+  animation: cz-chip 420ms ease-out 0ms both;
+}
+.cz-row {
+  animation: cz-row 440ms ease-out 260ms both;
+}
+.cz-tasks {
+  animation: cz-chip 300ms ease-out 440ms both;
+}
+.cz-gate {
+  animation: cz-chip 260ms ease-out 560ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cz-version,
+  .cz-row,
+  .cz-tasks,
+  .cz-gate {
+    animation: none;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------- product motion
+   Purposeful and short: content enters (fade + 4px rise, ease-out), live
+   state breathes (one pulse on screen at a time), results land (spans fade
+   in). No exits, no bounce, no parallax, no glow. Under reduced motion every
+   transform is dropped and only opacity/colour changes remain. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drawer-in {
+  from {
+    opacity: 0.6;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* the page content on a route change (the shell stays put). It rises with
+   `top`, not a transform: a transform would make this wrapper the containing
+   block for the page's fixed drawers while it plays. */
+@keyframes route-rise {
+  from {
+    opacity: 0;
+    top: 4px;
+  }
+  to {
+    opacity: 1;
+    top: 0;
+  }
+}
+.route-enter {
+  position: relative;
+  animation: route-rise var(--dur-2) var(--ease-out) both;
+}
+/* first-load entrance of a short list: 40ms apart, first 8 children only */
+.stagger > * {
+  animation: rise-in 220ms var(--ease-out) both;
+}
+.stagger > :nth-child(2) {
+  animation-delay: 40ms;
+}
+.stagger > :nth-child(3) {
+  animation-delay: 80ms;
+}
+.stagger > :nth-child(4) {
+  animation-delay: 120ms;
+}
+.stagger > :nth-child(5) {
+  animation-delay: 160ms;
+}
+.stagger > :nth-child(6) {
+  animation-delay: 200ms;
+}
+.stagger > :nth-child(7) {
+  animation-delay: 240ms;
+}
+.stagger > :nth-child(n + 8) {
+  animation-delay: 280ms;
+}
+.pop-in {
+  animation: pop-in var(--dur-2) var(--ease-out) both;
+  transform-origin: top right;
+}
+.drawer-in {
+  animation: drawer-in var(--dur-3) var(--ease-drawer) both;
+}
+.fade-in {
+  animation: fade-in var(--dur-2) var(--ease-out) both;
+}
+
+/* live pulse: a 6px dot whose ring breathes out. Only on genuinely live
+   state; the health ring stands down while the sandbox is analysing, and
+   every ring pauses while the tab is hidden. */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: pulse-ring 2.4s var(--ease-out) infinite;
+}
+:root[data-tab-hidden] .pulse-dot::after {
+  animation-play-state: paused;
+}
+:root[data-live-busy] .pulse-health::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* skeleton sweep: 1.5s linear, low contrast */
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-band) 0%,
+    color-mix(in srgb, var(--color-hairline) 80%, var(--color-band)) 50%,
+    var(--color-band) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* sandbox verdict highlights: tint + a 2px underline in the verdict colour.
+   Text stays ink (≥12:1 on every tint); the underline colours are ≥3:1 on white
+   except green, which uses green-ink for the stroke. */
+.hl {
+  color: var(--color-ink);
+  border-radius: 2px;
+  padding: 0 1px;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
+}
+.hl-under {
+  background: color-mix(in srgb, var(--color-red) 10%, transparent);
+  border-bottom: 2px solid var(--color-red);
+}
+.hl-over {
+  background: color-mix(in srgb, var(--color-amber) 16%, transparent);
+  border-bottom: 2px solid var(--color-amber);
+}
+.hl-reverify {
+  background: color-mix(in srgb, var(--color-slate) 10%, transparent);
+  border-bottom: 2px solid var(--color-slate);
+}
+.hl-current {
+  background: color-mix(in srgb, var(--color-green) 16%, transparent);
+  border-bottom: 2px solid var(--color-green-ink);
+}
+.hl-neutral {
+  background: color-mix(in srgb, var(--color-teal) 12%, transparent);
+  border-bottom: 2px dashed var(--color-teal-ink);
+}
+.hl[data-active="true"] {
+  box-shadow: 0 0 0 2px var(--color-teal-ink);
+}
+.hl:focus-visible {
+  outline-offset: 2px;
+}
+@keyframes span-land {
+  from {
+    background-color: transparent;
+    border-bottom-color: transparent;
+  }
+}
+.span-in {
+  animation: span-land 150ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+/* the one accent surface in the product: the "where we are" / try-it card */
+.accent-card {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-teal) 6%, var(--color-surface)) 0%, var(--color-surface) 70%);
+  border-color: color-mix(in srgb, var(--color-teal) 35%, var(--color-hairline));
+}
+
+/* reason tooltips for refused controls: 300ms hover delay, 150ms fade */
+.tip-host {
+  position: relative;
+  display: inline-flex;
+}
+.tip {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 45;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 5px 8px;
+  border-radius: var(--radius-ui);
+  background: var(--color-ink);
+  color: var(--color-on-navy);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
+  transition-delay: 0ms;
+  box-shadow: 0 8px 24px -8px rgb(16 24 40 / 0.35);
+}
+.tip-right {
+  right: 0;
+}
+.tip-left {
+  left: 0;
+}
+.tip-host:hover .tip,
+.tip-host:focus-within .tip {
+  opacity: 1;
+  transform: none;
+  transition-delay: 300ms;
+}
+.tip-host:focus-within .tip {
+  transition-delay: 0ms;
+}
+
+/* keyboard hint: 11px mono key (layered, so utilities such as `hidden sm:inline-flex` still apply) */
+@layer components {
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid var(--color-hairline);
+    border-radius: 4px;
+    background: var(--color-band);
+    color: var(--color-ink-2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .btn:not(.btn-ghost):not(.btn-outline) .kbd {
+    /* white on teal-ink 5.61:1 — no fill, so the ratio holds */
+    border-color: color-mix(in srgb, var(--color-on-navy) 45%, transparent);
+    background: transparent;
+    color: var(--color-on-navy);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-enter,
+  .stagger > *,
+  .pop-in,
+  .drawer-in {
+    animation-name: fade-in;
+  }
+  .pulse-dot::after,
+  .sk-shimmer {
+    animation: none;
+  }
+  .pulse-dot::after {
+    opacity: 0;
+  }
+  .tip {
+    transform: none;
+  }
+}
