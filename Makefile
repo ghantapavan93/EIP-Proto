@@ -6,7 +6,7 @@ PY ?= backend/.venv/bin/python
 .PHONY: setup seed scan demo run-gate test lint api ui up down reset clean
 
 setup:            ## create the backend venv and install everything
-	python -m venv backend/.venv && $(PY) -m pip install -q -e "backend[dev]" && cd frontend && npm install
+	python -m venv backend/.venv && $(PY) -m pip install -q -c backend/requirements.lock -e "backend[dev]" && cd frontend && npm install
 
 seed:             ## rules, contracts, workflow, models, corpus, inventory (idempotent)
 	$(PY) -m backstop.cli seed

@@ -5,15 +5,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
 
 # Install the package first so the layer is cached across source edits.
-COPY backend/pyproject.toml /app/backend/pyproject.toml
+COPY backend/pyproject.toml backend/requirements.lock /app/backend/
 COPY backend/backstop/__init__.py /app/backend/backstop/__init__.py
-RUN pip install --quiet /app/backend
+RUN pip install --quiet -c /app/backend/requirements.lock /app/backend
 
 COPY backend /app/backend
 COPY rules /app/rules
 COPY contracts /app/contracts
 COPY fixtures /app/fixtures
-RUN pip install --quiet /app/backend
+RUN pip install --quiet -c /app/backend/requirements.lock /app/backend
 
 # The rule corpus, contracts and fixtures are resolved relative to the repo root.
 ENV BACKSTOP_RULES_DIR=/app/rules \
