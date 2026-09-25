@@ -46,7 +46,7 @@ def audit_verify(session: SessionDep, user: UserDep, through_id: int | None = Qu
 
     if (through_id is None) != (tip is None):
         raise HTTPException(422, "a checkpoint needs both through_id and tip")
-    return audit.verify_chain(session, (through_id, tip) if through_id is not None else None)
+    return audit.verify_chain(session, (through_id, tip) if through_id is not None and tip is not None else None)
 
 
 @router.get("/audit", response_model=s.Page)

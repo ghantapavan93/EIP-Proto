@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import yaml
 from sqlalchemy import select
@@ -175,7 +176,7 @@ def run_scan(
     )
 
     assets = load_inventory(session, settings.fixtures_dir)
-    stats = {
+    stats: dict[str, Any] = {
         "artifacts": len(assets),
         "unchanged": 0,
         "new_versions": 0,

@@ -119,6 +119,7 @@ def _verdict(rule: Rule, views: list[VersionView], match: Match, as_of: date) ->
             reason = (f"encodes v{bound.version}, which {when}; v{in_force.version} is in force on "
                       f"{as_of.isoformat()} — a proposal is not law, so this is ahead of the rule, not stale")
         else:
+            assert bound.effective_from is not None  # enacted, not proposed: the loader requires a date
             reason = (f"encodes v{bound.version}, which applies from {bound.effective_from.isoformat()}; "
                       f"v{in_force.version} is in force on {as_of.isoformat()} — ahead of the rule, not stale")
     else:

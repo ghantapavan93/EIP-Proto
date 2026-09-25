@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -97,7 +98,7 @@ def asset_out(session: Session, asset: Asset, *, detail: bool = False) -> s.Asse
                           length=len(v.content_text))
         for v in asset.versions
     ]
-    base = dict(
+    base: dict[str, Any] = dict(
         id=asset.id, code=asset.code, type=asset.type, name=asset.name, url=asset.url,
         source_system=asset.source_system, owner_role=asset.owner_role, is_synthetic=asset.is_synthetic,
         latest_hash=latest.content_hash if latest else None,

@@ -59,16 +59,16 @@ def access_review(session: SessionDep, settings: SettingsDep, user: User = Depen
         .order_by(AuditEvent.id.desc())
     ):
         last.setdefault(actor, (ts, event_type))
-    acted = dict(session.execute(
+    acted: dict[str, int] = dict(session.execute(
         select(AuditEvent.actor, func.count()).where(AuditEvent.actor.in_(names), AuditEvent.ts >= since_30d,
                                                     AuditEvent.event_type != "auth.denied")
         .group_by(AuditEvent.actor)
-    ).all())
-    denied = dict(session.execute(
+    ).tuples().all())
+    denied: dict[str, int] = dict(session.execute(
         select(AuditEvent.actor, func.count()).where(AuditEvent.actor.in_(names), AuditEvent.ts >= since_30d,
                                                     AuditEvent.event_type == "auth.denied")
         .group_by(AuditEvent.actor)
-    ).all())
+    ).tuples().all())
 
     accounts = [
         s.AccessAccountOut(

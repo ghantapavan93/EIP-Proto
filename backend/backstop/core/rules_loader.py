@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
@@ -60,7 +60,7 @@ class LoadReport:
     rules_created: int = 0
     versions_created: int = 0
     unchanged: int = 0
-    files: list[str] | None = None
+    files: list[str] = field(default_factory=list)
 
 
 def _as_date(value) -> date | None:
@@ -167,6 +167,7 @@ def validate_rule_doc(doc: dict, path: Path) -> None:
             # Never in force: outside the window checks. A vacated version keeps its
             # original dates for history and may overlap the version it never displaced.
             continue
+        assert eff_from is not None  # only a proposed version may be undated, and it was skipped above
         # An open previous window (effective_to null) runs forever, so any later enacted
         # version overlaps it: it must be closed first. date.max stands in for "open".
         if seen_enacted and eff_from <= (previous_to or date.max):
@@ -304,6 +305,7 @@ def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> L
                             f"{path.name}: version {v['version']} effective_to changed "
                             f"{stored.effective_to} -> {yaml_to}. A closed window is final."
                         )
+                    assert yaml_to is not None  # stored window was open and differs, so YAML closed it
                     stored.effective_to = yaml_to
                     audit.record(
                         session,

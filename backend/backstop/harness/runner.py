@@ -393,7 +393,8 @@ def _approved_overrides(session: Session, transcripts: list[Transcript]) -> dict
     cases = session.scalars(select(TestCase).where(
         TestCase.status == "APPROVED", TestCase.transcript_id.in_(ids))).all()
     return {(tc.contract_id, tc.transcript_id): tc for tc in cases
-            if (tc.expires_at.replace(tzinfo=UTC) if tc.expires_at.tzinfo is None else tc.expires_at) > now}
+            if tc.transcript_id is not None  # always true: the IN filter above excludes NULL
+            and (tc.expires_at.replace(tzinfo=UTC) if tc.expires_at.tzinfo is None else tc.expires_at) > now}
 
 
 RUN_KEY_MAX = 160  # Run.run_key column width

@@ -184,9 +184,10 @@ def propose_version(code: str, body: s.RuleVersionCreate, session: SessionDep,
     if duplicate is not None:
         raise HTTPException(409, f"{rule.code} v{duplicate.version} ({duplicate.status}) already has this "
                                  "effective_from and clause_text")
-    enacted = [v for v in rule.versions if v.status not in staleness.NEVER_IN_FORCE and v.effective_from is not None]
-    last_enacted = max(enacted, key=lambda v: v.effective_from) if enacted else None
-    if last_enacted is not None and body.effective_from <= last_enacted.effective_from:
+    last_enacted_from = max((v.effective_from for v in rule.versions
+                             if v.status not in staleness.NEVER_IN_FORCE and v.effective_from is not None),
+                            default=None)
+    if last_enacted_from is not None and body.effective_from <= last_enacted_from:
         raise HTTPException(422, "effective_from must be after the latest enacted version's effective_from")
     last = rule.versions[-1] if rule.versions else None
     number = (last.version + 1) if last else 1
@@ -207,7 +208,7 @@ def propose_version(code: str, body: s.RuleVersionCreate, session: SessionDep,
     session.flush()
     audit.record(session, actor=user.name, event_type="rule.version_created", entity_type="rule_version",
                  entity_id=rv.id, payload={"rule": rule.code, "version": rv.version, "status": rv.status,
-                                           "effective_from": rv.effective_from.isoformat(),
+                                           "effective_from": body.effective_from.isoformat(),
                                            "change_classification": rv.change_classification, "source": "api"})
     session.commit()
     session.refresh(rv)
