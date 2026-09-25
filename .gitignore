@@ -1,0 +1,47 @@
+# ── Private working notes ────────────────────────────────────────────────
+# Raw research and audience notes stay local; curated docs live in docs/.
+research/
+
+# ── Secrets and local configuration ──────────────────────────────────────
+.env
+.env.*
+!.env.example
+!frontend/.env.mock
+
+# ── Local databases ──────────────────────────────────────────────────────
+backstop.db
+backstop.db.bak*
+ci.db
+*.db-journal
+
+# ── Python ───────────────────────────────────────────────────────────────
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+backend/build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ── Node / frontend ──────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+# Vite writes these while a dev server loads its config
+frontend/vite.config.ts.timestamp-*.mjs
+
+# ── Runtime logs and demo state ──────────────────────────────────────────
+*.log
+.demo-link.txt
+
+# ── Editors, OS and tooling ──────────────────────────────────────────────
+.claude/
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
