@@ -8,15 +8,17 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install
         # Editable: rules/, contracts/ and fixtures/ resolve from the source tree.
-        run: pip install --quiet -e "./backend[dev]"
+        run: pip install --quiet -c backend/requirements.lock -e "./backend[dev]"
       - name: Lint
         run: ruff check backend/backstop backend/tests
+      - name: Type-check
+        run: mypy --config-file backend/pyproject.toml backend/backstop
       - name: Test
         run: pytest backend/tests -q
       # The gate: seed, scan the frozen snapshots, run the updated prompt under
@@ -54,11 +56,11 @@ jobs:
     env:
       BACKSTOP_TEST_DATABASE_URL: postgresql+psycopg://backstop:backstop@localhost:5432/backstop_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: pip install --quiet -e "./backend[dev]"
+      - run: pip install --quiet -c backend/requirements.lock -e "./backend[dev]"
       - run: pytest backend/tests -q
 
   frontend:
@@ -67,8 +69,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -81,6 +83,6 @@ jobs:
   compose:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build images
         run: docker compose build

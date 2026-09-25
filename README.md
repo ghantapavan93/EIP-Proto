@@ -189,7 +189,7 @@ http://localhost:8000/docs.
 
 ```bash
 python -m venv backend/.venv
-backend/.venv/bin/pip install -e "./backend[dev]"      # Windows: backend\.venv\Scripts\pip
+backend/.venv/bin/pip install -c backend/requirements.lock -e "./backend[dev]"   # Windows: backend\.venv\Scripts\pip
 backend/.venv/bin/python -m backstop.cli demo
 backend/.venv/bin/python -m backstop.cli serve
 cd frontend && npm install && npm run dev              # in a second terminal
@@ -200,10 +200,11 @@ cd frontend && npm install && npm run dev              # in a second terminal
 ```bash
 backend/.venv/bin/python -m pytest backend/tests -q
 backend/.venv/bin/python -m ruff check backend/backstop backend/tests
+backend/.venv/bin/python -m mypy --config-file backend/pyproject.toml backend/backstop
 cd frontend && npm run lint && npm run test -- --run && npm run build
 ```
 
-There are 345 backend tests, run on SQLite and PostgreSQL, and 246 frontend tests. The
+There are 348 backend tests, run on SQLite and PostgreSQL, and 246 frontend tests; the backend is type-checked with mypy. The
 release gate is a command a pipeline can run:
 `backstop run --prompt 2 --model sim-large --rule-date 2026-10-01 --gate` exits 0 only
 when every blocking contract passes.
