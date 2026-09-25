@@ -430,6 +430,8 @@ export function HomePage() {
 
   // ---------------------------------------------------------------- PROMPT card
   const promptState = currentOf(promptRun);
+  // A development-set gain must never be shown without the held-out result the server attaches.
+  const heldOut = promptCmp.data?.statistics?.held_out ?? null;
   const promptDelta =
     promptCmp.data && promptBase && promptRun ? (
       <>
@@ -437,6 +439,14 @@ export function HomePage() {
           <Metric value={`+${promptCmp.data.newly_passing.length}`} tone={promptCmp.data.newly_passing.length ? 'green' : 'muted'} label="newly passing" />
           <Metric size="md" value={promptCmp.data.newly_failing.length} tone={promptCmp.data.newly_failing.length ? 'red' : 'muted'} label="newly failing" />
         </MetricRow>
+        {heldOut && (
+          <p role="note" className="mt-2 rounded-[6px] border border-amber/35 bg-amber/8 px-2.5 py-1.5 text-[12px] leading-snug text-ink">
+            <strong className="font-semibold text-amber-ink">Development calls only.</strong> {heldOut.summary}{' '}
+            <Link to={`/runs/compare?a=${heldOut.a_run_id}&b=${heldOut.b_run_id}`} className="font-semibold">
+              Held-out comparison
+            </Link>
+          </p>
+        )}
       </>
     ) : (
       <div className="text-[13px] leading-snug text-ink-3">{promptRun ? `${promptRun.prompt_label} — no baseline to compare` : 'No prompt-triggered run yet'}</div>

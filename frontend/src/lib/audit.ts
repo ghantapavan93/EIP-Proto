@@ -64,6 +64,8 @@ const EVENT_LABELS: Record<string, string> = {
   'export.generated': 'Run exported',
   'evidence.exported': 'Evidence exported',
   'auth.denied': 'Access denied',
+  'access.reviewed': 'Access reviewed',
+  'audit.checkpoint': 'Audit checkpoint taken',
   'sandbox.artifact_checked': 'Sandbox text checked',
   'sandbox.transcript_checked': 'Sandbox call checked',
 };
@@ -88,7 +90,7 @@ export function eventTone(row: Pick<AuditOut, 'event_type' | 'payload'>): Tone {
   if (t === 'rule.source_checked') return row.payload.changed === true ? 'amber' : 'teal';
   if (t.endsWith('rejected') || t.endsWith('refused') || t === 'auth.denied' || t.endsWith('failed') || t.endsWith('fetch_error')) return 'red';
   if (t === 'task.opened' || t === 'edge.proposed' || t === 'artifact.content_changed') return 'amber';
-  if (t === 'test_case.approved' || t === 'edge.confirmed') return 'green';
+  if (t === 'test_case.approved' || t === 'edge.confirmed' || t === 'audit.checkpoint') return 'green';
   if (t in EVENT_LABELS) return 'teal';
   return 'neutral';
 }
@@ -296,6 +298,10 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
       return join([s(p.created_by) && `created by ${s(p.created_by)}`, 'approved by a different user']);
     case 'ingest.completed':
       return join([s(p.format), n(p.created) !== null ? `${n(p.created)} created` : null, n(p.skipped_existing) ? `${n(p.skipped_existing)} skipped` : null, s(p.batch_hash) && `batch ${shortHash(s(p.batch_hash), 10)}`]);
+    case 'access.reviewed':
+      return join([n(p.accounts) !== null ? `${n(p.accounts)} accounts` : null, n(p.default_credential_accounts) ? `${n(p.default_credential_accounts)} on default passwords` : null, n(p.denied_24h) !== null ? `${n(p.denied_24h)} denied in 24 h` : null]);
+    case 'audit.checkpoint':
+      return join([n(p.through_id) !== null ? `through row ${n(p.through_id)}` : null, s(p.tip) && `tip ${shortHash(s(p.tip), 12)}`, n(p.rows_verified) !== null ? `${n(p.rows_verified)} rows verified` : null]);
     case 'auth.denied':
       return Array.isArray(p.required)
         ? `role ${s(p.role)} lacks ${p.required.map(s).join(' / ')}`

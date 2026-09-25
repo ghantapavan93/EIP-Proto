@@ -60,7 +60,7 @@ function OverrideLoop({ tcs, applied }: { tcs: TestCaseOut[] | undefined; applie
         title="Every later run honours it"
         body={
           <>
-            Runs apply the approved expectation and count it in <span className="font-mono text-[12px]">test_cases.applied</span>. It expires after 365 days, so an exception never quietly becomes policy.
+            Runs under the same rule apply the approved expectation and count it in <span className="font-mono text-[12px]">test_cases.applied</span>. A rule change sets it aside, and it expires after 365 days, so an exception never quietly becomes policy.
           </>
         }
         // 0 on the latest run usually means no run has happened since the approval, not a broken loop.
@@ -244,7 +244,7 @@ export function TestCasesPage() {
       <PageHeader
         eyebrow="Override memory"
         title="Test cases"
-        description="When a reviewer overrides a flagged call, the decision is pinned as an expectation. A second person approves it, and every later run honours it until it expires."
+        description="When a reviewer overrides a flagged call, the decision is pinned as an expectation. A second person approves it, and later runs honour it while the rule it was decided under stays in force, for up to 365 days."
         actions={
           <Link to="/review?kind=FLAGGED_RESULT" className="btn btn-outline hover:no-underline">
             Flagged calls to review <ArrowRight size={13} aria-hidden />

@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ChevronDown, ChevronRight, Cog, Link2, ShieldCheck, ShieldAlert, X } from 'lucide-react';
-import { useAudit, useContracts, useRuns, useVerifyAuditChain } from '../api/hooks';
+import { useAudit, useAuditActors, useContracts, useRuns, useVerifyAuditChain } from '../api/hooks';
 import type { AuditOut, AuditVerifyOut, RunOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Field } from '../components/layout/Page';
@@ -27,7 +27,6 @@ import {
 import { cn } from '../lib/cn';
 
 const PAGE_SIZE = 25;
-const HUMAN_ACTORS = ['analyst', 'engineer', 'admin'];
 const EVENT_TYPES = [...AUDIT_EVENT_TYPES, 'evidence.exported'].filter((t, i, all) => all.indexOf(t) === i);
 
 /** Who acted: automation reads as a teal "system" chip; people show their role. */
@@ -161,6 +160,9 @@ export function AuditPage() {
   const page = parsePageParam(params.get('page'));
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const verify = useVerifyAuditChain();
+  // The real accounts and seeded personas that have acted, not a fixed list of demo names.
+  const actors = useAuditActors();
+  const people = actors.data ?? [];
 
   const audit = useAudit({
     event_type: eventType || undefined,
@@ -237,9 +239,9 @@ export function AuditPage() {
           <select id="au-actor" className="input h-8 w-[170px] text-[12px]" value={actor} onChange={(e) => setParam('actor', e.target.value)}>
             <option value="">all</option>
             <optgroup label="People">
-              {HUMAN_ACTORS.map((a) => (
-                <option key={a} value={a}>
-                  {a}
+              {people.map((p) => (
+                <option key={p.actor} value={p.actor}>
+                  {p.actor} · {p.role}
                 </option>
               ))}
             </optgroup>

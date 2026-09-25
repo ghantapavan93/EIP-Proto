@@ -73,6 +73,7 @@ export function CommandPalette() {
         ? [{ id: 'evidence', group: 'Actions' as const, label: `Export evidence for this ${evidence.scope === 'tasks' ? 'task' : evidence.scope === 'runs' ? 'run' : 'rule'}`, hint: 'json bundle', keywords: 'export bundle sha256', evidence }]
         : []),
       { id: 'audit', group: 'Actions', label: 'Open audit log', hint: '/audit', keywords: 'chain verify', to: '/audit' },
+      { id: 'governance', group: 'Actions', label: 'Open governance', hint: '/governance', keywords: 'admin access roles permissions checkpoint rbac separation duties', to: '/governance' },
       { id: 'readiness', group: 'Actions', label: 'Open readiness', hint: '/readiness', keywords: 'deadlines aep october milestones owners vacated proposed', to: '/readiness' },
     ];
     const ruleItems: PaletteItem[] = (rules.data ?? []).map((r) => ({ id: `rule-${r.code}`, group: 'Rules', label: r.title, hint: r.code, keywords: r.citation, to: `/rules/${encodeURIComponent(r.code)}` }));

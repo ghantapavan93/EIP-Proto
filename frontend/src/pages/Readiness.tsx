@@ -262,7 +262,14 @@ function OwnersTable({ owners }: { owners: ReadinessOut['owners'] }) {
   );
 }
 
-function BurnDown({ b }: { b: ReadinessOut['burn_down'] }) {
+function BurnDown({ b, horizon }: { b: ReadinessOut['burn_down']; horizon: ReadinessOut['horizon'] }) {
+  // The table lists rules that change on the target date; the headline also counts encodings
+  // already stale today (rules that do not change that day). Say so, so the numbers reconcile.
+  const flipping = Object.values(horizon)
+    .flat()
+    .filter((h) => h.applies_from === b.target)
+    .reduce((sum, h) => sum + h.stale_encodings_on_that_date, 0);
+  const alreadyStale = b.stale_encodings_on_target - flipping;
   const pace = requiredPace(b.open_actionable_now, b.days_left);
   return (
     <div className="card p-4" data-testid="burn-down">
@@ -279,6 +286,11 @@ function BurnDown({ b }: { b: ReadinessOut['burn_down'] }) {
         <div>
           <div className={cn('stat text-[26px]', b.stale_encodings_on_target ? 'text-amber-ink' : 'text-green-ink')}>{b.stale_encodings_on_target}</div>
           <div className="text-[12px] leading-tight text-ink-2">stale encodings on {fmtDate(b.target)}</div>
+          {alreadyStale > 0 && flipping > 0 && (
+            <div className="mt-0.5 text-[11px] leading-tight text-ink-3" data-testid="stale-breakdown">
+              {flipping} from rules changing that day · {alreadyStale} already stale today
+            </div>
+          )}
         </div>
         <div>
           <div className="stat text-[26px] text-ink">{Math.max(0, b.days_left)}</div>
@@ -466,7 +478,7 @@ export function ReadinessPage() {
               </div>
             </Section>
             <Section title="Burn-down">
-              <BurnDown b={d.burn_down} />
+              <BurnDown b={d.burn_down} horizon={d.horizon} />
             </Section>
           </div>
 

@@ -15,6 +15,19 @@ function corpusName(corpus: string): string {
 }
 
 /**
+ * The x-axis caption. When every run started within the same hour (the demo replays its
+ * recorded runs at startup) a date range would read as a trend over one instant, so the
+ * caption says the points are in run order instead.
+ */
+function spanLabel(first: string, last: string, n: number): string {
+  const hour = 60 * 60 * 1000;
+  if (Math.abs(Date.parse(last) - Date.parse(first)) < hour) {
+    return `${n} runs in run order, all started ${fmtDate(first)} (replayed together, not a trend over time)`;
+  }
+  return `${fmtDate(first)} → ${fmtDate(last)}`;
+}
+
+/**
  * Failure rate per run, oldest → newest: a 2px line through the observed
  * rates, a whisker for each 95% interval, filled dots for development runs
  * and hollow dots for held-out runs (the number that measures overfitting).
@@ -90,7 +103,7 @@ export function TrendChart({ points, className }: { points: TrendPointOut[]; cla
       )}
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2 pl-[34px] text-[11px] text-ink-3">
         <span>
-          {fmtDate(points[0].started_at)} → {fmtDate(points[points.length - 1].started_at)} · line: observed failure rate · bar: 95% interval
+          {spanLabel(points[0].started_at, points[points.length - 1].started_at, points.length)} · line: observed failure rate · bar: 95% interval
         </span>
         {hasHoldout && (
           <span className="inline-flex items-center gap-1.5">

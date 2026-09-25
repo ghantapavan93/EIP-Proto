@@ -94,7 +94,8 @@ export function RunTranscriptPage() {
   const { id = '', code = '' } = useParams();
   const run = useRun(id);
   const rt = useRunTranscript(id, code);
-  const [tab, setTab] = useState<Tab>('extraction');
+  // Until the reader picks a tab: a call with a failing contract opens on its contracts (why it is red).
+  const [picked, setTab] = useState<Tab | null>(null);
 
   useTopBar([{ label: 'Runs', to: '/runs' }, { label: id.slice(0, 8), to: `/runs/${id}` }, { label: code }], run.data?.rule_date ?? null);
 
@@ -114,6 +115,7 @@ export function RunTranscriptPage() {
   const composition = isObject(d.output.composition) ? d.output.composition : null;
   const judged = d.results.filter((r) => Array.isArray(r.evidence.scores));
   const bad = d.results.filter((r) => r.outcome !== 'PASS').length;
+  const tab: Tab = picked ?? (bad > 0 ? 'contracts' : 'extraction');
   const unverified = d.spans.filter((s) => !s.verified);
   const notLocated = unverified.filter((s) => s.offset < 0);
 

@@ -24,6 +24,7 @@ import { CorpusChip } from '../components/runs/CorpusChip';
 import { ChangeMatrix } from '../components/charts/ChangeMatrix';
 import { Eyebrow } from '../components/ui/Eyebrow';
 import { SignificancePanel } from '../components/runs/SignificancePanel';
+import { AttributionPanel } from '../components/runs/AttributionPanel';
 
 function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; changed: WhatChanged }) {
   const hl = (k: keyof WhatChanged) => (changed[k] === true ? 'rounded-[3px] bg-teal/12 font-semibold text-ink px-1 -mx-1' : '');
@@ -334,6 +335,7 @@ export function RunComparePage() {
       {d && (
         <>
           <Section className="pt-0">
+            {d.attribution && <AttributionPanel attribution={d.attribution} />}
             <CallSetNotice whatChanged={d.what_changed} />
             {d.statistics && <SignificancePanel stats={d.statistics} />}
             <div className="card grid grid-cols-2 gap-px overflow-hidden bg-hairline md:grid-cols-4">
