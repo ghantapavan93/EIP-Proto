@@ -31,6 +31,8 @@ from backstop.models import Transcript
 # unless the operator opts out with BACKSTOP_INGEST_KEEP_AGENT_NAMES=1 (e.g. for coaching).
 KEEP_AGENT_NAMES_ENV = "BACKSTOP_INGEST_KEEP_AGENT_NAMES"
 
+PRODUCT_LINES = ("MA", "PDP", "MEDIGAP", "LIFE")
+
 FORMATS: dict[str, dict[str, Any]] = {
     "attention-snowflake": {
         "description": "Assumed shape of the Attention → Snowflake call export. CONFIRM column names against the real export.",
@@ -38,7 +40,7 @@ FORMATS: dict[str, dict[str, Any]] = {
             "call_id": "unique call identifier (becomes the transcript code, prefixed A-)",
             "started_at": "ISO timestamp",
             "agent_name": "agent display name",
-            "product_line": "MA | PDP | MEDIGAP | LIFE (mapped from the scorecard's call type if absent)",
+            "product_line": "MA | PDP | MEDIGAP | LIFE; any other value rejects the file; if absent, MA is assumed and flagged per call (product_line_assumed)",
             "duration_seconds": "integer",
             "transcript": "diarized text; lines like '[00:00:12] AGENT: ...' or 'AGENT: ...'",
         },
@@ -49,7 +51,7 @@ FORMATS: dict[str, dict[str, Any]] = {
     },
     "generic": {
         "description": "Minimal CSV: code, product_line, transcript.",
-        "columns": {"code": "unique", "product_line": "MA | PDP | MEDIGAP | LIFE", "transcript": "text"},
+        "columns": {"code": "unique", "product_line": "MA | PDP | MEDIGAP | LIFE (absent: MA, flagged)", "transcript": "text"},
         "redaction": "same as attention-snowflake",
     },
 }
@@ -98,6 +100,7 @@ def ingest_csv(session: Session, raw: str, *, fmt: str = "attention-snowflake", 
     if missing:
         raise IngestError(f"missing columns {sorted(missing)}; expected {list(FORMATS[fmt]['columns'])}")
     created = skipped = 0
+    product_assumed = 0
     redacted_total = dict.fromkeys((*pii.KINDS, "agent_name"), 0)
     batch_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
     seen: set[str] = set()
@@ -117,25 +120,32 @@ def ingest_csv(session: Session, raw: str, *, fmt: str = "attention-snowflake", 
         seen.add(code)
         try:
             duration = round(float(row.get("duration_seconds") or 0))
-        except ValueError as exc:
+        except (ValueError, OverflowError) as exc:
             raise IngestError(f"line {line_no}: duration_seconds {row.get('duration_seconds')!r} is not a number") from exc
         text, counts = redact(row["transcript"])
         agent, text, agent_hits = redact_agent_name(row.get("agent_name"), text)
         counts["agent_name"] = agent_hits
         for k, v in counts.items():
             redacted_total[k] += v
-        product_line = (row.get("product_line") or "MA").strip().upper()
-        if product_line not in ("MA", "PDP", "MEDIGAP", "LIFE"):
-            product_line = "MA"
+        # Which rules apply depends on the product line (TPMO and SOA rules do not govern
+        # Medigap). An unknown value is refused, never relabelled. A missing one (exports
+        # without the column) is assumed MA and flagged on the call and in the report.
+        raw_product = (row.get("product_line") or "").strip().upper()
+        if raw_product and raw_product not in PRODUCT_LINES:
+            raise IngestError(f"line {line_no}: product_line {row.get('product_line')!r} must be one of "
+                              f"{', '.join(PRODUCT_LINES)}")
+        product_line = raw_product or "MA"
+        product_assumed += not raw_product
         session.add(Transcript(
             code=code, corpus_hash=f"ingest:{batch_hash}", product_line=product_line, synthetic=False, text=text,
             labels={"ingested": True, "format": fmt, "agent": agent, "started_at": row.get("started_at"),
-                    "ground_truth": None, "redacted": counts},
+                    "ground_truth": None, "redacted": counts, "product_line_assumed": not raw_product},
             duration_seconds=duration,
         ))
         created += 1
     session.flush()
     report = {"format": fmt, "created": created, "skipped_existing": skipped, "redacted": redacted_total, "batch_hash": batch_hash,
+              "product_line_assumed": product_assumed,
               "note": "ingested transcripts have no ground truth; rule-judgment contracts will report ERROR for them"}
     audit.record(session, actor=actor, event_type="ingest.completed", entity_type="transcripts", entity_id=batch_hash, payload=report)
     session.commit()

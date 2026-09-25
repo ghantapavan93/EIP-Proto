@@ -17,6 +17,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query
@@ -52,11 +53,18 @@ def _rate(k: int, n: int) -> s.RateOut:
 
 
 def _pct(value: float | None) -> str:
-    return "n/a" if value is None else f"{value:.0%}"
+    """Same rule as the console's fmtPct: one decimal under 10%, else whole percent rounded
+    half up. (Python's format rounds half to even: 5/8 would read 62% here and 63% on screen.)"""
+    if value is None:
+        return "n/a"
+    pct = Decimal(str(value * 100))
+    if 0 < pct < 10:
+        return f"{pct.quantize(Decimal('0.1'), ROUND_HALF_UP).normalize():f}%"
+    return f"{pct.quantize(Decimal('1'), ROUND_HALF_UP):f}%"
 
 
 def _ci(r: s.RateOut) -> str:
-    return f"{r.ci_low:.0%}-{r.ci_high:.0%}"
+    return f"{_pct(r.ci_low)}-{_pct(r.ci_high)}"
 
 
 @dataclass

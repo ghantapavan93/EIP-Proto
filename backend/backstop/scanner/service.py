@@ -56,6 +56,9 @@ def load_inventory(session: Session, fixtures_dir: Path) -> list[Asset]:
                 is_synthetic=False,
             )
             session.add(asset)
+        else:
+            # Descriptive metadata follows the inventory file; content and hashes never change here.
+            asset.source_system = page.get("source_system", "web")
         assets.append(asset)
     for item in doc.get("synthetic", []):
         asset = session.scalar(select(Asset).where(Asset.code == item["code"]))

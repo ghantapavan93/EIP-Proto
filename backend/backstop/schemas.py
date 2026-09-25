@@ -356,10 +356,38 @@ class ModelBoardOut(BaseModel):
     rows: list[ModelBoardRow]
 
 
+class FactorChangeOut(BaseModel):
+    factor: str  # prompt | model | rule_date | corpus | contract_set | judge | overrides
+    label: str
+    a: str
+    b: str
+
+
+class IsolatingPairOut(BaseModel):
+    """An existing pair of runs that differs in `factor` alone."""
+
+    factor: str
+    label: str
+    a_run_id: str
+    b_run_id: str
+
+
+class AttributionOut(BaseModel):
+    """Can the difference between A and B be pinned on one change? (core/attribution.py)"""
+
+    verdict: Literal["isolated", "confounded", "repeat"]
+    changed: list[FactorChangeOut]
+    held_constant: list[str]
+    summary: str
+    scope_note: str | None = None
+    isolating_pairs: list[IsolatingPairOut] = []
+
+
 class CompareOut(BaseModel):
     a: RunOut
     b: RunOut
     what_changed: dict[str, Any]  # {prompt: bool, model: bool, rule_date: bool, adapter: bool}
+    attribution: AttributionOut | None = None
     newly_failing: list[CompareCell]
     newly_passing: list[CompareCell]
     unchanged_failing: int
@@ -409,6 +437,19 @@ class ContractComparisonOut(BaseModel):
     excluded_not_evaluated: int = 0  # unlabelled (ingested) cells: not failures, not passes
 
 
+class HeldOutCheckOut(BaseModel):
+    """The same prompt change replayed on the held-out calls (never read while writing prompts)."""
+
+    a_run_id: str
+    b_run_id: str
+    a_prompt_version: int
+    b_prompt_version: int
+    direction: str  # better | worse | none
+    p_value: float | None
+    summary: str
+    contradicts_development: bool
+
+
 class CompareStatisticsOut(BaseModel):
     mode: Literal["paired", "unpaired"]
     alpha: float
@@ -416,6 +457,7 @@ class CompareStatisticsOut(BaseModel):
     cautions: list[str] = []
     overall: ContractComparisonOut
     per_contract: list[ContractComparisonOut]
+    held_out: HeldOutCheckOut | None = None
 
 
 # ------------------------------------------------------------------ contract metrics
@@ -640,12 +682,13 @@ class SandboxMatchOut(BaseModel):
 
 class SandboxSummaryOut(BaseModel):
     matches: int
-    stale: int
+    stale: int  # confirmed readings only; a proposed reading is counted in needs_review
     current: int
     rules_touched: int
     over_restrictive: int
     under_restrictive: int
     reverify: int
+    needs_review: int = 0  # proposed matches: a human must confirm what the sentence encodes
 
 
 class SandboxArtifactOut(BaseModel):
@@ -772,3 +815,54 @@ class ReadinessOut(BaseModel):
     burn_down: BurnDownOut
     vacated: list[SetAsideVersionOut]
     proposed: list[ProposedVersionOut]
+
+
+# ------------------------------------------------------------------ governance (admin)
+
+
+class AccessAccountOut(BaseModel):
+    name: str
+    role: str
+    role_label: str
+    default_credentials: bool  # password == username: localhost only
+    last_recorded_action_at: datetime | None  # audit rows record changes and exports, not page views
+    last_recorded_action: str | None
+    actions_30d: int
+    denied_30d: int
+
+
+class DeniedAttemptOut(BaseModel):
+    ts: datetime
+    actor: str
+    kind: Literal["bad_credentials", "insufficient_role"]
+    detail: str
+
+
+class AccessActionOut(BaseModel):
+    action: str
+    label: str
+    roles: list[str]
+    rule: str
+
+
+class AccessReviewOut(BaseModel):
+    generated_at: datetime
+    identity_source: str
+    accounts: list[AccessAccountOut]
+    default_credential_accounts: int
+    denied_24h: int
+    recent_denied: list[DeniedAttemptOut]
+    matrix: list[AccessActionOut]
+    roles: list[dict[str, Any]]
+
+
+class AuditCheckpointOut(BaseModel):
+    """A receipt to keep outside the database; GET /api/audit/verify?through_id=&tip= checks it."""
+
+    id: int
+    taken_at: datetime
+    taken_by: str
+    through_id: int
+    tip: str
+    rows_verified: int
+    verify_path: str

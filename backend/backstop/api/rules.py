@@ -1,7 +1,7 @@
 """Rule registry: versioned, effective-dated rules and their change impact.
 
     GET  /api/rules                   every rule with its versions, as of a date
-    POST /api/rules/reload            reload rules/*.yaml (append-only; edited versions are refused)
+    POST /api/rules/reload            adopt rules/*.yaml (admin; append-only; edited versions are refused)
     GET  /api/rules/{code}            one rule and its versions, as of a date
     GET  /api/rules/{code}/impact     what-if: which artifacts go stale on a given date
     POST /api/rules/{code}/versions   propose a new version (never in force until adopted)
@@ -55,7 +55,7 @@ def list_rules(session: SessionDep, user: UserDep, as_of: date | None = None):
 
 
 @router.post("/reload")
-def reload_rules(session: SessionDep, settings: SettingsDep, user: User = Depends(require_role("engineer", "admin"))):
+def reload_rules(session: SessionDep, settings: SettingsDep, user: User = Depends(require_role("admin"))):
     try:
         report = load_rules(session, settings.rules_dir, actor=user.name)
     except RuleCorpusError as exc:
@@ -131,7 +131,10 @@ def rule_impact(code: str, session: SessionDep, user: UserDep, as_of: date = Que
             note = f"no proposed version of {rule.code} is effective on {as_of.isoformat()}; enacted history shown"
         # Reading the blast radius upserts STALE_ASSET tasks (idempotent) only for
         # roles that own them; an analyst's read changes nothing.
-        may_open = user.role in permissions.OPEN_STALE_TASK_ROLES
+        # Reading an older state of the rule ("what was stale in 2024?") must not put that
+        # period's work into today's queue.
+        may_open = (user.role in permissions.OPEN_STALE_TASK_ROLES
+                    and not impact.reads_past_rule_state(rule, as_of, date.today()))
         verdicts, counts, tasks = impact.evaluate_rule(session, rule, as_of, actor=user.name, open_tasks=may_open)
         session.commit()
         current = impact.in_force_version(rule, as_of)

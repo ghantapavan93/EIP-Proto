@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import UTC, date
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import yaml
@@ -368,6 +368,16 @@ def overridden(result: RunResult) -> bool:
     return isinstance(result.evidence, dict) and "override" in result.evidence
 
 
+def _override_still_applies(case: TestCase, verdict: ct.Verdict) -> bool:
+    """An override is a human decision about one call under one reading of the rule. It
+    carries across prompts and models (the call and the rule are the same), but not
+    across a change in the rule logic the contract applied."""
+    decided_under = ((case.expected or {}).get("evidence_at_override") or {}).get("rule_logic")
+    if decided_under is None:  # contract reads no rule parameters (schema, spans, figures, PII)
+        return True
+    return (verdict.evidence or {}).get("rule_logic") == decided_under
+
+
 def _approved_overrides(session: Session, transcripts: list[Transcript]) -> dict[tuple[str, str], TestCase]:
     """Approved, unexpired test cases keyed by (contract_id, transcript_id).
 
@@ -402,8 +412,9 @@ def _resolve_adapter(model: Model, adapter_kind: str | None, settings: Settings)
     if adapter_kind == "anthropic":
         adapter_kind = "live"
     if adapter_kind is None:
-        # Simulated models run simulated; real models replay cassettes (falling
-        # back to the live provider when it is configured) unless told otherwise.
+        # Simulated models run simulated; real models replay cassettes unless told
+        # otherwise. A missing cassette is an adapter error, never a silent live call:
+        # only `backstop record` may fall back to the live provider.
         adapter_kind = "simulated" if model.provider == "simulated" else (
             settings.default_adapter if settings.default_adapter not in ("simulated", "anthropic") else "cassette"
         )
@@ -471,6 +482,13 @@ def _score(session: Session, run: Run, adapter, pv: PromptVersion, transcripts: 
             except Exception as exc:  # noqa: BLE001 - a broken check is a result, not a crash
                 verdict = ct.Verdict("ERROR", {"error": f"{type(exc).__name__}: {exc}"})
             case = overrides.get((contract.id, t.id))
+            if case is not None and not _override_still_applies(case, verdict):
+                # The human decided under different rule logic (e.g. before the 48-hour SOA wait
+                # was eliminated). Their decision does not carry over: the verdict counts.
+                verdict = ct.Verdict(verdict.outcome, {**(verdict.evidence or {}), "override_not_applicable": {
+                    "test_case_id": case.id,
+                    "reason": "the rule logic in force differs from the logic the override was decided under"}})
+                case = None
             if case is not None:
                 if verdict.outcome == case.expected.get("outcome", "PASS"):
                     test_case_stats["agreeing"] += 1
@@ -517,7 +535,7 @@ def _route_review(session: Session, run: Run, results: list[RunResult],
         if session.scalar(select(ReviewTask).where(ReviewTask.dedupe_key == dedupe_key)) is None:
             session.add(ReviewTask(
                 kind="FLAGGED_RESULT", dedupe_key=dedupe_key, state="open", run_result_id=rr.id,
-                reason=f"{contract.code} {rr.outcome}: {contract.title}", assignee_role="qa-compliance",
+                reason=f"{contract.code} {rr.outcome}: {contract.title}", assignee_role="compliance",
                 payload={"run_id": run.id, "contract": contract.code, "severity": contract.severity,
                          "transcript_id": rr.transcript_id, "lane": "actionable"},
             ))
@@ -554,6 +572,18 @@ def _fail_run(session: Session, run: Run, actor: str, error: str) -> RunOutcome:
                  payload={"error": error})
     session.commit()
     return RunOutcome(run, deduplicated=False)
+
+
+# A RUNNING run older than this was abandoned by a crashed process (the longest recorded
+# live run took under an hour), so its key may be retired and the run started again.
+ABANDONED_AFTER = timedelta(hours=3)
+
+
+def _abandoned(run: Run) -> bool:
+    if run.status != "RUNNING" or run.started_at is None:
+        return False
+    started = run.started_at if run.started_at.tzinfo else run.started_at.replace(tzinfo=UTC)
+    return datetime.now(UTC) - started > ABANDONED_AFTER
 
 
 def execute_run(
@@ -619,9 +649,10 @@ def execute_run(
     if existing is None and overrides and reuse_pre_override_run:
         existing = session.scalar(select(Run).where(Run.run_key == pre_override_key, Run.status == "COMPLETE"))
     retry_of: str | None = None
-    if existing is not None and existing.status == "FAILED":
+    if existing is not None and (existing.status == "FAILED" or _abandoned(existing)):
         # A failed run has no verdict to reuse; caching it would pin the failure
-        # (e.g. a missing API key) forever. Retire its key and run again.
+        # (e.g. a missing API key) forever. A run left RUNNING by a crashed process
+        # is the same case. Retire its key and run again.
         retry_of = existing.id
         existing.run_key = bounded_run_key(f"{run_key}:failed:{existing.id[:8]}")
         session.flush()
@@ -642,6 +673,10 @@ def execute_run(
                  payload={"run_key": run_key, "prompt_version": prompt_version, "model": model_id,
                           "adapter": adapter_kind, "rule_date": rule_date.isoformat(), "trigger": trigger,
                           "retry_of": retry_of})
+    # Commit before scoring: the run is visible as RUNNING at once, and the audit-chain
+    # lock taken by the row above is released instead of being held for the whole run
+    # (a live model run takes minutes; every other audited write would wait behind it).
+    session.commit()
     try:
         adapter = ad.build_adapter(adapter_kind, model_id=model_id, fixtures_dir=settings.fixtures_dir,
                                    prompt_hash=pv.prompt_hash, api_key=settings.anthropic_api_key,

@@ -170,11 +170,15 @@ def check_artifact(session: Session, text: str, *, as_of: date, label: str | Non
         item = _verdict(rule, views[rule.code], match, as_of)
         if item is not None:
             items.append(item)
-    stale = [i for i in items if i["verdict"] == "stale"]
+    # A proposed match ("agents no longer need to wait 48 hours") may mean the opposite of what
+    # the matcher saw. It is listed with its provisional verdict but never counted as stale.
+    confirmed = [i for i in items if i["edge_status"] != "proposed"]
+    stale = [i for i in confirmed if i["verdict"] == "stale"]
     summary = {
         "matches": len(items),
         "stale": len(stale),
-        "current": sum(1 for i in items if i["verdict"] == "current"),
+        "needs_review": len(items) - len(confirmed),
+        "current": sum(1 for i in confirmed if i["verdict"] == "current"),
         "rules_touched": len({i["rule_code"] for i in items}),
         "over_restrictive": sum(1 for i in stale if i["direction"] == OVER),
         "under_restrictive": sum(1 for i in stale if i["direction"] == UNDER),
