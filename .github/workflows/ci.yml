@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        # Editable: rules/, contracts/ and fixtures/ resolve from the source tree.
+        run: pip install --quiet -e "./backend[dev]"
+      - name: Lint
+        run: ruff check backend/backstop backend/tests
+      - name: Test
+        run: pytest backend/tests -q
+      # The gate: seed, scan the frozen snapshots, run the updated prompt under
+      # the rules in force on Oct 1 2026. Exit 1 if any BLOCK contract fails.
+      - name: Contract gate (prompt v2, rules as of 2026-10-01)
+        env:
+          BACKSTOP_DATABASE_URL: sqlite:///./ci.db
+        run: |
+          backstop seed
+          backstop scan --as-of 2026-10-01
+          backstop run --prompt 2 --model sim-large --rule-date 2026-10-01 --gate
+      # Documented expectation: the CY2024 prompt is RED after the rule change.
+      - name: Old prompt must fail the gate after the rule change
+        env:
+          BACKSTOP_DATABASE_URL: sqlite:///./ci.db
+        run: |
+          if backstop run --prompt 1 --model sim-large --rule-date 2026-10-01 --trigger RULE --gate; then
+            echo "expected the CY2024 prompt to fail after 2026-10-01" && exit 1
+          fi
+
+  # Same suite on Postgres: column widths, negative LIMIT, row locks and the
+  # append-only trigger behave differently there than on SQLite.
+  backend-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: backstop
+          POSTGRES_PASSWORD: backstop
+          POSTGRES_DB: backstop_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U backstop" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BACKSTOP_TEST_DATABASE_URL: postgresql+psycopg://backstop:backstop@localhost:5432/backstop_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet -e "./backend[dev]"
+      - run: pytest backend/tests -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test -- --run
+      - run: npm run build
+
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose build
