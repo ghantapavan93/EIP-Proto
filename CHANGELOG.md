@@ -25,6 +25,18 @@ First version, built for an external review.
   evals, audit, governance, and a sandbox for pasted text.
 - Docker Compose stack, Terraform for the production shape, and a read-only preflight.
 
+### Fixed
+
+- Live Anthropic calls failed before sending with the anthropic 1.x SDK, which dropped the
+  `temperature` argument. Temperature is now sent only to models that accept it; newer
+  models run at their default, and the run records which applied.
+
+### Tooling
+
+- Backend dependencies pinned in `backend/requirements.lock` and used by CI and Docker.
+- The backend is type-checked with mypy in CI; a test checks the Alembic migrations
+  produce the same schema as the models.
+
 ### Known limitations
 
 Listed in [`docs/honesty.md`](docs/honesty.md), including the items the pre-review

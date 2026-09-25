@@ -31,3 +31,17 @@ In summary:
 The demo accounts in `.env.example` use password = username and are for
 localhost only. The tunnel scripts refuse to publish while any account still
 uses them.
+
+## Dependency audit
+
+`npm audit` on 2026-09-25 reports seven advisories. None is exploitable in the shipped
+console, and each has a planned fix:
+
+| Package | Where it runs | Advisory | Assessment | Plan |
+|---|---|---|---|---|
+| `react-router-dom` 6.x | Production bundle | Open redirect via a backslash in a link path; SSR hydration issue | The only user-controlled navigation is the post-login `?next=` path, and `lib/redirect.ts` already rejects `//`, `/\` and control characters; there is no server-side rendering | Upgrade to 7.x (a major version) |
+| `vite` 5.x, `esbuild` | Local dev server only | Path traversal and cross-origin reads against the dev server | Not part of the built bundle served by nginx | Upgrade with the Vite major |
+| `vitest` 2.x | Local test runner only | File read when the Vitest UI server is listening | The UI server is never started | Upgrade with the Vitest major |
+
+Python dependencies are pinned in `backend/requirements.lock` and installed with it in CI
+and in the Docker image.
