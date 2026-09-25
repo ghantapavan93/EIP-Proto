@@ -1,0 +1,5 @@
+# Every path is owned by the maintainer. The rule corpus and contracts are
+# listed separately so a future compliance owner can be added to them alone.
+*                @ghantapavan93
+/rules/          @ghantapavan93
+/contracts/      @ghantapavan93
