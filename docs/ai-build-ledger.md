@@ -1,9 +1,11 @@
 # AI build ledger
 
-This prototype was built with an AI coding agent (Claude Code) directing the
-work, with the human reviewing and deciding. The point of this page is not
-that AI was used — everyone uses it — but what it got wrong, how the mistakes
-were caught, and what that says about how AI-assisted work should be run.
+I built this prototype with an AI coding agent (Claude Code) and AI research
+agents. I set the direction, the scope and the trade-offs (see
+[`decisions.md`](decisions.md)), reviewed the work and decided what shipped; the
+agents did much of the research and wrote much of the code under that direction.
+The point of this page is not that AI was used, but what it got wrong, how the
+mistakes were caught, and what that says about how AI-assisted work should be run.
 
 ## Research phase (AI research agents, cross-checked)
 
