@@ -11,6 +11,7 @@ All scripts change to the repository root first, so they can be run from anywher
 | `demo-tunnel.ps1` | Windows PowerShell | Publish the UI gateway through a Cloudflare Quick Tunnel. |
 | `demo-tunnel.sh` | bash | Same as `demo-tunnel.ps1`. |
 | `demo-keepalive.ps1` | Windows PowerShell | Keep the stack and one Quick Tunnel running unattended for a set number of hours. |
+| `demo-down.ps1` / `demo-down.sh` | PowerShell / bash | Stop the stack; `-Reset` / `--reset` also deletes the database volume. |
 | `preflight.ps1` | Windows PowerShell | Read-only go/no-go before sending the link: stack health, corpus, calls, passwords, anonymous 401, public pages. |
 
 ## demo-up.ps1 and demo-up.sh
