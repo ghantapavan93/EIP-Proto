@@ -1,12 +1,14 @@
 """Audit log: read the append-only event trail and verify its hash chain.
 
     GET /api/audit          filtered, newest-first page of audit events
-    GET /api/audit/verify   recompute the SHA-256 chain; names the first broken link
+    GET /api/audit/actors   the people who appear in the log (for the actor filter)
+    GET /api/audit/verify   recompute the SHA-256 chain; names the first broken link.
+                            With ?through_id=&tip= it also checks an admin checkpoint.
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import func, select
 
 from backstop import schemas as s
@@ -16,12 +18,35 @@ from backstop.models import AuditEvent
 router = APIRouter(tags=["audit"])
 
 
+# Actors that are not people: automation, refused logins and names no account matches.
+_NON_PERSON_ROLES = ("system", "unauthenticated", "unknown")
+
+
+@router.get("/audit/actors")
+def audit_actors(session: SessionDep, user: UserDep):
+    """Every person (and seeded demo persona) with at least one audit row, busiest first."""
+    rows = session.execute(
+        select(AuditEvent.actor, AuditEvent.actor_role, func.count().label("events"))
+        .where(AuditEvent.actor_role.not_in(_NON_PERSON_ROLES))
+        .group_by(AuditEvent.actor, AuditEvent.actor_role)
+        .order_by(func.count().desc(), AuditEvent.actor)
+    ).all()
+    return [{"actor": a, "role": r, "events": n} for a, r, n in rows]
+
+
 @router.get("/audit/verify")
-def audit_verify(session: SessionDep, user: UserDep):
-    """Recompute the audit hash chain. ok=False names the first row that no longer links."""
+def audit_verify(session: SessionDep, user: UserDep, through_id: int | None = Query(None, ge=1),
+                 tip: str | None = Query(None, pattern="^[0-9a-f]{64}$")):
+    """Recompute the audit hash chain. ok=False names the first row that no longer links.
+
+    Pass a checkpoint (through_id + tip, from POST /api/admin/audit-checkpoints) to also
+    prove the history up to that row is the history that was checkpointed.
+    """
     from backstop.core import audit
 
-    return audit.verify_chain(session)
+    if (through_id is None) != (tip is None):
+        raise HTTPException(422, "a checkpoint needs both through_id and tip")
+    return audit.verify_chain(session, (through_id, tip) if through_id is not None else None)
 
 
 @router.get("/audit", response_model=s.Page)

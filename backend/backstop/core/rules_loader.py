@@ -138,6 +138,7 @@ def validate_rule_doc(doc: dict, path: Path) -> None:
         raise RuleCorpusError(f"{path.name}: missing {sorted(missing)}")
     seen = set()
     previous_to: date | None = None
+    seen_enacted = False
     for v in doc["versions"]:
         for key in ("version", "status", "effective_from", "clause_text", "change_classification"):
             if key not in v:
@@ -166,10 +167,13 @@ def validate_rule_doc(doc: dict, path: Path) -> None:
             # Never in force: outside the window checks. A vacated version keeps its
             # original dates for history and may overlap the version it never displaced.
             continue
-        if previous_to is not None and eff_from <= previous_to:
+        # An open previous window (effective_to null) runs forever, so any later enacted
+        # version overlaps it: it must be closed first. date.max stands in for "open".
+        if seen_enacted and eff_from <= (previous_to or date.max):
             raise RuleCorpusError(
                 f"{path.name}: v{v['version']} overlaps the previous version's validity window"
             )
+        seen_enacted = True
         previous_to = eff_to
     open_versions = [v for v in doc["versions"]
                      if v["status"] not in NEVER_IN_FORCE and v.get("effective_to") is None]

@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backstop import __version__
 from backstop.api import (
+    admin,
     assets,
     audit,
     contracts_metrics,
@@ -59,5 +60,5 @@ app.add_middleware(
 
 # ops first: /rules/{code}/sources and /prompts/diff must win over the generic routes.
 for router in (meta.router, audit.router, ops.router, rules.router, assets.router, runs.router, review.router, evidence.router,
-               sandbox.router, contracts_metrics.router, readiness.router):
+               sandbox.router, contracts_metrics.router, readiness.router, admin.router):
     app.include_router(router, prefix="/api")

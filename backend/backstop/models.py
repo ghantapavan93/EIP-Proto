@@ -121,7 +121,7 @@ class Asset(Base):
     type: Mapped[str] = mapped_column(String(32))
     name: Mapped[str] = mapped_column(String(200))
     url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    source_system: Mapped[str] = mapped_column(String(64))  # vercel | wordpress | attention(synthetic) ...
+    source_system: Mapped[str] = mapped_column(String(64))  # public-web | attention(synthetic) | sfmc(synthetic) ...
     owner_role: Mapped[str] = mapped_column(String(64), default="compliance")
     is_synthetic: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

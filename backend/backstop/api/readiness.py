@@ -29,6 +29,9 @@ from backstop.models import ReviewTask, Rule, RuleAssetEdge, utcnow
 
 router = APIRouter(tags=["readiness"])
 
+# Older rows used another slug for the same team; one owner must read as one queue.
+_ROLE_ALIASES = {"qa-compliance": "compliance"}
+
 MILESTONE_HORIZON_DAYS = 365
 BANDS: tuple[tuple[str, int, int], ...] = (("30", 0, 30), ("60", 31, 60), ("90", 61, 90))
 _KIND_ORDER = {"marketing_start": 0, "aep_start": 1, "aep_end": 2, "oep_start": 3, "rule_applies": 4,
@@ -169,7 +172,8 @@ def readiness(session: SessionDep, user: UserDep, as_of: date = Query(default_fa
     # ---- owners (ages measured now, not at as_of)
     by_role: dict[str, list] = defaultdict(list)
     for t in open_tasks:
-        by_role[t.assignee_role or "unassigned"].append(t)
+        role = t.assignee_role or "unassigned"
+        by_role[_ROLE_ALIASES.get(role, role)].append(t)
     owners = []
     for role, tasks in by_role.items():
         ages = [_age_days(t.opened_at, now) for t in tasks if t.opened_at is not None]

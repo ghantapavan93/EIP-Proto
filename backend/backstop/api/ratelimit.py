@@ -13,16 +13,22 @@ from collections.abc import Callable
 
 
 class TokenBucket:
+    """`capacity` requests at once, refilled continuously at `capacity / per_seconds` per second.
+
+    `clock` is public so a test can freeze time: a limit asserted against the wall clock
+    is flaky, because a slow machine lets the bucket refill mid-test.
+    """
+
     def __init__(self, capacity: int, per_seconds: float, clock: Callable[[], float] = time.monotonic):
         self.capacity = float(capacity)
         self.rate = capacity / per_seconds  # tokens per second
-        self._clock = clock
+        self.clock = clock
         self._state: dict[str, tuple[float, float]] = {}  # key -> (tokens, last refill)
         self._lock = threading.Lock()
 
     def take(self, key: str) -> float:
         """Spend one token for `key`. Returns 0.0 when allowed, else seconds until one is available."""
-        now = self._clock()
+        now = self.clock()
         with self._lock:
             if len(self._state) > 10_000:
                 self._state.clear()

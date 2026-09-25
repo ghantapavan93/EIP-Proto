@@ -17,6 +17,7 @@ from backstop.api.deps import SessionDep, User, current_user
 from backstop.api.ratelimit import TokenBucket
 from backstop.core import audit
 from backstop.core import sandbox as sb
+from backstop.core.pii import redact
 from backstop.harness import sandbox as tsb
 
 router = APIRouter(prefix="/sandbox", tags=["sandbox"])
@@ -79,7 +80,9 @@ def check_artifact(body: s.SandboxArtifactRequest, session: SessionDep,
                  entity_type="sandbox", entity_id=result["text_sha256"],
                  payload={"text_sha256": result["text_sha256"], "chars": result["chars"],
                           "matches": result["summary"]["matches"], "stale": result["summary"]["stale"],
-                          "as_of": as_of.isoformat(), "label": label})
+                          "as_of": as_of.isoformat(),
+                          # The label is user text too: redacted like everything else that is kept.
+                          "label": redact(label)[0] if label else label})
     session.commit()
     return result
 

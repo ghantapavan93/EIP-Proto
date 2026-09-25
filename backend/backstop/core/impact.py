@@ -151,6 +151,19 @@ def evaluate_all(session: Session, as_of: date, *, actor: str = "system") -> dic
     return out
 
 
+def reads_past_rule_state(rule: Rule, as_of: date, today: date) -> bool:
+    """True when `as_of` shows an older version of the rule than the one in force today
+    (or a time before the rule existed). Staleness there is history, not today's work.
+
+    Compared by version, not by date, so the flip date stays actionable after it passes:
+    on 2026-10-02, reading 2026-10-01 still shows the version in force today.
+    """
+    now, then = in_force_version(rule, today), in_force_version(rule, as_of)
+    if now is None:
+        return False  # nothing in force today (only future or proposed versions): nothing is past
+    return then is None or then.effective_from < now.effective_from
+
+
 def in_force_version(rule: Rule, as_of: date) -> RuleVersion | None:
     """Mirror of ``staleness.version_in_force`` for ORM rows (proposed, vacated and stayed
     versions are never in force)."""

@@ -19,7 +19,7 @@ import json
 from datetime import UTC, date, datetime
 from typing import Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from backstop import __version__
@@ -153,26 +153,37 @@ def _task(session: Session, task: ReviewTask) -> dict[str, Any]:
     }
 
 
-def _audit_rows(session: Session, entity_ids: set[str]) -> list[dict[str, Any]]:
+def _audit_rows(session: Session, entity_ids: set[str]) -> dict[str, Any]:
+    """The audit rows about this subject, newest kept when there are more than the cap.
+
+    Rows recording earlier exports of a bundle are left out: they describe the bundle,
+    not the subject, and would otherwise crowd out the decisions a reader needs.
+    `total` and `truncated` say whether the list is complete; a bundle never implies
+    it holds every row when it does not.
+    """
     ids = sorted(i for i in entity_ids if i)
     if not ids:
-        return []
-    rows = session.scalars(
-        select(AuditEvent).where(AuditEvent.entity_id.in_(ids)).order_by(AuditEvent.id).limit(_MAX_AUDIT_ROWS)
-    ).all()
+        return {"total": 0, "included": 0, "truncated": False, "rows": []}
+    about = AuditEvent.entity_id.in_(ids)
+    corr = set(session.scalars(select(AuditEvent.correlation_id).where(about, AuditEvent.correlation_id.is_not(None))
+                               .distinct()).all())
     # Pull in every row written by the same actions (shared correlation id).
-    corr = {r.correlation_id for r in rows if r.correlation_id}
-    if corr:
-        rows = session.scalars(
-            select(AuditEvent)
-            .where(or_(AuditEvent.entity_id.in_(ids), AuditEvent.correlation_id.in_(sorted(corr))))
-            .order_by(AuditEvent.id)
-            .limit(_MAX_AUDIT_ROWS)
-        ).all()
-    return [{"id": r.id, "ts": _iso(r.ts), "actor": r.actor, "actor_role": r.actor_role,
-             "event_type": r.event_type, "entity_type": r.entity_type, "entity_id": r.entity_id,
-             "correlation_id": r.correlation_id, "payload": r.payload, "prev_hash": r.prev_hash,
-             "row_hash": r.row_hash} for r in rows]
+    related = or_(about, AuditEvent.correlation_id.in_(sorted(corr))) if corr else about
+    related = and_(related, AuditEvent.event_type != "evidence.exported")
+    total = session.scalar(select(func.count()).select_from(AuditEvent).where(related)) or 0
+    rows = list(reversed(session.scalars(
+        select(AuditEvent).where(related).order_by(AuditEvent.id.desc()).limit(_MAX_AUDIT_ROWS)).all()))
+    return {"total": total, "included": len(rows), "truncated": total > len(rows), "rows": [
+        {"id": r.id, "ts": _iso(r.ts), "actor": r.actor, "actor_role": r.actor_role, "event_type": r.event_type,
+         "entity_type": r.entity_type, "entity_id": r.entity_id, "correlation_id": r.correlation_id,
+         "payload": r.payload, "prev_hash": r.prev_hash, "row_hash": r.row_hash} for r in rows]}
+
+
+def _with_audit(section: dict[str, Any], audit_rows: dict[str, Any]) -> dict[str, Any]:
+    section["audit_events"] = audit_rows["rows"]
+    section["audit_events_total"] = audit_rows["total"]
+    section["audit_events_truncated"] = audit_rows["truncated"]
+    return section
 
 
 def _finalize(session: Session, bundle: dict[str, Any], *, actor: str, role: str) -> dict[str, Any]:
@@ -219,7 +230,7 @@ def for_task(session: Session, task: ReviewTask, *, actor: str, role: str) -> di
         entity_ids |= {rr.run_id}
         if (task.payload or {}).get("aggregate"):
             subject["result"]["aggregate_transcripts"] = (task.payload or {}).get("flagged_transcripts", [])
-    subject["audit_events"] = _audit_rows(session, entity_ids)
+    _with_audit(subject, _audit_rows(session, entity_ids))
     return _finalize(session, {"subject": {"type": "review_task", "id": task.id}, **subject}, actor=actor, role=role)
 
 
@@ -229,14 +240,13 @@ def for_run(session: Session, run: Run, *, actor: str, role: str) -> dict[str, A
     tasks = session.scalars(select(ReviewTask).join(RunResult, ReviewTask.run_result_id == RunResult.id)
                             .where(RunResult.run_id == run.id)).all()
     entity_ids = {run.id} | {t.id for t in tasks}
-    return _finalize(session, {
+    return _finalize(session, _with_audit({
         "subject": {"type": "run", "id": run.id},
         "run": _run(run),
         "blocking_failures": sum(1 for f in findings if f["outcome"] == "FAIL" and f["contract"]["severity"] == "BLOCK"),
         "findings": findings,
         "review_tasks": [_task(session, t) for t in tasks],
-        "audit_events": _audit_rows(session, entity_ids),
-    }, actor=actor, role=role)
+    }, _audit_rows(session, entity_ids)), actor=actor, role=role)
 
 
 def for_rule(session: Session, rule: Rule, as_of: date, *, actor: str, role: str) -> dict[str, Any]:
@@ -251,14 +261,13 @@ def for_rule(session: Session, rule: Rule, as_of: date, *, actor: str, role: str
                       "encoding": _edge(session, edge), "review_task": _task(session, task) if task else None})
     entity_ids = {rule.id} | {rv.id for rv in rule.versions} | {s["encoding"]["edge_id"] for s in stale}
     entity_ids |= {s["review_task"]["task_id"] for s in stale if s["review_task"]}
-    return _finalize(session, {
+    return _finalize(session, _with_audit({
         "subject": {"type": "rule", "id": rule.code, "as_of": as_of.isoformat()},
         "rule_version_in_force": _rule_version(in_force) if in_force else None,
         "history": [_rule_version(rv) for rv in rule.versions],
         "counts": counts,
         "stale_encodings": stale,
-        "audit_events": _audit_rows(session, entity_ids),
-    }, actor=actor, role=role)
+    }, _audit_rows(session, entity_ids)), actor=actor, role=role)
 
 
 # ------------------------------------------------------------------ markdown
@@ -373,7 +382,10 @@ def to_markdown(bundle: dict[str, Any]) -> str:
                          f"v{s['bound_version']} → v{s['in_force_version']} | {span} |")
         lines.append("")
     events = bundle.get("audit_events", [])
-    lines.extend([f"## Audit trail ({len(events)} rows)", "", "| # | Time (UTC) | Actor | Event | Entity | Row hash |",
+    total = bundle.get("audit_events_total", len(events))
+    heading = (f"## Audit trail (newest {len(events)} of {total} rows; earlier rows are in the audit log)"
+               if bundle.get("audit_events_truncated") else f"## Audit trail ({len(events)} rows)")
+    lines.extend([heading, "", "| # | Time (UTC) | Actor | Event | Entity | Row hash |",
                   "|---|---|---|---|---|---|"])
     lines.extend(f"| {e['id']} | {e['ts']} | {e['actor']} ({e['actor_role']}) | {e['event_type']} | "
                  f"{e['entity_type']} `{e['entity_id'][:8]}` | `{e['row_hash'][:12]}` |" for e in events)

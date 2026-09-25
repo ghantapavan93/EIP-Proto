@@ -18,7 +18,8 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 | `backstop/schemas.py` | Pydantic request and response shapes the frontend is built against. |
 | `api/deps.py` | DB session, HTTP Basic authentication, `require_role`. |
 | `api/meta.py` | `GET /health` (no auth), `/meta`, `/me`. |
-| `api/audit.py` | `GET /audit` (filtered page) and `/audit/verify` (recomputes the hash chain). |
+| `api/audit.py` | `GET /audit` (filtered page) and `/audit/verify` (recomputes the hash chain; optionally checks an admin checkpoint). |
+| `api/admin.py` | Governance, admin only: access review and audit checkpoints. |
 | `api/rules.py` | Rule registry, reload, change impact as of a date, propose a version. |
 | `api/assets.py` | Artifact inventory and scans. |
 | `api/runs.py` | Workflows, prompts, models and model board, contracts, transcripts, runs, paired comparison. |
@@ -42,6 +43,7 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 | `core/pii.py` | Regex PII detection and redaction for real text. |
 | `core/sandbox.py` | Matches pasted text to rule versions and judges staleness; stores only a hash. |
 | `core/stats.py` | Wilson intervals, exact McNemar and Fisher tests. Pure Python. |
+| `core/attribution.py` | Whether a run comparison changed exactly one factor, and existing run pairs that isolate each factor when it did not. |
 | `harness/workflow.py` | The workflow under test (extract, check, compose, route), prompt versions, rule logic from params. |
 | `harness/contracts.py` | Contract checks; see [../contracts/README.md](../contracts/README.md). |
 | `harness/runner.py` | Seeds workflow, models, contracts and corpus; executes idempotent runs; computes the gate. |

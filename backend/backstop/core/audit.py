@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
+import threading
 from datetime import UTC, datetime
 from typing import Any
 
@@ -51,6 +53,8 @@ EVENT_TYPES = {
     "test_case.created",
     "test_case.approved",
     "auth.denied",
+    "access.reviewed",
+    "audit.checkpoint",
     "sandbox.artifact_checked",
     "sandbox.transcript_checked",
 }
@@ -101,6 +105,13 @@ def row_digest(prev_hash: str, *, ts: datetime, actor: str, actor_role: str, eve
     return hashlib.sha256((prev_hash + canonical).encode("utf-8")).hexdigest()
 
 
+# SQLite has no advisory locks: one process-wide lock serialises chain appends from
+# first read of the tip until the transaction ends (commit or rollback).
+_SQLITE_CHAIN_LOCK = threading.Lock()
+_SQLITE_LOCK_HELD = "backstop.audit.sqlite_lock_held"
+_SQLITE_LOCK_TIMEOUT_S = 10
+
+
 def _last_hash(session: Session) -> str:
     cached = session.info.get(_CHAIN_KEY)
     if cached is not None:
@@ -110,14 +121,24 @@ def _last_hash(session: Session) -> str:
         # Held until this transaction ends, so concurrent writers append in turn
         # instead of forking the chain from the same predecessor.
         session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _PG_CHAIN_LOCK})
+    elif bind.dialect.name == "sqlite" and not session.info.get(_SQLITE_LOCK_HELD):
+        # Bounded wait: a session that never ends its transaction must not hang every
+        # writer. After the timeout the append proceeds unlocked (the pre-lock behaviour).
+        if _SQLITE_CHAIN_LOCK.acquire(timeout=_SQLITE_LOCK_TIMEOUT_S):
+            session.info[_SQLITE_LOCK_HELD] = True
+        else:
+            logging.getLogger("backstop.audit").warning("audit chain lock not acquired in %ss", _SQLITE_LOCK_TIMEOUT_S)
     last = session.scalar(select(AuditEvent.row_hash).order_by(AuditEvent.id.desc()).limit(1))
     return last or GENESIS
 
 
 @event.listens_for(Session, "after_commit")
 @event.listens_for(Session, "after_rollback")
+@event.listens_for(Session, "after_soft_rollback")
 def _forget_chain_tip(session: Session, *args) -> None:
     session.info.pop(_CHAIN_KEY, None)
+    if session.info.pop(_SQLITE_LOCK_HELD, None):
+        _SQLITE_CHAIN_LOCK.release()
 
 
 def record(
@@ -163,10 +184,19 @@ def record(
     return event
 
 
-def verify_chain(session: Session) -> dict[str, Any]:
-    """Recompute every row's hash in id order. Reports the first break, if any."""
+def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None) -> dict[str, Any]:
+    """Recompute every row's hash in id order. Reports the first break, if any.
+
+    The chain alone is tamper-evident, not tamper-proof: someone able to drop the
+    append-only triggers could rewrite every row and recompute a consistent chain.
+    A checkpoint closes that gap. It is (row id, row hash) taken earlier and kept
+    outside the database; if the chain no longer contains that exact hash at that
+    row, history before the checkpoint was rewritten, and the result is not ok.
+    """
     expected_prev = GENESIS
     checked = 0
+    tip_id: int | None = None
+    seen_at_checkpoint: str | None = None
     for row in session.scalars(select(AuditEvent).order_by(AuditEvent.id)).yield_per(500):
         digest = row_digest(row.prev_hash, ts=row.ts, actor=row.actor, actor_role=row.actor_role,
                             event_type=row.event_type, entity_type=row.entity_type, entity_id=row.entity_id,
@@ -174,7 +204,28 @@ def verify_chain(session: Session) -> dict[str, Any]:
         if row.prev_hash != expected_prev or digest != row.row_hash:
             return {"ok": False, "checked": checked, "first_broken_id": row.id,
                     "reason": "prev_hash does not link" if row.prev_hash != expected_prev else "row content changed",
-                    "tip": expected_prev}
+                    "tip": expected_prev, "tip_id": tip_id, "checkpoint": _checkpoint_result(checkpoint, None)}
+        if checkpoint is not None and row.id == checkpoint[0]:
+            seen_at_checkpoint = row.row_hash
         expected_prev = row.row_hash
+        tip_id = row.id
         checked += 1
-    return {"ok": True, "checked": checked, "first_broken_id": None, "reason": None, "tip": expected_prev}
+    result = {"ok": True, "checked": checked, "first_broken_id": None, "reason": None, "tip": expected_prev,
+              "tip_id": tip_id, "checkpoint": _checkpoint_result(checkpoint, seen_at_checkpoint)}
+    if result["checkpoint"] is not None and not result["checkpoint"]["matches"]:
+        result["ok"] = False
+        result["reason"] = result["checkpoint"]["reason"]
+    return result
+
+
+def _checkpoint_result(checkpoint: tuple[int, str] | None, seen: str | None) -> dict[str, Any] | None:
+    if checkpoint is None:
+        return None
+    through_id, tip = checkpoint
+    if seen is None:
+        reason = f"row {through_id} is missing from the chain: history was removed or rewritten"
+    elif seen != tip:
+        reason = f"row {through_id} no longer carries the checkpoint hash: history before it was rewritten"
+    else:
+        reason = None
+    return {"through_id": through_id, "tip": tip, "matches": reason is None, "reason": reason}

@@ -31,6 +31,13 @@ PERMIT_WORDS = re.compile(r"\b(permitted|allowed|may|can be completed|is permitt
 
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 
+# Wording that can flip what a matched phrase means: "agents no longer must wait 48 hours"
+# names the old requirement in order to drop it. Such a match is never auto-confirmed;
+# it becomes a proposed edge a human reads.
+NEGATION = re.compile(
+    r"\b(no longer|eliminat\w*|removed|repeal\w*|rescind\w*|there is no|is not required|are not required|"
+    r"not required|do(?:es)? not (?:need|have) to|need not|without waiting)\b", re.I)
+
 
 @dataclass(frozen=True)
 class Match:
@@ -79,6 +86,8 @@ class Matcher:
     confidence: float = 1.0
     note: str = ""
     force_polarity: str | None = None
+    # Off only for matchers written to recognise the "no longer ..." wording itself.
+    negation_guard: bool = True
 
     def run(self, text: str) -> list[Match]:
         out: list[Match] = []
@@ -103,6 +112,10 @@ class Matcher:
             ):
                 continue
             polarity = self.force_polarity or infer_polarity(span)
+            status, note = self.status, self.note
+            if status == "confirmed" and self.negation_guard and NEGATION.search(span):
+                status = "proposed"
+                note = (f"{note} " if note else "") + "Negated or changed wording nearby; a human confirms what it encodes."
             out.append(
                 Match(
                     rule_code=self.rule_code,
@@ -111,9 +124,9 @@ class Matcher:
                     span=span,
                     offset=offset,
                     matcher=self.name,
-                    status=self.status,
+                    status=status,
                     confidence=self.confidence,
-                    note=self.note,
+                    note=note,
                 )
             )
         out = dedupe(out)

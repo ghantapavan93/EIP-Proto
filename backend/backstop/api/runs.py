@@ -18,12 +18,12 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from backstop import schemas as s
 from backstop.api.deps import SessionDep, SettingsDep, User, UserDep, require_role
 from backstop.api.serializers import contract_out, result_out, run_out, transcript_out
-from backstop.core import stats
+from backstop.core import attribution, stats
 from backstop.harness.corpus import HOLDOUT_PREFIX
 from backstop.harness.runner import execute_run
 from backstop.models import (
@@ -269,13 +269,25 @@ def compare_runs(session: SessionDep, user: UserDep, a: str = Query(...), b: str
         "cells_only_in_b": only_b,
         "contract_set": run_a.contract_set_hash != run_b.contract_set_hash,
     }
+    candidates = session.scalars(
+        select(Run).where(Run.status == "COMPLETE").order_by(Run.started_at.desc())
+        .options(selectinload(Run.model), selectinload(Run.prompt_version))
+    ).all()
+    attributed = attribution.attribute(attribution.factors_of(run_a), attribution.factors_of(run_b),
+                                       [attribution.factors_of(r) for r in candidates])
+    statistics = _compare_statistics(session, run_a, run_b, ca, cb)
+    if attributed["verdict"] == "confounded":
+        changed = [c["label"] for c in attributed["changed"]]
+        statistics.cautions.insert(0, f"Confounded: {', '.join(changed)} changed together, so a significant "
+                                      "difference here cannot be assigned to any one of them.")
     return s.CompareOut(
         a=run_out(session, run_a), b=run_out(session, run_b), what_changed=what_changed,
+        attribution=s.AttributionOut(**attributed),
         newly_failing=newly_failing, newly_passing=newly_passing, unchanged_failing=unchanged_failing,
         unchanged_passing=unchanged_passing,
         per_contract=[{"contract_code": k, **v} for k, v in sorted(per_contract.items())],
         failure_definition=COMPARE_FAILURE_DEFINITION,
-        statistics=_compare_statistics(run_a, run_b, ca, cb),
+        statistics=statistics,
     )
 
 
@@ -341,7 +353,36 @@ def _compare_one(code: str, severity: str | None, fails: tuple[str, ...], a_map:
     )
 
 
-def _compare_statistics(run_a: Run, run_b: Run, ca: _Cells, cb: _Cells) -> s.CompareStatisticsOut:
+def _held_out_check(session: Session, run_a: Run, run_b: Run) -> s.HeldOutCheckOut | None:
+    """The same prompt change replayed on the held-out calls, if both runs exist, phrased so a
+    development-set result cannot be quoted without it."""
+
+    def latest(run: Run) -> Run | None:
+        candidates = session.scalars(
+            select(Run).where(Run.prompt_version_id == run.prompt_version_id, Run.model_id == run.model_id,
+                              Run.adapter == run.adapter, Run.rule_date == run.rule_date, Run.status == "COMPLETE")
+            .order_by(Run.started_at.desc())
+        ).all()
+        return next((r for r in candidates if (r.stats or {}).get("corpus") == "holdout"), None)
+
+    ha, hb = latest(run_a), latest(run_b)
+    if ha is None or hb is None:
+        return None
+    held = _compare_statistics(session, ha, hb, _load_cells(session, ha.id), _load_cells(session, hb.id)).overall
+    va, vb = ha.prompt_version.version, hb.prompt_version.version
+    n = (ha.stats or {}).get("transcripts") or "the"
+    if held.direction in ("better", "worse"):
+        finding = (f"prompt v{vb} is significantly {held.direction} than v{va} on the release-blocking "
+                   f"contracts (p={stats.fmt_p(held.p_value)})")
+    else:
+        finding = f"prompts v{va} and v{vb} show no significant difference (p={stats.fmt_p(held.p_value)})"
+    return s.HeldOutCheckOut(
+        a_run_id=ha.id, b_run_id=hb.id, a_prompt_version=va, b_prompt_version=vb, direction=held.direction,
+        p_value=held.p_value, summary=f"On the {n} held-out calls, {finding}.",
+        contradicts_development=False)  # set by the caller, which knows the development verdict
+
+
+def _compare_statistics(session: Session | None, run_a: Run, run_b: Run, ca: _Cells, cb: _Cells) -> s.CompareStatisticsOut:
     """Is the difference between A and B signal or noise? Exact tests, Wilson intervals.
 
     Same calls in both runs: McNemar on the calls whose outcome changed. Different
@@ -386,10 +427,11 @@ def _compare_statistics(run_a: Run, run_b: Run, ca: _Cells, cb: _Cells) -> s.Com
 
     overall = _compare_one("ALL-BLOCK", "BLOCK", stats.failure_outcomes("BLOCK"), any_block(fa), any_block(fb),
                            paired_mode, sum(excluded.get(c, 0) for c in block),
-                           what="the release-blocking contracts (a call fails if any BLOCK contract fails)")
+                           what="the release-blocking contracts")
     if run_a.contract_set_hash != run_b.contract_set_hash:
         overall.cautions.append("The contract sets differ between the runs; ALL-BLOCK compares different checks.")
 
+    held_out: s.HeldOutCheckOut | None = None
     cautions = ["One generation per call: a repeat of either run could move a few calls. "
                 "Repeat generations would tighten these intervals."]
     corpus_a, corpus_b = (run_a.stats or {}).get("corpus", "synthetic"), (run_b.stats or {}).get("corpus", "synthetic")
@@ -398,12 +440,20 @@ def _compare_statistics(run_a: Run, run_b: Run, ca: _Cells, cb: _Cells) -> s.Com
                            "Rates are compared with Fisher's exact test on each run's own calls; two draws of "
                            "calls can differ on their own, so this does not isolate the change.")
     elif corpus_a == corpus_b == "synthetic" and run_a.prompt_version_id != run_b.prompt_version_id:
-        cautions.append("Both runs are on the development calls the prompts were written against. A prompt tuned "
-                        "on these calls can look significantly better here and still regress on unseen calls; "
-                        "confirm on the held-out corpus.")
+        held_out = _held_out_check(session, run_a, run_b) if session is not None else None
+        if held_out is not None:
+            held_out.contradicts_development = held_out.direction != overall.direction
+            # Lead with it: a development-set win the held-out calls contradict must never read as a win.
+            cautions.insert(0, f"Held-out check: {held_out.summary} These development calls were read while "
+                               f"writing the prompt; trust the held-out result.")
+        else:
+            cautions.append("Both runs are on the development calls the prompts were written against. A prompt "
+                            "tuned on these calls can look significantly better here and still regress on unseen "
+                            "calls; confirm on the held-out corpus.")
     return s.CompareStatisticsOut(mode="paired" if paired_mode else "unpaired", alpha=stats.ALPHA,
                                   failure_definition=stats.FAILURE_DEFINITION, cautions=cautions,
-                                  overall=overall, per_contract=per_contract)
+                                  overall=overall, per_contract=per_contract,
+                                  held_out=held_out if paired_mode and corpus_a == "synthetic" else None)
 
 
 @router.get("/runs/{run_id}", response_model=s.RunOut)

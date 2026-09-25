@@ -25,6 +25,8 @@ assert set(ROLE_ORDER) == VALID_ROLES
 
 # The roles every engineer/admin-only endpoint names in require_role(...).
 OPERATOR_ROLES = frozenset({"engineer", "admin"})
+# Governance: who has access, which rule corpus is adopted, and anchoring the audit trail.
+ADMIN_ROLES = frozenset({"admin"})
 EVERYONE = frozenset(VALID_ROLES)
 # api/rules.py reads this to decide whether an impact read may open STALE_ASSET tasks.
 OPEN_STALE_TASK_ROLES = OPERATOR_ROLES
@@ -42,8 +44,9 @@ ROLE_INFO: dict[str, tuple[str, str]] = {
     ),
     "admin": (
         "Administrator",
-        "The same permissions as an engineer in this prototype. Accounts come from BACKSTOP_USERS, a stand-in "
-        "for SSO; there is no user management screen.",
+        "Governs the platform: everything an engineer can do, plus the access review (who can do what, "
+        "default passwords, denied attempts), adopting the rule corpus into the running system, and taking "
+        "audit checkpoints kept outside the database. Accounts come from BACKSTOP_USERS, a stand-in for SSO.",
     ),
 }
 
@@ -78,8 +81,15 @@ ACTIONS: tuple[Action, ...] = (
            (("POST", "/api/sources/check"),)),
     Action("propose_rule_versions", "Propose a new rule version (what-if)", OPERATOR_ROLES, "",
            (("POST", "/api/rules/{code}/versions"),)),
-    Action("reload_rules", "Reload the rule corpus from git", OPERATOR_ROLES, "",
+    Action("reload_rules", "Adopt the rule corpus from git into the running system", ADMIN_ROLES,
+           "it changes what every later run is checked against: engineers propose versions, an admin adopts",
            (("POST", "/api/rules/reload"),)),
+    Action("review_access", "Review access: accounts, roles, default passwords, denied attempts", ADMIN_ROLES,
+           "every review is itself audit-logged",
+           (("GET", "/api/admin/access"),)),
+    Action("checkpoint_audit", "Take an audit checkpoint to keep outside the database", ADMIN_ROLES,
+           "refused while the chain is broken; anyone can later verify a checkpoint",
+           (("GET", "/api/admin/audit-checkpoints"), ("POST", "/api/admin/audit-checkpoints"))),
     Action("ingest_transcripts", "Ingest transcripts from an export file", OPERATOR_ROLES, "",
            (("POST", "/api/ingest/transcripts"),)),
     Action("open_stale_tasks", "Open stale-artifact review tasks by reading a rule's impact", OPEN_STALE_TASK_ROLES,

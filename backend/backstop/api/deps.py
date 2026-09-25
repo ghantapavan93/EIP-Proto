@@ -6,6 +6,7 @@ The user table is an env-var stub for SSO (see docs/honesty.md, "Not built
 
 from __future__ import annotations
 
+import hashlib
 import secrets
 import threading
 import time
@@ -45,6 +46,10 @@ def _should_audit_denial(username: str) -> bool:
         return True
 
 
+def _unknown_user(name: str | None) -> str:
+    return "unknown-user:" + hashlib.sha256((name or "").encode()).hexdigest()[:12]
+
+
 @dataclass(frozen=True)
 class User:
     name: str
@@ -68,7 +73,9 @@ def current_user(
     expected = entry[0] if entry is not None else _DUMMY_PASSWORD
     password_ok = secrets.compare_digest(expected.encode(), credentials.password.encode())
     if not (entry is not None and password_ok):
-        username = (credentials.username or "?")[: audit.ACTOR_MAX]
+        # A known account is named; anything else is hashed, because people paste
+        # passwords into the username field and this log can never be edited.
+        username = (credentials.username if entry is not None else _unknown_user(credentials.username))[: audit.ACTOR_MAX]
         if _should_audit_denial(username):
             audit.record(session, actor=username, role="unauthenticated", event_type="auth.denied",
                          entity_type="auth", entity_id="basic", payload={"reason": "bad credentials"})
