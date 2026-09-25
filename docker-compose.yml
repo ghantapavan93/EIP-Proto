@@ -1,0 +1,75 @@
+# Backstop — one command: `docker compose up --build`
+#
+#   UI   http://localhost:5173   the only public-facing port (nginx: static UI + /api proxy)
+#   API  http://localhost:8000/docs   loopback only; the browser always uses same-origin /api
+#   DB   no host port; Ollama stays on the host (host.docker.internal)
+#
+# Demo users come from BACKSTOP_USERS (.env). The defaults (analyst/analyst, …)
+# are for localhost only; scripts/demo-tunnel.* refuses to publish them.
+#
+# The backend seeds rules, contracts, the synthetic corpus and the artifact
+# inventory, replays the frozen page snapshots, executes nine runs (four
+# simulated acts + five recorded real-model replays), then serves. Everything is idempotent; restarting changes nothing.
+#
+# Deliberately boring: Postgres + one API container + one static UI container.
+# No queue, no vector store, no orchestrator. ECS + RDS is the stated
+# production shape (see docs/adr/ADR-004-right-sizing.md).
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: backstop
+      POSTGRES_PASSWORD: backstop
+      POSTGRES_DB: backstop
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backstop -d backstop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      BACKSTOP_DATABASE_URL: postgresql+psycopg://backstop:backstop@db:5432/backstop
+      BACKSTOP_USERS: ${BACKSTOP_USERS:-analyst:analyst:analyst,engineer:engineer:engineer,admin:admin:admin}
+      BACKSTOP_DEFAULT_ADAPTER: ${BACKSTOP_DEFAULT_ADAPTER:-cassette}
+      # Real models: the recorded cassettes replay with no provider at all. To record new
+      # ones from inside the container, point at the host's Ollama or set a free-tier key.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      BACKSTOP_ENVIRONMENT_LABEL: "PROTOTYPE · SYNTHETIC DATA"
+    depends_on:
+      db:
+        condition: service_healthy
+    # Loopback only: the API is reached through the UI gateway (/api), never
+    # directly. This mapping exists for local /docs; nothing public points at it.
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    # The one public port. Bound to loopback so the LAN cannot reach it; a
+    # Cloudflare Quick Tunnel (scripts/demo-tunnel.*) connects to it from this host.
+    ports:
+      - "127.0.0.1:${BACKSTOP_UI_PORT:-5173}:80"
+
+volumes:
+  pgdata:
