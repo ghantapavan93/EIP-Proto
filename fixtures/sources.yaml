@@ -14,32 +14,32 @@ real_pages:
   - code: mfaq-home
     name: MedicareFAQ — home
     url: https://www.medicarefaq.com/
-    source_system: vercel
+    source_system: public-web
     owner_role: marketing
   - code: mfaq-about
     name: MedicareFAQ — About Us
     url: https://www.medicarefaq.com/about-us/
-    source_system: vercel
+    source_system: public-web
     owner_role: marketing
   - code: mfaq-soa
     name: MedicareFAQ — Scope of Appointment FAQ
     url: https://www.medicarefaq.com/faqs/scope-of-appointment/
-    source_system: vercel
+    source_system: public-web
     owner_role: compliance
   - code: mfaq-ma-compare
     name: MedicareFAQ — Key questions when comparing Medicare Advantage plans
     url: https://www.medicarefaq.com/blog/key-questions-to-ask-when-comparing-medicare-advantage-plans/
-    source_system: vercel
+    source_system: public-web
     owner_role: marketing
   - code: teb-home
     name: The Elite Brokerage — home (footer disclaimer)
     url: https://www.theelitebrokerage.com/
-    source_system: vercel
+    source_system: public-web
     owner_role: compliance
   - code: mcmp-rates
     name: MedicareCompared — rates funnel
     url: https://rates.medicarecompared.com/
-    source_system: netlify
+    source_system: public-web
     owner_role: marketing
 
 synthetic:

@@ -9,8 +9,8 @@ The backend finds this folder through `BACKSTOP_FIXTURES_DIR` (default: `fixture
 | Path | What it is | Real or synthetic | Read by |
 |---|---|---|---|
 | `sources.yaml` | Artifact inventory: 6 public web pages (`real_pages`) and 15 stand-ins for internal artifacts (`synthetic`: scorecard items, scripts, a coaching prompt, an email template, training slides, an IVR line, a lead-form consent, a compensation sheet, a dialer policy). Synthetic entries carry their text inline. | Page URLs real; internal artifacts synthetic | `scanner/service.py` (`load_inventory`, scans) |
-| `pages/<code>.html` | Frozen copies of the six public pages: `mfaq-home`, `mfaq-about`, `mfaq-soa`, `mfaq-ma-compare` (medicarefaq.com), `teb-home` (theelitebrokerage.com), `mcmp-rates` (rates.medicarecompared.com). | Real | `scanner/crawler.py` (snapshot mode; live mode overwrites) |
-| `sources/<host>-<hash>.html` | Frozen copies of the primary source each rule cites (`source_url`). The name is the host plus the first 10 hex characters of the SHA-256 of the URL. | Real | `scanner/sources.py` (`backstop check-sources`, `POST /api/sources/check`) |
+| `pages/<code>.html` | Short attributed excerpts of the six public pages (the passages around each rule-bearing sentence; every matcher result is identical to the full page): `mfaq-home`, `mfaq-about`, `mfaq-soa`, `mfaq-ma-compare` (medicarefaq.com), `teb-home` (theelitebrokerage.com), `mcmp-rates` (rates.medicarecompared.com). | Real | `scanner/crawler.py` (snapshot mode; live mode overwrites) |
+| `sources/<host>-<hash>.html` | Short excerpts of the primary source each rule cites (`source_url`): the passages relevant to the rule. The watcher hashes them; a live check refreshes the full page locally. The name is the host plus the first 10 hex characters of the SHA-256 of the URL. | Real | `scanner/sources.py` (`backstop check-sources`, `POST /api/sources/check`) |
 | `matcher_golden.yaml` | 113 labelled snippets with the rule-version edges a careful analyst would draw, including near-misses. | Synthetic | `scanner/evaluate.py` (`backstop eval-matchers`, `GET /api/evals/matchers`), `api/ops.py` status rail |
 | `pii_golden.yaml` | 42 labelled strings for scoring the PII redactor, including negatives. | Synthetic | `backend/tests/test_governance_and_pii.py` |
 | `judge_canary.yaml` | Six fixed coaching notes with expected score bands, re-judged on every judged run to detect judge drift. | Synthetic | `harness/canary.py` via `harness/runner.py` |
@@ -31,7 +31,7 @@ The other six rules have no `source_url` yet, so the watcher skips them.
 
 ## Real and synthetic
 
-- **Real:** `pages/` and `sources/` are third-party pages. They were fetched once, read-only, on 2026-09-21 with an identified user agent, for research, and frozen so the demo never depends on the network. Each file is attributed to its publisher through its URL (in `sources.yaml` for pages, in the citing rule's `source_url` for sources). The content belongs to those publishers.
+- **Real:** `pages/` and `sources/` are short excerpts of third-party pages. The pages were fetched once, read-only, on 2026-09-21 with an identified user agent, for research, and frozen so the demo never depends on the network. Each file is attributed to its publisher through its URL (in `sources.yaml` for pages, in the citing rule's `source_url` for sources). The content belongs to those publishers.
 - **Synthetic:** every internal artifact, golden set, canary note, defect profile and the sample CSV. The call transcripts themselves are not stored here; `harness/corpus.py` generates them deterministically (60 development calls, `T001`-`T060`, and 60 held-out calls, `H001`-`H060`).
 - **Recorded:** cassettes hold real output from real models, run through the real workflow and contracts on the synthetic calls.
 
