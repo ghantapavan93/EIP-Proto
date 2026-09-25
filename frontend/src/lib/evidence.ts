@@ -47,6 +47,57 @@ export function complianceWord(v: unknown): string {
   return str(v);
 }
 
+export interface RuleExplanation {
+  /** the deterministic comparison the contract made, e.g. "25s < 131s → disclaimer before benefits → compliant" */
+  check: string;
+  /** what went wrong, in one sentence, when the model disagreed with the rule */
+  finding: string | null;
+}
+
+function num(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+/**
+ * "Why is this red?" for the rule contracts, recomputed from the stored evidence.
+ * Returns null unless the recomputed verdict equals the stored ground truth, so the
+ * explanation can never disagree with the contract that produced the result.
+ */
+export function explainRuleVerdict(ev: JsonObject, outcome: string): RuleExplanation | null {
+  if (ev.not_applicable !== undefined || typeof ev.expected !== 'boolean') return null;
+  const logic = isObject(ev.rule_logic) ? ev.rule_logic : {};
+  let derived: boolean | null = null;
+  let check = '';
+  const disclaimer = num(ev.disclaimer_seconds);
+  const benefits = num(ev.benefits_started_seconds);
+  if (logic.basis === 'ordering' && disclaimer !== null && benefits !== null) {
+    derived = disclaimer < benefits;
+    check = derived
+      ? `${disclaimer}s < ${benefits}s → disclaimer before benefits → compliant`
+      : `${disclaimer}s ≥ ${benefits}s → benefits discussed first → violation`;
+  } else if (logic.basis === 'timer' && disclaimer !== null && num(logic.window_seconds) !== null) {
+    const window = num(logic.window_seconds) as number;
+    derived = disclaimer <= window;
+    check = derived ? `${disclaimer}s ≤ ${window}s window → compliant` : `${disclaimer}s > ${window}s window → violation`;
+  } else if (num(logic.min_hours) !== null && ev.soa_exception == null && num(ev.appointment_hours_after_soa) !== null) {
+    const min = num(logic.min_hours) as number;
+    const hours = num(ev.appointment_hours_after_soa) as number;
+    derived = hours >= min;
+    check = min === 0 ? 'no waiting period in force → compliant' : derived ? `${hours}h ≥ ${min}h wait → compliant` : `${hours}h < ${min}h wait → violation`;
+  }
+  if (derived === null || derived !== ev.expected) return null;
+  if (outcome === 'PASS' || typeof ev.got !== 'boolean' || ev.got === ev.expected) return { check, finding: null };
+  const modelRead = num(ev.model_disclaimer_seconds);
+  let finding = `The model answered ${complianceWord(ev.got)}; the rule in force gives ${complianceWord(ev.expected)}.`;
+  if (disclaimer !== null && modelRead !== null) {
+    finding =
+      Math.abs(modelRead - disclaimer) <= 2
+        ? `The model read the disclaimer at ${modelRead}s, which is correct, and still answered ${complianceWord(ev.got)}: its verdict contradicts the evidence it extracted.`
+        : `The model misread the disclaimer time (${modelRead}s; the call has it at ${disclaimer}s), so its verdict rests on a wrong reading.`;
+  }
+  return { check, finding };
+}
+
 /** One line for tables. */
 export function evidenceSummary(contractCode: string, ev: JsonObject): string {
   switch (evidenceFamily(contractCode, ev)) {

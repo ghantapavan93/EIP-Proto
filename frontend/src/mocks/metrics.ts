@@ -375,7 +375,7 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
     anyBlock(fb),
     paired,
     block.reduce((n, c) => n + (excluded.get(c) ?? 0), 0),
-    'the release-blocking contracts (a call fails if any BLOCK contract fails)',
+    'the release-blocking contracts',
   );
   if (a.run.contract_set_hash !== b.run.contract_set_hash) overall.cautions.push('The contract sets differ between the runs; ALL-BLOCK compares different checks.');
 

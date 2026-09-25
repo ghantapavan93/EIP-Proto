@@ -63,6 +63,7 @@ State lives for the page session; reload to reseed.
 | `/review?kind=&state=&task=` | Review queue | STALE_ASSET / PROPOSED_EDGE / FLAGGED_RESULT / RULE_SOURCE_CHANGED tabs, state filter, drawer with context (evidence span, rule diff, expected vs got), allowed transitions, reason code (required for dismissed / overridden / upheld), 409/403 shown inline, test case card after override |
 | `/test-cases` | Test cases | overrides pending approval by a different user, 12-month expiry; Approve (engineer/admin; disabled when creator = you) |
 | `/audit` | Audit log | append-only events, filters by event type / entity type / entity id, pagination, expandable payloads |
+| `/governance` | Governance | action × role matrix for everyone; admins get the access review, audit checkpoints (take, list, verify a receipt) and corpus adoption; other roles see what each panel is and why it is refused |
 
 ## Layout
 
@@ -75,7 +76,7 @@ src/
     ui/         Chip DataTable Drawer Toast KeyValue JsonView Eyebrow HighlightedText TickNumber
                 EmptyState ErrorState LoadingState Skeleton
     charts/     ConfusionMatrix TrendChart StatBars OutcomeBar RateRange FanDiagram ChangeMatrix
-    runs/       GateChip AdapterChip CorpusChip ModelId RunFacts DiffChips SignificancePanel
+    runs/       GateChip AdapterChip CorpusChip ModelId RunFacts DiffChips SignificancePanel AttributionPanel
     rules/      Timeline RuleVersionBadges DirectionChip DateAsOfControl
     artifacts/  SourceBadge RunScanControl ScanStats
     evidence/   EvidenceBlock EvidenceQuote EvidenceExport
@@ -83,7 +84,7 @@ src/
     access/     GatedButton usePermission
     sandbox/    ArtifactCheck TranscriptCheck SandboxNotes useSandboxTimers
   pages/        Login Home Rules RuleDetail Artifacts ArtifactDetail Runs RunDetail RunTranscript RunCompare Review
-                TestCases Audit Contracts ContractDetail Readiness Models Evals Try
+                TestCases Audit Governance Contracts ContractDetail Readiness Models Evals Try
   lib/          pure view logic: format, vocab, spans, stats, significance, readiness, review, evidence, sandbox …
   mocks/        server.ts (in-memory API)  rules.ts  assets.ts (artifacts + edges)  registry.ts (contracts, models, prompts)
                 corpus.ts (synthetic transcripts)  engine.ts (deterministic replay + contract judging)  staleness.ts

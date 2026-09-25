@@ -3,8 +3,9 @@
  * core/permissions.py, which a backend test checks against every
  * require_role); this table mirrors it for a server without /me and for the
  * moment before it answers. Action ids are the server's: analysts review and
- * decide, engineers and admins also change the system, and no one approves
- * their own override.
+ * decide, engineers also operate the harness, admins also govern it (access,
+ * the adopted rule corpus, audit checkpoints), and no one approves their own
+ * override.
  */
 
 import type { MeOut, MePermission, RoleInfo } from '../api/types';
@@ -23,7 +24,9 @@ export type RoleAction =
   | 'reload_rules'
   | 'open_stale_tasks'
   | 'republish'
-  | 'approve_test_cases';
+  | 'approve_test_cases'
+  | 'review_access'
+  | 'checkpoint_audit';
 
 interface ActionSpec {
   label: string;
@@ -33,6 +36,7 @@ interface ActionSpec {
 }
 
 const EDITORS = ['engineer', 'admin'];
+const ADMINS = ['admin'];
 const EVERYONE = ['analyst', 'engineer', 'admin'];
 
 /** In the server's order (core/permissions.py ACTIONS). */
@@ -46,7 +50,9 @@ export const ACTIONS: Record<RoleAction, ActionSpec> = {
   start_scans: { label: 'Scan the artifact inventory', roles: EDITORS, refusal: 'Engineers and admins can run scans' },
   check_rule_sources: { label: "Check the regulators' source pages for changed text", roles: EDITORS, refusal: 'Engineers and admins can re-check sources' },
   propose_rule_versions: { label: 'Propose a new rule version (what-if)', roles: EDITORS, refusal: 'Engineers and admins can propose rule versions' },
-  reload_rules: { label: 'Reload the rule corpus from git', roles: EDITORS, refusal: 'Engineers and admins can reload rules' },
+  reload_rules: { label: 'Adopt the rule corpus from git into the running system', roles: ADMINS, refusal: 'Only an admin adopts the rule corpus; engineers propose versions' },
+  review_access: { label: 'Review access: accounts, roles, default passwords, denied attempts', roles: ADMINS, refusal: 'Only an admin reviews access' },
+  checkpoint_audit: { label: 'Take an audit checkpoint to keep outside the database', roles: ADMINS, refusal: 'Only an admin takes audit checkpoints; anyone can verify one' },
   ingest_transcripts: { label: 'Ingest transcripts from an export file', roles: EDITORS, refusal: 'Engineers and admins can ingest transcripts' },
   open_stale_tasks: { label: "Open stale-artifact review tasks by reading a rule's impact", roles: EDITORS, refusal: 'Engineers and admins open stale-artifact tasks' },
   export_evidence: { label: 'Export evidence bundles and run results', roles: EVERYONE, refusal: '' },
@@ -68,7 +74,7 @@ const ROLE_INFO: Record<string, { label: string; description: string }> = {
   },
   admin: {
     label: 'Administrator',
-    description: 'The same permissions as an engineer in this prototype. Accounts are a stand-in for SSO; there is no user management screen.',
+    description: 'Governs the platform: everything an engineer can do, plus the access review (who can do what, default passwords, denied attempts), adopting the rule corpus into the running system, and taking audit checkpoints kept outside the database. Accounts come from BACKSTOP_USERS, a stand-in for SSO.',
   },
 };
 

@@ -7,8 +7,10 @@ import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryOptions
 import { api, download, downloadWithMeta, toQuery, upload } from './client';
 import { isApiError } from './errors';
 import type {
+  AccessReviewOut,
   AssetDetailOut,
   AssetOut,
+  AuditCheckpointOut,
   AuditOut,
   AuditQuery,
   AuditVerifyOut,
@@ -96,6 +98,8 @@ export const keys = {
   ingestFormats: () => ['backstop', 'ingest', 'formats'] as const,
   health: () => ['backstop', 'health'] as const,
   status: () => ['backstop', 'status'] as const,
+  access: () => ['backstop', 'admin', 'access'] as const,
+  checkpoints: () => ['backstop', 'admin', 'checkpoints'] as const,
 };
 
 /** Status rail poll interval. */
@@ -522,6 +526,21 @@ export function useSandboxTranscript() {
 
 // ---------------------------------------------------------------- audit
 
+export interface AuditActorOut {
+  actor: string;
+  role: string;
+  events: number;
+}
+
+/** GET /audit/actors — the people who appear in the log, for the actor filter. */
+export function useAuditActors() {
+  return useQuery<AuditActorOut[], Error>({
+    queryKey: ['backstop', 'audit', 'actors'],
+    queryFn: () => api.get<AuditActorOut[]>('/audit/actors'),
+    staleTime: 60_000,
+  });
+}
+
 export function useAudit(q: AuditQuery) {
   return useQuery<Page<AuditOut>, Error>({
     queryKey: keys.audit(q),
@@ -536,6 +555,62 @@ export function useVerifyAuditChain() {
   return useMutation<AuditVerifyOut, Error, void>({
     mutationFn: () => api.get<AuditVerifyOut>('/audit/verify'),
     onSuccess: () => void qc.invalidateQueries({ queryKey: keys.status() }),
+  });
+}
+
+/** GET /audit/verify?through_id=&tip= — does the chain still contain this checkpoint? */
+export function useVerifyCheckpoint() {
+  return useMutation<AuditVerifyOut, Error, { through_id: number; tip: string }>({
+    mutationFn: ({ through_id, tip }) =>
+      api.get<AuditVerifyOut>(`/audit/verify?through_id=${through_id}&tip=${encodeURIComponent(tip)}`),
+  });
+}
+
+// ---------------------------------------------------------------- governance (admin)
+
+/** GET /admin/access — admin only; the server audit-logs every review. */
+export function useAccessReview(enabled: boolean) {
+  return useQuery<AccessReviewOut, Error>({
+    queryKey: keys.access(),
+    queryFn: () => api.get<AccessReviewOut>('/admin/access'),
+    enabled,
+    staleTime: 30_000,
+  });
+}
+
+export function useAuditCheckpoints(enabled: boolean) {
+  return useQuery<AuditCheckpointOut[], Error>({
+    queryKey: keys.checkpoints(),
+    queryFn: () => api.get<AuditCheckpointOut[]>('/admin/audit-checkpoints'),
+    enabled,
+  });
+}
+
+export interface ReloadRulesOut {
+  rules_created: number;
+  versions_created: number;
+  unchanged: number;
+  files: string[];
+}
+
+/** POST /rules/reload — admin only: adopt the reviewed corpus in git into the running system. */
+export function useReloadRules() {
+  const qc = useQueryClient();
+  return useMutation<ReloadRulesOut, Error, void>({
+    mutationFn: () => api.post<ReloadRulesOut>('/rules/reload'),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: keys.rules() }),
+  });
+}
+
+/** POST /admin/audit-checkpoints — refused (409) while the chain is broken. */
+export function useTakeCheckpoint() {
+  const qc = useQueryClient();
+  return useMutation<AuditCheckpointOut, Error, void>({
+    mutationFn: () => api.post<AuditCheckpointOut>('/admin/audit-checkpoints'),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: keys.checkpoints() });
+      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
+    },
   });
 }
 

@@ -25,7 +25,7 @@ const SCREENS: Array<[string, RegExp | string]> = [
   ['/readiness', /Vacated — Backstop will not enforce/],
   ['/runs', /canary off band|off band/i],
   [`/runs/${RUN_IDS.ruleFlip}`, /Judge canary — six notes with known bands/],
-  [`/runs/${RUN_IDS.ruleFlip}/transcripts/T017`, /disclaimer_compliant/],
+  [`/runs/${RUN_IDS.ruleFlip}/transcripts/T017`, /C-TPMO-01/], // a failing call opens on its contracts
   [`/runs/${RUN_IDS.modelSwap}/transcripts/T018`, /not found in transcript/],
   [`/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`, /Prompt diff — v1 → v2/],
   [`/runs/compare?a=${RUN_IDS.promptV2}&b=${RUN_IDS.modelSwap}`, /Newly failing — passed in A/],

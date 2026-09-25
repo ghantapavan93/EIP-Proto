@@ -39,7 +39,7 @@ import { TickNumber } from '../components/ui/TickNumber';
 import { CAUSALITY_STEPS, useCausalitySequence } from '../lib/motion';
 import { fmtDate, fmtTs, shortHash, todayIso } from '../lib/format';
 import { artifactTypeLabel, changeTone, directionLabel, polarityTone, PROPOSABLE_CLASSIFICATIONS, roleLabel, severityTone, stateTone } from '../lib/vocab';
-import { classificationLabel, governingVersions } from '../lib/ruleVersions';
+import { classificationLabel, governingVersions, nextChangeWithin } from '../lib/ruleVersions';
 import { RuleStatusNotes, VersionStatusChip } from '../components/rules/RuleVersionBadges';
 import { cn } from '../lib/cn';
 
@@ -157,6 +157,22 @@ const PROPOSE_DEFAULTS = {
  * the same date. Read-only on the server: no tasks, no audit rows. Labelled
  * HYPOTHETICAL so it is never read as the real exposure.
  */
+/**
+ * A prompt that declares a different version from the one in force is either behind
+ * (declares a superseded version) or ahead (declares one that has not taken effect yet).
+ */
+function DeclaredChip({ stale, declared, inForce }: { stale: boolean; declared: number | null; inForce: number | null }) {
+  if (!stale) return <Chip tone="green">current</Chip>;
+  if (declared !== null && inForce !== null && declared > inForce) {
+    return (
+      <Chip tone="teal" title={`Declares v${declared}; v${inForce} is in force on this date`}>
+        ahead · not yet in force
+      </Chip>
+    );
+  }
+  return <Chip tone="amber">declares superseded version</Chip>;
+}
+
 export function WhatIfImpact({ code, version, asOf, undated = false, voteDate = null }: { code: string; version: number; asOf: string; undated?: boolean; voteDate?: string | null }) {
   const whatIf = useImpactWhatIf(code, asOf, version);
   const enacted = useImpact(code, asOf);
@@ -424,7 +440,15 @@ function SourceWatch({ code, canCheck }: { code: string; canCheck: boolean }) {
                   { live: false },
                   {
                     onSuccess: (r) => {
-                      toast({ title: `Checked ${r.checked} sources · ${r.changed} changed · ${r.first_seen} first seen · ${r.errors} errors`, detail: `mode ${r.mode}`, tone: r.changed ? 'amber' : 'green' });
+                      toast({
+                        title: `Checked ${r.checked} sources · ${r.changed} changed · ${r.first_seen} first seen · ${r.errors} errors`,
+                        detail:
+                          r.mode === 'snapshot'
+                            ? 'Replayed the frozen copies: this confirms the stored copy, not the live page.'
+                            : `mode ${r.mode}`,
+                        // an error means UNKNOWN, never "unchanged"
+                        tone: r.errors ? 'red' : r.changed ? 'amber' : r.mode === 'snapshot' ? 'teal' : 'green',
+                      });
                       void sources.refetch();
                     },
                     onError: (err) => toast({ title: 'Source check refused', detail: err.message, tone: 'red' }),
@@ -457,6 +481,10 @@ function SourceWatch({ code, canCheck }: { code: string; canCheck: boolean }) {
                       <Chip tone="amber">changed</Chip>
                     ) : rows.filter((r) => r.source_url === s.source_url).length === 1 ? (
                       <Chip tone="teal">first seen</Chip>
+                    ) : s.fetch_mode === 'snapshot' ? (
+                      <Chip tone="neutral" title="The frozen copy was replayed; the live page was not fetched">
+                        replayed · not fetched
+                      </Chip>
                     ) : (
                       <Chip tone="green">unchanged</Chip>
                     )}
@@ -489,7 +517,12 @@ export function RuleDetailPage() {
   const rule = useRule(code);
   const contracts = useContracts();
   const [params, setParams] = useSearchParams();
-  const asOf = params.get('as_of') || meta.data?.today || todayIso();
+  const today = meta.data?.today || todayIso();
+  // With no date in the URL, open on the rule's next change when it is under 30 days away:
+  // today's state of a rule about to flip shows nothing stale and hides the point.
+  const upcoming = nextChangeWithin(rule.data?.versions, today, 30);
+  const asOf = params.get('as_of') || upcoming || today;
+  const openedOnUpcoming = !params.get('as_of') && upcoming !== null;
   const setAsOf = (value: string) => {
     const next = new URLSearchParams(params);
     next.set('as_of', value);
@@ -571,6 +604,7 @@ export function RuleDetailPage() {
     [],
   );
 
+  const inForceForPrompts = impact.data?.in_force_version ?? null;
   const promptColumns = useMemo<ColumnDef<ImpactPromptVersion, unknown>[]>(
     () => [
       { header: 'Workflow', accessorKey: 'workflow', meta: { mono: true } },
@@ -584,14 +618,14 @@ export function RuleDetailPage() {
           return (
             <span className="inline-flex items-center gap-1.5 font-mono">
               {code}@v{p.declared_version ?? '?'}
-              {p.stale ? <Chip tone="amber">declares superseded version</Chip> : <Chip tone="green">current</Chip>}
+              <DeclaredChip stale={p.stale} declared={p.declared_version} inForce={inForceForPrompts} />
             </span>
           );
         },
       },
       { header: 'Prompt hash', accessorKey: 'prompt_hash', meta: { mono: true }, cell: (c) => <span title={c.row.original.prompt_hash}>{shortHash(c.row.original.prompt_hash, 16)}</span> },
     ],
-    [code],
+    [code, inForceForPrompts],
   );
 
   if (rule.isLoading) return <LoadingState className="p-6" rows={5} />;
@@ -658,7 +692,17 @@ export function RuleDetailPage() {
         }
         actions={
           <>
-            <DateAsOfControl value={asOf} onChange={setAsOf} quick={quick} />
+            <div className="flex flex-col items-end gap-1">
+              <DateAsOfControl value={asOf} onChange={setAsOf} quick={quick} />
+              {openedOnUpcoming && (
+                <span className="text-[11.5px] text-ink-2" role="note">
+                  Showing the next change on this rule ({fmtDate(asOf)}).{' '}
+                  <button type="button" className="font-semibold text-teal-ink hover:underline" onClick={() => setAsOf(today)}>
+                    Show today
+                  </button>
+                </span>
+              )}
+            </div>
             <EvidenceExport scope="rules" id={r.code} asOf={asOf} className="self-end" preview={evidencePreview} />
             <span className="self-end">
               <GatedButton action="propose_rule_versions" className="btn btn-outline" onClick={() => setProposeOpen(true)}>
@@ -773,8 +817,8 @@ export function RuleDetailPage() {
               <LoadingState rows={4} />
             ) : (
               <div className="space-y-3">
-                <StaleGroup title="Over-restrictive — still enforces something the rule no longer requires" direction="over_restrictive" items={groups.over} ruleCode={r.code} hint="Nothing on this rule applies a stricter clause than the one in force." seq={seq} />
-                <StaleGroup title="Under-restrictive — encodes a weaker clause or misses a new requirement" direction="under_restrictive" items={groups.under} ruleCode={r.code} hint="No artifact on this rule is missing a requirement that is in force." seq={seq} />
+                <StaleGroup title="Over-restrictive — still enforces something the rule no longer requires" direction="over_restrictive" items={groups.over} ruleCode={r.code} hint="No confirmed encoding of this rule applies a stricter clause than the one in force." seq={seq} />
+                <StaleGroup title="Under-restrictive — encodes a weaker clause or misses a new requirement" direction="under_restrictive" items={groups.under} ruleCode={r.code} hint="No confirmed encoding of this rule is missing a requirement in force. An artifact no matcher recognised is not evaluated." seq={seq} />
                 <StaleGroup title="Re-verify — the basis or wording changed; a human must read it" direction="reverify" items={groups.reverify} ruleCode={r.code} hint="Nothing on this rule needs a human re-read as of this date." seq={seq} />
               </div>
             )}

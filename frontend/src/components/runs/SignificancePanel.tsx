@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
-import type { CompareStatisticsOut, ContractComparisonOut, PairedTableOut } from '../../api/types';
+import type { CompareStatisticsOut, ContractComparisonOut, HeldOutCheckOut, PairedTableOut } from '../../api/types';
 import { cn } from '../../lib/cn';
 import { axisMax, directionLabel, directionTone, fmtCi, fmtPct, lostToHolm, pLine, plainVerdict, rowCautions } from '../../lib/significance';
 import { severityTone } from '../../lib/vocab';
@@ -207,6 +207,40 @@ function ContractRow({ row, alpha, max, family }: { row: ContractComparisonOut; 
  * shared axis, the p-value and its Holm adjustment, and the cautions that
  * should temper the reading.
  */
+/**
+ * Shown above the development verdict, never below it: the held-out calls were not read
+ * while writing the prompt, so when they disagree they are the result to trust.
+ */
+function HeldOutBanner({ check }: { check: HeldOutCheckOut }) {
+  const contradicts = check.contradicts_development;
+  return (
+    <div
+      role="note"
+      aria-label="Held-out check"
+      className={cn(
+        'mb-3 flex flex-wrap items-start gap-x-3 gap-y-1.5 rounded-[8px] border px-4 py-3 text-[13px] leading-snug',
+        contradicts ? 'border-red/40 bg-red/5' : 'border-hairline bg-surface',
+      )}
+    >
+      <AlertTriangle size={15} className={cn('mt-[2px] shrink-0', contradicts ? 'text-red' : 'text-ink-3')} aria-hidden />
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold text-ink">
+          {contradicts ? 'The held-out calls reverse this result.' : 'The held-out calls agree.'}
+        </div>
+        <p className="text-ink-2">
+          {check.summary} The development calls below were read while writing the prompt; the held-out calls were not.
+        </p>
+      </div>
+      <Link
+        to={`/runs/compare?a=${encodeURIComponent(check.a_run_id)}&b=${encodeURIComponent(check.b_run_id)}`}
+        className="inline-flex shrink-0 items-center gap-1 self-center text-[12.5px] font-semibold"
+      >
+        Open held-out comparison <ArrowRight size={12} aria-hidden />
+      </Link>
+    </div>
+  );
+}
+
 export function SignificancePanel({ stats }: { stats: CompareStatisticsOut }) {
   const rows = stats.per_contract;
   const max = axisMax([stats.overall.a, stats.overall.b, ...rows.flatMap((r) => [r.a, r.b])]);
@@ -222,8 +256,9 @@ export function SignificancePanel({ stats }: { stats: CompareStatisticsOut }) {
           {test} · α = {stats.alpha} · Holm across {rows.length} contracts · 95% Wilson intervals
         </span>
       </div>
+      {stats.held_out && <HeldOutBanner check={stats.held_out} />}
       <OverallCard row={stats.overall} alpha={stats.alpha} max={max} />
-      <Cautions items={stats.cautions} className="mt-2" />
+      <Cautions items={stats.cautions.filter((c) => !(stats.held_out && c.startsWith('Held-out check:')))} className="mt-2" />
       <div className="card mt-3 overflow-hidden">
         <div className="hidden grid-cols-[150px_minmax(0,1.4fr)_minmax(150px,1fr)_92px_150px] gap-x-4 border-b border-hairline bg-band px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-2 md:grid">
           <span>Contract</span>

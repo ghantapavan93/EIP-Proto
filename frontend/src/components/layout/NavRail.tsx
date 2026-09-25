@@ -1,21 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-  Activity,
-  BookOpen,
-  CalendarClock,
-  Cpu,
-  FileCheck2,
-  FileText,
-  FlaskConical,
-  GitBranch,
-  Inbox,
-  ScanText,
-  ScrollText,
-  ShieldCheck,
-  Target,
-  X,
-} from 'lucide-react';
+import { Activity, BookOpen, CalendarClock, Cpu, FileCheck2, FileText, FlaskConical, GitBranch, Inbox, ScanText, ScrollText, ShieldCheck, Target, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { MOBILE_NAV_ID } from './shellContext';
 
@@ -58,7 +43,10 @@ const GROUPS: Array<{ label: string; items: NavItem[] }> = [
   },
   {
     label: 'System',
-    items: [{ to: '/audit', label: 'Audit', icon: ScrollText }],
+    items: [
+      { to: '/audit', label: 'Audit', icon: ScrollText },
+      { to: '/governance', label: 'Governance', icon: ShieldCheck },
+    ],
   },
 ];
 

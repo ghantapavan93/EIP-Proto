@@ -1,6 +1,8 @@
 import { ApiError } from '../api/errors';
 import { getCredentials, type Credentials } from '../api/auth';
 import type {
+  AccessReviewOut,
+  AuditCheckpointOut,
   AssetOut,
   AuditOut,
   CompareCell,
@@ -39,8 +41,9 @@ import { evaluate, summarize, versionInForce } from './staleness';
 import { SAMPLES, sandboxArtifact, sandboxTranscript } from './sandbox';
 import { COMPARE_FAILURE_DEFINITION, compareStatistics, contractMetrics } from './metrics';
 import { readiness } from './readiness';
-import { fallbackMe } from '../lib/roles';
+import { ACTIONS, ROLES, fallbackMe } from '../lib/roles';
 import { governingVersions, governs } from '../lib/ruleVersions';
+import { attributeRuns } from '../lib/attribution';
 
 /**
  * In-memory mock of the Backstop API. Same routes, same shapes, same refusal
@@ -98,6 +101,8 @@ const state: State = {
 const GENESIS = '0'.repeat(64);
 
 /** Mock actor -> role: people keep their demo role; "system" rows are automation; "demo-seed:*" rows are seeded examples. */
+const ROLE_ORDER = ['analyst', 'engineer', 'admin'];
+
 function actorRole(actor: string): string {
   if (actor.startsWith('demo-seed:')) return 'demo-seed';
   return DEMO_USERS[actor]?.role ?? 'system';
@@ -700,6 +705,7 @@ function compare(a: RunRecord, b: RunRecord): CompareOut {
   return {
     failure_definition: COMPARE_FAILURE_DEFINITION,
     statistics: compareStatistics(a, b),
+    attribution: attributeRuns(a.run, b.run, state.runs.filter((r) => r.run.status === 'COMPLETE').map((r) => r.run)),
     a: a.run,
     b: b.run,
     what_changed: {
@@ -789,6 +795,73 @@ function requireEditor(role: string, what: string, path: string): void {
   if (!['engineer', 'admin'].includes(role)) throw new ApiError(403, `role '${role}' may not ${what}`, path);
 }
 
+function requireAdmin(actor: string, role: string, path: string): void {
+  if (role !== 'admin') {
+    audit(actor, 'auth.denied', 'auth', 'role', { required: ['admin'], role });
+    throw new ApiError(403, `role '${role}' may not do this`, path);
+  }
+}
+
+/** GET /admin/access, computed from the demo accounts and the in-memory audit log. */
+function accessReview(): AccessReviewOut {
+  const now = Date.now();
+  const within = (ts: string, ms: number) => now - Date.parse(ts) <= ms;
+  const DAY = 86_400_000;
+  const accounts = Object.entries(DEMO_USERS)
+    .sort(([an, a], [bn, b]) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role) || an.localeCompare(bn))
+    .map(([name, u]) => {
+      const mine = state.audit.filter((e) => e.actor === name);
+      const acted = mine.filter((e) => e.event_type !== 'auth.denied');
+      const last = acted[acted.length - 1];
+      return {
+        name,
+        role: u.role,
+        role_label: ROLES.find((r) => r.role === u.role)?.label ?? u.role,
+        default_credentials: u.password === name,
+        last_recorded_action_at: last?.ts ?? null,
+        last_recorded_action: last?.event_type ?? null,
+        actions_30d: acted.filter((e) => within(e.ts, 30 * DAY)).length,
+        denied_30d: mine.filter((e) => e.event_type === 'auth.denied' && within(e.ts, 30 * DAY)).length,
+      };
+    });
+  const denied = state.audit.filter((e) => e.event_type === 'auth.denied');
+  return {
+    generated_at: nowIso(),
+    identity_source:
+      'Accounts come from the BACKSTOP_USERS environment variable, a stand-in for SSO. Production reads identities and role claims from the identity provider (OIDC); this review would read the same claims.',
+    accounts,
+    default_credential_accounts: accounts.filter((a) => a.default_credentials).length,
+    denied_24h: denied.filter((e) => within(e.ts, DAY)).length,
+    recent_denied: denied.slice(-25).reverse().map((e) => {
+      const p = e.payload as Record<string, unknown>;
+      const required = Array.isArray(p.required) ? (p.required as string[]).join(' or ') : 'another role';
+      return e.entity_id === 'basic'
+        ? { ts: e.ts, actor: e.actor, kind: 'bad_credentials' as const, detail: String(p.reason ?? 'bad credentials') }
+        : { ts: e.ts, actor: e.actor, kind: 'insufficient_role' as const, detail: `signed in as ${String(p.role ?? '?')}; needed ${required}` };
+    }),
+    matrix: (Object.keys(ACTIONS) as Array<keyof typeof ACTIONS>).map((action) => ({
+      action,
+      label: ACTIONS[action].label,
+      roles: ROLE_ORDER.filter((r) => ACTIONS[action].roles.includes(r)),
+      rule: '',
+    })),
+    roles: ROLES,
+  };
+}
+
+function checkpointOut(e: AuditOut): AuditCheckpointOut {
+  const p = e.payload as { through_id: number; tip: string; rows_verified: number };
+  return {
+    id: e.id,
+    taken_at: e.ts,
+    taken_by: e.actor,
+    through_id: p.through_id,
+    tip: p.tip,
+    rows_verified: p.rows_verified,
+    verify_path: `/api/audit/verify?through_id=${p.through_id}&tip=${p.tip}`,
+  };
+}
+
 // ------------------------------------------------------------------ router
 
 export async function mockRequest(method: string, path: string, body?: unknown, credentials?: Credentials | null): Promise<unknown> {
@@ -853,6 +926,7 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   if (head === 'rules') {
     if (method === 'GET' && !second) return state.rules.map(ruleOut);
     if (method === 'POST' && second === 'reload') {
+      requireAdmin(actor, role, path);
       audit(actor, 'rules.reloaded', 'rules', 'rules/*.yaml', { unchanged: state.rules.length });
       return { rules_created: 0, versions_created: 0, unchanged: state.rules.length, files: state.rules.map((r) => `rules/${r.code}.yaml`) };
     }
@@ -1207,8 +1281,49 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   }
 
   // ---- audit
+  if (head === 'audit' && method === 'GET' && second === 'actors') {
+    const counts = new Map<string, { actor: string; role: string; events: number }>();
+    for (const e of state.audit) {
+      const role = e.actor_role ?? 'unknown';
+      if (['system', 'unauthenticated', 'unknown'].includes(role)) continue;
+      const row = counts.get(e.actor) ?? { actor: e.actor, role, events: 0 };
+      row.events += 1;
+      counts.set(e.actor, row);
+    }
+    return [...counts.values()].sort((a, b) => b.events - a.events || a.actor.localeCompare(b.actor));
+  }
   if (head === 'audit' && method === 'GET' && second === 'verify') {
-    return { ok: true, checked: state.audit.length, first_broken_id: null, reason: null, tip: state.audit[state.audit.length - 1]?.row_hash ?? GENESIS };
+    const last = state.audit[state.audit.length - 1];
+    const base = { ok: true, checked: state.audit.length, first_broken_id: null, reason: null, tip: last?.row_hash ?? GENESIS, tip_id: last?.id ?? null, checkpoint: null };
+    const throughRaw = query.get('through_id');
+    const tip = query.get('tip');
+    if ((throughRaw === null) !== (tip === null)) throw new ApiError(422, 'a checkpoint needs both through_id and tip', path);
+    if (throughRaw === null || tip === null) return base;
+    const through_id = Number(throughRaw);
+    const row = state.audit.find((e) => e.id === through_id);
+    const reason = !row
+      ? `row ${through_id} is missing from the chain: history was removed or rewritten`
+      : row.row_hash !== tip
+        ? `row ${through_id} no longer carries the checkpoint hash: history before it was rewritten`
+        : null;
+    return { ...base, ok: reason === null, reason, checkpoint: { through_id, tip, matches: reason === null, reason } };
+  }
+
+  // ---- governance (admin)
+  if (head === 'admin' && second === 'access' && method === 'GET') {
+    requireAdmin(actor, role, path);
+    const review = accessReview();
+    audit(actor, 'access.reviewed', 'access', 'review', { accounts: review.accounts.length, default_credential_accounts: review.default_credential_accounts, denied_24h: review.denied_24h });
+    return review;
+  }
+  if (head === 'admin' && second === 'audit-checkpoints') {
+    requireAdmin(actor, role, path);
+    if (method === 'GET') return state.audit.filter((e) => e.event_type === 'audit.checkpoint').reverse().slice(0, 50).map(checkpointOut);
+    if (method === 'POST') {
+      const last = state.audit[state.audit.length - 1];
+      if (!last) throw new ApiError(409, 'the audit log is empty; there is nothing to checkpoint', path);
+      return checkpointOut(audit(actor, 'audit.checkpoint', 'audit', String(last.id), { through_id: last.id, tip: last.row_hash, rows_verified: state.audit.length }));
+    }
   }
   if (head === 'audit' && method === 'GET') {
     const entityType = query.get('entity_type');

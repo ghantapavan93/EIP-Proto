@@ -710,6 +710,18 @@ export interface ContractComparisonOut {
   excluded_not_evaluated?: number;
 }
 
+/** The same prompt change on the held-out calls (older servers omit it). */
+export interface HeldOutCheckOut {
+  a_run_id: string;
+  b_run_id: string;
+  a_prompt_version: number;
+  b_prompt_version: number;
+  direction: ComparisonDirection | string;
+  p_value: number | null;
+  summary: string;
+  contradicts_development: boolean;
+}
+
 export interface CompareStatisticsOut {
   mode: 'paired' | 'unpaired' | string;
   alpha: number;
@@ -717,12 +729,43 @@ export interface CompareStatisticsOut {
   cautions: string[];
   overall: ContractComparisonOut;
   per_contract: ContractComparisonOut[];
+  held_out?: HeldOutCheckOut | null;
+}
+
+export type AttributionVerdict = 'isolated' | 'confounded' | 'repeat';
+
+export interface FactorChangeOut {
+  /** prompt | model | rule_date | corpus | contract_set | judge | overrides */
+  factor: string;
+  label: string;
+  a: string;
+  b: string;
+}
+
+/** An existing pair of runs that differs in `factor` alone. */
+export interface IsolatingPairOut {
+  factor: string;
+  label: string;
+  a_run_id: string;
+  b_run_id: string;
+}
+
+/** Can the difference between A and B be pinned on one change? (backend core/attribution.py) */
+export interface AttributionOut {
+  verdict: AttributionVerdict;
+  changed: FactorChangeOut[];
+  held_constant: string[];
+  summary: string;
+  scope_note?: string | null;
+  isolating_pairs: IsolatingPairOut[];
 }
 
 export interface CompareOut {
   a: RunOut;
   b: RunOut;
   what_changed: WhatChanged;
+  /** older servers omit it */
+  attribution?: AttributionOut | null;
   newly_failing: CompareCell[];
   newly_passing: CompareCell[];
   unchanged_failing: number;
@@ -1102,12 +1145,74 @@ export interface AuditOut {
 }
 
 /** GET /audit/verify */
+export interface CheckpointCheckOut {
+  through_id: number;
+  tip: string;
+  matches: boolean;
+  reason: string | null;
+}
+
 export interface AuditVerifyOut {
   ok: boolean;
   checked: number;
   first_broken_id: number | null;
   reason: string | null;
   tip: string;
+  /** id of the last verified row (older servers omit it) */
+  tip_id?: number | null;
+  /** present when a checkpoint (through_id + tip) was checked */
+  checkpoint?: CheckpointCheckOut | null;
+}
+
+// ------------------------------------------------------------- governance (admin)
+
+export interface AccessAccountOut {
+  name: string;
+  role: string;
+  role_label: string;
+  /** password == username: acceptable on localhost only */
+  default_credentials: boolean;
+  /** audit rows record changes and exports, not page views */
+  last_recorded_action_at: string | null;
+  last_recorded_action: string | null;
+  actions_30d: number;
+  denied_30d: number;
+}
+
+export interface DeniedAttemptOut {
+  ts: string;
+  actor: string;
+  kind: 'bad_credentials' | 'insufficient_role';
+  detail: string;
+}
+
+export interface AccessActionOut {
+  action: string;
+  label: string;
+  roles: string[];
+  rule: string;
+}
+
+export interface AccessReviewOut {
+  generated_at: string;
+  identity_source: string;
+  accounts: AccessAccountOut[];
+  default_credential_accounts: number;
+  denied_24h: number;
+  recent_denied: DeniedAttemptOut[];
+  matrix: AccessActionOut[];
+  roles: RoleInfo[];
+}
+
+/** A receipt to keep outside the database; GET /audit/verify?through_id=&tip= checks it. */
+export interface AuditCheckpointOut {
+  id: number;
+  taken_at: string;
+  taken_by: string;
+  through_id: number;
+  tip: string;
+  rows_verified: number;
+  verify_path: string;
 }
 
 export interface Page<T> {
@@ -1226,6 +1331,8 @@ export interface SandboxArtifactSummary {
   stale: number;
   current: number;
   rules_touched: number;
+  /** proposed readings a human must confirm; never counted as stale (older servers omit it) */
+  needs_review?: number;
   over_restrictive: number;
   under_restrictive: number;
   reverify: number;

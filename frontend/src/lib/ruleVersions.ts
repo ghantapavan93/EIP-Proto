@@ -125,3 +125,20 @@ export function rankSources(sources: RuleSourceRef[] | undefined): RuleSourceRef
 export function authorityLabel(authority: string): string {
   return AUTHORITY_LABEL[authority] ?? authority;
 }
+
+/**
+ * The earliest enacted version taking effect after `today` and within `days` (YYYY-MM-DD),
+ * or null. A rule page with no date opens there: today's state of a rule about to change
+ * shows nothing stale and hides the point.
+ */
+export function nextChangeWithin(versions: RuleVersionOut[] | undefined, today: string, days: number): string | null {
+  const limit = new Date(`${today}T00:00:00Z`);
+  limit.setUTCDate(limit.getUTCDate() + days);
+  const horizon = limit.toISOString().slice(0, 10);
+  const dates = (versions ?? [])
+    .filter(governs)
+    .map((v) => v.effective_from)
+    .filter((d) => d > today && d <= horizon)
+    .sort();
+  return dates[0] ?? null;
+}

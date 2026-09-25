@@ -117,6 +117,8 @@ export const AUDIT_EVENT_TYPES = [
   'export.generated',
   'evidence.exported',
   'auth.denied',
+  'access.reviewed',
+  'audit.checkpoint',
   'sandbox.artifact_checked',
   'sandbox.transcript_checked',
 ] as const;
@@ -347,6 +349,7 @@ export function kindTone(kind: string | null | undefined): Tone {
 /** Role slugs from the API → the labels the EIP floor uses. Unknown slugs are humanized. */
 const ROLE_LABELS: Record<string, string> = {
   compliance: 'QA Compliance Analyst',
+  'qa-compliance': 'QA Compliance Analyst', // legacy slug on older rows
   'sales-innovation': 'Sales Innovation',
   'sales-supervisor': 'Sales Supervisor',
   training: 'Training Supervisor',

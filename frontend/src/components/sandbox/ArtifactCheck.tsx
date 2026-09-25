@@ -51,7 +51,7 @@ function WhatItChecks({ rules }: { rules: RuleOut[] | undefined }) {
     <div className="card px-4 py-3">
       <div className="eyebrow mb-1">What it looks for</div>
       <p className="text-[12.5px] leading-relaxed text-ink-2">
-        Phrasing that encodes one of the {rules?.length ?? 7} versioned rules — a 48-hour wait, a first-minute disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
+        Phrasing that encodes one of the {rules?.length ?? 13} versioned rules — a 48-hour wait, a first-minute disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
       </p>
       {rules && (
         <ul className="mt-2.5 divide-y divide-hairline border-t border-hairline">
@@ -59,8 +59,9 @@ function WhatItChecks({ rules }: { rules: RuleOut[] | undefined }) {
             const latest = latestGoverning(r);
             return (
               <li key={r.code} className="flex items-baseline justify-between gap-3 py-1.5 text-[12.5px]">
-                <Link to={`/rules/${encodeURIComponent(r.code)}`} className="min-w-0 truncate text-ink hover:text-teal-ink" title={r.title}>
-                  {headOf(r.title)}
+                {/* The full title: short heads collide ("TPMO disclaimer" is two different rules). */}
+                <Link to={`/rules/${encodeURIComponent(r.code)}`} className="min-w-0 leading-snug text-ink hover:text-teal-ink" title={r.code}>
+                  {r.title}
                 </Link>
                 {latest && <span className="shrink-0 font-mono text-[11px] text-ink-3">v{latest.version} · {latest.effective_from}</span>}
               </li>
@@ -171,6 +172,11 @@ function Summary({ result, onCopy }: { result: SandboxArtifactOut; onCopy: () =>
           {s.over_restrictive > 0 && <Chip tone="amber">{s.over_restrictive} over-restrictive</Chip>}
           {s.reverify > 0 && <Chip tone="slate">{s.reverify} re-verify</Chip>}
           {s.current > 0 && <Chip tone="green">{s.current} current</Chip>}
+          {(s.needs_review ?? 0) > 0 && (
+            <Chip tone="slate" title="Proposed readings are not counted as stale until a human confirms them">
+              {s.needs_review} needs a human read
+            </Chip>
+          )}
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -294,7 +300,7 @@ export function ArtifactCheck({ today }: { today: string }) {
   const out = result?.out;
   const announce = out
     ? out.summary.matches
-      ? `Checked as of ${out.as_of}: ${out.summary.matches} ${out.summary.matches === 1 ? 'match' : 'matches'}, ${out.summary.stale} stale, ${out.summary.rules_touched} ${out.summary.rules_touched === 1 ? 'rule' : 'rules'} touched.`
+      ? `Checked as of ${out.as_of}: ${out.summary.matches} ${out.summary.matches === 1 ? 'match' : 'matches'}, ${out.summary.stale} stale${out.summary.needs_review ? `, ${out.summary.needs_review} needing a human read` : ''}, ${out.summary.rules_touched} ${out.summary.rules_touched === 1 ? 'rule' : 'rules'} touched.`
       : `Checked as of ${out.as_of}: no rule-bearing language found.`
     : '';
 
@@ -334,7 +340,11 @@ export function ArtifactCheck({ today }: { today: string }) {
               className={cn('input min-h-[260px] font-mono text-[12.5px] leading-[1.65]', tooLong && 'border-red')}
               placeholder={'Paste a call script, QA scorecard item, email template, web page or prompt…\n\nExample: "Complete the Scope of Appointment at least 48 hours before the appointment."'}
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => {
+                setText(e.target.value);
+                // Once the text is edited it is no longer the sample: drop the sample's title.
+                if (samples.data?.artifacts.some((s) => s.label === label)) setLabel('');
+              }}
               spellCheck={false}
               aria-describedby={`${textareaId}-count`}
             />
@@ -399,7 +409,7 @@ export function ArtifactCheck({ today }: { today: string }) {
           <div className="hidden rounded-[8px] border border-dashed border-input px-5 py-6 text-[13px] leading-relaxed text-ink-2 lg:block">
             <div className="font-semibold text-ink">What you will see</div>
             <ol className="mt-2 list-decimal space-y-1 pl-5">
-              <li>Your text, with every rule-bearing sentence highlighted by verdict.</li>
+              <li>Your text, with every sentence a matcher recognised highlighted by verdict. Wording no matcher knows is not flagged.</li>
               <li>For each: which rule, which version it encodes, and whether that version is in force on your date.</li>
               <li>If it is stale, the direction: over-restrictive (stricter than the rule now is), under-restrictive (misses a new requirement) or re-verify.</li>
             </ol>

@@ -131,7 +131,7 @@ export function EvalsPage() {
                   ['Fixtures', String(s.cases), 'text-navy', false, s.positives !== undefined ? `${s.positives} positive · ${s.negatives ?? 0} negative` : null],
                   ['Fixture precision', pct(s.precision), s.precision < 1 ? 'text-red' : 'text-navy', true, 'on these fixtures'],
                   ['Fixture recall', pct(s.recall), s.recall < 1 ? 'text-amber-ink' : 'text-navy', true, 'on these fixtures'],
-                  ['True positives', String(s.tp), 'text-green-ink', false, null],
+                  ['True positives', String(s.tp), 'text-green-ink', false, s.positives !== undefined && s.tp !== s.positives ? `expected edges found; some positive fixtures expect two` : 'expected edges found'],
                   ['False positives', String(s.fp), s.fp ? 'text-red' : 'text-ink-3', false, null],
                   ['False negatives', String(s.fn), s.fn ? 'text-amber-ink' : 'text-ink-3', false, null],
                   ['Known limitations', String(s.known_limitations), 'text-slate', false, null],

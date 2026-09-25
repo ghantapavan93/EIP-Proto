@@ -4,7 +4,7 @@ import { Chip } from '../ui/Chip';
 import { KeyValue } from '../ui/KeyValue';
 import { JsonView } from '../ui/JsonView';
 import { StatBars } from '../charts/StatBars';
-import { complianceWord, evidenceFamily, isObject, numList, str, strList } from '../../lib/evidence';
+import { complianceWord, evidenceFamily, explainRuleVerdict, isObject, numList, str, strList } from '../../lib/evidence';
 import { outcomeTone, severityTone } from '../../lib/vocab';
 import { cn } from '../../lib/cn';
 
@@ -53,9 +53,20 @@ export function EvidenceBody({ contractCode, outcome, evidence, transcriptLink }
         { key: 'SOA exception', value: ev.soa_exception !== undefined ? str(ev.soa_exception) : undefined },
         { key: 'Not applicable', value: ev.not_applicable !== undefined ? str(ev.not_applicable) : undefined },
       ].filter((r) => r.value !== undefined && r.value !== '—');
+      const why = explainRuleVerdict(ev, outcome);
       return (
         <>
           <ExpectedGot expected={complianceWord(ev.expected)} got={complianceWord(ev.got)} outcome={outcome} />
+          {why && (
+            <div className={cn('mt-2 border px-2.5 py-2 text-[12px]', why.finding ? 'border-red/40 bg-red/5' : 'border-hairline')} aria-label="Why this verdict">
+              <div className="eyebrow">Deterministic check</div>
+              <div className="font-mono text-ink">{why.check}</div>
+              {why.finding && <p className="mt-1.5 leading-snug text-ink">{why.finding}</p>}
+              <Link to={`/contracts/${encodeURIComponent(contractCode)}`} className="mt-1 inline-block text-[11.5px]">
+                Contract, rule and citation
+              </Link>
+            </div>
+          )}
           {rows.length > 0 && <KeyValue className="mt-2" rows={rows.map((r) => ({ key: r.key, value: r.value, mono: true }))} />}
         </>
       );

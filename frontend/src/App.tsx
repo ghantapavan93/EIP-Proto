@@ -16,6 +16,7 @@ import { RunComparePage } from './pages/RunCompare';
 import { ReviewPage } from './pages/Review';
 import { TestCasesPage } from './pages/TestCases';
 import { AuditPage } from './pages/Audit';
+import { GovernancePage } from './pages/Governance';
 import { ContractsPage } from './pages/Contracts';
 import { ContractDetailPage } from './pages/ContractDetail';
 import { ReadinessPage } from './pages/Readiness';
@@ -49,6 +50,7 @@ export function App() {
               <Route path="/review" element={<ReviewPage />} />
               <Route path="/test-cases" element={<TestCasesPage />} />
               <Route path="/audit" element={<AuditPage />} />
+              <Route path="/governance" element={<GovernancePage />} />
               <Route path="/try" element={<TryPage />} />
               <Route
                 path="*"

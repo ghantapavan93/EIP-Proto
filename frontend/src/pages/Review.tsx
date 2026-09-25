@@ -615,7 +615,9 @@ export function ReviewPage() {
   const contracts = useContracts();
   // GET /review has no run filter; narrow client-side on run_id / payload.run_id.
   const runTasks = useMemo(() => filterTasksByRun(tasks.data, runFilter), [tasks.data, runFilter]);
-  const laneCounts = useMemo(() => countByLane(runTasks), [runTasks]);
+  // Lane badges count work still open (not closed), the same number Home and Readiness show;
+  // decided tasks remain listed under the state filter but are not outstanding work.
+  const laneCounts = useMemo(() => countByLane(runTasks?.filter((t) => !TERMINAL_REVIEW_STATES.has(t.state))), [runTasks]);
   const visibleTasks = useMemo(() => (lane === 'all' ? runTasks : runTasks?.filter((t) => taskLane(t) === lane)), [runTasks, lane]);
   const layout = useMemo(() => groupActionable(lane === 'actionable' ? visibleTasks : []), [visibleTasks, lane]);
   const runsById = useMemo(() => new Map((runs.data ?? []).map((r) => [r.id, r])), [runs.data]);
