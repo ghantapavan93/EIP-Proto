@@ -21,8 +21,8 @@ In summary:
 | Area | Control in this prototype |
 |---|---|
 | Authentication | HTTP Basic with roles (`analyst`, `engineer`, `admin`); a stand-in for SSO |
-| Authorization | Mutating endpoints require `engineer` or `admin`; review decisions require a named user |
-| Audit | Append-only table (database triggers), SHA-256 hash chain, `GET /api/audit/verify` |
+| Authorization | Operating endpoints require `engineer` or `admin`; governance (access review, rule-corpus adoption, audit checkpoints) requires `admin`; review decisions require a named user |
+| Audit | Append-only table (database triggers), SHA-256 hash chain, `GET /api/audit/verify`, admin checkpoints kept outside the database |
 | Personal data | Ingest and the sandbox redact PII before storage or matching (`backend/backstop/core/pii.py`) |
 | Model egress | Real transcripts go only to a local model unless explicitly allowed (`RealDataGuard`) |
 | Secrets | Environment variables only; `.env` is never committed; see [`.env.example`](.env.example) |

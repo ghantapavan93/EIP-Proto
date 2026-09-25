@@ -16,6 +16,7 @@ Everything written about Backstop beyond the code, grouped by what the reader ne
 
 | Document | What it covers |
 |---|---|
+| [`decisions.md`](decisions.md) | The author's decision log: each call that shaped the prototype, the alternatives and why |
 | [`adr/`](adr/) | Seven architecture decision records: rules as code, the AI boundary, model adapters, right-sizing, idempotency and audit, advisory judges, real pages vs synthetic data |
 | [`buy-vs-build.md`](buy-vs-build.md) | Which parts are worth owning, which are commodity, and the exit path for each |
 | [`open-questions.md`](open-questions.md) | The questions public research cannot answer, grouped by the decision they unlock |

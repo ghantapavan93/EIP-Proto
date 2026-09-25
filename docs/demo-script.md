@@ -34,7 +34,7 @@ what still holds, what broke, where the evidence is, and who owns the decision.*
    contradiction — the delta and the state are different questions."
 3. **(0:45) Rule → `soa-48h-wait`, as of 2026-09-30 → 2026-10-01.** The
    in-force version flips, the counts tick, the affected artifacts highlight —
-   including the real MedicareFAQ page still saying "two days". Point at
+   including a real public FAQ page whose "two days" guidance is right until Sept 30. Point at
    **Applies from 2026-10-01** vs **Regulation effective 2026-06-01**, and the
    provenance list: primary authority first, secondary interpretation last.
 4. **(1:15) Call-recording retention.** The OPEN QUESTION block: the primary
@@ -65,11 +65,10 @@ what still holds, what broke, where the evidence is, and who owns the decision.*
    scorecard item SC-12 (over-restrictive — still scoring agents down for
    same-day appointments), the coaching prompt, the SFMC confirmation email
    ("as required by CMS … at least 48 hours"), the workflow prompt v1, and
-   **the real MedicareFAQ page** — "the form should ideally be submitted at
-   least two days before the meeting". Review tasks are open, routed to owner
-   roles.
+   **a real public FAQ page** whose two-day guidance is correct today and
+   changes on Oct 1. Review tasks are open, routed to owner roles.
 
-   *Line:* "One rule change, and every artifact that encodes it lights up —
+   *Line:* "One rule change, and every artifact the matchers recognise as encoding it lights up —
    including a page that was live on your public site on 2026-09-21."
 
 ## 90 seconds — the engine

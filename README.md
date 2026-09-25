@@ -41,7 +41,7 @@ The worked example: CMS's CY2027 marketing changes take effect on
 | **Approach** | One engine for three triggers (RULE, PROMPT, MODEL). Deterministic code decides; models propose; a named human confirms. |
 | **Stack** | Python 3.12 · FastAPI · SQLAlchemy · Alembic · PostgreSQL / SQLite · React 18 · TypeScript · Vite · Tailwind · Docker Compose · Terraform (ECS/RDS shape) |
 | **Models** | Qwen2.5 7B, Qwen2.5 3B, Llama 3.1 8B run locally through Ollama and recorded; any OpenAI-compatible provider plugs in |
-| **Quality** | 300 backend tests (SQLite and PostgreSQL) · 228 frontend tests · lint and type checks · CI contract gate |
+| **Quality** | 345 backend tests (SQLite and PostgreSQL) · 246 frontend tests · lint and type checks · CI contract gate |
 
 **Capabilities**
 
@@ -50,11 +50,12 @@ The worked example: CMS's CY2027 marketing changes take effect on
 | Change triggers (`/`) | What changed (rule, prompt or model), what it broke, and what is open |
 | Rules and blast radius (`/rules`) | Which artifacts encode a rule version, and which go stale on a given date |
 | Readiness (`/readiness`) | What changes in the next 30, 60 and 90 days, and who owns the open work |
-| Runs and compare (`/runs`) | Contract results per call, and paired comparisons with exact significance tests |
+| Runs and compare (`/runs`) | Contract results per call; paired comparisons with exact significance tests; whether exactly one thing changed, and if not, links to the runs that isolate each change |
 | Contracts (`/contracts`) | Per-contract accuracy against ground truth, with confidence intervals |
 | Models board (`/models`) | Measured vs declared behaviour per model, defect fingerprint, cost and latency |
 | Review and test cases (`/review`) | Human decisions, overrides that become regression cases, approval by a second person |
 | Audit (`/audit`) | Append-only, hash-chained trail with a one-click verification |
+| Governance (`/governance`) | Who may do what; for admins, the access review, audit checkpoints and adopting the rule corpus |
 | Try your data (`/try`) | Paste an artifact or transcript and check it against the rules; nothing is stored |
 
 ---
@@ -186,9 +187,9 @@ is the scanner on frozen pages and synthetic artifacts; no model is involved.
 1. **Rules → `soa-48h-wait`.** Evaluate as of 2026-09-30: nothing is stale.
    Evaluate as of 2026-10-01: the 48-hour SOA waiting period ends, and the
    artifacts that encode it are listed: a scorecard item, a coaching prompt,
-   an SFMC email, workflow prompt v1, and a real medicarefaq.com page, crawled
-   on 2026-09-21, that says the form "should ideally be submitted at least two
-   days before the meeting". Review tasks open, routed to owner roles.
+   an SFMC email, workflow prompt v1, and a real public FAQ page (read on
+   2026-09-21) whose two-day guidance is correct until 2026-09-30 and needs
+   updating on 2026-10-01. Review tasks open, routed to owner roles.
 2. **Runs → Compare.** Prompt v1 (written for the 2024 rules), same 60 calls,
    same simulated model; only the rule date moves from Sept 30 to Oct 1.
    **25 results flip (22 blocking FAILs, 3 FLAGs):** 14 on `C-TPMO-01`, 8 on
@@ -219,7 +220,7 @@ as truth.
 | Thing | Status |
 |---|---|
 | The thirteen rules (`rules/*.yaml`), their versions, statuses, effective dates and citations | **Real.** The original seven were checked against eCFR and the Federal Register on 2026-09-23 (CY2027 final rule: 91 FR 17384); corrections are logged in [`docs/honesty.md`](docs/honesty.md#corrections). Six more (agent compensation, TPMO data sharing, TCPA one-to-one consent and revocation, SOA scope, Florida calling hours) carry citations in each file and model vacated and proposed versions; they have no watched source URL yet. `eip-licensing-footprint` is an EIP business fact, not a regulation, included to show the graph is not CMS-specific. |
-| Six public web pages | **Real.** medicarefaq.com, theelitebrokerage.com, rates.medicarecompared.com — fetched once on 2026-09-21, read-only, with an identified user agent, and frozen under `fixtures/pages/`. The demo replays the snapshots. |
+| Six public web pages | **Real.** medicarefaq.com, theelitebrokerage.com, rates.medicarecompared.com — fetched once on 2026-09-21, read-only, with an identified user agent, and kept as short attributed excerpts under `fixtures/pages/` (the passages around each rule-bearing sentence; matches identical to the full pages). The demo replays them. |
 | Internal artifacts (scorecard items, scripts, coaching prompt, SFMC template, training slides, IVR line, web form, compensation schedule, dialer policy) | **Synthetic.** Written in the shape an integration would produce. Labeled `is_synthetic` in the data and badged SYNTHETIC in the UI. None of it is EIP content. |
 | The call transcripts (60 development, 60 held-out) | **Synthetic.** Generated deterministically (`backend/backstop/harness/corpus.py`) with ground-truth labels. Names, Medicare numbers and dates are fabricated in formats that cannot collide with real ones. |
 | The workflow (`qa-handoff`: extract → check → compose → route) and its three prompt versions | **Real code.** v1 encodes the 2024 rules; v2 the 2027 rules; v3 is v2 with the disclaimer-ordering test spelled out. |
@@ -229,7 +230,7 @@ as truth.
 | Statistics | **Real code.** Exact McNemar for paired run comparisons, Fisher's exact test, Wilson intervals and Holm correction, in pure Python (`core/stats.py`). |
 | LLM edge proposer ("two business days" ≈ 48 hours) | **Real code, key-gated.** Span-verified and proposal-only; without a key the deterministic matchers carry the demo. |
 | Attention / Salesforce / SFMC / dialer integrations | **Not built.** Interfaces and the production path are in [`docs/honesty.md`](docs/honesty.md). |
-| SSO / RBAC | **Stub.** HTTP Basic with environment-configured users and three roles. |
+| SSO / RBAC | **Identity stubbed, roles real.** HTTP Basic with environment-configured users stands in for SSO; the three roles and their permissions are enforced server-side and tested. |
 | Deployment | Docker Compose. ECS + RDS is the stated production shape ([ADR-004](docs/adr/ADR-004-right-sizing.md), [`infra/`](infra/)). |
 
 Full list, including known limitations: [`docs/honesty.md`](docs/honesty.md).
@@ -241,14 +242,16 @@ Full list, including known limitations: [`docs/honesty.md`](docs/honesty.md).
 | Question | Answer |
 |---|---|
 | "What's your false-positive rate?" | Unknown in production. The Golden Matcher Suite ([`docs/eval-report.md`](docs/eval-report.md)) has 113 hand-written cases: 61 detected, 0 false positives, 0 misses, 16 documented known limitations. These are regression fixtures written by the matchers' author, not a production accuracy estimate. |
+| "Same prompt, different model: is that really the model?" | Every comparison reports attribution. **Isolated** means exactly one of prompt, model, rule date, calls scored, contract set, judge or approved overrides changed. **Confounded** means two or more did: the page says the difference cannot be credited to either, and links existing runs that change each one alone. The demo's rule flip, prompt fix and model swap are each isolated. |
+| "What can each role actually do?" | Analysts decide review tasks. Engineers also operate the harness: runs, scans, rule proposals, ingest, approving others' test cases. Admins also govern it: the access review, adopting the rule corpus, and audit checkpoints. The server enforces every line of that table, a test fails if an endpoint disagrees with it, and each refusal is audit-logged (`/governance`). |
 | "Is prompt B actually better than prompt A?" | Compare reports a paired exact McNemar test per contract with Holm correction, and says when a sample is too small to rank two prompts. The held-out set is where the v3 improvement disappeared. |
 | "Your judge has the disease it diagnoses." | Judged contracts never block. Every run re-judges six fixed coaching notes, N=5 each, against author-set bands. It is a calibration check, not longitudinal drift detection. `run.stats.judge_stability`. |
-| "What happens when a reviewer disagrees?" | They override with a reason code, which creates a test case. Once a different person approves it, later runs mark that verdict `override`; it no longer blocks the gate or reopens a task. It expires after 365 days. |
+| "What happens when a reviewer disagrees?" | They override with a reason code, which creates a test case. Once a different person approves it, later runs under the same rule mark that verdict `override`; it no longer blocks the gate or reopens a task. A rule change sets it aside, and it expires after 365 days. |
 | "What is coming, and who owns it?" | `/readiness` lists rule changes in the next 30/60/90 days, including proposed and vacated versions that are never treated as in force, with open work grouped by owner. |
 | "What does this cost at 3,000 calls a day?" | `run.stats.cost`: $0 for simulated runs; measured or estimated USD for live runs, projected per day and per AEP from editable list prices (`harness/cost.py`). |
 | "Who tells the corpus the CFR changed?" | `backstop check-sources` hashes each rule's primary source page; a change opens a `RULE_SOURCE_CHANGED` review task. Only a human edits the corpus. |
 | "Why not Promptfoo or Braintrust + cron?" | The runner is replaceable. The part worth owning is the effective-dated rule parameters and the rule → artifact graph with its evidence. Runs export to their shapes: `GET /api/runs/{id}/export?format=braintrust\|langsmith\|csv`. See [`docs/buy-vs-build.md`](docs/buy-vs-build.md). |
-| "Who approved this, and can you prove it?" | Hash-chained, append-only audit rows with actor and role (`GET /api/audit/verify`), and a one-file evidence export per run, task or rule. |
+| "Who approved this, and can you prove it?" | Hash-chained, append-only audit rows with actor and role (`GET /api/audit/verify`), a one-file evidence export per run, task or rule, and admin checkpoints: receipts kept outside the system that stop verifying if history is ever rewritten wholesale. |
 | "Are you creating more review work?" | Only BLOCK failures, stale encodings, low-confidence proposed edges and rule-source changes open actionable tasks. FLAG and judged results become one advisory item per run × contract. |
 | "We have no model budget." | Neither did this build. Three local models ran through Ollama ($0, nothing leaves the machine). Groq, Google AI Studio and OpenRouter free tiers are one environment variable away. |
 | "Is that a real model or a script?" | Every run carries its adapter: **SIMULATED**, **CASSETTE** (recorded real output) or **LIVE**. The Models board labels rows *measured* or *declared* and never mixes them. |
@@ -383,7 +386,7 @@ Start with [`docs/README.md`](docs/README.md) for a reading order by audience.
 
 | For | Read |
 |---|---|
-| Leadership, 5 minutes | This page, then [`docs/honesty.md`](docs/honesty.md) and [`docs/buy-vs-build.md`](docs/buy-vs-build.md) |
+| Leadership, 5 minutes | This page, then [`docs/decisions.md`](docs/decisions.md), [`docs/honesty.md`](docs/honesty.md) and [`docs/buy-vs-build.md`](docs/buy-vs-build.md) |
 | Engineering | [`docs/adr/`](docs/adr/), [`docs/api-contract.md`](docs/api-contract.md), [`backend/`](backend/), [`frontend/`](frontend/) |
 | Compliance | [`rules/`](rules/), [`contracts/`](contracts/), [`docs/assumptions-ledger.md`](docs/assumptions-ledger.md) |
 | Security | [`SECURITY.md`](SECURITY.md), [`docs/threat-model.md`](docs/threat-model.md) |
