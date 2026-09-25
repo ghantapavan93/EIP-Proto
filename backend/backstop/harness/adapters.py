@@ -26,11 +26,15 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import yaml
 
 from backstop.harness import workflow as wf
+from backstop.harness.anthropic_params import applied_temperature, sampling
+
+if TYPE_CHECKING:  # anthropic is optional at runtime
+    from anthropic.types import ToolParam
 
 
 @dataclass
@@ -261,7 +265,7 @@ class CassetteAdapter:
 
 # ------------------------------------------------------------------ anthropic (live)
 
-_TOOL = {
+_TOOL: ToolParam = {
     "name": "record_qa",
     "description": "Record the structured QA output for a Medicare sales call.",
     "input_schema": {
@@ -326,7 +330,7 @@ class AnthropicAdapter:
             msg = self.client.messages.create(
                 model=self.model_id,
                 max_tokens=2000,
-                temperature=0,
+                **sampling(self.model_id, 0.0),
                 system=prompt_text,
                 tools=[_TOOL],
                 tool_choice={"type": "tool", "name": "record_qa"},
@@ -339,7 +343,7 @@ class AnthropicAdapter:
             return AdapterResult(raw={}, latency_ms=int((time.perf_counter() - started) * 1000), usage={},
                                  error=f"{type(exc).__name__}: {exc}")
         latency = int((time.perf_counter() - started) * 1000)
-        block = next((b for b in msg.content if getattr(b, "type", "") == "tool_use"), None)
+        block = next((b for b in msg.content if b.type == "tool_use"), None)
         if block is None:
             return AdapterResult(raw={}, latency_ms=latency, usage={}, error="model returned no tool call")
         usage = {"input_tokens": msg.usage.input_tokens, "output_tokens": msg.usage.output_tokens, "model": msg.model}
@@ -352,7 +356,7 @@ class AnthropicAdapter:
                 msg = self.client.messages.create(
                     model=self.judge_model_id,
                     max_tokens=20,
-                    temperature=1.0,
+                    **sampling(self.judge_model_id, 1.0),
                     system=rubric,
                     messages=[{"role": "user", "content": f"<coaching_note>\n{coaching_note}\n</coaching_note>\n\nReply with a single number from 1 to 5."}],
                 )
@@ -361,7 +365,7 @@ class AnthropicAdapter:
                 scores.append(float(m.group(0)) if m else 1.0)
             except Exception:  # noqa: BLE001
                 scores.append(float("nan"))
-        return scores, {"judge_model": self.judge_model_id, "temperature": 1.0}
+        return scores, {"judge_model": self.judge_model_id, "temperature": applied_temperature(self.judge_model_id, 1.0)}
 
 
 def _live_adapter(model_id: str, api_key: str | None, judge_model_id: str | None) -> Adapter | None:

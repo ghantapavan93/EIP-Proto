@@ -161,7 +161,11 @@ def reads_past_rule_state(rule: Rule, as_of: date, today: date) -> bool:
     now, then = in_force_version(rule, today), in_force_version(rule, as_of)
     if now is None:
         return False  # nothing in force today (only future or proposed versions): nothing is past
-    return then is None or then.effective_from < now.effective_from
+    if then is None:
+        return True
+    # in_force_version skips undated versions, so both dates are set.
+    assert then.effective_from is not None and now.effective_from is not None
+    return then.effective_from < now.effective_from
 
 
 def in_force_version(rule: Rule, as_of: date) -> RuleVersion | None:

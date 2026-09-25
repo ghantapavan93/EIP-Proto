@@ -13,6 +13,7 @@ from __future__ import annotations
 import statistics
 from collections import Counter, defaultdict
 from datetime import UTC, date, datetime, timedelta
+from typing import Literal, cast
 
 from fastapi import APIRouter, Query
 from sqlalchemy import select
@@ -127,8 +128,10 @@ def readiness(session: SessionDep, user: UserDep, as_of: date = Query(default_fa
         for v in rule.versions:
             if v.status in SET_ASIDE:
                 top = (v.sources or [{}])[0]
+                # SET_ASIDE is exactly {"vacated", "stayed"}, so the status is one of the two.
+                status = cast(Literal["vacated", "stayed"], v.status)
                 vacated.append(s.SetAsideVersionOut(
-                    rule_code=rule.code, version=v.version, status=v.status, why=_why(v.summary, v.clause_text),
+                    rule_code=rule.code, version=v.version, status=status, why=_why(v.summary, v.clause_text),
                     source=top.get("cite") or v.source_url or rule.citation,
                     source_url=top.get("url") or v.source_url or ""))
                 continue

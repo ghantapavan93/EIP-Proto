@@ -215,16 +215,16 @@ def for_task(session: Session, task: ReviewTask, *, actor: str, role: str) -> di
     subject: dict[str, Any] = {"review_task": _task(session, task)}
     entity_ids = {task.id}
     if task.rule_version_id:
-        rv = session.get(RuleVersion, task.rule_version_id)
+        rv = session.get_one(RuleVersion, task.rule_version_id)
         subject["rule_version_in_force"] = _rule_version(rv)
         entity_ids.add(rv.id)
     if task.edge_id:
-        edge = session.get(RuleAssetEdge, task.edge_id)
+        edge = session.get_one(RuleAssetEdge, task.edge_id)
         subject["encoding"] = _edge(session, edge)
         subject["bound_rule_version"] = _rule_version(edge.rule_version)
         entity_ids |= {edge.id, edge.asset_id}
     if task.run_result_id:
-        rr = session.get(RunResult, task.run_result_id)
+        rr = session.get_one(RunResult, task.run_result_id)
         subject["result"] = _result(rr)
         subject["run"] = _run(rr.run)
         entity_ids |= {rr.run_id}
@@ -252,9 +252,9 @@ def for_run(session: Session, run: Run, *, actor: str, role: str) -> dict[str, A
 def for_rule(session: Session, rule: Rule, as_of: date, *, actor: str, role: str) -> dict[str, Any]:
     verdicts, counts, tasks = impact.evaluate_rule(session, rule, as_of, actor=actor, open_tasks=False)
     in_force = impact.in_force_version(rule, as_of)
-    stale = []
+    stale: list[dict[str, Any]] = []
     for v in verdicts:
-        edge = session.get(RuleAssetEdge, v.edge_id)
+        edge = session.get_one(RuleAssetEdge, v.edge_id)
         task = tasks.get(v.edge_id)
         stale.append({"direction": v.direction, "reason": v.reason, "bound_version": v.bound_version,
                       "in_force_version": v.in_force_version, "disputed": v.disputed,

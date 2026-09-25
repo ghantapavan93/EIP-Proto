@@ -667,8 +667,8 @@ MATCHERS: list[Matcher] = [
 
 def run_all(text: str) -> list[Match]:
     matches: list[Match] = []
-    for m in MATCHERS:
-        matches.extend(m.run(text))
+    for matcher in MATCHERS:
+        matches.extend(matcher.run(text))
     # If the same span was both confirmed and proposed for the same rule, keep confirmed.
     best: dict[tuple[str, int, str], Match] = {}
     for m in matches:

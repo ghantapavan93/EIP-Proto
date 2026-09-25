@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -49,7 +50,7 @@ def list_tasks(session: SessionDep, user: UserDep, state: str | None = None, kin
     return [task_out(session, t, user.role) for t in tasks]
 
 
-def _prefetch(session, tasks: list[ReviewTask]) -> list:
+def _prefetch(session, tasks: Sequence[ReviewTask]) -> list:
     """Load everything task_out touches in a handful of IN queries.
 
     task_out resolves each task's rule version, artifact, edge and run result with

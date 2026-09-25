@@ -210,7 +210,7 @@ def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None) ->
         expected_prev = row.row_hash
         tip_id = row.id
         checked += 1
-    result = {"ok": True, "checked": checked, "first_broken_id": None, "reason": None, "tip": expected_prev,
+    result: dict[str, Any] = {"ok": True, "checked": checked, "first_broken_id": None, "reason": None, "tip": expected_prev,
               "tip_id": tip_id, "checkpoint": _checkpoint_result(checkpoint, seen_at_checkpoint)}
     if result["checkpoint"] is not None and not result["checkpoint"]["matches"]:
         result["ok"] = False

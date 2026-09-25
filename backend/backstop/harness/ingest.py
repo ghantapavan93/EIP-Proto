@@ -19,7 +19,7 @@ import hashlib
 import io
 import os
 import re
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -79,7 +79,7 @@ def redact_agent_name(name: str | None, text: str) -> tuple[str | None, str, int
     (case-sensitive, whole words) in the transcript. Returns (label, text, replacements)."""
     if name is None or not name.strip() or keep_agent_names():
         return name, text, 0
-    short = pii.initials(name)
+    short = cast(str, pii.initials(name))  # name is non-blank here, so initials() returns a str
     text, n = re.subn(rf"(?<![\w-]){re.escape(name.strip())}(?![\w-])", short, text)
     return short, text, n
 

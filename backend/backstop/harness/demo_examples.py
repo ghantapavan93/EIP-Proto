@@ -58,7 +58,7 @@ def _open_finding(session: Session, run: Run, contract_code: str) -> ReviewTask 
         return None
     codes = {tr.id: tr.code for tr in session.scalars(
         select(Transcript).where(Transcript.id.in_([t.payload.get("transcript_id") for t in tasks]))).all()}
-    return min(tasks, key=lambda t: codes.get(t.payload.get("transcript_id"), "~"))
+    return min(tasks, key=lambda t: codes.get(t.payload.get("transcript_id", ""), "~"))
 
 
 def seed_example_test_cases(session: Session) -> list[dict[str, Any]]:

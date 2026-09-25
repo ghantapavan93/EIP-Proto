@@ -15,6 +15,7 @@ import hashlib
 import re
 from datetime import date
 from pathlib import Path
+from typing import TypedDict
 from urllib.parse import urlparse
 
 from sqlalchemy import select
@@ -28,6 +29,15 @@ from backstop.models import ReviewTask, Rule, RuleSourceCheck
 from backstop.scanner import crawler
 
 _SAFE = re.compile(r"[^a-z0-9-]+")
+
+
+class SourceCheckStats(TypedDict):
+    checked: int
+    changed: int
+    unchanged: int
+    first_seen: int
+    errors: int
+    mode: str
 
 
 def _snapshot(fixtures_dir: Path, url: str) -> Path:
@@ -57,8 +67,8 @@ def _version_for_task(rule: Rule, as_of: date | None) -> str | None:
 
 
 def check_sources(session: Session, settings: Settings, *, live: bool = False, actor: str = "system",
-                  as_of: date | None = None) -> dict:
-    stats = {"checked": 0, "changed": 0, "unchanged": 0, "first_seen": 0, "errors": 0, "mode": "live" if live else "snapshot"}
+                  as_of: date | None = None) -> SourceCheckStats:
+    stats: SourceCheckStats = {"checked": 0, "changed": 0, "unchanged": 0, "first_seen": 0, "errors": 0, "mode": "live" if live else "snapshot"}
     for rule in session.scalars(select(Rule)).all():
         url = rule.source_url
         if not url:
@@ -98,6 +108,7 @@ def check_sources(session: Session, settings: Settings, *, live: bool = False, a
         session.add(check)
         session.flush()
         if check.changed:
+            assert previous is not None  # changed is only set when there was a previous hash
             dedupe_key = f"source:{rule.id}:{result.content_hash}"
             if session.scalar(select(ReviewTask).where(ReviewTask.dedupe_key == dedupe_key)) is None:
                 task = ReviewTask(
