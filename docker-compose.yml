@@ -20,7 +20,8 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: backstop
-      POSTGRES_PASSWORD: backstop
+      # Never published outside the compose network; override for anything but a local demo.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-backstop}
       POSTGRES_DB: backstop
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U backstop -d backstop"]
@@ -35,7 +36,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     environment:
-      BACKSTOP_DATABASE_URL: postgresql+psycopg://backstop:backstop@db:5432/backstop
+      BACKSTOP_DATABASE_URL: postgresql+psycopg://backstop:${POSTGRES_PASSWORD:-backstop}@db:5432/backstop
       BACKSTOP_USERS: ${BACKSTOP_USERS:-analyst:analyst:analyst,engineer:engineer:engineer,admin:admin:admin}
       BACKSTOP_DEFAULT_ADAPTER: ${BACKSTOP_DEFAULT_ADAPTER:-cassette}
       # Real models: the recorded cassettes replay with no provider at all. To record new
