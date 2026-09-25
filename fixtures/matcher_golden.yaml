@@ -1,0 +1,425 @@
+# Labeled snippets for evaluating the deterministic matchers.
+#
+# Each case is a short text and the set of (rule, version) edges a careful
+# compliance analyst would draw from it. `expect: []` means "no edge" — those
+# are the near-misses that measure false positives. Confirmed and proposed
+# edges both count as detections; the report breaks them out.
+#
+# Run: `backstop eval-matchers` → docs/eval-report.md and GET /api/evals/matchers
+
+cases:
+  # ---------------------------------------------------------------- soa-48h-wait (v1)
+  - id: soa-01
+    text: "A Scope of Appointment must be documented at least 48 hours before any personal marketing appointment."
+    expect: [{rule: soa-48h-wait, version: 1}]
+  - id: soa-02
+    text: "Score 0 if the appointment is booked inside the 48-hour window unless the customer is a walk-in."
+    # Since 2026-09-25 the walk-in exception is also a proposed reading of the SOA scope rule.
+    expect: [{rule: soa-48h-wait, version: 1}, {rule: soa-all-personal-marketing-appointments, version: 1, status: proposed}]
+  - id: soa-03
+    text: "As required by CMS, your appointment is scheduled at least 48 hours after your signed Scope of Appointment."
+    expect: [{rule: soa-48h-wait, version: 1}]
+  - id: soa-04
+    text: "Once you've signed the SOA, we'll need to wait two business days before we can meet."
+    expect: [{rule: soa-48h-wait, version: 1}]
+  - id: soa-05
+    text: "CMS guidelines traditionally suggest a 48-hour advance window for the Scope of Appointment."
+    expect: [{rule: soa-48h-wait, version: 1}]
+  - id: soa-06-near-miss
+    text: "Call us within 48 hours for a free quote on Plan G."
+    expect: []
+  - id: soa-07-near-miss
+    text: "Your ID card arrives within two business days of enrollment."
+    expect: []
+  - id: soa-08-near-miss
+    text: "The Scope of Appointment form lists which plan types the agent may discuss."
+    expect: []
+  - id: soa-09-near-miss
+    text: "Forty-eight hours after the storm, the office reopened for appointments with existing clients."
+    expect: [{rule: soa-48h-wait, version: 1}]   # known limitation: 'appointments' context triggers; documented FP
+
+  # ---------------------------------------------------------------- tpmo-disclaimer-timing
+  - id: dt-01
+    text: "The agent reads the full TPMO disclaimer within the first 60 seconds of the call."
+    expect: [{rule: tpmo-disclaimer-timing, version: 1}]
+  - id: dt-02
+    text: "I'm required to read a quick disclaimer within the first minute of our call."
+    expect: [{rule: tpmo-disclaimer-timing, version: 1}]
+  - id: dt-03
+    text: "Flag calls where the disclaimer was not delivered in the first minute."
+    expect: [{rule: tpmo-disclaimer-timing, version: 1}]
+  - id: dt-04
+    text: "The agent reads the full TPMO disclaimer prior to the discussion of any benefits."
+    expect: [{rule: tpmo-disclaimer-timing, version: 2}]
+  - id: dt-05
+    text: "Read the disclaimer before you discuss plan benefits."
+    expect: [{rule: tpmo-disclaimer-timing, version: 2}]
+  - id: dt-06-near-miss
+    text: "Within the first minute the customer asked about dental coverage."
+    expect: []
+  - id: dt-07-near-miss
+    text: "Benefits begin on the first of the month after enrollment."
+    expect: []
+
+  # ---------------------------------------------------------------- tpmo-disclaimer-text
+  - id: dx-01
+    text: "Please contact medicare.gov or 1-800-MEDICARE or your local State Health Insurance Program to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 1}]
+  - id: dx-02
+    text: "Please contact Medicare.gov, 1-800-MEDICARE, or your local State Health Insurance Program (SHIP) to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 1}]
+  - id: dx-03
+    text: "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 2, status: confirmed}]
+  - id: dx-03b-short-form
+    # 2026-09-25: this line alone used to be tagged v2 *confirmed*. It lacks the
+    # organization/plan-count sentence that v1 and v2 both require, so it is now a
+    # proposed edge with an "incomplete disclaimer" note (r1 finding A2).
+    text: "Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 2, status: proposed}]
+  - id: dx-04-near-miss
+    text: "You can also call 1-800-MEDICARE, use your State Health Insurance Assistance Program (SHIP) for free counseling, or work with a licensed agent."
+    expect: []
+  - id: dx-05-near-miss
+    text: "SHIP counselors are volunteers trained by the state."
+    expect: []
+
+  # ---------------------------------------------------------------- call-recording-retention
+  - id: rr-01
+    text: "Every marketing and sales call is recorded in its entirety. Recordings are retained for 10 years."
+    expect: [{rule: call-recording-retention, version: 1}]
+  - id: rr-02
+    text: "This call is being recorded and will be retained for ten years in accordance with Medicare marketing rules."
+    expect: [{rule: call-recording-retention, version: 1}]
+  - id: rr-03
+    text: "Recordings of sales calls must be kept for six years; years four through six may be transcripts."
+    expect: [{rule: call-recording-retention, version: 2}]
+  - id: rr-04-ambiguous
+    text: "CMS requires agents and their agencies to retain completed SOA forms for a minimum of 10 years."
+    expect: [{rule: call-recording-retention, version: 1, proposed: true}]   # proposed only; a human decides
+  - id: rr-05-near-miss
+    text: "Our founders have worked together for ten years."
+    expect: []
+  - id: rr-06-near-miss
+    text: "Plan G premiums have risen about 6 percent over six years."
+    expect: []
+
+  # ---------------------------------------------------------------- superlatives
+  - id: sup-01
+    text: "The agent does not use superlatives such as \"best\" or \"number one\" unless the claim is substantiated by data."
+    expect: [{rule: superlatives, version: 1}]
+  - id: sup-02
+    text: "Superlatives are prohibited in marketing materials unless supported by current or prior-year data."
+    expect: [{rule: superlatives, version: 1}]
+  - id: sup-03
+    # Relabelled 2026-09-25 (was sup-03-near-miss, expect []). A superlative *use* about a
+    # plan is a claim a human must check (v1: data in the material; v2: accurate and
+    # supportable). The old matcher only saw the literal word "superlative" (r1 finding A5).
+    text: "Honestly, this is the best plan in Lee County."
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: sup-04-near-miss
+    text: "Superlatives make copy feel salesy; prefer specifics."
+    expect: []
+
+  # ---------------------------------------------------------------- soa-educational-events
+  - id: ee-01
+    text: "Do not collect Scope of Appointment forms or Business Reply Cards at educational events."
+    expect: [{rule: soa-educational-events, version: 1}]
+  - id: ee-02
+    text: "A marketing event may not begin within 12 hours of an educational event at the same location."
+    expect: [{rule: soa-educational-events, version: 1}]
+  - id: ee-03-near-miss
+    text: "Our educational events are free and open to the public; bring your questions."
+    expect: []
+
+  # ---------------------------------------------------------------- eip-licensing-footprint
+  - id: lf-01
+    text: "Our agents are licensed to offer insurance services in 48 states."
+    expect: [{rule: eip-licensing-footprint, version: 1}]
+  - id: lf-02
+    text: "Licensed in All 50 States — full national coverage."
+    expect: [{rule: eip-licensing-footprint, version: 2}]
+  - id: lf-03-near-miss
+    text: "Medicare Advantage enrollment grew in 48 states last year."
+    # known limitation: bare '48 states' without licensing words still raises a *proposed*
+    # footprint edge (a human rejects it in one click); documented FP.
+    expect: [{rule: eip-licensing-footprint, version: 1, status: proposed}]
+
+  # ---------------------------------------------------------------- superlative claims (added 2026-09-25)
+  - id: sup-05
+    text: "The #1 rated Medicare Advantage carrier in Florida, three years running."
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: sup-06
+    text: "Top-rated Medigap plans with the lowest premiums in Pinellas County."
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: sup-07-near-miss
+    text: "The best time to call is after 5 pm; our plan specialists answer until 8."
+    expect: []
+  - id: sup-08-near-miss
+    text: "We are at our best when you bring your drug list and your current plan card."
+    expect: []
+  - id: sup-09-near-miss
+    text: "Our agents help you find the best coverage for your needs at no cost to you."
+    expect: []
+  - id: sup-10-near-miss
+    text: "Named one of the Best Places to Work by the Tampa Bay Business Journal."
+    expect: []
+
+  # ---------------------------------------------------------------- licensing footprint vs carrier availability
+  - id: lf-04-near-miss
+    text: "AARP MedicareRx Preferred (PDP) from UnitedHealthcare. Available in all 50 states."
+    expect: []   # the carrier's footprint, not EIP's licensing
+  - id: lf-05-near-miss
+    text: "This Part D plan is offered in all 50 states and the District of Columbia."
+    expect: []
+
+  # ---------------------------------------------------------------- real quotes, EIP public estate (r1, fetched 2026-09-25)
+  # Verbatim from medicarefaq.com and theelitebrokerage.com. Where no encoded rule covers a
+  # quote, the case expects no edge, is marked known_limitation, and `gap` names what is missing.
+  - id: r1-q01
+    text: "Scope of appointment confirmation: written or recorded verbal agreement is required before discussing specific products"
+    expect: []
+    known_limitation: true
+    gap: "Misdescribes the CY2027 changes by omission; no version-specific wording to bind. Needs a 'regulatory-description accuracy' rule (LLM proposal + human review), not a regex."
+  - id: r1-q02
+    text: "Recording and documentation requirements: certain calls must be recorded or logged for compliance review"
+    expect: []
+    known_limitation: true
+    gap: "Mentions recording but no retention period, so it binds to neither v1 (10 years) nor v2 (6 years)."
+  - id: r1-q03
+    text: "CMS Required Disclosure We do not offer every plan available in your area. Any information we provide is limited to those plans we do offer in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 2, status: proposed}]   # was a false green (v2 confirmed)
+  - id: r1-q04
+    text: "Our agents are contracted with every major carrier in Hillsborough County and can compare all 58 Medicare Advantage plans, Medigap policies, and Part D options at no cost to you."
+    expect: []
+    known_limitation: true
+    gap: "Contradicts the page's own 'we do not offer every plan' disclaimer. Needs an 'all-plans claim vs disclaimer' rule."
+  - id: r1-q05
+    text: "Humana Walmart Value Rx stands out for offering $0 copays on both Tier 1 and Tier 2 drugs at preferred pharmacies, a benefit no other major national plan matches."
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: r1-q06
+    text: "Largest formulary among major national Part D plans"
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: r1-q07
+    text: "The $2,000 annual Part D out-of-pocket cap continues in 2027, making formulary verification even more valuable for high-cost medications."
+    expect: []
+    known_limitation: true
+    gap: "Wrong program parameter (the 2027 cap is $2,400). Needs a 'program parameters by plan year' rule."
+  - id: r1-q08
+    text: "Part D Maximum Out-of-Pocket $2,000 New cap effective 2025; includes the Medicare Prescription Payment Plan option"
+    expect: []
+    known_limitation: true
+    gap: "Stale program parameter in a 2026 table. Needs a 'program parameters by plan year' rule."
+  - id: r1-q09
+    text: "Broad preferred pharmacy network. Gap coverage on generics."
+    expect: []
+    known_limitation: true
+    gap: "The coverage gap ended in 2025. Needs a plan-year fact rule."
+  - id: r1-q10
+    text: "For 2026, the standard monthly premium is $202.90, up from $202.90 in 2025."
+    expect: []
+    known_limitation: true
+    gap: "The 2025 Part B premium was $185. Needs a 'program parameters by plan year' rule."
+  - id: r1-q11
+    text: "Licensed in All 50 States BBB A+ Rated 1,000,000+ Clients Helped"
+    expect: [{rule: eip-licensing-footprint, version: 2, status: confirmed}]
+  - id: r1-q12
+    text: "With over 50,000 clients served in 50 states over the last nine years, we offer a proven track record"
+    expect: [{rule: eip-licensing-footprint, version: 2, status: proposed}]   # clients served, not licensing: a human decides
+  - id: r1-q13
+    text: "This website is not connected with the federal government or the federal Medicare program. Please contact medicare.gov or 1-800-MEDICARE or your local State Health Insurance Program to get information on all of your options."
+    expect: [{rule: tpmo-disclaimer-text, version: 1, status: confirmed}]
+  - id: r1-q14
+    text: "Top-level contracts with the highest paid commissions Co-Op money"
+    expect: []
+    known_limitation: true
+    gap: "Agent-facing compensation claim (FMV caps), not a beneficiary superlative. Needs a compensation rule and counsel."
+  - id: r1-q15
+    text: "Once your agency meets its goals, we automatically move you up to the next contract level, until you reach the top."
+    expect: []
+    known_limitation: true
+    gap: "Production-tiered contract levels. No encoded rule; verify with counsel."
+  - id: r1-q16
+    text: "2024 AHIP Medicare Training AHIP Certification"
+    expect: []
+    known_limitation: true
+    gap: "Certification two plan years stale. Needs a 'certification plan-year freshness' rule."
+  - id: r1-q17
+    text: "Our licensed Medicare agents provide free, unbiased guidance. We are compensated by insurance carriers, not by you."
+    expect: []
+    known_limitation: true
+    gap: "'Unbiased' from a commission-paid TPMO that does not offer every plan. No encoded misleading-claims rule."
+  - id: r1-q18
+    text: "Because CMS standardizes commission rates, a broker has no financial reason to steer you toward one carrier over another."
+    expect: []
+    known_limitation: true
+    gap: "Overstates CMS commission rules (CMS sets a maximum, not a standard rate). agent-broker-compensation is now encoded, but its matchers look for CY2027 cap amounts and vacated administrative-payment language, not claims about what the caps mean."
+  - id: r1-q19
+    text: "Tampa (Hillsborough County) has 58 Medicare Advantage plans available in 2026, with 52 offering $0 monthly premiums and 74% rated 4 stars or higher by CMS"
+    expect: []
+    known_limitation: true
+    gap: "Plan-year 2026 data on a page aimed at AEP 2027. Needs a 'plan-year freshness' rule."
+  - id: r1-q20
+    text: "Our licensed agents can review your current coverage, check your drug formulary, and help you find the best plan for 2027 at no cost to you."
+    expect: []
+    known_limitation: true
+    gap: "Soft superlative in a service description. Deliberately not flagged: 'help you find the best plan' is excluded to keep false positives low (see sup-09-near-miss)."
+
+  # ---------------------------------------------------------------- frozen demo pages (fixtures/pages), superlative review
+  # Found by scanning the six frozen pages with the new superlative matcher. The first is a
+  # claim; the rest are advice, a testimonial and a table header, and must stay quiet.
+  - id: sup-11-mfaq-home
+    text: "Everything you need to know about Plan G: costs, coverage, and why it's become the most popular Medigap plan."
+    expect: [{rule: superlatives, version: 2, status: proposed}]
+  - id: sup-12-near-miss
+    text: "Last year's best plan may not be this year's best plan."
+    expect: []
+  - id: sup-13-near-miss
+    text: "A plan that has a manageable MOOP, covers your drugs affordably, and carries a strong star rating is almost always the best choice, regardless of what the premium says."
+    expect: []
+  - id: sup-14-near-miss
+    text: "MedicareFAQ proved very helpful in setting me up with the best choice and subsequent low premium for my secondary Medicare coverage."
+    expect: []
+  - id: sup-15-near-miss
+    text: "Best For HMO (Health Maintenance Organization) No (except emergencies) Usually yes People who use one health system"
+    expect: []
+  - id: sup-16-near-miss
+    text: "The best free tool is Medicare.gov Plan Finder, which lets you enter your zip code, doctors, and medications."
+    expect: []   # a superlative about a government tool, not a plan, carrier or benefit
+
+  # ---------------------------------------------------------------- tpmo-disclaimer-text (v2, all-plans wording)
+  - id: dtx-all-plans-01
+    text: "Currently we represent 12 organizations which offer 64 products in your area. You can always contact Medicare.gov or 1-800-MEDICARE for help with plan choices."
+    expect: [{rule: tpmo-disclaimer-text, version: 2}]
+  - id: dtx-all-plans-02-near-miss
+    text: "You can always contact Medicare.gov or 1-800-MEDICARE for help with plan choices."
+    expect: []   # no organization/plan-count sentence: not the (e)(41) wording
+
+  # ---------------------------------------------------------------- agent-broker-compensation (v2 vacated, v3 CY2027)
+  - id: comp-01
+    text: "Per 42 CFR 422.2274(e)(2), carrier administrative payments must be counted as compensation."
+    expect: [{rule: agent-broker-compensation, version: 2}]
+  - id: comp-02
+    text: "Beginning with contract year 2025, administrative payments are included in the calculation of enrollment-based compensation."
+    expect: [{rule: agent-broker-compensation, version: 2}]
+  - id: comp-03
+    text: "Initial-year MA commission for CY2027: $725 per enrollment (national), $816 in Connecticut, Pennsylvania and D.C."
+    expect: [{rule: agent-broker-compensation, version: 3}]
+  - id: comp-04
+    text: "Renewal compensation is capped at $363 per year for a like plan type."
+    expect: [{rule: agent-broker-compensation, version: 3}]
+  - id: comp-05
+    text: "PDP commission: $130 initial and $65 renewal for 2027 enrollments."
+    expect: [{rule: agent-broker-compensation, version: 3}]
+  - id: comp-06-near-miss
+    text: "The court vacated the rule that counted administrative payments as compensation, so they are no longer included."
+    expect: []   # describes the vacatur correctly
+  - id: comp-07-near-miss
+    text: "Plan G premiums start at $130 per month in Tampa."
+    expect: []   # a premium, not compensation
+  - id: comp-08-near-miss
+    text: "A $725 deductible applies before the plan pays for inpatient stays."
+    expect: []
+  - id: comp-09-near-miss
+    text: "Our agents earn a commission from the carrier; you pay nothing extra for our help."
+    expect: []   # compensation mentioned, no amount and no vacated language
+
+  # ---------------------------------------------------------------- tpmo-data-sharing-consent (v1)
+  - id: share-01
+    text: "By submitting this form you agree that we may share your information with our marketing partners, who may contact you about Medicare plans."
+    expect: [{rule: tpmo-data-sharing-consent, version: 1, status: proposed}]
+  - id: share-02
+    text: "I consent to be contacted by up to 10 partners about Medicare Advantage plans."
+    expect: [{rule: tpmo-data-sharing-consent, version: 1, status: proposed}]
+  - id: share-03
+    text: "Check a box for each company below to consent to sharing your data with that company individually."
+    expect: [{rule: tpmo-data-sharing-consent, version: 1, status: confirmed}]
+  - id: share-04-near-miss
+    text: "Our partners at the local senior center host free educational events each month."
+    expect: []   # partners, but no consent or data sharing
+  - id: share-05-near-miss
+    text: "We never sell or share your personal information."
+    expect: []
+
+  # ---------------------------------------------------------------- tcpa-pewc-one-to-one (v2 vacated)
+  - id: pewc-01
+    text: "Following the FCC one-to-one consent rule, you consent to calls from one seller at a time: Elite Insurance Partners."
+    expect: [{rule: tcpa-pewc-one-to-one, version: 2}]
+  - id: pewc-02
+    text: "Calls must be logically and topically associated with the website where the consumer gave consent."
+    expect: [{rule: tcpa-pewc-one-to-one, version: 2}]
+  - id: pewc-03-near-miss
+    text: "Schedule a one-to-one appointment with a licensed agent."
+    expect: []
+  - id: pewc-04-near-miss
+    text: "We are a single point of contact for all your Medicare questions."
+    expect: []
+
+  # ---------------------------------------------------------------- tcpa-consent-revocation (v1)
+  - id: revoke-01
+    text: "Treat any reply of STOP, QUIT, END, REVOKE, OPT OUT, CANCEL or UNSUBSCRIBE as a revocation of consent."
+    expect: [{rule: tcpa-consent-revocation, version: 1}]
+  - id: revoke-02
+    text: "Opt-out requests are added to the internal do-not-call list within 10 business days."
+    expect: [{rule: tcpa-consent-revocation, version: 1}]
+  - id: revoke-03
+    text: "Opt-out requests (STOP, CANCEL, UNSUBSCRIBE) are processed within 30 days."
+    expect: [{rule: tcpa-consent-revocation, version: 1}]   # keywords confirmed; the 30-day window is a proposed reading of the same sentence
+  - id: revoke-04
+    text: "The only way to opt out is to call our customer service line."
+    expect: [{rule: tcpa-consent-revocation, version: 1, status: proposed}]
+  - id: revoke-05-near-miss
+    text: "Reply STOP to opt out."
+    expect: []   # one keyword: an opt-out instruction, not an encoding of the revocation rule
+  - id: revoke-06-near-miss
+    text: "Your ID card arrives within 10 business days of enrollment."
+    expect: []
+  - id: revoke-07-near-miss
+    text: "Coverage can end, stop or cancel if you move out of the service area."
+    expect: []   # the words, but not about consent or opt-outs
+
+  # ---------------------------------------------------------------- soa-all-personal-marketing-appointments
+  - id: soa-all-01
+    text: "Inbound transfers: no Scope of Appointment is needed when the caller calls in to enroll."
+    expect: [{rule: soa-all-personal-marketing-appointments, version: 1}]
+  - id: soa-all-02
+    text: "Skip the SOA for web chats; it only applies to scheduled appointments."
+    expect: [{rule: soa-all-personal-marketing-appointments, version: 1}]
+  - id: soa-all-03
+    text: "I'll send the Scope of Appointment now. Once you've signed it, we'll need to wait two business days before we can meet, unless you'd like to walk in."
+    expect: [{rule: soa-48h-wait, version: 1}, {rule: soa-all-personal-marketing-appointments, version: 1, status: proposed}]
+  - id: soa-all-04
+    text: "An SOA is required before every personal marketing appointment, including inbound calls, walk-ins and web chats."
+    expect: [{rule: soa-all-personal-marketing-appointments, version: 2}]
+  - id: soa-all-05-near-miss
+    text: "Knowing this form exists means you walk in with clarity, not confusion."
+    expect: []   # from the frozen SOA explainer page: 'walk in' and 'not', but no SOA exemption
+  - id: soa-all-06-near-miss
+    text: "Same-day completion of the Scope of Appointment is permitted when you walk in without a prior appointment."
+    expect: []   # timing, not an exemption from the SOA
+  - id: soa-all-07-near-miss
+    text: "Inbound calls are answered by a licensed agent within two minutes."
+    expect: []
+
+  # ---------------------------------------------------------------- fl-telesolicitation-hours-frequency (v1)
+  - id: fl-01
+    text: "Outbound calls to Florida leads are placed from 8 a.m. to 8 p.m. in the lead's time zone."
+    expect: [{rule: fl-telesolicitation-hours-frequency, version: 1, status: confirmed}]
+  - id: fl-02
+    text: "Dial window: 8 a.m. to 9 p.m. in the lead's local time zone, seven days a week."
+    expect: [{rule: fl-telesolicitation-hours-frequency, version: 1, status: proposed}]
+  - id: fl-03
+    text: "Up to 5 call attempts per lead per day on new web leads."
+    expect: [{rule: fl-telesolicitation-hours-frequency, version: 1, status: proposed}]
+  - id: fl-04
+    text: "No more than 3 calls per 24 hours to the same number on the same subject."
+    expect: [{rule: fl-telesolicitation-hours-frequency, version: 1, status: confirmed}]
+  - id: fl-05-near-miss
+    text: "Our office is open until 9 p.m. on weekdays."
+    expect: []   # office hours, no calling context
+  - id: fl-06-near-miss
+    text: "Take 3 tablets per day with food."
+    expect: []
+  - id: fl-07-near-miss
+    text: "The plan covers 5 visits per year to a chiropractor."
+    expect: []

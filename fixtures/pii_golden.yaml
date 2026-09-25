@@ -1,0 +1,73 @@
+# Labeled strings for scoring backstop.core.pii (the redactor used by ingest and the sandbox).
+#
+# `expect` lists the PII kinds a careful reviewer would redact in `text`, one entry per
+# occurrence. `expect: []` is a negative: nothing in it is personal data, and redacting any
+# of it is over-redaction (a false positive). Every value here is invented.
+#
+# Scoring (tests/test_pii.py::test_pii_golden_scores): per case and kind,
+# TP = min(expected, detected), FP = detected - TP, FN = expected - TP.
+# `limitation: true` marks a case the regex redactor is known to miss; it is scored
+# like any other case (it lowers recall) so the number stays honest.
+
+cases:
+  # ------------------------------------------------------------ Medicare numbers (MBI)
+  - {id: mbi-dashed, text: "My Medicare number is 1EG4-TE5-MK73.", expect: [medicare_number]}
+  - {id: mbi-spaced, text: "It's 1EG4 TE5 MK73 on the red white and blue card.", expect: [medicare_number]}
+  - {id: mbi-lower, text: "medicare id 1eg4-te5-mk73", expect: [medicare_number]}
+  - {id: mbi-bare, text: "Member ID 1EG4TE5MK73 please.", expect: [medicare_number]}
+  - {id: mbi-synthetic, text: "Signing now. My Medicare number is 1XX4-XX2-XX18 if you need it.", expect: [medicare_number]}
+
+  # ------------------------------------------------------------ SSN
+  - {id: ssn-dashed, text: "SSN 123-45-6789", expect: [ssn]}
+  - {id: ssn-spaced, text: "my social is 123 45 6789", expect: [ssn]}
+  - {id: ssn-bare-labelled, text: "Social Security number 123456789, got it.", expect: [ssn]}
+  - {id: ssn-bare-unlabelled, text: "Reference 123456789 is on your letter.", expect: []}
+
+  # ------------------------------------------------------------ dates of birth
+  - {id: dob-slash, text: "born 03/14/1948", expect: [dob]}
+  - {id: dob-iso, text: "Date of birth 1951-03-03.", expect: [dob]}
+  - {id: dob-month-name, text: "I was born March 3, 1951 in Ohio.", expect: [dob]}
+  - {id: dob-day-first, text: "Birthday is 3rd of March 1951.", expect: [dob]}
+  - {id: dob-short-year, text: "DOB 3-14-48", expect: [dob]}
+  - {id: dob-19xx-no-context, text: "That's 11/02/1950, the one on my card.", expect: [dob]}
+
+  # ------------------------------------------------------------ phone numbers
+  - {id: phone-parens, text: "Call me back at (512) 555-0142 after lunch.", expect: [phone]}
+  - {id: phone-dashed, text: "My cell is 512-555-0142.", expect: [phone]}
+  - {id: phone-dotted, text: "Text 512.555.0142 if I miss you.", expect: [phone]}
+  - {id: phone-plus1, text: "Reach me on +1 813 555 0199.", expect: [phone]}
+  - {id: phone-bare-labelled, text: "my phone number is 8135550199", expect: [phone]}
+
+  # ------------------------------------------------------------ email
+  - {id: email-plain, text: "Send it to margaret.ellison@example.com please.", expect: [email]}
+  - {id: email-spoken, text: "it's margaret dot ellison at gmail dot com", expect: [email]}
+
+  # ------------------------------------------------------------ street addresses
+  - {id: addr-full, text: "I live at 1420 Oak Hollow Drive, Apt 3, Tampa.", expect: [address]}
+  - {id: addr-abbrev, text: "Mail it to 88 W. Palm Ave.", expect: [address]}
+  - {id: addr-pobox, text: "Use P.O. Box 4471 for anything by mail.", expect: [address]}
+  - {id: addr-no-suffix, text: "We're at 1420 Oak Hollow in Brandon.", expect: [address], limitation: true}
+
+  # ------------------------------------------------------------ several kinds in one line
+  - id: multi-line
+    text: "Member 1EG4-TE5-MK73, SSN 123-45-6789, born 04/12/1951, cell (727) 555-0110, email r.diaz@example.org."
+    expect: [medicare_number, ssn, dob, phone, email]
+
+  # ------------------------------------------------------------ names (known gap)
+  - {id: name-self-intro, text: "My name is Margaret Ellison.", expect: [name], limitation: true}
+
+  # ------------------------------------------------------------ negatives: must NOT be redacted
+  - {id: neg-dollars, text: "The premium is $1,234.56 a year and the MOOP is $4,900.", expect: []}
+  - {id: neg-dollar-dash, text: "Quoted $1,234-56 on the old form.", expect: []}
+  - {id: neg-plan-id, text: "Plan H1234-001 and PDP S5884-123 are both in the county.", expect: []}
+  - {id: neg-plan-id-3part, text: "Contract-plan-segment H1036-077-000 is the one.", expect: []}
+  - {id: neg-call-timestamp, text: "[00:01:20] AGENT: Thanks. Call started 2026-10-02T14:03:11Z.", expect: []}
+  - {id: neg-call-date, text: "We spoke on 10/02/2026 and again on October 3, 2026.", expect: []}
+  - {id: neg-effective-date, text: "Coverage is effective 2027-01-01 if you enroll by 12/07/2026.", expect: []}
+  - {id: neg-tollfree, text: "Please contact Medicare.gov or 1-800-MEDICARE (1-800-633-4227) for all options.", expect: []}
+  - {id: neg-tollfree-888, text: "Our office line is 1-888-555-0143, Monday to Friday.", expect: []}
+  - {id: neg-counts, text: "Currently we represent 26 organizations which offer 3,740 products in your area.", expect: []}
+  - {id: neg-star-rating, text: "74% of the 58 plans are rated 4 stars or higher.", expect: []}
+  - {id: neg-drug-tier, text: "Tier 1 and Tier 2 drugs are $0 at 5 preferred pharmacies.", expect: []}
+  - {id: neg-street-word, text: "We can walk through 3 plans on the way to your decision.", expect: []}
+  - {id: neg-oep-dates, text: "AEP runs Oct 15 to Dec 7; OEP is Jan 1 to Mar 31.", expect: []}

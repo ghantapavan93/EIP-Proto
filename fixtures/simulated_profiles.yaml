@@ -1,0 +1,26 @@
+# Declared defect profiles for the simulated adapter.
+#
+# These are NOT models. They are deterministic stand-ins whose imperfections
+# are declared here and printed on screen next to every run, so nobody
+# mistakes a simulated regression for a measured one. Replace with recorded
+# cassettes (`backstop record`) or the live adapter when an API key exists.
+#
+# Probabilities are per transcript, seeded by (model, transcript code), so a
+# re-run reproduces the same defects and the harness stays idempotent.
+
+models:
+  sim-large:
+    label: "Simulated — large model profile (clean)"
+    numeric_hallucination: 0.00   # summary quotes a figure not on the call
+    span_paraphrase: 0.00         # "verbatim" span is a paraphrase
+    pii_leak: 0.00                # repeats a Medicare number in prose
+    timestamp_error: 0.00         # misreads the disclaimer timestamp by 15-25s
+    coaching_quality: 4.4         # judge baseline (1-5)
+  sim-small:
+    label: "Simulated — small model profile (defect-prone)"
+    numeric_hallucination: 0.06
+    span_paraphrase: 0.05
+    pii_leak: 0.20                # applied only to the 6 calls that contain PII
+    timestamp_error: 0.06
+    coaching_quality: 3.7
+    generic_coaching_rate: 0.45      # writes a generic, quote-free coaching note
