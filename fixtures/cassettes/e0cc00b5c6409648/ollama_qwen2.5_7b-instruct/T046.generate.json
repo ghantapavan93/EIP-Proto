@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 122,
+      "benefits_span": "The UnitedHealthcare plan available in Orange County has a $5 monthly premium, a $90 drug deductible and a $4600 maximum out-of-pocket. Based on the CMS 2026 star ratings, this is the highest-rated plan in Orange County.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$90",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivered the disclaimer before discussing benefits, and scheduled a plan review appointment. The agent also provided a superlative statement about the plan's star rating, which was substantiated.",
+      "coaching_note": "Great job on delivering the disclaimer and scheduling the appointment. However, ensure that superlative statements are always substantiated to avoid any misrepresentation. In this case, the statement about the plan being the highest-rated in Orange County was accurate, but it's important to double-check all claims to maintain trust.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Review plan with customer and send confirmation email"
+      }
+    }
+  },
+  "latency_ms": 18465,
+  "usage": {
+    "input_tokens": 1370,
+    "output_tokens": 540,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:31:43Z"
+}

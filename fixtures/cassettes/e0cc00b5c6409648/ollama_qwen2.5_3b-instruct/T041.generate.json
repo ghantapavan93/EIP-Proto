@@ -1,0 +1,41 @@
+{
+  "raw": {
+    "composition": {
+      "coaching_note": "The agent did a good job by delivering the TPMO disclaimer prior to discussing any benefits. However, the agent could have been more proactive in collecting the Scope of Appointment before starting the plan discussion. The agent could improve by asking the customer to sign the Scope of Appointment during the call, rather than waiting for the customer to initiate it later.",
+      "crm_record": {
+        "carrier": null,
+        "disposition": "Compliant",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. No superlatives were used. The call was for a Medicare Advantage plan."
+    },
+    "extraction": {
+      "appointment_hours_after_soa": null,
+      "appointment_scheduled": false,
+      "carrier": null,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "numeric_claims": [],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "00:25",
+      "soa_wait_compliant": true
+    }
+  },
+  "latency_ms": 2924,
+  "usage": {
+    "input_tokens": 1391,
+    "output_tokens": 294,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:20:48Z"
+}

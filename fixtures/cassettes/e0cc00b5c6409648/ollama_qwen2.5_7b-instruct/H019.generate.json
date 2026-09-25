@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 43,
+      "benefits_span": "The Aetna plan available in Pasco County has a $5 monthly premium, a $85 drug deductible and a $3200 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "85",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all the rules, delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. The call was compliant.",
+      "coaching_note": "Great job, Owen! You delivered the disclaimer before discussing benefits and collected the Scope of Appointment promptly. One improvement would be to ensure the customer fully understands the Scope of Appointment before scheduling the appointment. For example, you could ask, 'Do you have any questions about the Scope of Appointment before we schedule the appointment?'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Review and sign Scope of Appointment, schedule plan review in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 18054,
+  "usage": {
+    "input_tokens": 1398,
+    "output_tokens": 515,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:51:03Z"
+}

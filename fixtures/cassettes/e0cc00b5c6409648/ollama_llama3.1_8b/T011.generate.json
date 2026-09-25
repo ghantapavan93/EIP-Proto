@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 120,
+      "appointment_scheduled": true,
+      "benefits_span": "The Mutual of Omaha plan available in Duval County has a $0 monthly premium, a $165 drug deductible and a $5700 maximum out-of-pocket.",
+      "benefits_started_seconds": 55,
+      "carrier": "Mutual of Omaha",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "numeric_claims": [
+        {
+          "context": "monthly premium",
+          "value": "$0"
+        },
+        {
+          "context": "drug deductible",
+          "value": "$165"
+        },
+        {
+          "context": "maximum out-of-pocket",
+          "value": "$5700"
+        }
+      ],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "flagged": false,
+          "substantiated": false,
+          "text": null
+        }
+      ]
+    },
+    "composition": {
+      "coaching_note": "The agent could improve by providing more specific information about the plans, such as the network and formulary, before discussing benefits. For example, the agent could say, \u201cLet me check the network for your primary care physician\u201d and then provide the information.\n\n",
+      "crm_record": {
+        "carrier": "Mutual of Omaha",
+        "disposition": "Scheduled plan review",
+        "next_step": "Send confirmation email to Mr. Patel",
+        "product_line": "MA"
+      },
+      "summary": "The agent discussed Mutual of Omaha plans with Mr. Patel, focusing on keeping his doctors and dental coverage. The plan review was scheduled for 5 days from now."
+    }
+  },
+  "latency_ms": 23935,
+  "usage": {
+    "input_tokens": 1331,
+    "output_tokens": 472,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:31:41Z"
+}

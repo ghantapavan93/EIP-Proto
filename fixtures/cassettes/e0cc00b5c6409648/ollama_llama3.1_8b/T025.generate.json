@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 43,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 108,
+      "benefits_span": "The Cigna plan available in Volusia County has a $35 monthly premium, a $30 drug deductible and a $5000 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "best",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$30",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "33612",
+        "July"
+      ]
+    },
+    "composition": {
+      "summary": "The agent failed to deliver the TPMO disclaimer prior to discussing benefits. The agent also used a superlative that was flagged as misleading.",
+      "coaching_note": "Owen stated, 'I'll flag the ones with dental and vision.' This implies that the plans with dental and vision coverage are somehow superior, which may be misleading. To improve, Owen could rephrase this to simply state the features of the plans.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Schedule plan review for 4 days from now"
+      }
+    }
+  },
+  "latency_ms": 61810,
+  "usage": {
+    "input_tokens": 2774,
+    "output_tokens": 1048,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:46:11Z"
+}

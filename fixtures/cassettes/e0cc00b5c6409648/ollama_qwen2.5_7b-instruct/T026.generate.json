@@ -1,0 +1,63 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 41,
+      "benefits_span": "The Mutual of Omaha plan available in Lee County has a $40 monthly premium, a $480 drug deductible and a $2900 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "480",
+          "context": "drug deductible"
+        },
+        {
+          "value": "2900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Mr. Patel",
+        "33662",
+        "October"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed a Medicare Part D plan with the customer and scheduled a plan review. The disclaimer was delivered after the benefits discussion, which is non-compliant.",
+      "coaching_note": "Owen should ensure the disclaimer is read before discussing any benefits to comply with the rules. For example, he could say, 'Before we go over the details, I need to inform you that we do not offer every plan available in your area. Currently, we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer in 4 days"
+      }
+    }
+  },
+  "latency_ms": 19993,
+  "usage": {
+    "input_tokens": 1380,
+    "output_tokens": 560,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:26:02Z"
+}

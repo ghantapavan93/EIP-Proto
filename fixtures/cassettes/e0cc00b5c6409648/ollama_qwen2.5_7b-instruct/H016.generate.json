@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 112,
+      "benefits_span": "The Aetna plan available in Polk County has a $5 monthly premium, a $90 drug deductible and a $5100 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.75,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$90",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5100",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. The customer was kept informed and the appointment was scheduled for 48 hours later.",
+      "coaching_note": "Luis did a great job adhering to all compliance rules. However, he could improve by providing a bit more detail about the plans, such as the network of doctors and hospitals included, to help the customer make a more informed decision.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Review and sign Scope of Appointment, follow up with customer in 48 hours"
+      }
+    }
+  },
+  "latency_ms": 25522,
+  "usage": {
+    "input_tokens": 1385,
+    "output_tokens": 512,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:50:08Z"
+}

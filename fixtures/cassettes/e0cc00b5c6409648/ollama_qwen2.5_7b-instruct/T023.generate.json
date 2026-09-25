@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Humana",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 120,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 252,
+      "benefits_span": "The Humana plan available in Polk County has a $0 monthly premium, a $520 drug deductible and a $6600 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "0",
+          "context": "monthly premium"
+        },
+        {
+          "value": "520",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivered the disclaimer before discussing benefits, and collected the Scope of Appointment. The appointment was scheduled for 4 days later.",
+      "coaching_note": "Great job, Marcus! You adhered to all the rules and delivered the disclaimer before discussing benefits. One improvement would be to ensure the customer understands the importance of reviewing the Scope of Appointment before the scheduled meeting.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Humana",
+        "next_step": "Follow up with Mrs. Dubois on the scheduled appointment and ensure she reviews the Scope of Appointment."
+      }
+    }
+  },
+  "latency_ms": 18219,
+  "usage": {
+    "input_tokens": 1459,
+    "output_tokens": 498,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:25:00Z"
+}

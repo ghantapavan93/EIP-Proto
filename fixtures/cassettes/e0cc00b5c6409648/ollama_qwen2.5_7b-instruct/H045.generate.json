@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 117,
+      "benefits_span": "The Mutual of Omaha plan available in Lee County has a $30 monthly premium, a $270 drug deductible and a $6300 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.2833333333333332,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Honestly, this is the best plan in Lee County, nobody beats it.",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$270",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed a Medicare Part D plan with the customer, highlighting its benefits and scheduling a plan review. A superlative was used, which could be misleading.",
+      "coaching_note": "Owen used a superlative, 'Honestly, this is the best plan in Lee County, nobody beats it,' which could be misleading. It's important to provide balanced information to avoid misleading the customer.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer and send confirmation email"
+      }
+    }
+  },
+  "latency_ms": 18064,
+  "usage": {
+    "input_tokens": 1377,
+    "output_tokens": 553,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:58:56Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 40,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 25,
+      "benefits_span": "The Mutual of Omaha plan available in Orange County has a $10 monthly premium, a $5 drug deductible and a $4000 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.72,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "5",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan details before the disclaimer, which is compliant. The agent also scheduled the appointment immediately after collecting the Scope of Appointment, which is compliant.",
+      "coaching_note": "Grace did a good job by scheduling the appointment immediately after collecting the Scope of Appointment. However, she could improve by ensuring the disclaimer is read before discussing any benefits to maintain compliance.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with Mr. Kowalski on the scheduled plan review."
+      }
+    }
+  },
+  "latency_ms": 18530,
+  "usage": {
+    "input_tokens": 1239,
+    "output_tokens": 490,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:54:33Z"
+}

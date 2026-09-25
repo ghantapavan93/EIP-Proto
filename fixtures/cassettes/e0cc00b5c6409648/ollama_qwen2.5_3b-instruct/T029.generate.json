@@ -1,0 +1,43 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "The Mutual of Omaha plan available in Volusia County has a $20 monthly premium, a $230 drug deductible and a $5500 maximum out-of-pocket.",
+      "benefits_started_seconds": 103,
+      "benefits_span": "The Mutual of Omaha plan available in Volusia County has a $20 monthly premium, a $230 drug deductible and a $5500 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 72
+    },
+    "composition": {
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The disclaimer was delivered and compliant with the ordering:before-benefits basis. The SOA was collected and the appointment was scheduled.",
+      "coaching_note": "Agent Luis, you did a great job delivering the TPMO disclaimer before discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Send follow-up email to confirm appointment"
+      }
+    }
+  },
+  "latency_ms": 6424,
+  "usage": {
+    "input_tokens": 2427,
+    "output_tokens": 672,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:51Z"
+}

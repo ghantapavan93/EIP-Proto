@@ -1,0 +1,39 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 2,
+      "appointment_scheduled": true,
+      "carrier": "Cigna",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "01:19",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Agent, you did a great job delivering the TPMO disclaimer prior to discussing any benefits. It's important to ensure that customers understand the scope of the insurance plans available in their area. Keep up the good work!",
+      "crm_record": {
+        "appointment_scheduled": true,
+        "disclaimer_basis": "ordering:before-benefits",
+        "disclaimer_compliant": true,
+        "soa_collected": true
+      },
+      "summary": "The agent delivered the TPMO disclaimer prior to discussing any benefits, and the SOA was collected before the benefits discussion. The agent scheduled an appointment for 4 days from the call, which is compliant with the SOA waiting period."
+    }
+  },
+  "latency_ms": 2487,
+  "usage": {
+    "input_tokens": 1392,
+    "output_tokens": 260,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:08Z"
+}

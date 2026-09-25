@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 101,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 120,
+      "benefits_span": "The Cigna plan available in Hillsborough County has a $35 monthly premium, a $85 drug deductible and a $4000 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.9333333333333333,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "85",
+          "context": "drug deductible"
+        },
+        {
+          "value": "4000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent provided a disclaimer before discussing benefits and collected the Scope of Appointment before scheduling the appointment, both of which were compliant. The agent also explained the Cigna plan details clearly.",
+      "coaching_note": "Luis did a good job by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. However, he could improve by ensuring the appointment is scheduled at least 24 hours after the SOA is collected to fully comply with the rules.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Review plan with customer in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 18142,
+  "usage": {
+    "input_tokens": 1440,
+    "output_tokens": 523,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:51:22Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Humana",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 0,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 25,
+      "benefits_span": "The Humana plan available in Polk County has a $30 monthly premium, a $195 drug deductible and a $3000 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "195",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed a Humana Part D plan with the customer, provided a disclaimer, and collected a Scope of Appointment. The call was compliant with the rules.",
+      "coaching_note": "Grace did well by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. However, Grace could have scheduled the appointment closer to the time of the call to ensure the customer has the most recent information.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Humana",
+        "next_step": "Follow up with customer on the scheduled plan review"
+      }
+    }
+  },
+  "latency_ms": 17691,
+  "usage": {
+    "input_tokens": 1238,
+    "output_tokens": 489,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:53:55Z"
+}

@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 20,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 127,
+      "benefits_span": "The UnitedHealthcare plan available in Polk County has a $5 monthly premium, a $530 drug deductible and a $4200 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$530",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before delivering the disclaimer, which is non-compliant. The agent collected the Scope of Appointment and scheduled a plan review, both of which were compliant.",
+      "coaching_note": "Owen, it's important to deliver the disclaimer before discussing any plan benefits to ensure compliance. For example, you said, 'The UnitedHealthcare plan available in Polk County has a $5 monthly premium, a $530 drug deductible and a $4200 maximum out-of-pocket.' This should have been preceded by the disclaimer. Next time, make sure to deliver the disclaimer first.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer"
+      }
+    }
+  },
+  "latency_ms": 20961,
+  "usage": {
+    "input_tokens": 1479,
+    "output_tokens": 523,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:25:22Z"
+}

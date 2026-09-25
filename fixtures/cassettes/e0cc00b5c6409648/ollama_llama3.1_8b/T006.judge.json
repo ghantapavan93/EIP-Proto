@@ -1,0 +1,14 @@
+{
+  "scores": [
+    4.0,
+    5.0,
+    3.0,
+    3.0,
+    3.0
+  ],
+  "meta": {
+    "judge_model": "ollama/llama3.1:8b",
+    "temperature": 1.0,
+    "provider": "ollama"
+  }
+}

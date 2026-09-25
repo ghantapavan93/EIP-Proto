@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "Before we start, this call is being recorded for quality and compliance.",
+      "benefits_started_seconds": 34,
+      "benefits_span": "The Aetna plan available in Pasco County has a $35 monthly premium, a $75 drug deductible and a $6200 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 72,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Ms. Nakamura",
+        "Pasco County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent scheduled an appointment with Ms. Nakamura to review Medicare Advantage plans, but failed to deliver the TPMO disclaimer before discussing benefits.",
+      "coaching_note": "Dana, you mentioned that you sent the Scope of Appointment to Ms. Nakamura's email. However, you failed to deliver the TPMO disclaimer before discussing benefits. To improve, please make sure to deliver the disclaimer before discussing any benefits.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Review Medicare Advantage plans with Ms. Nakamura on Thursday"
+      }
+    }
+  },
+  "latency_ms": 45195,
+  "usage": {
+    "input_tokens": 2232,
+    "output_tokens": 766,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:15:35Z"
+}

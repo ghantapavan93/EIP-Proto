@@ -1,0 +1,65 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 47,
+      "benefits_span": "The UnitedHealthcare plan available in Pasco County has a $45 monthly premium, a $510 drug deductible and a $5400 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.2,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "Honestly, this is the best plan in Pasco County, nobody beats it.",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "510",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5400",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivered the disclaimer before discussing benefits, and collected the Scope of Appointment. However, the agent used a superlative that could be misleading.",
+      "coaching_note": "Dana used a superlative, 'Honestly, this is the best plan in Pasco County, nobody beats it,' which could be seen as misleading. It's important to provide balanced information and avoid making absolute claims.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Review and sign the Scope of Appointment, schedule a follow-up call in 48 hours."
+      }
+    }
+  },
+  "latency_ms": 20969,
+  "usage": {
+    "input_tokens": 1422,
+    "output_tokens": 560,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:32:04Z"
+}

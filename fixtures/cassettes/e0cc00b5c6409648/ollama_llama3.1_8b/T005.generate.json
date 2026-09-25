@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 51,
+      "benefits_span": "keeping your doctors, or the lowest premium?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$515",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who expressed a preference for keeping her doctors. The agent scheduled a plan review for 4 days from now.",
+      "coaching_note": "The agent could improve by providing more specific information about the plans, rather than just listing features. For example, the agent could explain how the $5 monthly premium compares to other plans.",
+      "crm_record": {
+        "disposition": "Scheduled plan review",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Schedule plan review for 4 days from now"
+      }
+    }
+  },
+  "latency_ms": 52671,
+  "usage": {
+    "input_tokens": 2816,
+    "output_tokens": 978,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:27:14Z"
+}

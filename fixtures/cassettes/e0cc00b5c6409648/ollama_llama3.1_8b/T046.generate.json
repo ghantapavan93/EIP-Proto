@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 27,
+      "benefits_span": "The UnitedHealthcare plan available in Orange County has a $5 monthly premium, a $90 drug deductible and a $4600 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 5,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "highest-rated plan in Orange County",
+          "substantiated": false,
+          "flagged": true
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$5",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$90",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed a Medicare Advantage plan with Mr. Alvarez, scheduling a plan review for 5 days from now. The agent failed to substantiate the claim that the plan is the highest-rated in Orange County.",
+      "coaching_note": "Priya, you mentioned that the UnitedHealthcare plan is the 'highest-rated plan in Orange County.' However, you failed to provide any evidence to support this claim. To improve, please ensure that you have a clear understanding of the plan's ratings and can substantiate any claims you make.",
+      "crm_record": {
+        "disposition": "Scheduled Plan Review",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Schedule Plan Review in 5 days"
+      }
+    }
+  },
+  "latency_ms": 65041,
+  "usage": {
+    "input_tokens": 2604,
+    "output_tokens": 1029,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:05:07Z"
+}

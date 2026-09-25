@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 112,
+      "benefits_span": "The Mutual of Omaha plan available in Orange County has a $25 monthly premium, a $315 drug deductible and a $6600 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.25,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "25",
+          "context": "monthly premium"
+        },
+        {
+          "value": "315",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before the disclaimer, which is non-compliant. The agent collected the Scope of Appointment and scheduled a plan review, both of which were compliant.",
+      "coaching_note": "Luis, it's important to deliver the disclaimer before discussing any benefits to ensure compliance. In this call, the disclaimer was given after the benefits discussion, which is a violation. Next time, make sure to deliver the disclaimer first, followed by the benefits discussion.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, schedule plan review"
+      }
+    }
+  },
+  "latency_ms": 44606,
+  "usage": {
+    "input_tokens": 2879,
+    "output_tokens": 931,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:18:08Z"
+}

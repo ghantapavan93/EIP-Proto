@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 115,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 194,
+      "benefits_span": "The Aetna plan available in Lee County has a $35 monthly premium, a $170 drug deductible and a $3600 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.0,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "170",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, delivering the disclaimer before discussing benefits and collecting the Scope of Appointment promptly. The call was recorded and the customer was enrolled in a Part D plan.",
+      "coaching_note": "Grace did well by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment quickly. However, she could improve by providing a bit more detail about the plan's benefits, such as the specific drugs covered or the network of providers, to help the customer make an informed decision.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Review plan with customer in 4 days"
+      }
+    }
+  },
+  "latency_ms": 17735,
+  "usage": {
+    "input_tokens": 1369,
+    "output_tokens": 512,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:51:40Z"
+}

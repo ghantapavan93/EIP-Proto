@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 27,
+      "benefits_span": "AGENT: Medicare Supplement plans are standardized, so we can compare carriers by price right now if you'd like.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": false,
+      "superlatives": [
+        {
+          "text": "standardized",
+          "substantiated": false,
+          "flagged": false
+        },
+        {
+          "text": "standardized",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "160",
+          "context": "monthly"
+        }
+      ],
+      "pii_detected": [
+        "Nakamura"
+      ]
+    },
+    "composition": {
+      "summary": "The agent did not deliver the TPMO disclaimer prior to discussing benefits. The call did not collect a Scope of Appointment and did not schedule an appointment. The agent used superlatives which could be misleading.",
+      "coaching_note": "Owen, remember to deliver the TPMO disclaimer before discussing any benefits. Let's ensure you're compliant with the rules and provide a clear and accurate overview of the plans available.",
+      "crm_record": {
+        "disposition": "Needs TPMO disclaimer and SOA collection",
+        "product_line": "MA",
+        "carrier": "Cigna"
+      }
+    }
+  },
+  "latency_ms": 3936,
+  "usage": {
+    "input_tokens": 1110,
+    "output_tokens": 410,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: nested schema flattened twice in a row"
+  },
+  "recorded_at": "2026-09-22T06:22:24Z"
+}

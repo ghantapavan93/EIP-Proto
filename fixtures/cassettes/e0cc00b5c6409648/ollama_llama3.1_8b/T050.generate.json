@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "The Aetna plan available in Polk County has a $45 monthly premium, a $350 drug deductible and a $3900 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 48,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$350",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$3900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX8-XX0-XX96",
+        "09/16/1949"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, who prioritized the lowest premium. The agent collected a Scope of Appointment and scheduled a plan review for 2 days later.",
+      "coaching_note": "The agent asked the customer about their priorities, but did not provide a clear explanation of the benefits of the Aetna plan. In the future, the agent can ask more targeted questions to help the customer understand the plan's features.",
+      "crm_record": {
+        "disposition": "Scheduled plan review",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Plan review in 2 days"
+      }
+    }
+  },
+  "latency_ms": 54469,
+  "usage": {
+    "input_tokens": 2964,
+    "output_tokens": 958,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:08:56Z"
+}

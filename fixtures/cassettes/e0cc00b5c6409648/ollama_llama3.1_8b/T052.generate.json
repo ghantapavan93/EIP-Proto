@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 41,
+      "benefits_span": "The Mutual of Omaha plan available in Hillsborough County has a $10 monthly premium, a $120 drug deductible and a $6700 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$120",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX2-XX0-XX80",
+        "04/16/1953"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Mutual of Omaha plans with Mr. Chen, scheduling a plan review for 4 days from now.",
+      "coaching_note": "Jordan, you mentioned 'lowest premium' without substantiating it. Consider providing more context or evidence to support this claim.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "MA",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Plan Review"
+      }
+    }
+  },
+  "latency_ms": 54906,
+  "usage": {
+    "input_tokens": 2750,
+    "output_tokens": 946,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:10:44Z"
+}

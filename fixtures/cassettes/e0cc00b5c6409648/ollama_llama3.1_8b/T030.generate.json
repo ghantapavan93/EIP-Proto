@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 43,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 25,
+      "benefits_span": "The Cigna plan available in Lee County has a $30 monthly premium, a $410 drug deductible and a $5700 maximum out-of-pocket.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 48,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$410",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Dubois",
+        "Lee County"
+      ]
+    },
+    "composition": {
+      "summary": "Mrs. Dubois was presented with a Cigna plan in Lee County, but the agent failed to read the TPMO disclaimer prior to discussing benefits.",
+      "coaching_note": "Grace, you mentioned that you 'got right to it' and discussed benefits before reading the disclaimer. Remember to read the disclaimer first, as per CMS rules. This will help you avoid potential compliance issues. Specifically, you can say something like, 'Before we start, let me read you the disclaimer: We do not offer every plan available in your area...'",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Follow-up in 2 days"
+      }
+    }
+  },
+  "latency_ms": 51059,
+  "usage": {
+    "input_tokens": 2356,
+    "output_tokens": 899,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:50:33Z"
+}

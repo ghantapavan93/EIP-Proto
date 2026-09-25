@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "Okay, that helps narrow it down.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0.041666666666666664,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Medicare number",
+        "date of birth"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. However, the agent collected personal information (Medicare number and date of birth) during the call, which is not compliant.",
+      "coaching_note": "Luis did a good job following the compliance rules, but it's important to ensure that personal information is not collected during the call. Next time, wait until after the appointment is scheduled to gather this information.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Follow up with Mrs. Dubois on the scheduled plan review and ensure personal information is collected post-appointment."
+      }
+    }
+  },
+  "latency_ms": 15243,
+  "usage": {
+    "input_tokens": 1492,
+    "output_tokens": 457,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:00:25Z"
+}

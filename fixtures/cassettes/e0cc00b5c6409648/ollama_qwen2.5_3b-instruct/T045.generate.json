@@ -1,0 +1,42 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 1,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "numeric_claims": [],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "00:50",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "The agent used superlatives, which can be misleading. Consider rephrasing to avoid exaggeration. For example, instead of saying 'the best plan in Polk County', you could say 'a very good plan in Polk County'.",
+      "crm_record": {
+        "carrier": "Elite Insurance Partners",
+        "disposition": "Compliant",
+        "next_step": "Schedule follow-up appointment for 48 hours from now",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The agent used superlatives, which were flagged as potentially misleading. The call was scheduled for a follow-up appointment."
+    }
+  },
+  "latency_ms": 3044,
+  "usage": {
+    "input_tokens": 1388,
+    "output_tokens": 308,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:21:11Z"
+}

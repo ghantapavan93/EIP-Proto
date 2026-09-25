@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 159,
+      "benefits_span": "AGENT: Medicare Supplement plans are standardized, so we can compare carriers by price right now if you'd like.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": false,
+      "soa_span": null,
+      "appointment_scheduled": false,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": false,
+      "superlatives": [
+        {
+          "text": "standardized",
+          "substantiated": false,
+          "flagged": false
+        },
+        {
+          "text": "standardized",
+          "substantiated": false,
+          "flagged": false
+        },
+        {
+          "text": "standardized",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "150",
+          "context": "monthly"
+        }
+      ],
+      "pii_detected": [
+        "Kowalski",
+        "Pasco County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent did not deliver the TPMO disclaimer prior to discussing benefits. The call ended without collecting a Scope of Appointment or scheduling an appointment.",
+      "coaching_note": "Owen, remember to deliver the TPMO disclaimer before discussing any benefits. It's important for compliance and customer understanding. 'We do not offer every plan available in your area...'",
+      "crm_record": {
+        "disposition": "Needs TPMO disclaimer and SOA collection",
+        "product_line": "MA",
+        "carrier": "Cigna"
+      }
+    }
+  },
+  "latency_ms": 4122,
+  "usage": {
+    "input_tokens": 1116,
+    "output_tokens": 428,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: nested schema flattened twice in a row"
+  },
+  "recorded_at": "2026-09-22T06:22:29Z"
+}

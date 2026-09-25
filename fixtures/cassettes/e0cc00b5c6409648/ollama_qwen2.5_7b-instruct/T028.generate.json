@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Mutual of Omaha",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 40,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 25,
+      "benefits_span": "The Mutual of Omaha plan available in Pinellas County has a $15 monthly premium, a $365 drug deductible and a $5000 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "15",
+          "context": "monthly premium"
+        },
+        {
+          "value": "365",
+          "context": "drug deductible"
+        },
+        {
+          "value": "5000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan details before the disclaimer, which is non-compliant. The agent collected the Scope of Appointment and scheduled a plan review, both of which are compliant.",
+      "coaching_note": "Luis, it's important to deliver the disclaimer before discussing any plan benefits to ensure compliance. In this call, the disclaimer was given after the agent discussed the plan details. Next time, make sure to deliver the disclaimer first.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Mutual of Omaha",
+        "next_step": "Follow up with Mr. Okafor on the plan review in 4 days."
+      }
+    }
+  },
+  "latency_ms": 21375,
+  "usage": {
+    "input_tokens": 1235,
+    "output_tokens": 507,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:26:42Z"
+}

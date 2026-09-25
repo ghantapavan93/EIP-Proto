@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 112,
+      "benefits_span": "The Cigna plan available in Lee County has a $35 monthly premium, a $330 drug deductible and a $5900 maximum out-of-pocket.",
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$35",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$330",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before discussing plans. The agent also sent the Scope of Appointment to the customer's email for review.",
+      "coaching_note": "Great job, Marcus! You adhered to all the necessary compliance rules. One area for improvement is ensuring the customer signs the Scope of Appointment before proceeding with plan details. Next time, make sure to confirm the customer has signed the document before moving forward.",
+      "crm_record": {
+        "disposition": "Plan Discussion",
+        "product_line": "PDP",
+        "carrier": "Cigna",
+        "next_step": "Follow up with customer to ensure they have reviewed and signed the Scope of Appointment."
+      }
+    }
+  },
+  "latency_ms": 17098,
+  "usage": {
+    "input_tokens": 1390,
+    "output_tokens": 523,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:57:30Z"
+}

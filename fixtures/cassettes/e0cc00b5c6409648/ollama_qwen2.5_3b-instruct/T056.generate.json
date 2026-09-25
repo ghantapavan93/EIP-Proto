@@ -1,0 +1,58 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": false,
+      "disclaimer_seconds": null,
+      "disclaimer_span": null,
+      "benefits_started_seconds": 180,
+      "benefits_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.5,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$45 monthly premium",
+          "context": "Aetna plan available in Polk County"
+        },
+        {
+          "value": "$270 drug deductible",
+          "context": "Aetna plan available in Polk County"
+        },
+        {
+          "value": "$3800 maximum out-of-pocket",
+          "context": "Aetna plan available in Polk County"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent did not deliver the TPMO disclaimer prior to discussing benefits. The agent collected the Scope of Appointment but did not wait the required 24 hours before scheduling the appointment.",
+      "coaching_note": "Owen, remember to deliver the TPMO disclaimer before discussing any benefits. It's important to give customers time to review the information. \\u201cI've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?\\u201d This is a good opportunity to deliver the disclaimer.",
+      "crm_record": {
+        "disposition": "Follow up with the customer to ensure the TPMO disclaimer was delivered prior to discussing benefits.",
+        "product_line": "MA",
+        "carrier": "Aetna"
+      }
+    }
+  },
+  "latency_ms": 10751,
+  "usage": {
+    "input_tokens": 2279,
+    "output_tokens": 1128,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool:flat",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:22:07Z"
+}

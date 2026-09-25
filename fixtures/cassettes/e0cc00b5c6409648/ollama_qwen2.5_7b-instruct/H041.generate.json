@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "The Aetna plan available in Pasco County has a $30 monthly premium, a $280 drug deductible and a $4000 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$280",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4000",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules by delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before discussing plans. The customer was interested in the lowest premium and the agent provided details on the Aetna plan.",
+      "coaching_note": "Grace did well in delivering the disclaimer and collecting the Scope of Appointment before discussing the plans. However, she could have scheduled the appointment more explicitly, which might have helped the customer better understand the next steps.",
+      "crm_record": {
+        "disposition": "Plan Discussion",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with customer to ensure understanding and confirm appointment"
+      }
+    }
+  },
+  "latency_ms": 16457,
+  "usage": {
+    "input_tokens": 1439,
+    "output_tokens": 502,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:57:47Z"
+}

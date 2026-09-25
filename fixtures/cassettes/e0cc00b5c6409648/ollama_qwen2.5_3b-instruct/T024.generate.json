@@ -1,0 +1,39 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 48,
+      "appointment_scheduled": true,
+      "carrier": "UnitedHealthcare",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans.",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Owen, you did a great job delivering the TPMO disclaimer prior to discussing any benefits. It's important to ensure that the customer understands the limitations of the plans offered. Keep up the good work!",
+      "crm_record": {
+        "carrier": "UnitedHealthcare",
+        "disposition": "Compliant",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The agent scheduled a follow-up appointment, which was compliant with the waiting period."
+    }
+  },
+  "latency_ms": 3172,
+  "usage": {
+    "input_tokens": 1434,
+    "output_tokens": 327,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:14Z"
+}

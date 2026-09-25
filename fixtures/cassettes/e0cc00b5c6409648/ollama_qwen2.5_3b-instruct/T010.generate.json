@@ -1,0 +1,39 @@
+{
+  "raw": {
+    "composition": {
+      "coaching_note": "The agent did a good job by delivering the TPMO disclaimer prior to discussing any benefits. The next step is to schedule a follow-up call for the customer to review the plan details.",
+      "crm_record": {
+        "carrier": "Elite Insurance Partners",
+        "disposition": "Compliant",
+        "next_step": "Schedule follow-up call for plan review",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. No superlatives were used, and the call was for a Medicare Advantage plan. The CRM record includes the product line, carrier, and next steps."
+    },
+    "extraction": {
+      "appointment_hours_after_soa": 4,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "02:07",
+      "soa_wait_compliant": true
+    }
+  },
+  "latency_ms": 2663,
+  "usage": {
+    "input_tokens": 1330,
+    "output_tokens": 279,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:16:28Z"
+}

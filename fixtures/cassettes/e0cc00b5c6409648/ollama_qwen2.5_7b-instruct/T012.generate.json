@@ -1,0 +1,59 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "The Humana plan available in Hillsborough County has a $20 monthly premium, a $450 drug deductible and a $5800 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$450",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$5800",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed plan benefits before the disclaimer, which is non-compliant. The agent collected the Scope of Appointment and scheduled a follow-up appointment, both of which were compliant.",
+      "coaching_note": "Tamika should ensure the disclaimer is read before discussing any plan benefits to avoid non-compliance. For example, she could say, 'Before we discuss the details, I need to inform you that we do not offer every plan available in your area. Currently, we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.'",
+      "crm_record": {
+        "disposition": "Scheduled Follow-Up",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, follow up in 4 days"
+      }
+    }
+  },
+  "latency_ms": 17774,
+  "usage": {
+    "input_tokens": 1369,
+    "output_tokens": 547,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:21:24Z"
+}

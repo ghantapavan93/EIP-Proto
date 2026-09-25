@@ -1,0 +1,67 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "Both if I can.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$40",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$370",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4200",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Advantage plans with the customer, scheduling a follow-up appointment 48 hours later to review the Scope of Appointment. The agent delivered the TPMO disclaimer and collected the Scope of Appointment on the same call.",
+      "coaching_note": "Tamika, you did a great job delivering the TPMO disclaimer and collecting the Scope of Appointment on the same call. However, you could improve by asking more targeted questions to understand the customer's needs and preferences.",
+      "crm_record": {
+        "disposition": "Scheduled follow-up appointment",
+        "product_line": "MA",
+        "carrier": "Aetna",
+        "next_step": "Follow-up appointment in 48 hours"
+      }
+    }
+  },
+  "latency_ms": 53475,
+  "usage": {
+    "input_tokens": 2786,
+    "output_tokens": 955,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:37:37Z"
+}

@@ -1,0 +1,14 @@
+{
+  "scores": [
+    1.0,
+    1.0,
+    3.0,
+    1.0,
+    3.0
+  ],
+  "meta": {
+    "judge_model": "ollama/qwen2.5:7b-instruct",
+    "temperature": 1.0,
+    "provider": "ollama"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 5,
+      "appointment_scheduled": true,
+      "benefits_span": "keeping your doctors, or the lowest premium?",
+      "benefits_started_seconds": 50,
+      "carrier": "Cigna",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "numeric_claims": [
+        {
+          "context": "premium",
+          "value": "$40"
+        }
+      ],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "flagged": false,
+          "substantiated": false,
+          "text": "keeping your doctors, or the lowest premium?"
+        }
+      ]
+    },
+    "composition": {
+      "coaching_note": "The agent could improve by not using superlatives that may be considered misleading, such as 'keeping your doctors, or the lowest premium?'",
+      "crm_record": {
+        "carrier": "Cigna",
+        "disposition": "Scheduled Appointment",
+        "next_step": "Follow-up in 5 days",
+        "product_line": "MA"
+      },
+      "summary": "The agent delivered the TPMO disclaimer before discussing benefits and collected the Scope of Appointment before scheduling an appointment. The agent discussed a Cigna MA plan with a $40 monthly premium and a $20 drug deductible."
+    }
+  },
+  "latency_ms": 20623,
+  "usage": {
+    "input_tokens": 1354,
+    "output_tokens": 404,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:26:20Z"
+}

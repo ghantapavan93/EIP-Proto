@@ -1,0 +1,51 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "Before we start, this call is being recorded for quality and compliance.",
+      "benefits_started_seconds": 34,
+      "benefits_span": "The UnitedHealthcare plan available in Pinellas County has a $20 monthly premium, a $345 drug deductible and a $3600 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 72,
+      "soa_exception": null,
+      "soa_wait_compliant": false,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Mr. Kowalski",
+        "Pinellas County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent scheduled an appointment with Mr. Kowalski to review Medicare Advantage plans, but failed to deliver the TPMO disclaimer before discussing benefits.",
+      "coaching_note": "Grace, you mentioned that you sent the Scope of Appointment to Mr. Kowalski's email, but you didn't wait the required 72 hours before scheduling the appointment. Let's make sure to follow the rules and wait the full 72 hours before scheduling the appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Review Medicare Advantage plans with Mr. Kowalski on Thursday"
+      }
+    }
+  },
+  "latency_ms": 40585,
+  "usage": {
+    "input_tokens": 2252,
+    "output_tokens": 760,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:13:14Z"
+}

@@ -1,0 +1,42 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 257,
+      "benefits_span": "Do you take any brand-name medications I should check?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 1.5
+    },
+    "composition": {
+      "summary": "The call was compliant with the CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered and documented before discussing any benefits, and the Scope of Appointment was collected before the benefits discussion. The appointment was scheduled for 72 hours out from the call.",
+      "coaching_note": "Agent: 'I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?' This is a good practice as it ensures the customer is aware of the appointment and can sign the document immediately, saving time and improving the customer experience.",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Elite Insurance Partners"
+      }
+    }
+  },
+  "latency_ms": 6294,
+  "usage": {
+    "input_tokens": 2879,
+    "output_tokens": 675,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:13:51Z"
+}

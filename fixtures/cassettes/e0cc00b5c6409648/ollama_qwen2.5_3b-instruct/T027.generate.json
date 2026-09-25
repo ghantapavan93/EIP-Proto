@@ -1,0 +1,43 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Humana",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 19,
+      "disclaimer_span": "The Humana plan available in Lee County has a $25 monthly premium, a $370 drug deductible and a $3500 maximum out-of-pocket.",
+      "benefits_started_seconds": 125,
+      "benefits_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "soa_wait_compliant": true,
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 120
+    },
+    "composition": {
+      "summary": "The call was compliant with CMS rules, with the disclaimer delivered and scheduled before discussing benefits. The Scope of Appointment was collected and the appointment was scheduled.",
+      "coaching_note": "Agent: 'I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?' \u2014 Please ensure that the Scope of Appointment is always collected before discussing plans.",
+      "crm_record": {
+        "disposition": "Completed",
+        "product_line": "MA",
+        "carrier": "Humana",
+        "next_step": "Send follow-up email with confirmation and next steps"
+      }
+    }
+  },
+  "latency_ms": 6589,
+  "usage": {
+    "input_tokens": 2421,
+    "output_tokens": 683,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:19:36Z"
+}

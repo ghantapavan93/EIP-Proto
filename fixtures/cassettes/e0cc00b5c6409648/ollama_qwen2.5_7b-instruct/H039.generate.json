@@ -1,0 +1,60 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "The premium, honestly.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": null,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "215",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3300",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": []
+    },
+    "composition": {
+      "summary": "The agent discussed a Medicare Part D plan with the customer, focusing on the lowest premium. The disclaimer was delivered before discussing benefits, but the timing was not compliant due to the benefits discussion starting before the disclaimer. The Scope of Appointment was collected and the appointment was scheduled.",
+      "coaching_note": "Luis did a good job of collecting the Scope of Appointment and scheduling the appointment. However, the disclaimer was not delivered in the correct order, as the benefits discussion started before the disclaimer. To improve, Luis should ensure the disclaimer is always read before any benefits discussion, even if the customer initiates the plan discussion.",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plans with customer"
+      }
+    }
+  },
+  "latency_ms": 15878,
+  "usage": {
+    "input_tokens": 1488,
+    "output_tokens": 482,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T08:57:12Z"
+}

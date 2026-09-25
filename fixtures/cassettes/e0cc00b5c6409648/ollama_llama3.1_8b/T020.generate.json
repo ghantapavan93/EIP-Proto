@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "UnitedHealthcare",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 142,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": null,
+      "benefits_span": null,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$30",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$140",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$4700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "ZIP code",
+        "date of birth month"
+      ]
+    },
+    "composition": {
+      "summary": "The agent delivered the TPMO disclaimer before discussing benefits, collected the Scope of Appointment, and scheduled an appointment 3 days from now. However, the agent made no superlative claims.",
+      "coaching_note": "Luis, you did a great job delivering the disclaimer and collecting the SOA. However, you could improve by providing more specific information about the plan's benefits and limitations. For example, you mentioned the $30 monthly premium, but didn't explain what that means for the customer's out-of-pocket costs.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "UnitedHealthcare",
+        "next_step": "Follow-up on appointment 3 days from now"
+      }
+    }
+  },
+  "latency_ms": 51759,
+  "usage": {
+    "input_tokens": 2764,
+    "output_tokens": 946,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:40:53Z"
+}

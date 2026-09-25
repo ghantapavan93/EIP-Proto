@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": "Aetna",
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 183,
+      "benefits_span": "The Aetna plan available in Polk County has a $45 monthly premium, a $350 drug deductible and a $3900 maximum out-of-pocket.",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 2,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "45",
+          "context": "monthly premium"
+        },
+        {
+          "value": "350",
+          "context": "drug deductible"
+        },
+        {
+          "value": "3900",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX8-XX0-XX96",
+        "09/16/1949"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed all necessary protocols, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. However, the agent should avoid asking for sensitive information like Medicare numbers and dates of birth during the call to prevent PII exposure.",
+      "coaching_note": "Grace did a good job with the disclaimer and scheduling the appointment. However, it's important to avoid collecting sensitive information like Medicare numbers and dates of birth over the phone to protect customer privacy. Grace should inform the customer that she will collect this information during the appointment.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": "Aetna",
+        "next_step": "Follow up with customer on the scheduled plan review"
+      }
+    }
+  },
+  "latency_ms": 20287,
+  "usage": {
+    "input_tokens": 1574,
+    "output_tokens": 551,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:33:02Z"
+}

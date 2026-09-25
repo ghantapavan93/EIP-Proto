@@ -1,0 +1,62 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 108,
+      "benefits_span": "Several do; I'll flag the ones with dental and vision. Let me check the network for your primary care physician.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 4,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "10",
+          "context": "monthly premium"
+        },
+        {
+          "value": "120",
+          "context": "drug deductible"
+        },
+        {
+          "value": "6700",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "1XX2-XX0-XX80",
+        "04/16/1953"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed the required steps but the disclaimer was delivered after the benefits discussion, which is non-compliant. The agent also collected the Scope of Appointment and scheduled a plan review, both of which were compliant.",
+      "coaching_note": "Jordan, it's important to ensure the disclaimer is delivered before discussing any benefits. This call was non-compliant because the disclaimer was given after the benefits discussion. Next time, make sure to deliver the disclaimer first to avoid any compliance issues.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review and sign Scope of Appointment, schedule plan review"
+      }
+    }
+  },
+  "latency_ms": 18172,
+  "usage": {
+    "input_tokens": 1455,
+    "output_tokens": 519,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-22T07:33:39Z"
+}

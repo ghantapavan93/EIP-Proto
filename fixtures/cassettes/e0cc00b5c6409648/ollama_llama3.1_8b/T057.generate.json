@@ -1,0 +1,64 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 10,
+      "disclaimer_span": "Before we start, this call is being recorded for quality and compliance.",
+      "benefits_started_seconds": 34,
+      "benefits_span": "The Cigna plan available in Volusia County has a $20 monthly premium, a $200 drug deductible and a $6600 maximum out-of-pocket.",
+      "disclaimer_compliant": false,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 72,
+      "soa_exception": null,
+      "soa_wait_compliant": false,
+      "superlatives": [],
+      "numeric_claims": [
+        {
+          "value": "$20",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$200",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$6600",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Lindqvist",
+        "Volusia County"
+      ]
+    },
+    "composition": {
+      "summary": "Mrs. Lindqvist was assisted with comparing Medicare Advantage plans and scheduling an appointment for Thursday.",
+      "coaching_note": "Grace, you mentioned that you sent the Scope of Appointment to the customer's email, but you didn't wait for them to confirm signing it before discussing benefits. Please make sure to wait for the customer to confirm signing the SOA before discussing benefits.",
+      "crm_record": {
+        "disposition": "Scheduled Appointment",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Review on Thursday"
+      }
+    }
+  },
+  "latency_ms": 45142,
+  "usage": {
+    "input_tokens": 2246,
+    "output_tokens": 784,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T07:14:49Z"
+}

@@ -1,0 +1,42 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": null,
+      "appointment_scheduled": false,
+      "carrier": null,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "numeric_claims": [],
+      "pii_detected": [],
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_exception": null,
+      "soa_span": "01:11",
+      "soa_wait_compliant": true,
+      "superlatives": []
+    },
+    "composition": {
+      "coaching_note": "Agent: 'Since you initiated today's call and asked to proceed, we can review plans now.' The agent should have waited for the customer to sign the Scope of Appointment before proceeding with the plan review. This would have ensured better compliance with the CMS rules and provided the customer with more time to review the document.",
+      "crm_record": {
+        "carrier": null,
+        "disposition": "Compliant",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. No superlatives were used, and no numeric claims were made. The call was compliant with the CMS rules for Medicare sales calls."
+    }
+  },
+  "latency_ms": 3067,
+  "usage": {
+    "input_tokens": 1321,
+    "output_tokens": 315,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:20:51Z"
+}

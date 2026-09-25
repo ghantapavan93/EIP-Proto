@@ -1,0 +1,38 @@
+{
+  "raw": {
+    "extraction": {
+      "appointment_hours_after_soa": 96,
+      "appointment_scheduled": true,
+      "carrier": "Elite Insurance Partners",
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_compliant": true,
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 16,
+      "product_line": "MA",
+      "soa_collected": true,
+      "soa_span": "01:19",
+      "soa_wait_compliant": true
+    },
+    "composition": {
+      "coaching_note": "Agent: 'I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?' The agent should have asked for the customer's consent to send the Scope of Appointment via email. This would have ensured the customer was aware of the communication method and had the opportunity to provide consent or request a different method.",
+      "crm_record": {
+        "carrier": "Elite Insurance Partners",
+        "disposition": "Compliant",
+        "product_line": "MA"
+      },
+      "summary": "The call was compliant with CMS contract year 2027 marketing rules. The TPMO disclaimer was delivered prior to discussing any benefits, and the Scope of Appointment was collected before the plan discussion. The appointment was scheduled 96 hours after the SOA was collected."
+    }
+  },
+  "latency_ms": 2792,
+  "usage": {
+    "input_tokens": 1308,
+    "output_tokens": 290,
+    "model": "qwen2.5:3b-instruct",
+    "provider": "ollama",
+    "mode": "tool",
+    "attempts": [
+      "tool"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:16:37Z"
+}

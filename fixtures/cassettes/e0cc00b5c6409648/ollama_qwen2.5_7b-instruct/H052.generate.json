@@ -1,0 +1,49 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "PDP",
+      "carrier": null,
+      "disclaimer_delivered": true,
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 58,
+      "benefits_span": "Now, what matters most to you \u2014 keeping your doctors, or the lowest premium?",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 3,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Medicare number",
+        "Date of birth"
+      ]
+    },
+    "composition": {
+      "summary": "The agent followed all compliance rules, including delivering the disclaimer before discussing benefits and collecting the Scope of Appointment before scheduling the appointment. However, the agent collected Medicare number and date of birth, which should not have been shared.",
+      "coaching_note": "Grace did a good job following the compliance rules. However, it's important to avoid collecting sensitive information like Medicare numbers and dates of birth during the call. Next time, ensure to only collect the Scope of Appointment and avoid asking for personal details until the appointment.",
+      "crm_record": {
+        "disposition": "Scheduled",
+        "product_line": "PDP",
+        "carrier": null,
+        "next_step": "Review plan with customer in 72 hours"
+      }
+    }
+  },
+  "latency_ms": 14469,
+  "usage": {
+    "input_tokens": 1492,
+    "output_tokens": 434,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:00:55Z"
+}

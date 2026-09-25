@@ -1,0 +1,70 @@
+{
+  "raw": {
+    "type": "object",
+    "extraction": {
+      "product_line": "MA",
+      "carrier": "Cigna",
+      "disclaimer_delivered": true,
+      "disclaimer_seconds": 25,
+      "disclaimer_span": "We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.",
+      "benefits_started_seconds": 50,
+      "benefits_span": "keeping your doctors, or the lowest premium?",
+      "disclaimer_compliant": true,
+      "disclaimer_basis": "ordering:before-benefits",
+      "soa_collected": true,
+      "soa_span": "I've sent the Scope of Appointment to your email so we can go over specific plans. Can you sign it while we're on the line?",
+      "appointment_scheduled": true,
+      "appointment_hours_after_soa": 0,
+      "soa_exception": null,
+      "soa_wait_compliant": true,
+      "superlatives": [
+        {
+          "text": "lowest premium",
+          "substantiated": false,
+          "flagged": false
+        }
+      ],
+      "numeric_claims": [
+        {
+          "value": "$25",
+          "context": "monthly premium"
+        },
+        {
+          "value": "$65",
+          "context": "drug deductible"
+        },
+        {
+          "value": "$3500",
+          "context": "maximum out-of-pocket"
+        }
+      ],
+      "pii_detected": [
+        "Mr. Patel",
+        "Duval County"
+      ]
+    },
+    "composition": {
+      "summary": "The agent, Luis, discussed Medicare Advantage plans with Mr. Patel, who was looking to keep his current doctors. The agent presented a plan from Cigna with a $25 monthly premium and a $65 drug deductible. The call was compliant with all rules.",
+      "coaching_note": "Luis, you did a great job discussing the plan with Mr. Patel. However, you could have been more specific about the benefits of the Cigna plan, such as the $25 monthly premium. Try to highlight the key features of each plan in your next calls.",
+      "crm_record": {
+        "disposition": "Appointment Scheduled",
+        "product_line": "MA",
+        "carrier": "Cigna",
+        "next_step": "Send confirmation email to Mr. Patel"
+      }
+    }
+  },
+  "latency_ms": 60327,
+  "usage": {
+    "input_tokens": 2786,
+    "output_tokens": 988,
+    "model": "llama3.1:8b",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "tool",
+      "json"
+    ]
+  },
+  "recorded_at": "2026-09-22T06:58:46Z"
+}

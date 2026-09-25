@@ -1,0 +1,41 @@
+{
+  "raw": {
+    "extraction": {
+      "product_line": "MEDIGAP",
+      "carrier": "Cigna",
+      "disclaimer_delivered": false,
+      "disclaimer_compliant": true,
+      "soa_collected": false,
+      "appointment_scheduled": false,
+      "soa_wait_compliant": true,
+      "superlatives": [],
+      "numeric_claims": [],
+      "pii_detected": [
+        "Mr. Okafor"
+      ]
+    },
+    "composition": {
+      "summary": "The agent discussed Medicare Supplement (Medigap) Plan G with the customer but did not deliver the TPMO disclaimer or schedule an appointment.",
+      "coaching_note": "Agent did not deliver the TPMO disclaimer before discussing benefits, which is compliant for Medigap calls. However, the agent should ensure the disclaimer is always delivered, even in Medigap calls, to maintain consistency and avoid any potential issues.",
+      "crm_record": {
+        "disposition": "Informational Call",
+        "product_line": "MEDIGAP",
+        "carrier": "Cigna",
+        "next_step": "No next step"
+      }
+    }
+  },
+  "latency_ms": 8050,
+  "usage": {
+    "input_tokens": 1116,
+    "output_tokens": 244,
+    "model": "qwen2.5:7b-instruct",
+    "provider": "ollama",
+    "mode": "json",
+    "attempts": [
+      "json"
+    ],
+    "tool_mode": "disabled: two consecutive tool-call misses; JSON mode from here on"
+  },
+  "recorded_at": "2026-09-23T09:02:33Z"
+}
