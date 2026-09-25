@@ -1,8 +1,8 @@
 # Decision log
 
-The calls that shaped Backstop, who made them, and why. AI assistance did much of
-the building (see [`ai-build-ledger.md`](ai-build-ledger.md)); the direction, the
-scope and every trade-off below were decided by the author, Pavan Kalyan.
+The calls that shaped Backstop and why I made them. AI assistance did much of the
+building (see [`ai-build-ledger.md`](ai-build-ledger.md)); the direction, the scope and
+every trade-off below were mine.
 
 | Date | Decision | Alternatives considered | Why |
 |---|---|---|---|
