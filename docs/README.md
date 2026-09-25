@@ -16,6 +16,7 @@ Everything written about Backstop beyond the code, grouped by what the reader ne
 
 | Document | What it covers |
 |---|---|
+| [`architecture.md`](architecture.md) | Components, data model, what happens on each kind of change, invariants, where to look in the code |
 | [`reviewer-faq.md`](reviewer-faq.md) | The hard questions a reviewer asks, with answers and the full measured results |
 | [`decisions.md`](decisions.md) | The author's decision log: each call that shaped the prototype, the alternatives and why |
 | [`adr/`](adr/) | Seven architecture decision records: rules as code, the AI boundary, model adapters, right-sizing, idempotency and audit, advisory judges, real pages vs synthetic data |

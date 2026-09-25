@@ -1,34 +1,39 @@
 # Backstop
 
-**When a rule, a prompt or a model changes, which AI workflows are now wrong — and can you prove it?**
+**Change control and regression testing for business-critical AI workflows.**
 
 [![CI](https://github.com/ghantapavan93/EIP-Proto/actions/workflows/ci.yml/badge.svg)](https://github.com/ghantapavan93/EIP-Proto/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB)
 ![React 18 + TypeScript](https://img.shields.io/badge/react-18%20%2B%20TypeScript-149ECA)
 ![License: all rights reserved](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)
 
+A rule changes. A prompt changes. A model changes. Backstop answers:
+
+- **What changed?**
+- **What stayed constant?**
+- **What broke?**
+- **What evidence proves it?**
+- **Who owns the next decision?**
+
 ![Backstop change triggers](docs/images/home.png)
 
 ## Why I built this
+
+The question behind it: *how do you know an AI workflow still behaves correctly after
+the business rule, the prompt or the underlying model changes?*
 
 A Medicare sales floor now runs on AI: call scoring, coaching notes, QA hand-offs,
 scripts, prompts and web pages that all encode what the rules say. On **1 October 2026**
 the CMS CY2027 marketing changes take effect, two weeks before the Annual Enrollment
 Period. On that day some of those artifacts stop being right, and nothing breaks
-loudly: every API stays green while the output quietly goes wrong.
+loudly: every API stays green while the output quietly goes wrong. The same happens
+when someone edits a prompt, or when a vendor swaps the model behind an endpoint.
 
-The same thing happens when someone edits a prompt, or when a vendor swaps the model
-behind an endpoint. I wanted one system that answers three questions for all three
-kinds of change:
-
-1. **What still holds, and what broke?**
-2. **What is the evidence** — the exact sentence, the rule version, the model output?
-3. **Who owns the fix**, and is the decision on record?
-
-I built Backstop in about 48 hours as a working answer to a question from Elite
-Insurance Partners about whether I work on the full stack or on AI workflows. It is
-both. It is a prototype, not affiliated with or endorsed by EIP, and every call
-transcript and internal artifact in it is synthetic.
+I built Backstop in about 48 hours as a falsifiable prototype rather than assume the
+problem was already solved, and as a working answer to a question from Elite Insurance
+Partners about whether I work on the full stack or on AI workflows. It is both. It is
+not affiliated with or endorsed by EIP, and every call transcript and internal artifact
+in it is synthetic.
 
 ## What it does
 
@@ -45,18 +50,29 @@ transcript and internal artifact in it is synthetic.
 - **Puts a person on every decision.** Review tasks, overrides that need a second
   approver, roles the server enforces, and a hash-chained audit log with checkpoints.
 
-## What I found
+## A result that changed my conclusion
 
-I ran the same 60 synthetic calls through three local models (Qwen2.5 7B and 3B,
-Llama 3.1 8B) at no cost and recorded every output, so the results replay offline.
+I ran the same synthetic calls through three local models (Qwen2.5 7B and 3B, Llama 3.1
+8B) at no cost and recorded every output, so every number here replays offline.
+
+Prompt v3 rewrote one line of prompt v2 to fix the 7B's disclaimer judgments.
+
+| Wrong disclaimer judgments (Qwen2.5 7B) | Prompt v2 | Prompt v3 |
+|---|---|---|
+| 60 development calls (read while writing v3) | 20 | **5** |
+| 60 held-out calls (never read) | 5 | **22**, plus 2 schema failures |
+
+On the development calls v3 looked like a fix. On unseen calls it was significantly
+worse (p = 1.9 × 10⁻⁶). **The evidence does not establish v3 as better, and neither
+prompt earns deployment on it.** The result stays in the repository, is shown above the
+development result wherever the two are compared, and is pinned by a regression test
+(`test_held_out_replay_reverses_the_prompt_fix`).
+
+Two more findings from the same runs:
 
 - **Correct extraction, wrong conclusion.** The 7B read the disclaimer at 25 s and the
-  benefits at 131 s, then called the call non-compliant: 20 wrong judgments in 60. The
-  deterministic contract caught what the model's own explanation did not.
-- **A prompt fix that did not generalize.** Rewriting one line of the prompt took wrong
-  judgments from 20 to 5 on the calls I read while writing it. On 60 unseen calls the
-  new prompt was significantly *worse* (p = 1.9 × 10⁻⁶). Backstop shows that result
-  above the development one, so the improvement cannot be quoted without it.
+  benefits at 131 s, then called the call non-compliant. The deterministic contract
+  caught what the model's own explanation did not.
 - **Grounding failures differ by model.** The 3B quoted a timestamp as evidence; the 8B
   returned the JSON schema instead of an answer 12 times.
 
@@ -127,7 +143,21 @@ The boundary for AI is explicit:
 | Coaching-note quality | A model judge: advisory only, five samples, variance shown |
 | Editing any rule, artifact or record | Never automated |
 
-The reasoning behind each choice is in the [architecture decision records](docs/adr/).
+The reasoning behind each choice is in the [architecture decision records](docs/adr/)
+and the [architecture overview](docs/architecture.md).
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Console | React 18, TypeScript, Vite, Tailwind, TanStack Query |
+| API | Python 3.12, FastAPI, SQLAlchemy, Pydantic, Alembic |
+| Database | PostgreSQL (SQLite for tests and local runs) |
+| Gateway | nginx with strict security headers |
+| Models | Ollama locally; any OpenAI-compatible provider; recorded runs for replay |
+| Deployment | Docker Compose; Terraform sketch for ECS and RDS |
+| Demo access | Cloudflare Tunnel in front of the gateway only |
+| CI | GitHub Actions: lint, tests on SQLite and PostgreSQL, the contract gate |
 
 ## What is real, and what is not
 
@@ -210,6 +240,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and
 
 Each top-level folder has its own README.
 
+## How I built it
+
+AI tools accelerated the research and much of the implementation. I owned the problem
+selection, the architecture boundaries, the scope, the evaluation design, the
+trade-offs, and the decision to keep negative results such as the held-out regression.
+What the AI got wrong and how it was caught is in
+[docs/ai-build-ledger.md](docs/ai-build-ledger.md); the decisions are in
+[docs/decisions.md](docs/decisions.md).
+
 ## Documentation
 
 | If you want | Read |
@@ -217,7 +256,7 @@ Each top-level folder has its own README.
 | The decisions I made, and why | [docs/decisions.md](docs/decisions.md) |
 | Answers to the hard questions | [docs/reviewer-faq.md](docs/reviewer-faq.md) |
 | What is real, and the known limitations | [docs/honesty.md](docs/honesty.md) |
-| The architecture decisions | [docs/adr/](docs/adr/) |
+| How the system fits together | [docs/architecture.md](docs/architecture.md), [docs/adr/](docs/adr/) |
 | The API | [docs/api-contract.md](docs/api-contract.md) |
 | Security and the threat model | [SECURITY.md](SECURITY.md), [docs/threat-model.md](docs/threat-model.md) |
 | What I would ask before building further | [docs/open-questions.md](docs/open-questions.md) |
