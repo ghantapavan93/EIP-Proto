@@ -1,0 +1,67 @@
+code: tpmo-disclaimer-text
+title: TPMO disclaimer — required wording
+regulator: CMS
+citation: 42 CFR 422.2267(e)(41) (wording in the paragraph lead-in; (i) who must use it, (ii) when)
+applies_to: [MA, PDP]
+summary: >
+  The exact disclaimer text a TPMO that does not represent every plan must
+  use. The CY2024 wording referred beneficiaries to Medicare.gov,
+  1-800-MEDICARE, or the State Health Insurance Assistance Program (SHIP);
+  the CY2027 wording (per LII, checked 2026-09-21) drops the SHIP reference.
+  Websites, emails, chat, print and TV must carry it; sales calls must convey
+  it verbally. The CY2027 paragraph has a second wording for a TPMO that sells
+  for every MA organization in the area (corrected 2026-09-25; see
+  docs/honesty.md, Corrections).
+source_url: https://www.law.cornell.edu/cfr/text/42/422.2267
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      "We do not offer every plan available in your area. Currently we
+      represent [insert number of organizations] organizations which offer
+      [insert number of plans] products in your area. Please contact
+      Medicare.gov, 1-800-MEDICARE, or your local State Health Insurance
+      Program to get information on all of your options."
+    summary: CY2024 wording — includes the SHIP referral.
+    params:
+      required_phrases:
+        - "We do not offer every plan available in your area"
+        - "Please contact Medicare.gov, 1-800-MEDICARE, or your local State Health Insurance Program"
+      mentions_ship: true
+    source_url: https://www.federalregister.gov/documents/2023/04/12/2023-07115/
+  - version: 2
+    status: in_force
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: CLARIFIES
+    clause_text: >
+      [42 CFR 422.2267(e)(41), per LII 2026-09-21 and eCFR 2026-09-23] If a TPMO
+      does not sell for all MA organizations in the service area: "We do not
+      offer every plan available in your area. Currently we represent [insert
+      number of organizations] organizations which offer [insert number of plans]
+      products in your area. Please contact Medicare.gov or 1-800-MEDICARE to
+      get information on all of your options." If the TPMO sells for all MA
+      organizations in the service area: "Currently we represent [insert number
+      of organizations] organizations which offer [insert number of plans]
+      products in your area. You can always contact Medicare.gov or
+      1-800-MEDICARE for help with plan choices."
+    summary: >
+      CY2027 wording — SHIP referral removed. Two variants: one for a TPMO that
+      does not sell for every MA organization in the area, one for a TPMO that
+      does. The organization and plan counts change with plan-year data.
+    params:
+      required_phrases:
+        - "We do not offer every plan available in your area"
+        - "Please contact Medicare.gov or 1-800-MEDICARE"
+      required_phrases_if_sells_for_all_organizations:
+        - "Currently we represent"
+        - "You can always contact Medicare.gov or 1-800-MEDICARE for help with plan choices"
+      mentions_ship: false
+    source_url: https://www.law.cornell.edu/cfr/text/42/422.2267
+    git_commit: seed

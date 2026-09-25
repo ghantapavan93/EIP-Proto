@@ -1,0 +1,47 @@
+code: soa-48h-wait
+title: Scope of Appointment — 48-hour waiting period before a personal marketing appointment
+regulator: CMS
+citation: 42 CFR 422.2264(c)(3)(i) (48-hour wait, eCFR text before 2026-10-01; removed by the CY2027 rule)
+applies_to: [MA, PDP]
+summary: >
+  The CY2024 rule required a Scope of Appointment to be documented at least 48
+  hours before a personal marketing appointment (with limited exceptions). The
+  CY2027 rule eliminates the waiting period from 2026-10-01. The SOA itself is
+  still required.
+source_url: https://www.crowell.com/en/insights/client-alerts/cms-finalizes-cy-2027-medicare-advantage-and-part-d-rule-key-implications-for-plan-sponsors
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2023-09-30
+    effective_to: 2026-09-30
+    change_classification: INITIAL
+    clause_text: >
+      [CY2024, paraphrased] A personal marketing appointment may not occur
+      sooner than 48 hours after the Scope of Appointment is documented, except
+      for walk-ins and when the beneficiary is within the last four days of an
+      election period.
+    summary: SOA must precede the appointment by at least 48 hours.
+    params:
+      min_hours_between_soa_and_appointment: 48
+      exceptions: [walk_in, last_four_days_of_election_period]
+    source_url: https://www.federalregister.gov/documents/2023/04/12/2023-07115/
+  - version: 2
+    status: eliminated
+    effective_from: 2026-10-01
+    # CY2027 final rule (91 FR 17384) took legal effect 2026-06-01; its marketing
+    # provisions apply from 2026-10-01, which is the date that matters here.
+    regulation_effective: 2026-06-01
+    effective_to: null
+    change_classification: REMOVES_REQUIREMENT
+    clause_text: >
+      [Paraphrase of the CY2027 final rule per Crowell & Moring (secondary);
+      primary: 42 CFR 422.2264(c)(3) as amended, 91 FR 17583 (paragraph-level
+      citation — verify)] The 48-hour waiting period between SOA completion and
+      a personal marketing appointment is eliminated. The SOA requirement
+      itself remains.
+    summary: Waiting period removed; SOA still required.
+    params:
+      min_hours_between_soa_and_appointment: 0
+      soa_still_required: true
+    source_url: https://www.federalregister.gov/documents/2026/04/06/2026-06600/
+    git_commit: seed

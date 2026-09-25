@@ -1,0 +1,90 @@
+code: tcpa-consent-revocation
+title: TCPA — honoring revocation of consent for robocalls and robotexts
+regulator: FCC
+citation: 47 CFR 64.1200(a)(10)-(12), (d)(3)
+applies_to: [MA, PDP, MEDIGAP, LIFE]
+summary: >
+  A consumer may revoke consent to robocalls and robotexts by any reasonable
+  means; the caller must honor it within ten business days. In force since
+  2025-04-11, except the "revoke-all" clause for informational messages, whose
+  compliance date the FCC's Consumer and Governmental Affairs Bureau moved to
+  2027-01-31 (DA 26-12). The FCC votes on a rewrite on 2026-09-30 (v2, a draft):
+  a proposal with a vote date and no effective date yet.
+# Rule-level source_url is left empty on purpose: the source watcher needs a frozen
+# snapshot of every rule-level URL (fixtures/sources/), and none is committed yet.
+# Primary sources, with URLs, are on each version.
+source_url: ""
+versions:
+  - version: 1
+    status: in_force
+    effective_from: 2025-04-11
+    effective_to: null
+    change_classification: INITIAL
+    deferrals:
+      - provision: >
+          Revoke-all: a revocation made in response to one type of informational
+          message applies to all future robocalls and robotexts from that caller
+          on unrelated matters (64.1200(a)(10), in part)
+        deferred_to: 2027-01-31
+        source: "DA 26-12 (CGB, adopted and released 2026-01-06); earlier waiver 40 FCC Rcd 2395 (to 2026-04-11)"
+    clause_text: >
+      [paraphrase of 47 CFR 64.1200(a)(10)-(12) and (d)(3), eCFR] Consent may be
+      revoked by any reasonable method, including replying "stop", "quit", "end",
+      "revoke", "opt out", "cancel" or "unsubscribe" to a text. A revocation is
+      honored within a reasonable time, not more than ten business days; the same
+      limit applies to company-specific do-not-call requests. One confirmation
+      text with no marketing, sent within five minutes, is presumed permissible.
+      [DA 26-12, quoting 64.1200(a)(10)] "[i]f a called party uses any [reasonable] method to revoke
+      consent, that consent is considered definitively revoked and the caller may
+      not send additional robocalls and robotexts."
+    summary: >
+      In force from 2025-04-11. The revoke-all clause for informational messages
+      is deferred to 2027-01-31.
+    params:
+      honor_within_business_days: 10
+      confirmation_text_presumed_ok_minutes: 5
+      keywords: [stop, quit, end, revoke, opt out, cancel, unsubscribe]
+      exclusive_method_allowed: false
+    sources:
+      - authority: primary
+        cite: "eCFR 47 CFR 64.1200(a)(10)-(12), (d)(3)"
+        url: https://www.ecfr.gov/current/title-47/section-64.1200
+      - authority: primary
+        cite: "DA 26-12, Order (CGB, 2026-01-06): waiver of the revoke-all clause extended to 2027-01-31"
+        url: https://docs.fcc.gov/public/attachments/DA-26-12A1.pdf
+  - version: 2
+    status: proposed
+    # No effective date until the FCC adopts it; the draft says 30 days after
+    # Federal Register publication, replacing the 2027-01-31 deferral.
+    effective_from: null
+    vote_date: 2026-09-30
+    effective_to: null
+    change_classification: MODIFIES
+    clause_text: >
+      [paraphrase of the draft Report and Order and FNPRM, FCC-CIRC 2609-05, and
+      its draft rule text] Callers may designate an exclusive means to revoke
+      consent (a key-press, the seven keywords, or a designated website or
+      number) if they disclose it clearly on each call and text. A revocation of
+      an informational message may be treated as specific to that category. A
+      revocation in response to a marketing call or text revokes consent to all
+      future marketing from that caller. Ten business days retained; the FNPRM
+      asks about seven. Effective 30 days after Federal Register publication.
+    summary: >
+      Draft for the FCC's 2026-09-30 open meeting. Not law. A secondary source
+      described it as adopted on 2026-09-09; the primary draft shows blank
+      adoption dates and "tentative consideration" on 2026-09-30. Re-check on
+      2026-10-01.
+    params:
+      honor_within_business_days: 10
+      exclusive_method_allowed: true
+      marketing_revocation_scope: all_marketing
+      informational_revocation_scope: category
+      effective_rule: 30 days after Federal Register publication; supersedes the 2027-01-31 deferral
+    sources:
+      - authority: primary
+        cite: "FCC-CIRC 2609-05 draft (DOC-424844A1), released 2026-09-09"
+        url: https://docs.fcc.gov/public/attachments/DOC-424844A1.pdf
+      - authority: secondary
+        cite: "Covington Global Policy Watch, 2026-09"
+        url: https://www.globalpolicywatch.com/2026/09/fcc-releases-draft-rules-and-proposals-on-tcpa-consent-revocation/
+    git_commit: seed
