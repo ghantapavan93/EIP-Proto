@@ -80,8 +80,15 @@ def test_dev_compare_finds_a_significant_improvement(client, runs_7b):
     assert row["significant"] and row["direction"] == "better"
     assert row["verdict"] == "B is significantly better on this contract (p=0.00073)"
     assert row["p_holm"] < 0.05, "survives correction across the eight contracts"
-    # The product says out loud why this number is not the end of the story.
-    assert any("held-out" in c for c in st["cautions"])
+    # The product says out loud why this number is not the end of the story: the held-out
+    # replay of the same change leads the cautions, with its own verdict.
+    assert st["cautions"][0].startswith("Held-out check:")
+    assert "significantly worse" in st["cautions"][0] and "trust the held-out result" in st["cautions"][0]
+    # Structured, so the console can put it above the development verdict and link it.
+    held = st["held_out"]
+    assert (held["a_run_id"], held["b_run_id"]) == (runs_7b[("holdout", 2)], runs_7b[("holdout", 3)])
+    assert held["direction"] == "worse" and held["contradicts_development"] is True
+    assert held["summary"].startswith("On the 60 held-out calls, prompt v3 is significantly worse than v2")
     # Legacy fields unchanged; ERROR now broken out and the definition stated.
     legacy = next(p for p in body["per_contract"] if p["contract_code"] == "C-TPMO-01")
     assert legacy["a_fail"] == 20 and legacy["b_fail"] == 5 and legacy["a_error"] == legacy["b_error"] == 0

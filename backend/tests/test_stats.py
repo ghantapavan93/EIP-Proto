@@ -126,7 +126,7 @@ def test_compare_statistics_paired_with_errors_and_unlabelled_cells():
                + [("T0", "C-SUP", "FLAG", "PASS"), ("T1", "C-SUP", "FLAG", "PASS"),
                   ("U1", "C-X", "BLOCK", "ERROR")],
                not_evaluated={("U1", "C-X")})
-    out = _compare_statistics(_run(prompt="p2"), _run(prompt="p3"), a, b)
+    out = _compare_statistics(None, _run(prompt="p2"), _run(prompt="p3"), a, b)
     assert out.mode == "paired" and "ERROR" in out.failure_definition
     x = next(r for r in out.per_contract if r.contract_code == "C-X")
     assert x.paired.model_dump() == {"both_pass": 2, "a_only_fail": 0, "b_only_fail": 10, "both_fail": 0}
@@ -144,7 +144,7 @@ def test_compare_statistics_paired_with_errors_and_unlabelled_cells():
 def test_compare_statistics_unpaired_when_the_corpus_changed():
     a = _cells([(f"T{i}", "C-X", "BLOCK", "FAIL" if i < 20 else "PASS") for i in range(60)])
     b = _cells([(f"H{i}", "C-X", "BLOCK", "FAIL" if i < 5 else "PASS") for i in range(60)])
-    out = _compare_statistics(_run("dev"), _run("held", "holdout", contract_set="other"), a, b)
+    out = _compare_statistics(None, _run("dev"), _run("held", "holdout", contract_set="other"), a, b)
     assert out.mode == "unpaired" and "paired test is invalid" in out.cautions[0]
     x = out.per_contract[0]
     assert x.paired is None and x.n_shared == 0 and x.test == "Fisher exact (two-sided)"
@@ -157,7 +157,7 @@ def test_compare_holm_caution_when_only_raw_p_is_significant():
     for code in ("C-A", "C-B", "C-C", "C-D"):
         rows_a += [(f"T{i}", code, "BLOCK", "PASS") for i in range(10)]
         rows_b += [(f"T{i}", code, "BLOCK", "FAIL" if (code == "C-A" and i < 6) else "PASS") for i in range(10)]
-    out = _compare_statistics(_run(), _run(), _cells(rows_a), _cells(rows_b))
+    out = _compare_statistics(None, _run(), _run(), _cells(rows_a), _cells(rows_b))
     first = out.per_contract[0]
     assert first.p_value == pytest.approx(2 / 64) and first.significant
     assert first.p_holm == pytest.approx(4 * 2 / 64)
