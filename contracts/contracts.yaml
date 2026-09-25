@@ -1,0 +1,80 @@
+# Behavioral contracts for the qa-handoff workflow.
+#
+# A contract is a check the workflow's output must satisfy on every transcript.
+# BLOCK contracts are deterministic and may gate a release. FLAG contracts are
+# advisory. The one JUDGED contract uses a model as a judge, runs N times, and
+# reports variance — it can never block, because judge scores move when the
+# judge moves.
+#
+# `rule` links the contract to a rule in rules/*.yaml; the contract reads the
+# params of the rule version in force on the run's rule date. That is how a
+# rule change becomes a test change without anyone editing a test.
+
+contracts:
+  - code: C-SCHEMA-01
+    title: Output validates against the QA record schema
+    description: Enums, required fields, and types as declared in workflow.py. A malformed record can never reach the CRM.
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: engineering
+    check: schema_valid
+  - code: C-SPAN-01
+    title: Every quoted span is verbatim in the transcript
+    description: disclaimer_span, benefits_span, soa_span and superlative texts must be exact substrings (whitespace-normalized). No span, no claim.
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: ai-enablement
+    check: spans_verbatim
+  - code: C-FACT-01
+    title: Every dollar figure in the summary appears on the call
+    description: Numeric claims the summary asserts ($ amounts) must occur in the transcript. Catches invented premiums and deductibles.
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: ai-enablement
+    check: numbers_grounded
+  - code: C-PII-01
+    title: No Medicare number, DOB or SSN in any output field
+    description: Output prose is redacted; PII types may be reported, values never.
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: compliance
+    check: pii_redacted
+  - code: C-TPMO-01
+    title: Disclaimer judgment matches the rule in force
+    description: The model's disclaimer_compliant must equal ground truth under the rule version in force on the run's rule date (timer before Oct 1 2026, ordering after). Medigap calls are not applicable.
+    rule: tpmo-disclaimer-timing
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: compliance
+    check: disclaimer_judgment
+  - code: C-SOA-01
+    title: SOA wait judgment matches the rule in force
+    description: soa_wait_compliant must equal ground truth (48-hour minimum before Oct 1 2026; none after; exceptions honored).
+    rule: soa-48h-wait
+    kind: DETERMINISTIC
+    severity: BLOCK
+    owner_role: compliance
+    check: soa_judgment
+  - code: C-SUP-01
+    title: Superlative flags match the rule in force
+    description: Under CY2024 every superlative without referenced supporting data must be flagged. Under CY2027 the documentation requirement is gone, so a superlative is flagged only when it is labeled misleading or unsupportable — never merely for being a superlative.
+    rule: superlatives
+    kind: DETERMINISTIC
+    severity: FLAG
+    owner_role: compliance
+    check: superlative_flags
+  - code: J-COACH-01
+    title: Coaching note is specific and quotes the agent
+    description: Advisory. A judge scores the coaching note 1-5 on specificity, quoting the agent's words, and naming one concrete improvement. Five runs; mean and variance reported; flags below 3.0. Cannot block.
+    kind: JUDGED
+    severity: FLAG
+    owner_role: sales-innovation
+    check: coaching_quality
+    n_runs: 5
+    judge_model_id: same-as-run
+    spec:
+      threshold: 3.0
+      rubric: >
+        You are grading a sales-coaching note for a Medicare call center. Score 1-5.
+        5: quotes the agent's own words, names one concrete improvement tied to the call, under 120 words.
+        3: generic but accurate. 1: generic praise with no quote and no specific improvement.
