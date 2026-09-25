@@ -2,6 +2,11 @@
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\demo-keepalive.ps1            # 6 hours
 #   powershell -ExecutionPolicy Bypass -File scripts\demo-keepalive.ps1 -Hours 3
+#   powershell -ExecutionPolicy Bypass -File scripts\demo-keepalive.ps1 -Hours 10 -Adopt
+#
+# -Adopt keeps the link already sent: if a tunnel for this stack is running and its URL
+# (from .demo-link.txt) answers, the keep-alive watches that tunnel instead of starting a
+# new one. Stop the previous keep-alive first; two would both restart the tunnel.
 #
 # While it runs it:
 #   - asks Windows not to idle-sleep (SetThreadExecutionState, like a video player;
@@ -12,7 +17,7 @@
 #
 # A restarted Quick Tunnel gets a NEW random URL. .demo-link.txt and the log
 # always hold the current one; the old link stops working.
-param([double]$Hours = 6)
+param([double]$Hours = 6, [switch]$Adopt)
 
 $ErrorActionPreference = "Continue"
 Set-Location (Join-Path $PSScriptRoot "..")
@@ -84,9 +89,21 @@ function Start-Tunnel {
     Log "PUBLIC LINK: $($script:Url)"
 }
 
+function Adopt-Tunnel {
+    if (-not (Test-Path $LinkFile)) { return $false }
+    $url = (Get-Content $LinkFile -Raw).Trim()
+    $proc = Get-CimInstance Win32_Process -Filter "Name='cloudflared.exe'" |
+        Where-Object { $_.CommandLine -match [regex]::Escape("--url $Local") } | Select-Object -First 1
+    if (-not $url -or -not $proc -or -not (Test-Url "$url/api/health/deep")) { return $false }
+    $script:Tunnel = Get-Process -Id $proc.ProcessId
+    $script:Url = $url
+    Log "adopted running tunnel (pid $($proc.ProcessId)); link unchanged: $url"
+    return $true
+}
+
 Log "keep-alive started for $Hours h"
 [void](Ensure-Stack)
-Start-Tunnel
+if (-not ($Adopt -and (Adopt-Tunnel))) { Start-Tunnel }
 $deadline = (Get-Date).AddHours($Hours)
 $misses = 0
 while ((Get-Date) -lt $deadline) {
