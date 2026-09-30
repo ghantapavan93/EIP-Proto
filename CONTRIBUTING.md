@@ -44,8 +44,8 @@ a line in [`docs/honesty.md`](docs/honesty.md) if it changes a published result.
 
 ## Conventions
 
-- **Commits:** imperative mood, one change per commit, subject under about 60 characters
-  ("Add held-out check to run comparisons").
+- **Commits:** imperative mood, one change per commit, subject at most 72 characters
+  ("Add held-out check to run comparisons"); the body says why when the diff cannot.
 - **Claims:** every number in the docs or the UI is either measured, simulated, recorded
   or assumed, and says which.
 - **Secrets:** never in the repository. Configuration comes from the environment; see

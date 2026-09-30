@@ -31,7 +31,7 @@ backstop demo                                        # replays every recorded se
 Each `record` runs the model live through the **cassette** adapter and writes
 one JSON file per transcript (and per judge call) under
 `fixtures/cassettes/<prompt_hash>/<model>/` — `T017.generate.json`,
-`T017.judge.json`, `canary_c1.judge.json`, and `T017.judge@<judge>.json`
+`T017.judge.json`, `canary_canary-good-1.judge.json`, and `T017.judge@<judge>.json`
 when the judge is another model. The next run with the same inputs replays
 the cassettes — no GPU, no network, identical results. The UI shows
 `CASSETTE` on those runs; token usage and latency are the recorded values.

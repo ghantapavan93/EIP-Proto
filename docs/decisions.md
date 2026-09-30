@@ -17,7 +17,7 @@ every trade-off below were mine.
 | 2026-09-25 | Every comparison states whether exactly one thing changed, and points to clean comparisons when it did not | Report differences without attribution | "Same prompt, different model" is only a fair question if the answer isolates the model |
 | 2026-09-25 | Before external review, fix the high-risk audit findings and disclose the rest rather than change recorded numbers late | Fix everything at once | Late changes to measured results would be harder to trust than disclosed limitations |
 | 2026-09-25 | Publish the repository with third-party pages reduced to short attributed excerpts, verified to give identical results | Keep it private; publish full page copies | Open for review without redistributing other people's content |
-| 2026-09-25 | Keep AI assistance visible in commit trailers and the build ledger | Remove it | Transparency about how the work was done is part of the work |
+| 2026-09-30 | Disclose AI assistance once, in the README and the build ledger, instead of a trailer on every commit | Per-commit trailers; no disclosure | One account of what the tools did, what they got wrong and what I decided says more than 56 identical trailers |
 
 ## Engineering decisions
 

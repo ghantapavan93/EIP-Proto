@@ -15,7 +15,15 @@ A rule changes. A prompt changes. A model changes. Backstop answers:
 - **What evidence proves it?**
 - **Who owns the next decision?**
 
+```bash
+docker compose up --build        # then open http://localhost:5173 and sign in as engineer / engineer
+```
+
+Runs offline: no GPU, API key or network needed. The recorded model runs replay from `fixtures/cassettes/`.
+
 ![Backstop change triggers](docs/images/home.png)
+
+*The console as of 2026-09-25. RED is the expected state: each card is a change that broke something, with the evidence one click away.*
 
 ## Why I built this
 
@@ -23,22 +31,23 @@ The question behind it: *how do you know an AI workflow still behaves correctly 
 the business rule, the prompt or the underlying model changes?*
 
 A Medicare sales floor now runs on AI: call scoring, coaching notes, QA hand-offs,
-scripts, prompts and web pages that all encode what the rules say. On **1 October 2026**
-the CMS CY2027 marketing changes take effect, two weeks before the Annual Enrollment
-Period. On that day some of those artifacts stop being right, and nothing breaks
+scripts, prompts and web pages that all encode what the rules say. The CMS CY2027
+marketing changes apply from **1 October 2026**, two weeks before the Annual Enrollment
+Period. From that date some of those artifacts are no longer right, and nothing breaks
 loudly: every API stays green while the output quietly goes wrong. The same happens
 when someone edits a prompt, or when a vendor swaps the model behind an endpoint.
 
 I built Backstop in about 48 hours as a falsifiable prototype rather than assume the
-problem was already solved, and as a working answer to a question from Elite Insurance
-Partners about whether I work on the full stack or on AI workflows. It is both. It is
-not affiliated with or endorsed by EIP, and every call transcript and internal artifact
-in it is synthetic.
+problem was already solved. It is also my answer to "full stack or AI workflows?": it
+is both. It is not affiliated with or endorsed by Elite Insurance Partners, and every
+call transcript and internal artifact in it is synthetic.
 
 ## What it does
 
-- **Keeps rules as code.** Thirteen Medicare, TCPA and state rules as versioned,
-  effective-dated YAML with citations. History is appended, never edited.
+- **Keeps rules as code.** Fourteen Medicare, TCPA and state rules as versioned,
+  effective-dated YAML with citations, including vacated, stayed and proposed versions
+  that are never enforced, and the FCC ruling that puts AI-generated voices under the
+  TCPA. History is appended, never edited.
 - **Finds what encodes each rule.** Deterministic matchers bind scripts, scorecard
   items, prompts and public pages to the exact rule version they encode, and show which
   go stale on a given date and in which direction.
@@ -163,7 +172,7 @@ and the [architecture overview](docs/architecture.md).
 
 | | |
 |---|---|
-| Rules and citations | Real; checked against eCFR and the Federal Register |
+| Rules and citations | Real. Every version cites its primary source; when and against what each was checked is in [`rules/README.md`](rules/README.md) |
 | Six public web pages | Real, read once on 2026-09-21; kept as short attributed excerpts |
 | Model outputs in the measured results | Real, recorded from local models |
 | Call transcripts and internal artifacts | Synthetic, and labelled as such everywhere |
@@ -204,7 +213,9 @@ backend/.venv/bin/python -m mypy --config-file backend/pyproject.toml backend/ba
 cd frontend && npm run lint && npm run test -- --run && npm run build
 ```
 
-There are 348 backend tests, run on SQLite and PostgreSQL, and 246 frontend tests; the backend is type-checked with mypy. The
+There are 389 backend tests, run on SQLite and PostgreSQL, and 255 frontend tests. The
+backend is type-checked with mypy; the frontend with `tsc`, plus Prettier and `knip`
+for dead code; the Terraform with `fmt` and `validate`. `make check` runs the local set. The
 release gate is a command a pipeline can run:
 `backstop run --prompt 2 --model sim-large --rule-date 2026-10-01 --gate` exits 0 only
 when every blocking contract passes.
@@ -234,7 +245,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and
 │       ├── pages/      One component per route
 │       ├── lib/        Pure view logic
 │       └── test/
-├── infra/terraform/    The production shape as code (ECS, RDS, scheduled task), not applied
+├── infra/terraform/    The production shape as code (ECS, RDS, nightly gate + alert), validated in CI, not applied
 ├── scripts/            Demo bring-up, tunnel, keep-alive and preflight
 └── docs/               Decisions, ADRs, honesty ledger, API contract, operations
 ```
@@ -260,6 +271,8 @@ What the AI got wrong and how it was caught is in
 | How the system fits together | [docs/architecture.md](docs/architecture.md), [docs/adr/](docs/adr/) |
 | The API | [docs/api-contract.md](docs/api-contract.md) |
 | Security and the threat model | [SECURITY.md](SECURITY.md), [docs/threat-model.md](docs/threat-model.md) |
+| How it would plug into Attention, Snowflake, Salesforce and Power BI | [docs/eip-integration.md](docs/eip-integration.md) |
+| How it would run from October 1 through AEP, and the first 30 days | [docs/aep-runbook.md](docs/aep-runbook.md) |
 | What I would ask before building further | [docs/open-questions.md](docs/open-questions.md) |
 
 ## What I would do next

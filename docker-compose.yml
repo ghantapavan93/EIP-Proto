@@ -8,8 +8,9 @@
 # are for localhost only; scripts/demo-tunnel.* refuses to publish them.
 #
 # The backend seeds rules, contracts, the synthetic corpus and the artifact
-# inventory, replays the frozen page snapshots, executes nine runs (four
-# simulated acts + five recorded real-model replays), then serves. Everything is idempotent; restarting changes nothing.
+# inventory, replays the frozen page snapshots, executes eleven runs (four
+# simulated acts, five recorded real-model replays, two held-out replays), then
+# serves. Everything is idempotent; restarting changes nothing.
 #
 # Deliberately boring: Postgres + one API container + one static UI container.
 # No queue, no vector store, no orchestrator. ECS + RDS is the stated

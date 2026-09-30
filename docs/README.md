@@ -22,8 +22,9 @@ Everything written about Backstop beyond the code, grouped by what the reader ne
 | [`adr/`](adr/) | Seven architecture decision records: rules as code, the AI boundary, model adapters, right-sizing, idempotency and audit, advisory judges, real pages vs synthetic data |
 | [`buy-vs-build.md`](buy-vs-build.md) | Which parts are worth owning, which are commodity, and the exit path for each |
 | [`open-questions.md`](open-questions.md) | The questions public research cannot answer, grouped by the decision they unlock |
+| [`eip-integration.md`](eip-integration.md) | How Backstop would connect to Attention, Snowflake, Salesforce via MuleSoft, Power BI and SSO: built, not built, or assumed |
+| [`aep-runbook.md`](aep-runbook.md) | October 1 through AEP, what to do when the FCC order is published, and the first 30 days on real data |
 | [`screens.md`](screens.md) | Every route in the console and what it is for |
-| [`demo-script.md`](demo-script.md) | The timed walkthrough, with fallbacks that work offline |
 
 ### Evidence and honesty
 
@@ -42,7 +43,7 @@ Everything written about Backstop beyond the code, grouped by what the reader ne
 | [`api-contract.md`](api-contract.md) | Endpoints, request and response shapes, error codes |
 | [`threat-model.md`](threat-model.md) | Threats, the mitigation in place, and what production would add |
 | [`operations.md`](operations.md) | Running the stack, publishing a demo through a Cloudflare tunnel, rotating accounts |
-| [`../infra/`](../infra/) | The production shape as Terraform (ECS, RDS, scheduled task), not applied |
+| [`../infra/`](../infra/) | The production shape as Terraform (ECS, RDS, nightly gate + alert), validated in CI, not applied |
 
 ## Conventions
 

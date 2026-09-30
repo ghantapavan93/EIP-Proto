@@ -6,8 +6,7 @@
 
 Call-center workflows are retried constantly. A double-write is a compliance
 event. A carrier oversight conversation wants to know who knew what was stale,
-when, and what they did about it. The Full Stack posting's job is literally
-"turn prototypes into reliable production-ready applications".
+when, and what they did about it.
 
 ## Decision
 
