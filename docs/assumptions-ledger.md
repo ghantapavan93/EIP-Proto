@@ -32,6 +32,10 @@ was requested or used.
 | R19 | Florida 501.616(6): no solicitation call before 8 a.m. or after 8 p.m. called-party time; at most 3 calls per 24 hours on the same subject; reaches licensed insurance agents via 501.604 | FACT | Fla. Stat. 501.616, 501.604 (2026) |
 | R20 | Whether 501.616(6) reaches interstate calls, and whether a requested callback is a solicitation | **Disputed** — ask counsel | — |
 | R21 | CY(N+1) marketing may begin Oct 1; AEP runs Oct 15 – Dec 7; MA OEP Jan 1 – Mar 31 | FACT | 42 CFR 422.2263(a), 422.62(a)(2)(iii), 422.62(a)(3)(i) (eCFR, read 2026-09-23) |
+| R22 | An AI-generated or cloned voice is an "artificial or prerecorded voice" under the TCPA; outbound AI-voice calls need prior express consent (written for telemarketing) and the 64.1200(b) identification and opt-out; a live agent choosing the messages does not exempt the call. Effective on release, 2024-02-08 | FACT | FCC 24-17 paras. 2, 5, 8, 9, 11 (read 2026-09-30); eCFR 47 CFR 64.1200 |
+| R23 | The FCC's AI-call disclosure rules (define "AI-generated call"; disclose at consent and at call start) are proposed only; no final rule in the Federal Register as of 2026-09-30 | FACT | FCC 24-84, 89 FR 73321 (2024-09-10); FR search 2026-09-30 |
+| R24 | CMS's AI guidance to MA plans (HPMS FAQ, 2024-02-06) concerns coverage decisions under 422.101(c) and Section 1557 bias, not TPMO marketing | FACT | CMS HPMS memo 2024-02-06, Q2 |
+| R25 | Florida had not adopted the NAIC AI model bulletin as of 2026-04-01, and its 2026 AI-in-claims bill (HB 527) died in Senate Rules on 2026-03-13 | FACT | NAIC implementation map (status 2026-04-01); flsenate.gov HB 527 (2026) |
 
 ## About EIP (public evidence)
 
@@ -39,9 +43,9 @@ was requested or used.
 |---|---|---|---|
 | E1 | EIP uses Salesforce (+ Marketing Cloud), MuleSoft, Snowflake, Attention, Vigil (vigilnow.com), Power BI | FACT | Vigil and Attention case studies; live SFMC CloudPages; job postings 2025–2026 |
 | E2 | Attention scores 100% of calls on a 28-item revenue-weighted scorecard with automated daily coaching | FACT (vendor-stated) | attention.com/customers/elite-insurance-partners |
-| E3 | Three open technology roles: AI Workflow Engineer, AI Enablement Specialist, Full Stack Software Engineer; the JDs ask for "systematic testing and evaluation approaches" and "turn prototypes … into reliable production-ready applications" | FACT | jobs.jobvite.com/teameip (read 2026-09-21) |
+| E3 | EIP is building AI workflow, AI enablement and full-stack capability in-house; its public role descriptions ask for "systematic testing and evaluation approaches" and for turning prototypes into production applications | FACT | EIP's public careers pages (read 2026-09-21) |
 | E4 | Vapi is EIP's voice-AI vendor | **UNKNOWN** — named only in a removed 2025 posting; nothing here depends on it | search snippets |
-| E5 | EIP has an eval / prompt-versioning tool today | **UNKNOWN** — no public evidence either way; the JD asks the hire to *create* evaluation approaches | Jobvite |
+| E5 | EIP has an eval / prompt-versioning tool today | **UNKNOWN** — no public evidence either way; the public role descriptions ask for evaluation approaches to be *created* | EIP's public careers pages |
 | E6 | A rule→artifact registry (even a spreadsheet) exists and is being used for Oct 1 | **UNKNOWN** — this is the kill evidence for the hypothesis | — |
 | E7 | The public SOA FAQ encodes the 48-hour window (correct until 2026-09-30); one footer carries the pre-CY2027 SHIP disclaimer wording; two pages give different licensing-footprint figures | FACT | excerpts under fixtures/pages/, read 2026-09-21 |
 

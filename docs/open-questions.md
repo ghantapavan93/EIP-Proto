@@ -21,8 +21,8 @@ is useful or already solved.
 5. Are your Attention scorecard definitions and expert-mode prompts versioned
    anywhere you own (TeamEIP Git), or only in the vendor console?
 6. Is there any eval or prompt-versioning tool already paid for (Braintrust,
-   LangSmith, Promptfoo, Snowflake evals), or is "create systematic testing
-   approaches" in the JD literally starting from zero?
+   LangSmith, Promptfoo, Snowflake evals), or does systematic testing start
+   from zero?
 
 ## The feedback loop
 
@@ -62,3 +62,16 @@ is useful or already solved.
 17. If this harness ran on your Attention → Snowflake export after AEP, what
     is the first contract you would want it to check? (On unlabeled calls the
     rule-judgment contracts return ERROR; who could label a monthly sample?)
+
+## Voice AI and consent
+
+18. Is any outbound call placed, or any voicemail left, with a synthetic or cloned
+    voice today, including a vendor's "virtual agent" on callbacks or no-answer
+    follow-ups? If so, which consent record covers it, and does the lead-form wording
+    name AI-generated calls?
+19. Does the dialer stop Florida numbers at 8 p.m. called-party time and cap attempts
+    at three per 24 hours on the same subject, and where would that be proven from:
+    dialer configuration or call records in Snowflake?
+20. After the FCC's 2026-09-30 order is published, who decides whether EIP designates
+    an exclusive opt-out method, and which scripts, IVR lines and SMS templates would
+    carry the disclosure?
