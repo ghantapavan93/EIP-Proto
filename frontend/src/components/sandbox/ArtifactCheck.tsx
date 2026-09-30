@@ -13,7 +13,7 @@ import { ClipboardCopy, Pencil, ScanText } from 'lucide-react';
 import { useRules, useSandboxArtifact, useSandboxSamples } from '../../api/hooks';
 import type { RuleOut, SandboxArtifactOut, SandboxMatch } from '../../api/types';
 import { cn } from '../../lib/cn';
-import { fmtDate, shortHash } from '../../lib/format';
+import { fmtDate, shiftIsoDate, shortHash } from '../../lib/format';
 import { isSubmitChord, modKeyLabel } from '../../lib/palette';
 import { usePrefersReducedMotion } from '../../lib/motion';
 import {
@@ -35,9 +35,7 @@ import { DateAsOfControl } from '../rules/DateAsOfControl';
 import { useToast } from '../ui/useToast';
 import { useLiveBusy } from './useSandboxTimers';
 import { PrivacyLine, RedactionTally, RefusalNote } from './SandboxNotes';
-import { latestGoverning } from '../../lib/ruleVersions';
-
-const QUICK_DATES = ['2026-09-30', '2026-10-01'];
+import { aroundChange, latestGoverning, nextRuleChange } from '../../lib/ruleVersions';
 
 /** The finding card's left edge carries its verdict colour (the chip says it in words). */
 const EDGE: Record<ReturnType<typeof matchTone>, string> = {
@@ -60,8 +58,8 @@ function WhatItChecks({ rules }: { rules: RuleOut[] | undefined }) {
     <div className="card px-4 py-3">
       <div className="eyebrow mb-1">What it looks for</div>
       <p className="text-[12.5px] leading-relaxed text-ink-2">
-        Phrasing that encodes one of the {rules?.length ?? 13} versioned rules — a 48-hour wait, a first-minute
-        disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
+        Phrasing that encodes one of the {rules ? `${rules.length} ` : ''}versioned rules — a 48-hour wait, a
+        first-minute disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
       </p>
       {rules && (
         <ul className="mt-2.5 divide-y divide-hairline border-t border-hairline">
@@ -106,21 +104,28 @@ function Finding({
 }) {
   const m: SandboxMatch = placed.match;
   const tone = matchTone(m);
+  // The whole card selects the finding through one button stretched over it; the
+  // rule link sits above that button so both stay separately focusable and clickable.
   return (
     <li
-      id={`finding-${placed.index}`}
-      tabIndex={-1}
       className={cn(
-        'card cursor-pointer border-l-[3px] px-3.5 py-3 outline-none hover:border-input',
+        'card relative border-l-[3px] px-3.5 py-3 hover:border-input',
         EDGE[tone],
         active && 'border-teal-ink shadow-[0_0_0_1px_var(--color-teal-ink)] hover:border-teal-ink',
       )}
-      onClick={onSelect}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
       aria-current={active ? 'true' : undefined}
     >
-      <div className="flex flex-wrap items-center gap-1.5">
+      <button
+        id={`finding-${placed.index}`}
+        type="button"
+        className="absolute inset-0 cursor-pointer rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-teal-ink"
+        aria-label={`Show ${m.rule_code} (${verdictLabel(m)}) in the text`}
+        aria-pressed={active}
+        onClick={onSelect}
+      />
+      <div className="pointer-events-none relative flex flex-wrap items-center gap-1.5">
         {m.verdict === 'stale' ? (
           <>
             <Chip tone="neutral">stale</Chip>
@@ -136,11 +141,10 @@ function Finding({
           </Chip>
         )}
       </div>
-      <div className="mt-2 flex items-baseline gap-2">
+      <div className="pointer-events-none relative mt-2 flex items-baseline gap-2">
         <Link
           to={`/rules/${encodeURIComponent(m.rule_code)}?as_of=${asOf}`}
-          className="shrink-0 font-mono text-[12px] font-semibold"
-          onClick={(e) => e.stopPropagation()}
+          className="pointer-events-auto relative shrink-0 font-mono text-[12px] font-semibold"
         >
           {m.rule_code}
         </Link>
@@ -148,13 +152,17 @@ function Finding({
           {headOf(m.rule_title)}
         </span>
       </div>
-      <div className="mt-0.5 font-mono text-[11px] text-ink-3 [overflow-wrap:anywhere]">{m.citation}</div>
-      <div className="mt-1.5 font-mono text-[11.5px] text-slate">
+      <div className="pointer-events-none relative mt-0.5 font-mono text-[11px] text-ink-3 [overflow-wrap:anywhere]">
+        {m.citation}
+      </div>
+      <div className="pointer-events-none relative mt-1.5 font-mono text-[11.5px] text-slate">
         encodes v{m.bound_version} → in force {m.in_force_version === null ? 'none' : `v${m.in_force_version}`}
       </div>
-      {m.reason && <p className="mt-1 text-[12.5px] leading-snug text-ink-2">{m.reason}</p>}
+      {m.reason && (
+        <p className="pointer-events-none relative mt-1 text-[12.5px] leading-snug text-ink-2">{m.reason}</p>
+      )}
       {(m.applies_from || m.regulation_effective) && (
-        <div className="mt-1.5 text-[11.5px] text-ink-3">
+        <div className="pointer-events-none relative mt-1.5 text-[11.5px] text-ink-3">
           {m.applies_from && <>applies from {fmtDate(m.applies_from)}</>}
           {m.regulation_effective && m.regulation_effective !== m.applies_from && (
             <> · regulation effective {fmtDate(m.regulation_effective)}</>
@@ -163,7 +171,7 @@ function Finding({
       )}
       {placed.at < 0 && (
         <blockquote
-          className="quote mt-2 text-[12px]"
+          className="quote pointer-events-none relative mt-2 text-[12px]"
           title="This span contains redacted text, so it cannot be painted onto what you pasted"
         >
           {m.span}
@@ -195,7 +203,7 @@ function Summary({ result, onCopy }: { result: SandboxArtifactOut; onCopy: () =>
           {s.over_restrictive > 0 && <Chip tone="amber">{s.over_restrictive} over-restrictive</Chip>}
           {s.reverify > 0 && <Chip tone="slate">{s.reverify} re-verify</Chip>}
           {s.current > 0 && <Chip tone="green">{s.current} current</Chip>}
-          {(s.needs_review ?? 0) > 0 && (
+          {s.needs_review > 0 && (
             <Chip tone="slate" title="Proposed readings are not counted as stale until a human confirms them">
               {s.needs_review} needs a human read
             </Chip>
@@ -224,13 +232,11 @@ function Summary({ result, onCopy }: { result: SandboxArtifactOut; onCopy: () =>
 }
 
 /**
- * The hero of /try: paste any script, page, email or prompt; Backstop's
- * deterministic matchers find text that encodes a versioned rule and say,
- * for the chosen date, whether that encoding is current or stale — and in
- * which direction. Nothing is stored.
+ * The artifact tab of /try: paste any script, page, email or prompt;
+ * Backstop's deterministic matchers find text that encodes a versioned rule
+ * and say, for the chosen date, whether that encoding is current or stale —
+ * and in which direction. Nothing is stored.
  */
-const STORY_DATE = '2026-10-01';
-
 export function ArtifactCheck({ today }: { today: string }) {
   const samples = useSandboxSamples();
   const rules = useRules();
@@ -238,9 +244,11 @@ export function ArtifactCheck({ today }: { today: string }) {
   const { toast } = useToast();
   const reduced = usePrefersReducedMotion();
   const [text, setText] = useState('');
-  // Default to the date the CY2027 marketing changes apply: checking "as of today"
-  // (before Oct 1) would call a soon-to-be-stale line current and hide the point.
-  const [asOf, setAsOf] = useState(STORY_DATE);
+  // Until the user picks a date, check as of the next rule change: evaluated at today,
+  // a line that goes stale on that change still reads current, which answers the wrong question.
+  const change = useMemo(() => nextRuleChange(rules.data, today), [rules.data, today]);
+  const [pickedAsOf, setAsOf] = useState<string | null>(null);
+  const asOf = pickedAsOf ?? change ?? today;
   const [label, setLabel] = useState('');
   const [result, setResult] = useState<{ out: SandboxArtifactOut; text: string; label: string } | null>(null);
   const [editing, setEditing] = useState(true);
@@ -253,8 +261,6 @@ export function ArtifactCheck({ today }: { today: string }) {
   const labelId = useId();
   const mod = modKeyLabel();
   useLiveBusy(check.isPending);
-
-  void today; // kept in the signature for callers; the story date is the default
 
   const analyze = useCallback(
     (body?: { text: string; label: string }, asOfOverride?: string) => {
@@ -394,13 +400,15 @@ export function ArtifactCheck({ today }: { today: string }) {
               // A result on screen must never describe a different date than the picker shows.
               if (result) analyze({ text: result.text, label: result.label }, d);
             }}
-            quick={QUICK_DATES}
+            quick={aroundChange(change)}
             label="As of"
           />
-          <p className="basis-full text-[11.5px] text-ink-3 sm:order-last">
-            Oct 1, 2026 is when the CY2027 marketing changes apply — switch to Sep 30 to see the same text before the
-            change.
-          </p>
+          {change && (
+            <p className="basis-full text-[11.5px] text-ink-3 sm:order-last">
+              {fmtDate(change)} is when the next rule change applies — switch to {fmtDate(shiftIsoDate(change, -1))} to
+              see the same text before the change.
+            </p>
+          )}
           <div className="w-[220px] max-w-full">
             <label htmlFor={labelId} className="label">
               Label <span className="font-normal normal-case tracking-normal text-ink-3">(optional)</span>
@@ -484,7 +492,7 @@ export function ArtifactCheck({ today }: { today: string }) {
         </div>
       ) : (
         <section aria-label="Results" className="space-y-3">
-          <div className="card card-hero px-4 py-3">
+          <div className="card card-raised px-4 py-3">
             <Summary result={out} onCopy={() => void copy()} />
           </div>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
@@ -546,8 +554,9 @@ export function ArtifactCheck({ today }: { today: string }) {
                 <div className="card px-4 py-4">
                   <div className="text-[14px] font-semibold text-ink">No rule-bearing language found</div>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-ink-2">
-                    Backstop only flags text that encodes one of the {rules.data?.length ?? 7} versioned rules. A clean
-                    result means none of them is spelled out here — not that the text is compliant.
+                    Backstop only flags text that encodes one of the {rules.data ? `${rules.data.length} ` : ''}
+                    versioned rules. A clean result means none of them is spelled out here — not that the text is
+                    compliant.
                   </p>
                   {firstSample && (
                     <button

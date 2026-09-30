@@ -80,7 +80,7 @@ describe('/try — artifact check', () => {
     expect(screen.getAllByText(/only a SHA-256 of the text is logged/).length).toBeGreaterThan(0);
   }, 20000);
 
-  it('is honest when nothing rule-bearing is found', async () => {
+  it('says so when nothing rule-bearing is found', async () => {
     open('/try');
     fireEvent.click(await screen.findByRole('button', { name: 'Welcome email · no rule language' }, { timeout: 8000 }));
     expect(await screen.findByText('No rule-bearing language found', {}, { timeout: 8000 })).toBeInTheDocument();
@@ -99,7 +99,7 @@ describe('/try — artifact check', () => {
 });
 
 describe('/try — call transcript', () => {
-  it('shows a calm offline card when no local model is reachable (409)', async () => {
+  it('shows an offline status card when no local model is reachable (409)', async () => {
     open('/try?tab=transcript');
     fireEvent.click(
       await screen.findByRole('button', { name: 'MA call · disclaimer after benefits' }, { timeout: 8000 }),
@@ -141,7 +141,12 @@ describe('roles and access', () => {
     expect(within(cant).getByText('Start a harness run')).toBeInTheDocument();
     expect(within(dialog).getByText('Engineers and admins can:')).toBeInTheDocument();
     expect(within(cant).getByText('Approve a test case (a different person from its creator)')).toBeInTheDocument();
-    expect(within(cant).getByText('Engineers and admins approve test cases — never their own')).toBeInTheDocument();
+    // a refusal with its own condition keeps the server's reason inline
+    expect(
+      within(cant).getByText(
+        'Not allowed: only engineer or admin may do this (never one you created yourself: two-person rule).',
+      ),
+    ).toBeInTheDocument();
     act(() => {
       fireEvent.keyDown(document, { key: 'Escape' });
     });

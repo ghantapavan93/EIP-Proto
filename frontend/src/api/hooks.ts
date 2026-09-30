@@ -1,15 +1,28 @@
 /**
- * react-query hooks, one per endpoint. Keys are namespaced under "backstop"
- * so a single invalidation can sweep a whole entity family.
+ * react-query hooks, one per endpoint.
+ *
+ * Every key starts with a family key (`keys.rules()`, `keys.review()`, …)
+ * so one invalidation sweeps the whole family: `keys.rules()` covers the
+ * list, each rule, its impact and its source checks. Mutations never list
+ * keys themselves; they name what they changed and `invalidateAfterWrite`
+ * maps that to families.
  */
 
-import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+  type UseQueryOptions,
+} from '@tanstack/react-query';
 import { api, download, downloadWithMeta, toQuery, upload } from './client';
 import { isApiError } from './errors';
 import type {
   AccessReviewOut,
   AssetDetailOut,
   AssetOut,
+  AuditActorOut,
   AuditCheckpointOut,
   AuditOut,
   AuditQuery,
@@ -33,8 +46,8 @@ import type {
   ModelOut,
   Page,
   PromptDiffOut,
-  PromptVersionOut,
   ReadinessOut,
+  ReloadRulesOut,
   ReviewQuery,
   ReviewTaskOut,
   RuleOut,
@@ -61,87 +74,135 @@ import type {
   WorkflowOut,
 } from './types';
 
+const ROOT = 'backstop';
+
+/** Optional /models/board parameters; omitted ones take the server's defaults. */
+export interface ModelBoardQuery {
+  prompt?: number;
+  ruleDate?: string;
+}
+
 export const keys = {
-  all: ['backstop'] as const,
-  meta: () => ['backstop', 'meta'] as const,
-  me: () => ['backstop', 'me'] as const,
-  sandboxSamples: () => ['backstop', 'sandbox', 'samples'] as const,
-  rules: () => ['backstop', 'rules'] as const,
-  rule: (code: string) => ['backstop', 'rules', code] as const,
-  impact: (code: string, asOf: string) => ['backstop', 'rules', code, 'impact', asOf] as const,
+  all: [ROOT] as const,
+  meta: () => [ROOT, 'meta'] as const,
+  me: () => [ROOT, 'me'] as const,
+  status: () => [ROOT, 'status'] as const,
+  health: () => [ROOT, 'health'] as const,
+
+  sandboxSamples: () => [ROOT, 'sandbox', 'samples'] as const,
+
+  // family: the rule list, each rule, its impact (enacted and what-if) and its source checks
+  rules: () => [ROOT, 'rules'] as const,
+  rule: (code: string) => [...keys.rules(), code] as const,
+  impact: (code: string, asOf: string) => [...keys.rule(code), 'impact', asOf] as const,
   impactWhatIf: (code: string, asOf: string, version: number) =>
-    ['backstop', 'rules', code, 'impact', asOf, 'what-if', version] as const,
-  ruleSources: (code: string) => ['backstop', 'rules', code, 'sources'] as const,
-  assets: () => ['backstop', 'assets'] as const,
-  asset: (code: string) => ['backstop', 'assets', code] as const,
-  scans: () => ['backstop', 'scans'] as const,
-  workflows: () => ['backstop', 'workflows'] as const,
-  workflow: (code: string) => ['backstop', 'workflows', code] as const,
-  prompt: (id: string) => ['backstop', 'prompts', id] as const,
-  promptDiff: (a: string, b: string) => ['backstop', 'prompts', 'diff', a, b] as const,
-  models: () => ['backstop', 'models'] as const,
-  modelBoard: (prompt: number, ruleDate: string) => ['backstop', 'models', 'board', prompt, ruleDate] as const,
-  contracts: () => ['backstop', 'contracts'] as const,
-  contractMetrics: (code: string, q: ContractMetricsQuery) => ['backstop', 'contracts', code, 'metrics', q] as const,
-  readiness: (asOf: string) => ['backstop', 'readiness', asOf] as const,
-  transcripts: (limit: number, offset: number) => ['backstop', 'transcripts', limit, offset] as const,
-  transcript: (code: string) => ['backstop', 'transcripts', code] as const,
-  runs: () => ['backstop', 'runs'] as const,
-  run: (id: string) => ['backstop', 'runs', id] as const,
-  runResults: (id: string, q: RunResultsQuery) => ['backstop', 'runs', id, 'results', q] as const,
-  runTranscript: (id: string, code: string) => ['backstop', 'runs', id, 'transcripts', code] as const,
-  compare: (a: string, b: string) => ['backstop', 'runs', 'compare', a, b] as const,
-  review: (q: ReviewQuery) => ['backstop', 'review', q] as const,
-  reviewTask: (id: string) => ['backstop', 'review', 'task', id] as const,
-  testCases: () => ['backstop', 'test-cases'] as const,
-  audit: (q: AuditQuery) => ['backstop', 'audit', q] as const,
-  evals: () => ['backstop', 'evals', 'matchers'] as const,
-  ingestFormats: () => ['backstop', 'ingest', 'formats'] as const,
-  health: () => ['backstop', 'health'] as const,
-  status: () => ['backstop', 'status'] as const,
-  access: () => ['backstop', 'admin', 'access'] as const,
-  checkpoints: () => ['backstop', 'admin', 'checkpoints'] as const,
+    [...keys.impact(code, asOf), 'what-if', version] as const,
+  ruleSources: (code: string) => [...keys.rule(code), 'sources'] as const,
+
+  assets: () => [ROOT, 'assets'] as const,
+  asset: (code: string) => [...keys.assets(), code] as const,
+
+  workflows: () => [ROOT, 'workflows'] as const,
+  workflow: (code: string) => [...keys.workflows(), code] as const,
+  promptDiff: (a: string, b: string) => [ROOT, 'prompts', 'diff', a, b] as const,
+
+  // family: the model list and the board (the board shows each model's latest run)
+  models: () => [ROOT, 'models'] as const,
+  modelBoard: (q: ModelBoardQuery) => [...keys.models(), 'board', q] as const,
+
+  // family: the contract list and per-contract metrics (read from stored run results)
+  contracts: () => [ROOT, 'contracts'] as const,
+  contractMetrics: (code: string, q: ContractMetricsQuery) => [...keys.contracts(), code, 'metrics', q] as const,
+
+  readiness: () => [ROOT, 'readiness'] as const,
+  readinessAt: (asOf: string) => [...keys.readiness(), asOf] as const,
+
+  transcripts: () => [ROOT, 'transcripts'] as const,
+  transcriptPage: (limit: number, offset: number) => [...keys.transcripts(), limit, offset] as const,
+
+  // family: run list, each run, its results and transcripts, and comparisons
+  runs: () => [ROOT, 'runs'] as const,
+  run: (id: string) => [...keys.runs(), id] as const,
+  runResults: (id: string, q: RunResultsQuery) => [...keys.run(id), 'results', q] as const,
+  runTranscript: (id: string, code: string) => [...keys.run(id), 'transcripts', code] as const,
+  compare: (a: string, b: string) => [...keys.runs(), 'compare', a, b] as const,
+
+  review: () => [ROOT, 'review'] as const,
+  reviewList: (q: ReviewQuery) => [...keys.review(), 'list', q] as const,
+  reviewTask: (id: string) => [...keys.review(), 'task', id] as const,
+
+  testCases: () => [ROOT, 'test-cases'] as const,
+
+  audit: () => [ROOT, 'audit'] as const,
+  auditPage: (q: AuditQuery) => [...keys.audit(), 'page', q] as const,
+  auditActors: () => [...keys.audit(), 'actors'] as const,
+
+  evals: () => [ROOT, 'evals', 'matchers'] as const,
+  ingestFormats: () => [ROOT, 'ingest', 'formats'] as const,
+
+  access: () => [ROOT, 'admin', 'access'] as const,
+  checkpoints: () => [ROOT, 'admin', 'checkpoints'] as const,
 };
+
+/**
+ * What a write can change on the server, each mapped to the query family
+ * that reads it. A mutation names its effects; it never lists keys.
+ */
+const EFFECT_FAMILIES = {
+  rules: keys.rules,
+  assets: keys.assets,
+  review: keys.review,
+  testCases: keys.testCases,
+  runs: keys.runs,
+  models: keys.models,
+  contracts: keys.contracts,
+  transcripts: keys.transcripts,
+  readiness: keys.readiness,
+  health: keys.health,
+  checkpoints: keys.checkpoints,
+} as const;
+
+export type WriteEffect = keyof typeof EFFECT_FAMILIES;
+
+/**
+ * Refetch what a successful write made stale. Every write is audit-logged
+ * and moves the status rail (counts, open tasks, audit rows), so those two
+ * families always refresh; `effects` adds the domains the write touched.
+ */
+export function invalidateAfterWrite(qc: QueryClient, effects: readonly WriteEffect[] = []): void {
+  const families = [keys.audit(), keys.status(), ...effects.map((effect) => EFFECT_FAMILIES[effect]())];
+  for (const queryKey of families) void qc.invalidateQueries({ queryKey });
+}
 
 /** Status rail poll interval. */
 export const STATUS_POLL_MS = 30_000;
 
 type QueryOpts<T> = Omit<UseQueryOptions<T, Error>, 'queryKey' | 'queryFn'>;
 
-// ---------------------------------------------------------------- meta
+/** One retry smooths over a network blip; a 4xx (e.g. 401 → login) is a decision, not a blip. */
+function retryUnlessClientError(count: number, err: Error): boolean {
+  return count < 1 && !(isApiError(err) && err.status >= 400 && err.status < 500);
+}
+
+// ---------------------------------------------------------------- meta / identity
 
 export function useMeta(opts?: QueryOpts<MetaOut>) {
   return useQuery<MetaOut, Error>({
     queryKey: keys.meta(),
     queryFn: () => api.get<MetaOut>('/meta'),
     staleTime: 5 * 60_000,
-    // One retry smooths over a network blip; a 4xx (e.g. 401 → login) is a decision, not a blip.
-    retry: (count, err) => count < 1 && !(isApiError(err) && err.status >= 400 && err.status < 500),
+    retry: retryUnlessClientError,
     ...opts,
   });
 }
 
-/** Current role, or null while loading / signed out. */
-export function useRole(): string | null {
-  const { data } = useMeta();
-  return data?.role ?? null;
-}
-
-export function canEdit(role: string | null | undefined): boolean {
-  return role === 'engineer' || role === 'admin';
-}
-
-/**
- * GET /me: who is signed in, what their role may do and why. Older servers
- * without the route answer 404; callers fall back to lib/roles, so the query
- * never retries a 4xx.
- */
+/** GET /me: who is signed in, what their role may do and why. The source of every permission check in the UI. */
 export function useMe(opts?: QueryOpts<MeOut>) {
   return useQuery<MeOut, Error>({
     queryKey: keys.me(),
     queryFn: () => api.get<MeOut>('/me'),
     staleTime: 5 * 60_000,
-    retry: (count, err) => count < 1 && !(isApiError(err) && err.status >= 400 && err.status < 500),
+    retry: retryUnlessClientError,
     ...opts,
   });
 }
@@ -174,10 +235,15 @@ export function useRule(code: string | undefined) {
   });
 }
 
+function impactPath(code: string, asOf: string): string {
+  return `/rules/${encodeURIComponent(code)}/impact${toQuery({ as_of: asOf })}`;
+}
+
+/** GET /rules/{code}/impact: the blast radius on `asOf`. Read-only; each stale item carries its open review task, if any. */
 export function useImpact(code: string | undefined, asOf: string) {
   return useQuery<ImpactOut, Error>({
     queryKey: keys.impact(code ?? '', asOf),
-    queryFn: () => api.get<ImpactOut>(`/rules/${encodeURIComponent(code ?? '')}/impact${toQuery({ as_of: asOf })}`),
+    queryFn: () => api.get<ImpactOut>(impactPath(code ?? '', asOf)),
     enabled: Boolean(code) && Boolean(asOf),
     placeholderData: (prev) => prev,
   });
@@ -188,7 +254,7 @@ export function useImpactsAt(codes: string[], asOf: string) {
   return useQueries({
     queries: codes.map((code) => ({
       queryKey: keys.impact(code, asOf),
-      queryFn: () => api.get<ImpactOut>(`/rules/${encodeURIComponent(code)}/impact${toQuery({ as_of: asOf })}`),
+      queryFn: () => api.get<ImpactOut>(impactPath(code, asOf)),
       enabled: Boolean(asOf),
     })),
   });
@@ -211,17 +277,27 @@ export function useImpactWhatIf(code: string | undefined, asOf: string, version:
   });
 }
 
+/**
+ * POST /rules/{code}/impact/evaluate (engineer/admin): open a review task for
+ * every stale artifact on `asOf` that has none yet. Reading the impact never
+ * opens tasks; this is the one write. 409 when `asOf` shows an older version
+ * than the one in force today (that staleness is history, not work).
+ */
+export function useOpenStaleTasks(code: string) {
+  const qc = useQueryClient();
+  return useMutation<ImpactWhatIfOut, Error, { asOf: string }>({
+    mutationFn: ({ asOf }) =>
+      api.post<ImpactWhatIfOut>(`/rules/${encodeURIComponent(code)}/impact/evaluate${toQuery({ as_of: asOf })}`),
+    // the rules family covers the impact reads that show each item's task
+    onSuccess: () => invalidateAfterWrite(qc, ['rules', 'review', 'readiness']),
+  });
+}
+
 export function useProposeVersion(code: string) {
   const qc = useQueryClient();
   return useMutation<RuleVersionOut, Error, RuleVersionCreate>({
     mutationFn: (body) => api.post<RuleVersionOut>(`/rules/${encodeURIComponent(code)}/versions`, body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: keys.rules() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'readiness'] });
-    },
+    onSuccess: () => invalidateAfterWrite(qc, ['rules', 'review', 'readiness']),
   });
 }
 
@@ -237,12 +313,18 @@ export function useCheckSources() {
   const qc = useQueryClient();
   return useMutation<SourcesCheckOut, Error, { live?: boolean }>({
     mutationFn: ({ live = false }) => api.post<SourcesCheckOut>(`/sources/check${toQuery({ live })}`),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['backstop', 'rules'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-    },
+    // a changed source opens a RULE_SOURCE_CHANGED review task
+    onSuccess: () => invalidateAfterWrite(qc, ['rules', 'review']),
+  });
+}
+
+/** POST /rules/reload — admin only: adopt the reviewed corpus in git into the running system. */
+export function useReloadRules() {
+  const qc = useQueryClient();
+  return useMutation<ReloadRulesOut, Error, void>({
+    mutationFn: () => api.post<ReloadRulesOut>('/rules/reload'),
+    // new versions move every impact, readiness horizon and stale count
+    onSuccess: () => invalidateAfterWrite(qc, ['rules', 'readiness']),
   });
 }
 
@@ -264,23 +346,12 @@ export function useAsset(code: string | undefined) {
   });
 }
 
-export function useScans() {
-  return useQuery<ScanOut[], Error>({ queryKey: keys.scans(), queryFn: () => api.get<ScanOut[]>('/scans') });
-}
-
 export function useRunScan() {
   const qc = useQueryClient();
   return useMutation<ScanOut, Error, ScanRequest>({
     mutationFn: (body) => api.post<ScanOut>('/scans', body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: keys.scans() });
-      void qc.invalidateQueries({ queryKey: keys.assets() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'rules'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'readiness'] });
-    },
+    // new artifact versions, edges and stale-artifact tasks
+    onSuccess: () => invalidateAfterWrite(qc, ['assets', 'rules', 'review', 'readiness']),
   });
 }
 
@@ -303,14 +374,6 @@ export function useWorkflow(code: string | undefined) {
   });
 }
 
-export function usePrompt(id: string | undefined) {
-  return useQuery<PromptVersionOut, Error>({
-    queryKey: keys.prompt(id ?? ''),
-    queryFn: () => api.get<PromptVersionOut>(`/prompts/${encodeURIComponent(id ?? '')}`),
-    enabled: Boolean(id),
-  });
-}
-
 export function usePromptDiff(a: string | null, b: string | null) {
   return useQuery<PromptDiffOut, Error>({
     queryKey: keys.promptDiff(a ?? '', b ?? ''),
@@ -327,11 +390,15 @@ export function useModels() {
   });
 }
 
-/** Every model side by side: provider readiness, recorded cassettes, latest measured run. */
-export function useModelBoard(prompt = 2, ruleDate = '2026-10-01') {
+/**
+ * Every model side by side: provider readiness, recorded cassettes, latest
+ * measured run. Without parameters the server picks the prompt version and
+ * rule date; the response echoes the ones it used.
+ */
+export function useModelBoard(q: ModelBoardQuery = {}) {
   return useQuery<ModelBoardOut, Error>({
-    queryKey: keys.modelBoard(prompt, ruleDate),
-    queryFn: () => api.get<ModelBoardOut>(`/models/board${toQuery({ prompt, rule_date: ruleDate })}`),
+    queryKey: keys.modelBoard(q),
+    queryFn: () => api.get<ModelBoardOut>(`/models/board${toQuery({ prompt: q.prompt, rule_date: q.ruleDate })}`),
     staleTime: 30_000,
   });
 }
@@ -359,7 +426,7 @@ export function useContractMetrics(code: string | undefined, q: ContractMetricsQ
 /** GET /readiness?as_of=: milestones, 30/60/90-day horizon, owner queues, burn-down, vacated and proposed rules. */
 export function useReadiness(asOf: string) {
   return useQuery<ReadinessOut, Error>({
-    queryKey: keys.readiness(asOf),
+    queryKey: keys.readinessAt(asOf),
     queryFn: () => api.get<ReadinessOut>(`/readiness${toQuery({ as_of: asOf })}`),
     enabled: Boolean(asOf),
     staleTime: 30_000,
@@ -370,16 +437,8 @@ export function useReadiness(asOf: string) {
 
 export function useTranscripts(limit = 100, offset = 0) {
   return useQuery<TranscriptOut[], Error>({
-    queryKey: keys.transcripts(limit, offset),
+    queryKey: keys.transcriptPage(limit, offset),
     queryFn: () => api.get<TranscriptOut[]>(`/transcripts${toQuery({ limit, offset })}`),
-  });
-}
-
-export function useTranscript(code: string | undefined) {
-  return useQuery<TranscriptOut, Error>({
-    queryKey: keys.transcript(code ?? ''),
-    queryFn: () => api.get<TranscriptOut>(`/transcripts/${encodeURIComponent(code ?? '')}`),
-    enabled: Boolean(code),
   });
 }
 
@@ -426,15 +485,9 @@ export function useCreateRun() {
   const qc = useQueryClient();
   return useMutation<RunOut, Error, RunRequest>({
     mutationFn: (body) => api.post<RunOut>('/runs', body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: keys.runs() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'readiness'] });
-      // contract accuracy and trend read stored results
-      void qc.invalidateQueries({ queryKey: keys.contracts() });
-    },
+    // a run opens flagged-result tasks, becomes a model's latest run on the board,
+    // and adds stored results that contract metrics read
+    onSuccess: () => invalidateAfterWrite(qc, ['runs', 'review', 'readiness', 'contracts', 'models']),
   });
 }
 
@@ -452,7 +505,7 @@ export function useExportRun() {
 
 export function useReviewTasks(q: ReviewQuery = {}) {
   return useQuery<ReviewTaskOut[], Error>({
-    queryKey: keys.review(q),
+    queryKey: keys.reviewList(q),
     queryFn: () => api.get<ReviewTaskOut[]>(`/review${toQuery(q)}`),
   });
 }
@@ -465,18 +518,12 @@ export function useReviewTask(id: string | undefined) {
   });
 }
 
-export function useTransition(id: string) {
+/** POST /review/{id}/transition. An override also creates a test case pending approval. */
+export function useReviewTransition(id: string) {
   const qc = useQueryClient();
   return useMutation<ReviewTaskOut, Error, TransitionRequest>({
     mutationFn: (body) => api.post<ReviewTaskOut>(`/review/${encodeURIComponent(id)}/transition`, body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: keys.testCases() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'rules'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'readiness'] });
-    },
+    onSuccess: () => invalidateAfterWrite(qc, ['review', 'testCases', 'rules', 'readiness']),
   });
 }
 
@@ -493,16 +540,11 @@ export function useApproveTestCase() {
   const qc = useQueryClient();
   return useMutation<TestCaseOut, Error, string>({
     mutationFn: (id) => api.post<TestCaseOut>(`/test-cases/${encodeURIComponent(id)}/approve`),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: keys.testCases() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'review'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-    },
+    onSuccess: () => invalidateAfterWrite(qc, ['testCases', 'review']),
   });
 }
 
-// ---------------------------------------------------------------- sandbox (nothing persisted)
+// ---------------------------------------------------------------- sandbox (nothing persisted but an audit hash)
 
 export function useSandboxSamples() {
   return useQuery<SandboxSamplesOut, Error>({
@@ -515,30 +557,28 @@ export function useSandboxSamples() {
 
 /** POST /sandbox/artifact — deterministic matchers over pasted text; stores only a SHA-256 in the audit log. */
 export function useSandboxArtifact() {
+  const qc = useQueryClient();
   return useMutation<SandboxArtifactOut, Error, SandboxArtifactRequest>({
     mutationFn: (body) => api.post<SandboxArtifactOut>('/sandbox/artifact', body),
+    onSuccess: () => invalidateAfterWrite(qc),
   });
 }
 
 /** POST /sandbox/transcript — one call through the local model. 409 = no model reachable, 504 = timed out. */
 export function useSandboxTranscript() {
+  const qc = useQueryClient();
   return useMutation<SandboxTranscriptOut, Error, SandboxTranscriptRequest & { signal?: AbortSignal }>({
     mutationFn: ({ signal, ...body }) => api.post<SandboxTranscriptOut>('/sandbox/transcript', body, { signal }),
+    onSuccess: () => invalidateAfterWrite(qc),
   });
 }
 
 // ---------------------------------------------------------------- audit
 
-export interface AuditActorOut {
-  actor: string;
-  role: string;
-  events: number;
-}
-
 /** GET /audit/actors — the people who appear in the log, for the actor filter. */
 export function useAuditActors() {
   return useQuery<AuditActorOut[], Error>({
-    queryKey: ['backstop', 'audit', 'actors'],
+    queryKey: keys.auditActors(),
     queryFn: () => api.get<AuditActorOut[]>('/audit/actors'),
     staleTime: 60_000,
   });
@@ -546,13 +586,13 @@ export function useAuditActors() {
 
 export function useAudit(q: AuditQuery) {
   return useQuery<Page<AuditOut>, Error>({
-    queryKey: keys.audit(q),
+    queryKey: keys.auditPage(q),
     queryFn: () => api.get<Page<AuditOut>>(`/audit${toQuery(q)}`),
     placeholderData: (prev) => prev,
   });
 }
 
-/** GET /audit/verify — recompute the hash chain on demand. */
+/** GET /audit/verify — recompute the hash chain on demand. A read: it only refreshes the rail's chain badge. */
 export function useVerifyAuditChain() {
   const qc = useQueryClient();
   return useMutation<AuditVerifyOut, Error, void>({
@@ -564,8 +604,7 @@ export function useVerifyAuditChain() {
 /** GET /audit/verify?through_id=&tip= — does the chain still contain this checkpoint? */
 export function useVerifyCheckpoint() {
   return useMutation<AuditVerifyOut, Error, { through_id: number; tip: string }>({
-    mutationFn: ({ through_id, tip }) =>
-      api.get<AuditVerifyOut>(`/audit/verify?through_id=${through_id}&tip=${encodeURIComponent(tip)}`),
+    mutationFn: ({ through_id, tip }) => api.get<AuditVerifyOut>(`/audit/verify${toQuery({ through_id, tip })}`),
   });
 }
 
@@ -589,31 +628,12 @@ export function useAuditCheckpoints(enabled: boolean) {
   });
 }
 
-export interface ReloadRulesOut {
-  rules_created: number;
-  versions_created: number;
-  unchanged: number;
-  files: string[];
-}
-
-/** POST /rules/reload — admin only: adopt the reviewed corpus in git into the running system. */
-export function useReloadRules() {
-  const qc = useQueryClient();
-  return useMutation<ReloadRulesOut, Error, void>({
-    mutationFn: () => api.post<ReloadRulesOut>('/rules/reload'),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: keys.rules() }),
-  });
-}
-
 /** POST /admin/audit-checkpoints — refused (409) while the chain is broken. */
 export function useTakeCheckpoint() {
   const qc = useQueryClient();
   return useMutation<AuditCheckpointOut, Error, void>({
     mutationFn: () => api.post<AuditCheckpointOut>('/admin/audit-checkpoints'),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: keys.checkpoints() });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-    },
+    onSuccess: () => invalidateAfterWrite(qc, ['checkpoints']),
   });
 }
 
@@ -646,10 +666,7 @@ export function useExportEvidence() {
       const { name, sha256 } = await downloadWithMeta(evidencePath(req), `${stem}.${req.format}`);
       return { filename: name, sha256 };
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-    },
+    onSuccess: () => invalidateAfterWrite(qc),
   });
 }
 
@@ -675,12 +692,7 @@ export function useIngestTranscripts() {
   const qc = useQueryClient();
   return useMutation<IngestResultOut, Error, { file: File; format: string }>({
     mutationFn: ({ file, format }) => upload<IngestResultOut>(`/ingest/transcripts${toQuery({ format })}`, file),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ['backstop', 'transcripts'] });
-      void qc.invalidateQueries({ queryKey: ['backstop', 'audit'] });
-      void qc.invalidateQueries({ queryKey: keys.health() });
-      void qc.invalidateQueries({ queryKey: keys.status() });
-    },
+    onSuccess: () => invalidateAfterWrite(qc, ['transcripts', 'health']),
   });
 }
 

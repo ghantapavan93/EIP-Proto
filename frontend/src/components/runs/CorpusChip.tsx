@@ -1,5 +1,4 @@
 import type { RunOut } from '../../api/types';
-import { runCorpus } from '../../lib/runStats';
 import { Chip } from '../ui/Chip';
 
 export const HOLDOUT_TOOLTIP =
@@ -7,7 +6,7 @@ export const HOLDOUT_TOOLTIP =
 export const INGESTED_TOOLTIP = 'Redacted real transcripts with no ground truth; rule contracts report ERROR for them';
 
 interface CorpusChipProps {
-  run: Pick<RunOut, 'stats'> & { corpus?: string | null };
+  run: Pick<RunOut, 'corpus'>;
   size?: 'sm' | 'xs';
   className?: string;
 }
@@ -18,7 +17,7 @@ interface CorpusChipProps {
  * number is never read as a development number.
  */
 export function CorpusChip({ run, size = 'sm', className }: CorpusChipProps) {
-  const corpus = runCorpus(run);
+  const { corpus } = run;
   if (corpus === 'holdout') {
     return (
       <Chip tone="slate" size={size} title={HOLDOUT_TOOLTIP} className={className}>

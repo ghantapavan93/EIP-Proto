@@ -53,7 +53,6 @@
   --radius-ui: 6px;
   --radius-card: 8px;
   --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-hero: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
 
   /* motion: ease-out for anything entering, never ease-in; nothing over 300ms
      except the number tick and the skeleton sweep */
@@ -269,7 +268,7 @@ pre,
     box-shadow: none;
     transition: border-color var(--dur-1) var(--ease-out);
   }
-  .card-hero {
+  .card-raised {
     box-shadow: var(--shadow-card);
   }
 

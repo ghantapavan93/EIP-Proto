@@ -261,7 +261,7 @@ function TrendTable({ points }: { points: TrendPointOut[] }) {
                 {p.corpus === 'synthetic' ? (
                   <span className="text-[12px] text-ink-2">development</span>
                 ) : (
-                  <CorpusChip run={{ stats: {}, corpus: p.corpus }} size="xs" />
+                  <CorpusChip run={p} size="xs" />
                 )}
               </td>
               <td className="font-mono text-[12px]">{p.rule_date}</td>
@@ -435,7 +435,7 @@ export function ContractDetailPage() {
                 <span className="font-mono">
                   <ModelId id={run.model_id} /> · v{run.prompt_version} · {run.rule_date}
                 </span>
-                <CorpusChip run={{ stats: {}, corpus: run.corpus }} size="xs" />
+                <CorpusChip run={run} size="xs" />
                 <Link to={`/runs/${run.run_id}`} className="font-mono">
                   run {run.run_id.slice(0, 8)} →
                 </Link>

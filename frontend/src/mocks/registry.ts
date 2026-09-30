@@ -182,7 +182,7 @@ export const MODELS: ModelOut[] = [
     model_id: 'ollama/qwen2.5:7b-instruct',
     label: 'Qwen2.5 7B — local (Ollama, RTX 3060)',
     pinned: true,
-    notes: "Runs on this laptop's GPU. The honest baseline for 'no API spend'.",
+    notes: "Runs on this laptop's GPU. The baseline for 'no API spend'.",
   },
   {
     id: 'model-ollama-qwen3b',
@@ -256,8 +256,9 @@ export const PROVIDERS: ModelBoardOut['providers'] = {
 
 export function modelBoard(runs: RunOut[], prompt: number, ruleDate: string): ModelBoardOut {
   const rows: ModelBoardRow[] = MODELS.map((model) => {
+    // As in the backend: the board compares models on the development calls only.
     const mine = runs
-      .filter((r) => r.model_id === model.model_id && r.status === 'COMPLETE')
+      .filter((r) => r.model_id === model.model_id && r.status === 'COMPLETE' && r.corpus === 'synthetic')
       .sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
     const matched = mine.find((r) => r.prompt_version === prompt && r.rule_date === ruleDate);
     const latest = matched ?? mine[0] ?? null;
@@ -358,10 +359,6 @@ export const WORKFLOWS: WorkflowOut[] = [
     ],
   },
 ];
-
-export function findContract(code: string): ContractOut | undefined {
-  return CONTRACTS.find((c) => c.code === code);
-}
 
 export function findPromptVersion(workflow: string, version: number): PromptVersionOut | undefined {
   return WORKFLOWS.find((w) => w.code === workflow)?.prompt_versions.find((p) => p.version === version);

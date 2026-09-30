@@ -1,3 +1,4 @@
+import { lazy, type ComponentType } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/queryClient';
@@ -5,25 +6,34 @@ import { ToastProvider } from './components/ui/Toast';
 import { AppShell } from './components/layout/AppShell';
 import { LoginPage } from './pages/Login';
 import { HomePage } from './pages/Home';
-import { RulesPage } from './pages/Rules';
-import { RuleDetailPage } from './pages/RuleDetail';
-import { ArtifactsPage } from './pages/Artifacts';
-import { ArtifactDetailPage } from './pages/ArtifactDetail';
-import { RunsPage } from './pages/Runs';
-import { RunDetailPage } from './pages/RunDetail';
-import { RunTranscriptPage } from './pages/RunTranscript';
-import { RunComparePage } from './pages/RunCompare';
-import { ReviewPage } from './pages/Review';
-import { TestCasesPage } from './pages/TestCases';
-import { AuditPage } from './pages/Audit';
-import { GovernancePage } from './pages/Governance';
-import { ContractsPage } from './pages/Contracts';
-import { ContractDetailPage } from './pages/ContractDetail';
-import { ReadinessPage } from './pages/Readiness';
-import { EvalsPage } from './pages/Evals';
-import { ModelsPage } from './pages/Models';
-import { TryPage } from './pages/Try';
 import { EmptyState } from './components/ui/EmptyState';
+
+/**
+ * A screen loaded on first visit, so the first paint ships only the shell,
+ * login and home. Pages use named exports; lazy() needs a default one.
+ */
+function lazyPage<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
+  return lazy(() => load().then((m) => ({ default: m[name] })));
+}
+
+const RulesPage = lazyPage(() => import('./pages/Rules'), 'RulesPage');
+const RuleDetailPage = lazyPage(() => import('./pages/RuleDetail'), 'RuleDetailPage');
+const ArtifactsPage = lazyPage(() => import('./pages/Artifacts'), 'ArtifactsPage');
+const ArtifactDetailPage = lazyPage(() => import('./pages/ArtifactDetail'), 'ArtifactDetailPage');
+const RunsPage = lazyPage(() => import('./pages/Runs'), 'RunsPage');
+const RunDetailPage = lazyPage(() => import('./pages/RunDetail'), 'RunDetailPage');
+const RunTranscriptPage = lazyPage(() => import('./pages/RunTranscript'), 'RunTranscriptPage');
+const RunComparePage = lazyPage(() => import('./pages/RunCompare'), 'RunComparePage');
+const ReviewPage = lazyPage(() => import('./pages/Review'), 'ReviewPage');
+const TestCasesPage = lazyPage(() => import('./pages/TestCases'), 'TestCasesPage');
+const AuditPage = lazyPage(() => import('./pages/Audit'), 'AuditPage');
+const GovernancePage = lazyPage(() => import('./pages/Governance'), 'GovernancePage');
+const ContractsPage = lazyPage(() => import('./pages/Contracts'), 'ContractsPage');
+const ContractDetailPage = lazyPage(() => import('./pages/ContractDetail'), 'ContractDetailPage');
+const ReadinessPage = lazyPage(() => import('./pages/Readiness'), 'ReadinessPage');
+const EvalsPage = lazyPage(() => import('./pages/Evals'), 'EvalsPage');
+const ModelsPage = lazyPage(() => import('./pages/Models'), 'ModelsPage');
+const TryPage = lazyPage(() => import('./pages/Try'), 'TryPage');
 
 export function App() {
   return (

@@ -25,6 +25,8 @@ npm run build             # tsc -b && vite build → dist/
 npm run test              # vitest (jsdom)
 npm run lint              # eslint (typescript-eslint recommended, react-hooks, react-refresh)
 npm run typecheck         # tsc -b --noEmit
+npm run knip              # unused files, exports and dependencies (knip.jsonc)
+npm run format            # prettier --write src; CI runs format:check
 npm run build:mock        # static build that ships the mock (for a no-backend demo host)
 npm run preview           # serve dist/
 ```

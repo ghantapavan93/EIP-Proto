@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { canEdit, useAssets, useExportEvidence, useRole, useRules, useRuns } from '../../api/hooks';
+import { useAssets, useExportEvidence, useRules, useRuns } from '../../api/hooks';
+import { usePermission } from '../access/usePermission';
+import { useFocusTrap } from '../ui/useFocusTrap';
 import { useToast } from '../ui/useToast';
 import { bundleHashLabel, fmtTs } from '../../lib/format';
 import { evidenceForLocation, filterPalette, OPEN_PALETTE_EVENT, type PaletteItem } from '../../lib/palette';
@@ -12,17 +14,18 @@ const LIST_ID = 'command-palette-list';
 /**
  * Ctrl+K / ⌘K: go to a rule, artifact or run by code or id, open the review
  * queue, start a new run, or export evidence for the page you are on. Plain
- * navigation. Focus is trapped in the dialog; Esc closes and returns focus.
+ * navigation. Focus is trapped in the dialog (the input is its only tab stop;
+ * options are reached with the arrows); Esc closes and returns focus.
  */
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const restoreRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const role = useRole();
+  const startRuns = usePermission('start_runs');
   const { toast } = useToast();
   const exportEvidence = useExportEvidence();
   // Lists load only while the palette is open (usually already cached from the pages).
@@ -34,17 +37,11 @@ export function CommandPalette() {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen((o) => {
-          if (!o) restoreRef.current = document.activeElement as HTMLElement | null;
-          return !o;
-        });
+        setOpen((o) => !o);
       }
     };
     // the top bar's search button opens the palette without a synthetic key event
-    const onOpen = () => {
-      restoreRef.current = document.activeElement as HTMLElement | null;
-      setOpen(true);
-    };
+    const onOpen = () => setOpen(true);
     document.addEventListener('keydown', onKey);
     window.addEventListener(OPEN_PALETTE_EVENT, onOpen);
     return () => {
@@ -53,14 +50,12 @@ export function CommandPalette() {
     };
   }, []);
 
+  useFocusTrap(dialogRef, open, inputRef);
+
   useEffect(() => {
-    if (open) {
-      setQuery('');
-      setActive(0);
-      window.setTimeout(() => inputRef.current?.focus(), 0);
-    } else {
-      restoreRef.current?.focus?.();
-    }
+    if (!open) return;
+    setQuery('');
+    setActive(0);
   }, [open]);
 
   const evidence = useMemo(
@@ -85,7 +80,7 @@ export function CommandPalette() {
         keywords: 'sandbox paste check artifact transcript',
         to: '/try',
       },
-      ...(canEdit(role)
+      ...(startRuns.allowed
         ? [
             {
               id: 'new-run',
@@ -161,7 +156,7 @@ export function CommandPalette() {
         to: `/runs/${r.id}`,
       }));
     return [...actions, ...ruleItems, ...assetItems, ...runItems];
-  }, [rules.data, assets.data, runs.data, role, evidence]);
+  }, [rules.data, assets.data, runs.data, startRuns.allowed, evidence]);
 
   const results = useMemo(() => filterPalette(items, query), [items, query]);
   const activeIndex = Math.min(active, Math.max(0, results.length - 1));
@@ -199,10 +194,6 @@ export function CommandPalette() {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       run(results[activeIndex]);
-    } else if (e.key === 'Tab') {
-      // focus trap: the input is the only tab stop; options are reached with the arrows
-      e.preventDefault();
-      inputRef.current?.focus();
     }
   };
 
@@ -215,6 +206,7 @@ export function CommandPalette() {
       role="presentation"
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"

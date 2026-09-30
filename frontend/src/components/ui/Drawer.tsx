@@ -1,6 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { useFocusTrap } from './useFocusTrap';
 
 export interface DrawerProps {
   open: boolean;
@@ -13,25 +14,21 @@ export interface DrawerProps {
 }
 
 /**
- * Right-side drawer. Esc closes, backdrop click closes, the panel takes
- * focus on open so keyboard users land inside it. No focus trap (by design).
+ * Right-side modal drawer. The panel takes focus on open, Tab stays inside
+ * it, and closing returns focus to whatever opened it. Esc closes, backdrop
+ * click closes.
  */
 export function Drawer({ open, onClose, title, subtitle, children, footer, width = 560 }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   // Callers usually pass an inline onClose; hold it in a ref so a parent
-  // re-render neither re-binds the Esc listener nor steals focus back into
-  // the panel from whatever the user is typing in.
+  // re-render neither re-binds the Esc listener nor re-runs the focus trap.
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  // Focus the panel once per open, not on every render.
-  useEffect(() => {
-    if (!open) return;
-    const t = window.setTimeout(() => panelRef.current?.focus(), 0);
-    return () => window.clearTimeout(t);
-  }, [open]);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -61,7 +58,7 @@ export function Drawer({ open, onClose, title, subtitle, children, footer, width
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={typeof title === 'string' ? title : 'Drawer'}
+        aria-labelledby={titleId}
         tabIndex={-1}
         data-drawer-panel=""
         className={cn(
@@ -71,7 +68,9 @@ export function Drawer({ open, onClose, title, subtitle, children, footer, width
       >
         <header className="flex items-start justify-between gap-3 border-b border-hairline px-5 py-4">
           <div className="min-w-0">
-            <h2 className="truncate text-[16px] font-semibold text-ink">{title}</h2>
+            <h2 id={titleId} className="truncate text-[16px] font-semibold text-ink">
+              {title}
+            </h2>
             {subtitle && <div className="mt-1 text-xs text-ink-2">{subtitle}</div>}
           </div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} aria-label="Close">

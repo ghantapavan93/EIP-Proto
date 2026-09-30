@@ -74,7 +74,7 @@ function pick<T>(rand: () => number, arr: readonly T[]): T {
   return arr[Math.floor(rand() * arr.length) % arr.length];
 }
 
-// Hand-placed "hero" cases so each contract has something to say.
+// Hand-placed cases so each timing contract has at least one disagreement between the two bases to show.
 const TIMER_PASS_ORDERING_FAIL = new Set([7, 19, 33]); // disclaimer at 45s, benefits at 30s
 const TIMER_FAIL_ORDERING_PASS = new Set([12, 17, 48]); // disclaimer at 78s, benefits at 103s
 const NO_DISCLAIMER = new Set([26]);
@@ -272,10 +272,6 @@ export function transcriptOut(sc: Scenario, withText: boolean): TranscriptOut {
 }
 
 export const SCENARIOS: Scenario[] = Array.from({ length: CORPUS_SIZE }, (_, i) => scenarioFor(i + 1));
-
-export function findScenario(code: string): Scenario | undefined {
-  return SCENARIOS.find((s) => s.code === code);
-}
 
 // ------------------------------------------------------------- ingested samples
 

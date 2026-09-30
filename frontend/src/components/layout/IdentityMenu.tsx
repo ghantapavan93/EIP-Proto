@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown, Minus, Users } from 'lucide-react';
 import type { MeOut, RoleInfo } from '../../api/types';
-import { ROLES, actionLabel, roleTitle } from '../../lib/roles';
+import { actionLabel, roleTitle } from '../../lib/roles';
 import { cn } from '../../lib/cn';
 import { Drawer } from '../ui/Drawer';
 import { Chip } from '../ui/Chip';
@@ -18,9 +18,7 @@ function PermissionList({ me }: { me: MeOut }) {
   const refused = me.permissions.filter((p) => !p.allowed);
   // Most refusals share one reason ("only engineer or admin may do this"): say it once as a
   // heading; a refusal with its own condition (two-person rule, verified first) keeps it inline.
-  const editorsOnly = refused.filter(
-    (p) => /only engineer or admin may do this\.?$/i.test(p.why) || /^engineers and admins can /i.test(p.why),
-  );
+  const editorsOnly = refused.filter((p) => /only engineer or admin may do this\.?$/i.test(p.why));
   const cannot = refused.filter((p) => !editorsOnly.includes(p));
   return (
     <div className="space-y-3">
@@ -72,11 +70,11 @@ export function RolesDrawer({
 }: {
   open: boolean;
   onClose: () => void;
-  roles?: RoleInfo[];
+  roles: RoleInfo[];
   current?: string | null;
   me?: MeOut;
 }) {
-  const list = roles?.length ? roles : ROLES;
+  const list = roles;
   // Each role lists only what it adds to the one before it (the roles are cumulative).
   const added = list.map((r, i) => {
     const prev = i > 0 ? new Set(list[i - 1].can) : null;
@@ -149,6 +147,19 @@ export function RolesDrawer({
  */
 export function IdentityMenu() {
   const { me } = useIdentity();
+  // Hold the chip's place until /me answers rather than guess a name or role.
+  if (!me)
+    return (
+      <span
+        aria-hidden
+        className="sk sk-shimmer inline-block h-7 w-28 shrink-0 rounded-[6px]"
+        data-testid="identity-pending"
+      />
+    );
+  return <IdentityChip me={me} />;
+}
+
+function IdentityChip({ me }: { me: MeOut }) {
   const [open, setOpen] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);

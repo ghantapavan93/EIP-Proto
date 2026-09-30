@@ -15,8 +15,10 @@ import {
   verdictLabel,
   worstTone,
 } from '../lib/sandbox';
-import { actionLabel, fallbackMe, permissionFor } from '../lib/roles';
-import { flipDate, readGuideHidden, writeGuideHidden } from '../lib/guide';
+import { actionLabel, permissionFor } from '../lib/roles';
+import { meFor } from '../mocks/permissions';
+import { readGuideHidden, writeGuideHidden } from '../lib/guide';
+import { aroundChange, changeDateToShow } from '../lib/ruleVersions';
 import { isSeededExample, whoCanApprove } from '../lib/testCases';
 import { isSubmitChord } from '../lib/palette';
 
@@ -115,8 +117,10 @@ describe('sandbox: refusals and copy', () => {
   });
 
   it('lists only the identifiers that were redacted', () => {
-    expect(redactionLine({ medicare_number: 1, ssn: 0, dob: 2 })).toBe('1 Medicare number · 2 dates of birth');
-    expect(redactionLine({ medicare_number: 0, ssn: 0, dob: 0 })).toBe('');
+    expect(redactionLine({ medicare_number: 1, ssn: 0, dob: 2, phone: 0, email: 0, address: 0 })).toBe(
+      '1 Medicare number · 2 dates of birth',
+    );
+    expect(redactionLine({ medicare_number: 0, ssn: 0, dob: 0, phone: 0, email: 0, address: 0 })).toBe('');
   });
 
   it('copies findings as Markdown with the hash, never the claim that anything was stored', () => {
@@ -125,7 +129,7 @@ describe('sandbox: refusals and copy', () => {
       label: 'Q4 script',
       text_sha256: 'a'.repeat(64),
       chars: 40,
-      redacted: { medicare_number: 0, ssn: 0, dob: 0 },
+      redacted: { medicare_number: 0, ssn: 0, dob: 0, phone: 0, email: 0, address: 0 },
       matches: [match({ span: 'Wait 48 hours after the SOA.' })],
       summary: {
         matches: 1,
@@ -135,6 +139,7 @@ describe('sandbox: refusals and copy', () => {
         over_restrictive: 1,
         under_restrictive: 0,
         reverify: 0,
+        needs_review: 0,
       },
       persisted: false,
       note: '',
@@ -151,7 +156,7 @@ describe('sandbox: refusals and copy', () => {
     const out: SandboxTranscriptOut = {
       model_id: 'ollama/qwen2.5:7b-instruct',
       latency_ms: 12000,
-      redacted: { medicare_number: 0, ssn: 0, dob: 0 },
+      redacted: { medicare_number: 0, ssn: 0, dob: 0, phone: 0, email: 0, address: 0 },
       output: {
         extraction: {
           disclaimer_span: 'We do not offer every plan.',
@@ -182,42 +187,40 @@ describe('sandbox: refusals and copy', () => {
 });
 
 describe('roles, guide and test-case helpers', () => {
-  it('derives an analyst identity with reasons for every refusal', () => {
-    const me = fallbackMe('reviewer', 'analyst');
-    expect(me.role_label).toBe('QA Compliance Analyst');
-    const startRun = me.permissions.find((p) => p.action === 'start_runs');
-    expect(startRun).toMatchObject({ allowed: false, why: 'Engineers and admins can start runs' });
-    expect(me.permissions.find((p) => p.action === 'decide_tasks')?.allowed).toBe(true);
-    expect(me.roles[0].can).toContain('use_sandbox');
+  it('labels actions from /me, else humanises the id', () => {
+    const me = meFor('reviewer', 'analyst');
     expect(actionLabel(me, 'start_runs')).toBe('Start a harness run');
     expect(actionLabel(null, 'some_new_action')).toBe('Some new action');
-    expect(me.roles.map((r) => r.role)).toEqual(['analyst', 'engineer', 'admin']);
   });
 
-  it("prefers the server's answer and keeps the house refusal sentence", () => {
-    const me = {
-      ...fallbackMe('eng', 'engineer'),
-      permissions: [
-        {
-          action: 'start_runs',
-          label: 'Start a harness run',
-          allowed: false,
-          why: 'Not allowed: only engineer or admin may do this.',
-        },
-      ],
-    };
-    expect(permissionFor(me, 'engineer', 'start_runs')).toMatchObject({
+  it('decides from /me only, with the short refusal sentence on a refused control', () => {
+    const analyst = meFor('reviewer', 'analyst');
+    expect(permissionFor(analyst, 'start_runs')).toMatchObject({
       allowed: false,
       why: 'Engineers and admins can start runs',
     });
-    expect(permissionFor(null, 'engineer', 'start_runs').allowed).toBe(true);
-    expect(permissionFor(null, null, 'start_runs').allowed).toBe(false);
+    expect(permissionFor(analyst, 'decide_tasks').allowed).toBe(true);
+    expect(permissionFor(meFor('eng', 'engineer'), 'start_runs').allowed).toBe(true);
+    // before /me answers, or for an action /me does not list, nothing is allowed
+    expect(permissionFor(null, 'start_runs').allowed).toBe(false);
+    expect(permissionFor({ permissions: [] }, 'start_runs')).toMatchObject({
+      allowed: false,
+      why: 'Engineers and admins can start runs',
+    });
+    // a refusal without a short sentence keeps the server's reason
+    const noRefusalCopy = {
+      permissions: [{ action: 'use_sandbox', label: 'Check pasted text', allowed: false, why: 'Sandbox disabled.' }],
+    };
+    expect(permissionFor(noRefusalCopy, 'use_sandbox').why).toBe('Sandbox disabled.');
   });
 
-  it('picks the upcoming flip date, else the latest one', () => {
-    expect(flipDate(['2023-09-30', '2026-10-01', '2026-10-01'], '2026-09-24')).toBe('2026-10-01');
-    expect(flipDate(['2023-09-30', '2026-10-01'], '2026-11-02')).toBe('2026-10-01');
-    expect(flipDate([], '2026-09-24')).toBeNull();
+  it('picks the upcoming change date, else the latest one, and the presets around it', () => {
+    expect(changeDateToShow(['2023-09-30', '2026-10-01', '2026-10-01'], '2026-09-24')).toBe('2026-10-01');
+    expect(changeDateToShow(['2023-09-30', '2026-10-01'], '2026-11-02')).toBe('2026-10-01');
+    expect(changeDateToShow([], '2026-09-24')).toBeNull();
+    expect(aroundChange('2026-10-01')).toEqual(['2026-09-30', '2026-10-01']);
+    expect(aroundChange('2027-01-01')).toEqual(['2026-12-31', '2027-01-01']);
+    expect(aroundChange(null)).toEqual([]);
   });
 
   it('remembers the hidden guide, and survives storage that throws', () => {

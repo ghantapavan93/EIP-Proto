@@ -5,7 +5,7 @@ import { queryClient } from '../api/queryClient';
 import { mockRequest, RUN_IDS } from '../mocks/server';
 import { ApiError } from '../api/errors';
 import type { AccessReviewOut, AuditCheckpointOut, AuditVerifyOut, CompareOut, RunOut } from '../api/types';
-import { attributeRuns } from '../lib/attribution';
+import { attributeRuns } from '../mocks/attribution';
 
 /**
  * The two answers a technical reviewer asked for:
@@ -153,6 +153,8 @@ describe('governance (admin)', () => {
     expect(await screen.findByText(/Admins only\./, {}, { timeout: 8000 })).toBeInTheDocument();
     const matrix = screen.getByRole('table', { name: 'Actions each role may take' });
     expect(within(matrix).getByRole('rowheader', { name: /Review access/ })).toBeInTheDocument();
+    // read from /me: which roles list each action; the conditions come only with the admin's matrix
+    expect(within(matrix).queryByText('every review is itself audit-logged')).toBeNull();
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /Take checkpoint/ })).toHaveAttribute('aria-disabled', 'true'),
     );
@@ -161,6 +163,9 @@ describe('governance (admin)', () => {
   it('lets an admin review access and take a checkpoint', async () => {
     open('/governance', 'admin');
     expect(await screen.findByRole('table', { name: 'Accounts and roles' }, { timeout: 8000 })).toBeInTheDocument();
+    // the separation-of-duties table is the server's matrix, conditions included
+    const matrix = screen.getByRole('table', { name: 'Actions each role may take' });
+    expect(within(matrix).getByText('every review is itself audit-logged')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Take checkpoint/ }));
     expect(
       await screen.findByText(/Receipt — keep this outside the system/, {}, { timeout: 8000 }),

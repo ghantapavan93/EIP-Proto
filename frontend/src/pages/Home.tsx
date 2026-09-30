@@ -178,7 +178,7 @@ function TriggerCard({
   const detailsId = useId();
   return (
     <article
-      className="card card-hero flex min-w-0 flex-col transition-colors hover:border-input lg:row-span-4 lg:grid lg:grid-rows-subgrid lg:gap-0"
+      className="card card-raised flex min-w-0 flex-col transition-colors hover:border-input lg:row-span-4 lg:grid lg:grid-rows-subgrid lg:gap-0"
       aria-label={eyebrow}
     >
       <header className="px-4 pb-3 pt-3.5">
@@ -277,7 +277,7 @@ function TriggerCard({
 }
 
 /** Product line, live system state from /status, all real counts. */
-function Hero({
+function SystemSummary({
   status,
   guideHidden,
   onShowGuide,
@@ -650,7 +650,7 @@ export function HomePage() {
 
   return (
     <div>
-      <Hero status={status.data} guideHidden={guideHidden} onShowGuide={() => hideGuide(false)} />
+      <SystemSummary status={status.data} guideHidden={guideHidden} onShowGuide={() => hideGuide(false)} />
 
       {!guideHidden && (
         <Section className="pb-0 pt-0">

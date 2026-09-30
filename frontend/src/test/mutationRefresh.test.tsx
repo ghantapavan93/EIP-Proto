@@ -9,7 +9,9 @@ import {
   useApproveTestCase,
   useCheckSources,
   useIngestTranscripts,
+  useCreateRun,
   useProposeVersion,
+  useReloadRules,
   useRunScan,
 } from '../api/hooks';
 
@@ -101,12 +103,46 @@ describe('mutations refresh the status rail and the screens that depend on them'
 
   const has = (key: readonly unknown[]) => invalidated.some((k) => JSON.stringify(k) === JSON.stringify(key));
 
-  it('Run scan → status rail', async () => {
+  it('Run scan → artifacts, review, status rail', async () => {
     const { result } = renderHook(() => useRunScan(), { wrapper });
     act(() => result.current.mutate({ idempotency_key: 'k', live: false }));
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(has(keys.scans())).toBe(true);
+    expect(has(keys.assets())).toBe(true);
+    expect(has(keys.review())).toBe(true);
     expect(has(keys.status())).toBe(true);
+  });
+
+  it('Adopt rule corpus → rules, audit, readiness, status rail', async () => {
+    const { result } = renderHook(() => useReloadRules(), { wrapper });
+    act(() => result.current.mutate());
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(has(keys.rules())).toBe(true);
+    expect(has(keys.audit())).toBe(true);
+    expect(has(keys.readiness())).toBe(true);
+    expect(has(keys.status())).toBe(true);
+  });
+
+  it('Start run → runs, model board, contract metrics, review, status rail', async () => {
+    const { result } = renderHook(() => useCreateRun(), { wrapper });
+    act(() => result.current.mutate({ prompt_version: 2, model_id: 'sim-large', rule_date: '2026-10-01' }));
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(has(keys.runs())).toBe(true);
+    expect(has(keys.models())).toBe(true);
+    expect(has(keys.contracts())).toBe(true);
+    expect(has(keys.review())).toBe(true);
+    expect(has(keys.status())).toBe(true);
+  });
+
+  it('family keys cover every query under them', () => {
+    const covers = (family: readonly unknown[], key: readonly unknown[]) =>
+      JSON.stringify(key.slice(0, family.length)) === JSON.stringify(family);
+    expect(covers(keys.rules(), keys.impact('soa-48h-wait', '2026-10-01'))).toBe(true);
+    expect(covers(keys.rules(), keys.impactWhatIf('soa-48h-wait', '2026-10-01', 3))).toBe(true);
+    expect(covers(keys.models(), keys.modelBoard({}))).toBe(true);
+    expect(covers(keys.review(), keys.reviewTask('t-1'))).toBe(true);
+    expect(covers(keys.audit(), keys.auditPage({ limit: 50 }))).toBe(true);
+    expect(covers(keys.readiness(), keys.readinessAt('2026-10-01'))).toBe(true);
+    expect(covers(keys.transcripts(), keys.transcriptPage(100, 0))).toBe(true);
   });
 
   it('Approve test case → test cases, review, status rail', async () => {
@@ -114,7 +150,7 @@ describe('mutations refresh the status rail and the screens that depend on them'
     act(() => result.current.mutate('tc-1'));
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(has(keys.testCases())).toBe(true);
-    expect(has(['backstop', 'review'])).toBe(true);
+    expect(has(keys.review())).toBe(true);
     expect(has(keys.status())).toBe(true);
   });
 
@@ -123,7 +159,7 @@ describe('mutations refresh the status rail and the screens that depend on them'
     act(() => result.current.mutate({} as never));
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(has(keys.rules())).toBe(true);
-    expect(has(['backstop', 'review'])).toBe(true);
+    expect(has(keys.review())).toBe(true);
     expect(has(keys.status())).toBe(true);
   });
 
@@ -143,7 +179,7 @@ describe('mutations refresh the status rail and the screens that depend on them'
       }),
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(has(['backstop', 'transcripts'])).toBe(true);
+    expect(has(keys.transcripts())).toBe(true);
     expect(has(keys.status())).toBe(true);
   });
 });

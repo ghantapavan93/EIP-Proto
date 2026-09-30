@@ -227,12 +227,15 @@ export function compareRates(
     discordant = null;
     worse = (bN ? bFail / bN : 0) > (aN ? aFail / aN : 0);
   }
+  // `significant` is the test alone; a direction is claimed only when a paired test also saw enough changed calls.
   const significant = p < ALPHA && (discordant === null || discordant > 0);
   let direction: ComparisonDirection = 'none';
   let verdict: string;
-  if (significant) {
+  if (significant && (discordant === null || discordant >= MIN_DISCORDANT)) {
     direction = worse ? 'worse' : 'better';
     verdict = `B is significantly ${direction} on ${what} (p=${fmtP(p)})`;
+  } else if (significant) {
+    verdict = `No conclusion: B looks ${worse ? 'worse' : 'better'} (p=${fmtP(p)}), but only ${discordant} call(s) changed outcome`;
   } else {
     const tail = discordant !== null ? `n=${discordant} discordant pairs` : `n=${aN} vs ${bN} cells`;
     verdict = `No significant difference (p=${fmtP(p)}, ${tail})`;

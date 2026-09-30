@@ -6,17 +6,6 @@
 
 export type Tone = 'neutral' | 'teal' | 'green' | 'amber' | 'red' | 'slate';
 
-export const CHANGE_CLASSIFICATIONS = [
-  'INITIAL',
-  'ADDS_REQUIREMENT',
-  'REMOVES_REQUIREMENT',
-  'TIGHTENS',
-  'LOOSENS',
-  'MODIFIES',
-  'CLARIFIES',
-  'RESTORES_PRIOR',
-] as const;
-
 /**
  * What a proposal may be classified as (the API's RuleVersionCreate): not
  * INITIAL, and not RESTORES_PRIOR, which only a court decision produces.
@@ -29,8 +18,6 @@ export const PROPOSABLE_CLASSIFICATIONS = [
   'MODIFIES',
   'CLARIFIES',
 ] as const;
-
-export const RULE_VERSION_STATUSES = ['in_force', 'eliminated', 'amended', 'proposed', 'vacated', 'stayed'] as const;
 
 export const REVIEW_KINDS = ['STALE_ASSET', 'PROPOSED_EDGE', 'FLAGGED_RESULT', 'RULE_SOURCE_CHANGED'] as const;
 
@@ -253,6 +240,11 @@ export function changeTone(classification: string | null | undefined): Tone {
   }
 }
 
+/** A snake_case vocabulary value as words: "in_review" → "in review", "PENDING_APPROVAL" → "PENDING APPROVAL". */
+export function stateLabel(value: string): string {
+  return value.replaceAll('_', ' ');
+}
+
 export function stateTone(state: string | null | undefined): Tone {
   switch (state) {
     case 'open':
@@ -264,24 +256,6 @@ export function stateTone(state: string | null | undefined): Tone {
     case 'upheld':
       return 'green';
     case 'overridden':
-      return 'slate';
-    default:
-      return 'neutral';
-  }
-}
-
-export function ruleStatusTone(status: string | null | undefined): Tone {
-  switch (status) {
-    case 'in_force':
-      return 'green';
-    case 'eliminated':
-      return 'red';
-    case 'amended':
-    case 'stayed':
-      return 'amber';
-    case 'proposed':
-      return 'teal';
-    case 'vacated':
       return 'slate';
     default:
       return 'neutral';
@@ -356,7 +330,8 @@ export function kindTone(kind: string | null | undefined): Tone {
 /** Role slugs from the API → the labels the EIP floor uses. Unknown slugs are humanized. */
 const ROLE_LABELS: Record<string, string> = {
   compliance: 'QA Compliance Analyst',
-  'qa-compliance': 'QA Compliance Analyst', // legacy slug on older rows
+  // rows written before the team's slug was renamed still carry it (backend api/readiness.py aliases it too)
+  'qa-compliance': 'QA Compliance Analyst',
   'sales-innovation': 'Sales Innovation',
   'sales-supervisor': 'Sales Supervisor',
   training: 'Training Supervisor',

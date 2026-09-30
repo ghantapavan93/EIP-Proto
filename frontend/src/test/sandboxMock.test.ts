@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { mockRequest } from '../mocks/server';
 import { SAMPLES, sandboxModel } from '../mocks/sandbox';
+import { routeOf, transcriptSpans } from '../lib/sandbox';
 import type { ApiError } from '../api/errors';
 import type {
   AuditOut,
@@ -19,7 +20,11 @@ describe('mock /me', () => {
   it('describes the reviewer as an analyst, with what they can and cannot do', async () => {
     const me = (await mockRequest('GET', '/me', undefined, reviewer)) as MeOut;
     expect(me).toMatchObject({ name: 'reviewer', role: 'analyst', role_label: 'QA Compliance Analyst' });
-    expect(me.permissions.find((p) => p.action === 'start_runs')).toMatchObject({ allowed: false });
+    // the same wording as backend core/permissions.py
+    expect(me.permissions.find((p) => p.action === 'start_runs')).toMatchObject({
+      allowed: false,
+      why: 'Not allowed: only engineer or admin may do this.',
+    });
     expect(me.permissions.find((p) => p.action === 'use_sandbox')).toMatchObject({ allowed: true });
     expect(me.roles).toHaveLength(3);
     const eng = (await mockRequest('GET', '/me', undefined, engineer)) as MeOut;
@@ -84,7 +89,7 @@ describe('mock sandbox', () => {
     expect(out.matches.every((m) => m.verdict === 'ahead')).toBe(true);
   });
 
-  it('redacts identifiers before matching and returns an honest empty result', async () => {
+  it('redacts identifiers before matching and returns an empty result that says so', async () => {
     const out = (await mockRequest(
       'POST',
       '/sandbox/artifact',
@@ -131,13 +136,13 @@ describe('mock sandbox', () => {
       { text, product_line: 'MA' },
       reviewer,
     )) as SandboxTranscriptOut;
-    expect(out.route).toBe('BLOCK');
+    expect(routeOf(out)).toBe('BLOCK');
     expect(out.contracts.filter((c) => c.outcome === 'NEEDS_LABEL').map((c) => c.code)).toEqual([
       'C-TPMO-01',
       'C-SOA-01',
       'C-SUP-01',
     ]);
-    expect(out.spans?.every((s) => s.verified)).toBe(true);
+    expect(transcriptSpans(out, text).every((s) => s.verified)).toBe(true);
   });
 });
 

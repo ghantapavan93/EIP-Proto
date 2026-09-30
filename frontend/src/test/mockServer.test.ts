@@ -36,7 +36,7 @@ describe('mock server fixtures (shapes mirror the live API)', () => {
     expect(health.rules).toBeGreaterThan(0);
   });
 
-  it('tells the Oct 1 story: same prompt is GREEN on Sept 30 and RED on Oct 1; prompt v2 is GREEN; model swap is RED', async () => {
+  it('on the Oct 1 change: same prompt is GREEN on Sept 30 and RED on Oct 1; prompt v2 is GREEN; model swap is RED', async () => {
     const runs = (await mockRequest('GET', '/runs', undefined, analyst)) as RunOut[];
     const byId = new Map(runs.map((r) => [r.id, r]));
     expect(byId.get(RUN_IDS.baseline)?.gate).toBe('GREEN');
@@ -485,5 +485,46 @@ describe('mock server fixtures (shapes mirror the live API)', () => {
     };
     expect(bt.format).toBe('braintrust');
     expect(bt.records.length).toBe(480);
+  });
+});
+
+describe('mock rule impact: reading is free of side effects, evaluate opens tasks', () => {
+  const tasks = async () =>
+    ((await mockRequest('GET', '/review?kind=STALE_ASSET', undefined, analyst)) as ReviewTaskOut[]).length;
+
+  it('GET /impact opens no tasks for any role', async () => {
+    const before = await tasks();
+    for (const who of [analyst, engineer])
+      await mockRequest('GET', '/rules/soa-48h-wait/impact?as_of=2026-10-01', undefined, who);
+    expect(await tasks()).toBe(before);
+  });
+
+  it('POST /impact/evaluate is for engineers and admins, idempotent, and refuses a past rule state', async () => {
+    const refused = await mockRequest(
+      'POST',
+      '/rules/soa-48h-wait/impact/evaluate?as_of=2026-10-01',
+      undefined,
+      analyst,
+    ).catch((e: unknown) => e);
+    expect((refused as ApiError).status).toBe(403);
+
+    const first = (await mockRequest(
+      'POST',
+      '/rules/soa-48h-wait/impact/evaluate?as_of=2026-10-01',
+      undefined,
+      engineer,
+    )) as ImpactWhatIfOut;
+    expect(first.stale.every((item) => item.task_id !== null)).toBe(true);
+    const after = await tasks();
+    await mockRequest('POST', '/rules/soa-48h-wait/impact/evaluate?as_of=2026-10-01', undefined, engineer);
+    expect(await tasks()).toBe(after);
+
+    const past = await mockRequest(
+      'POST',
+      '/rules/soa-48h-wait/impact/evaluate?as_of=2020-01-01',
+      undefined,
+      engineer,
+    ).catch((e: unknown) => e);
+    expect((past as ApiError).status).toBe(409);
   });
 });

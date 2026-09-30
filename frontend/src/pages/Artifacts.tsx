@@ -2,19 +2,12 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ScanSearch, Upload } from 'lucide-react';
-import {
-  canEdit,
-  useAssets,
-  useHealthDeep,
-  useIngestFormats,
-  useIngestTranscripts,
-  useRole,
-  useTranscripts,
-} from '../api/hooks';
+import { useAssets, useHealthDeep, useIngestFormats, useIngestTranscripts, useTranscripts } from '../api/hooks';
 import type { AssetOut, IngestResultOut, ScanOut, TranscriptOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section, Field } from '../components/layout/Page';
 import { GatedButton } from '../components/access/GatedButton';
+import { usePermission } from '../components/access/usePermission';
 import { DataTable } from '../components/ui/DataTable';
 import { Chip } from '../components/ui/Chip';
 import { SourceBadge, TranscriptBadge } from '../components/artifacts/SourceBadge';
@@ -148,7 +141,7 @@ function IngestDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 export function ArtifactsPage() {
   useTopBar([{ label: 'Artifacts' }]);
   const navigate = useNavigate();
-  const role = useRole();
+  const scan = usePermission('start_scans');
   const assets = useAssets();
   // The API's default corpus leaves the held-out calls out; health reports how many there are.
   const transcripts = useTranscripts(500, 0);
@@ -313,23 +306,18 @@ export function ArtifactsPage() {
         title="Artifacts"
         description={`Everything that encodes a rule — ${real} real public pages (crawled, hashed, attributed), ${repo} repo prompts and ${synthetic} labeled synthetic internals.`}
         actions={
-          canEdit(role) ? (
-            <>
+          <>
+            {scan.allowed ? (
               <RunScanControl onScanned={setLastScan} withKeyInput />
-              <button type="button" className="btn btn-outline" onClick={() => setIngestOpen(true)}>
-                <Upload size={13} aria-hidden /> Ingest transcripts
-              </button>
-            </>
-          ) : (
-            <>
+            ) : (
               <GatedButton action="start_scans" className="btn btn-outline">
                 <ScanSearch size={13} aria-hidden /> Run scan
               </GatedButton>
-              <GatedButton action="ingest_transcripts" className="btn btn-outline">
-                <Upload size={13} aria-hidden /> Ingest transcripts
-              </GatedButton>
-            </>
-          )
+            )}
+            <GatedButton action="ingest_transcripts" className="btn btn-outline" onClick={() => setIngestOpen(true)}>
+              <Upload size={13} aria-hidden /> Ingest transcripts
+            </GatedButton>
+          </>
         }
       />
       {lastScan && (

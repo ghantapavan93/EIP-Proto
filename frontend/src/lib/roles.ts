@@ -1,15 +1,13 @@
 /**
- * Who can do what. GET /me is the source of truth (backend
- * core/permissions.py, which a backend test checks against every
- * require_role); this table mirrors it for a server without /me and for the
- * moment before it answers. Action ids are the server's: analysts review and
- * decide, engineers also operate the harness, admins also govern it (access,
- * the adopted rule corpus, audit checkpoints), and no one approves their own
- * override.
+ * Who can do what, as the UI shows it. GET /me is the only source of the
+ * decision (backend core/permissions.py, which a backend test checks against
+ * every require_role); this module only names the action ids the UI gates on
+ * and words a refused control.
  */
 
-import type { MeOut, MePermission, RoleInfo } from '../api/types';
+import type { MeOut, MePermission } from '../api/types';
 
+/** Action ids from GET /me permissions[].action that UI controls are gated on. */
 export type RoleAction =
   | 'view'
   | 'use_sandbox'
@@ -28,102 +26,26 @@ export type RoleAction =
   | 'review_access'
   | 'checkpoint_audit';
 
-interface ActionSpec {
-  label: string;
-  roles: string[];
-  /** the sentence a refused control shows */
-  refusal: string;
-}
-
-const EDITORS = ['engineer', 'admin'];
-const ADMINS = ['admin'];
-const EVERYONE = ['analyst', 'engineer', 'admin'];
-
-/** In the server's order (core/permissions.py ACTIONS). */
-export const ACTIONS: Record<RoleAction, ActionSpec> = {
-  view: { label: 'View rules, artifacts, runs, the review queue and the audit log', roles: EVERYONE, refusal: '' },
-  pick_up_tasks: { label: 'Pick up a review task (open → in review)', roles: EVERYONE, refusal: '' },
-  decide_tasks: { label: 'Decide review tasks (verify, dismiss, uphold, override)', roles: EVERYONE, refusal: '' },
-  republish: {
-    label: 'Mark a verified stale artifact as republished',
-    roles: EDITORS,
-    refusal: 'Engineers and admins mark artifacts republished',
-  },
-  approve_test_cases: {
-    label: 'Approve a test case (a different person from its creator)',
-    roles: EDITORS,
-    refusal: 'Engineers and admins approve test cases — never their own',
-  },
-  start_runs: { label: 'Start a harness run', roles: EDITORS, refusal: 'Engineers and admins can start runs' },
-  start_scans: { label: 'Scan the artifact inventory', roles: EDITORS, refusal: 'Engineers and admins can run scans' },
-  check_rule_sources: {
-    label: "Check the regulators' source pages for changed text",
-    roles: EDITORS,
-    refusal: 'Engineers and admins can re-check sources',
-  },
-  propose_rule_versions: {
-    label: 'Propose a new rule version (what-if)',
-    roles: EDITORS,
-    refusal: 'Engineers and admins can propose rule versions',
-  },
-  reload_rules: {
-    label: 'Adopt the rule corpus from git into the running system',
-    roles: ADMINS,
-    refusal: 'Only an admin adopts the rule corpus; engineers propose versions',
-  },
-  review_access: {
-    label: 'Review access: accounts, roles, default passwords, denied attempts',
-    roles: ADMINS,
-    refusal: 'Only an admin reviews access',
-  },
-  checkpoint_audit: {
-    label: 'Take an audit checkpoint to keep outside the database',
-    roles: ADMINS,
-    refusal: 'Only an admin takes audit checkpoints; anyone can verify one',
-  },
-  ingest_transcripts: {
-    label: 'Ingest transcripts from an export file',
-    roles: EDITORS,
-    refusal: 'Engineers and admins can ingest transcripts',
-  },
-  open_stale_tasks: {
-    label: "Open stale-artifact review tasks by reading a rule's impact",
-    roles: EDITORS,
-    refusal: 'Engineers and admins open stale-artifact tasks',
-  },
-  export_evidence: { label: 'Export evidence bundles and run results', roles: EVERYONE, refusal: '' },
-  use_sandbox: { label: 'Check pasted text in the sandbox', roles: EVERYONE, refusal: '' },
+/**
+ * The sentence a refused control shows on hover and focus. The server's `why`
+ * ("Not allowed: only engineer or admin may do this.") is written for the
+ * identity popover; next to a button a shorter sentence reads better.
+ */
+const REFUSALS: Partial<Record<RoleAction, string>> = {
+  republish: 'Engineers and admins mark artifacts republished',
+  approve_test_cases: 'Engineers and admins approve test cases — never their own',
+  start_runs: 'Engineers and admins can start runs',
+  start_scans: 'Engineers and admins can run scans',
+  check_rule_sources: 'Engineers and admins can re-check sources',
+  propose_rule_versions: 'Engineers and admins can propose rule versions',
+  reload_rules: 'Only an admin adopts the rule corpus; engineers propose versions',
+  review_access: 'Only an admin reviews access',
+  checkpoint_audit: 'Only an admin takes audit checkpoints; anyone can verify one',
+  ingest_transcripts: 'Engineers and admins can ingest transcripts',
+  open_stale_tasks: 'Engineers and admins open stale-artifact tasks',
 };
-
-const ORDER = Object.keys(ACTIONS) as RoleAction[];
 
 export const ROLE_LABELS: Record<string, string> = { analyst: 'Analyst', engineer: 'Engineer', admin: 'Admin' };
-
-const ROLE_INFO: Record<string, { label: string; description: string }> = {
-  analyst: {
-    label: 'QA Compliance Analyst',
-    description:
-      'Reads everything and decides review tasks (verify, dismiss, uphold, override). Does not start runs or scans, change rules, republish artifacts or approve test cases.',
-  },
-  engineer: {
-    label: 'AI Enablement Engineer',
-    description:
-      'Everything an analyst can do, plus starting runs and scans, proposing rule versions, ingesting transcripts, republishing artifacts and approving test cases someone else created.',
-  },
-  admin: {
-    label: 'Administrator',
-    description:
-      'Governs the platform: everything an engineer can do, plus the access review (who can do what, default passwords, denied attempts), adopting the rule corpus into the running system, and taking audit checkpoints kept outside the database. Accounts come from BACKSTOP_USERS, a stand-in for SSO.',
-  },
-};
-
-/** `can` holds action ids, as the server sends them; show them with actionLabel(). */
-export const ROLES: RoleInfo[] = ['analyst', 'engineer', 'admin'].map((role) => ({
-  role,
-  label: ROLE_INFO[role].label,
-  description: ROLE_INFO[role].description,
-  can: ORDER.filter((a) => ACTIONS[a].roles.includes(role)),
-}));
 
 /** Short role name for chips ("Analyst"), whatever the long label is. */
 export function roleTitle(role: string | null | undefined): string {
@@ -131,53 +53,23 @@ export function roleTitle(role: string | null | undefined): string {
   return ROLE_LABELS[role] ?? role.charAt(0).toUpperCase() + role.slice(1);
 }
 
-/** A readable label for an action id: the server's label when /me sent one, else the table's, else the id humanised. */
+/** A readable label for an action id: the server's label, else the id humanised. */
 export function actionLabel(me: Pick<MeOut, 'permissions'> | null | undefined, id: string): string {
   const fromServer = me?.permissions.find((p) => p.action === id)?.label;
   if (fromServer) return fromServer;
-  const spec = (ACTIONS as Record<string, ActionSpec | undefined>)[id];
-  if (spec) return spec.label;
   const words = id.replace(/[_.-]+/g, ' ');
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
-/** The identity a server without /me implies: permissions from the static table. */
-export function fallbackMe(name: string | null, role: string | null): MeOut {
-  const r = role ?? 'analyst';
-  return {
-    name: name ?? '—',
-    role: r,
-    role_label: ROLE_INFO[r]?.label ?? roleTitle(r),
-    role_description: ROLE_INFO[r]?.description ?? '',
-    permissions: ORDER.map((action) => {
-      const spec = ACTIONS[action];
-      const allowed = spec.roles.includes(r);
-      return {
-        action,
-        label: spec.label,
-        allowed,
-        why: allowed ? `Allowed for ${roleTitle(r).toLowerCase()}.` : spec.refusal,
-      };
-    }),
-    roles: ROLES,
-  };
-}
-
 /**
- * The permission for one action: the server's answer when /me names it, else
- * the static table. `why` on a refused action is the house-style sentence
- * ("Engineers and admins can start runs"); the identity popover shows the
- * server's own wording.
+ * The permission for one action from GET /me. An action /me does not list is
+ * refused: a control is never enabled on a guess. A refused action carries the
+ * short refusal sentence when there is one, else the server's own reason.
  */
-export function permissionFor(
-  me: MeOut | null | undefined,
-  role: string | null | undefined,
-  action: RoleAction,
-): MePermission {
-  const spec = ACTIONS[action];
+export function permissionFor(me: Pick<MeOut, 'permissions'> | null | undefined, action: RoleAction): MePermission {
   const found = me?.permissions.find((p) => p.action === action);
-  if (found) return { ...found, why: found.allowed ? found.why : spec.refusal || found.why };
-  const r = me?.role ?? role ?? null;
-  const allowed = r !== null && spec.roles.includes(r);
-  return { action, label: spec.label, allowed, why: allowed ? '' : spec.refusal };
+  const refusal = REFUSALS[action];
+  if (!found)
+    return { action, label: actionLabel(me, action), allowed: false, why: refusal ?? 'Not available to your role.' };
+  return found.allowed ? found : { ...found, why: refusal ?? found.why };
 }

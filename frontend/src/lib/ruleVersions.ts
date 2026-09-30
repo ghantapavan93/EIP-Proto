@@ -1,5 +1,5 @@
 import type { RuleDeferral, RuleOut, RuleSourceRef, RuleVersionOut } from '../api/types';
-import { fmtDate } from './format';
+import { fmtDate, shiftIsoDate } from './format';
 import type { Tone } from './vocab';
 
 /**
@@ -152,17 +152,50 @@ export function authorityLabel(authority: string): string {
 
 /**
  * The earliest enacted version taking effect after `today` and within `days` (YYYY-MM-DD),
- * or null. A rule page with no date opens there: today's state of a rule about to change
- * shows nothing stale and hides the point.
+ * or null. A rule page with no date opens there: evaluated at today, a rule about to
+ * change shows no stale artifacts, which is not the question the page is asked.
  */
 export function nextChangeWithin(versions: RuleVersionOut[] | undefined, today: string, days: number): string | null {
-  const limit = new Date(`${today}T00:00:00Z`);
-  limit.setUTCDate(limit.getUTCDate() + days);
-  const horizon = limit.toISOString().slice(0, 10);
+  const horizon = shiftIsoDate(today, days);
   const dates = (versions ?? [])
     .filter(governs)
     .map((v) => v.effective_from)
     .filter((d) => d > today && d <= horizon)
     .sort();
   return dates[0] ?? null;
+}
+
+/**
+ * The change date a screen evaluates at when the user has not picked one:
+ * the nearest upcoming effective date among `effectiveDates`, else the most
+ * recent one. Null when there are no dates.
+ */
+export function changeDateToShow(effectiveDates: string[], today: string): string | null {
+  if (!effectiveDates.length) return null;
+  const upcoming = effectiveDates.filter((d) => d > today).sort();
+  if (upcoming.length) return upcoming[0];
+  return [...effectiveDates].sort().reverse()[0];
+}
+
+/** changeDateToShow over each rule's newest governing version: the next rule change across the registry. */
+export function nextRuleChange(rules: Array<Pick<RuleOut, 'versions'>> | undefined, today: string): string | null {
+  const dates = (rules ?? []).map((r) => latestGoverning(r)?.effective_from).filter((d): d is string => Boolean(d));
+  return changeDateToShow(dates, today);
+}
+
+/**
+ * Date presets around a change: the day before (the old version governs) and
+ * the day itself (the new one does). Empty without a change date.
+ */
+export function aroundChange(change: string | null): string[] {
+  return change ? [shiftIsoDate(change, -1), change] : [];
+}
+
+/**
+ * January 1 of the year after `today`: where a new proposal's "would apply
+ * from" starts. Medicare Advantage and Part D requirements take effect by
+ * contract year, and a contract year starts on January 1.
+ */
+export function nextContractYearStart(today: string): string {
+  return `${Number(today.slice(0, 4)) + 1}-01-01`;
 }

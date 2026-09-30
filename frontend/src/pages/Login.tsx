@@ -12,7 +12,8 @@ import { ErrorState } from '../components/ui/ErrorState';
 import { Chip } from '../components/ui/Chip';
 import { safeNext } from '../lib/redirect';
 
-const PITCH = 'When CMS changes a rule on October 1, which of your scripts, prompts and pages are now wrong?';
+const PRODUCT_QUESTION =
+  'When CMS changes a rule on October 1, which of your scripts, prompts and pages are now wrong?';
 
 const ROLES = [
   { role: 'analyst', can: 'review and decide tasks' },
@@ -123,7 +124,9 @@ export function LoginPage() {
         <div>
           <div className="text-[15px] font-bold uppercase tracking-[0.14em]">Backstop</div>
           <div className="mt-1 text-[12px] text-on-navy-faint">Prototype for EIP</div>
-          <p className="mt-12 text-[22px] font-semibold leading-snug tracking-[-0.01em] text-on-navy">{PITCH}</p>
+          <p className="mt-12 text-[22px] font-semibold leading-snug tracking-[-0.01em] text-on-navy">
+            {PRODUCT_QUESTION}
+          </p>
           <p className="mt-4 text-[13px] leading-relaxed text-on-navy-muted">
             A rule changes, a prompt changes, or a vendor swaps the model. Backstop answers what still holds, what
             broke, where the evidence is, and who owns the decision.
@@ -143,9 +146,9 @@ export function LoginPage() {
           <div className="mb-4 lg:hidden">
             <div className="text-[15px] font-bold uppercase tracking-[0.14em] text-navy">Backstop</div>
             <div className="text-[12px] text-ink-2">Prototype for EIP</div>
-            <p className="mt-2 text-[13px] font-semibold leading-snug text-ink">{PITCH}</p>
+            <p className="mt-2 text-[13px] font-semibold leading-snug text-ink">{PRODUCT_QUESTION}</p>
           </div>
-          <div className="card card-hero p-6">
+          <div className="card card-raised p-6">
             <h1 className="text-[20px] tracking-[-0.01em]">Sign in to Backstop</h1>
             <p className="mt-1 text-xs text-ink-2">
               {showDemo ? 'Demo accounts' : 'Accounts are issued per person'} · HTTP Basic, a stand-in for SSO.

@@ -244,11 +244,12 @@ export interface ImpactOut {
  * GET /rules/{code}/impact?include_proposed=true&assume_version=N — the same
  * blast radius as if a proposed version were enacted. Nothing is written: no
  * tasks, no audit rows. hypothetical=false means no proposal applied (see note).
+ * Mirrors ImpactWhatIfOut in backend/backstop/api/rules.py.
  */
 export interface ImpactWhatIfOut extends ImpactOut {
-  hypothetical?: boolean;
-  assumed_version?: number | null;
-  note?: string;
+  hypothetical: boolean;
+  assumed_version: number | null;
+  note: string;
 }
 
 export interface RuleVersionCreate {
@@ -264,9 +265,11 @@ export interface RuleVersionCreate {
   source_url?: string;
 }
 
-export interface RulesReloadOut {
+/** POST /rules/reload (admin): what adopting the corpus from git changed. */
+export interface ReloadRulesOut {
   rules_created: number;
   versions_created: number;
+  versions_updated: number;
   unchanged: number;
   files: string[];
 }
@@ -570,8 +573,8 @@ export interface RunOut {
   model_label: string;
   adapter: Adapter | string;
   corpus_hash: string;
-  /** Which call set the run replayed; missing on older servers means synthetic. Also in stats.corpus. */
-  corpus?: RunCorpus | string;
+  /** Which call set the run replayed. */
+  corpus: RunCorpus | string;
   contract_set_hash: string;
   rule_date: string;
   trigger: RunTrigger | string;
@@ -681,7 +684,7 @@ export type ComparisonDirection = 'worse' | 'better' | 'none';
 export interface ContractComparisonOut {
   /** "ALL-BLOCK": a call fails if any BLOCK contract fails on it */
   contract_code: string;
-  severity?: string | null;
+  severity: string | null;
   failure_outcomes: string[];
   /** calls scored by both runs (the paired sample) */
   n_shared: number;
@@ -694,16 +697,20 @@ export interface ContractComparisonOut {
   test: string;
   p_value: number;
   /** Holm-adjusted across the per-contract family; null on the overall row */
-  p_holm?: number | null;
+  p_holm: number | null;
+  /** the raw test alone: p < alpha */
   significant: boolean;
+  /** per-contract rows: still significant after Holm; null on the overall (ALL-BLOCK) row, a single test */
+  significant_holm: boolean | null;
+  /** the conclusion: "none" unless significant, with enough changed calls, and (per contract) after Holm */
   direction: ComparisonDirection | string;
   verdict: string;
   cautions: string[];
   /** unlabelled (ingested) cells: not failures, not passes */
-  excluded_not_evaluated?: number;
+  excluded_not_evaluated: number;
 }
 
-/** The same prompt change on the held-out calls (older servers omit it). */
+/** The same prompt change replayed on the held-out calls (never read while writing prompts). */
 export interface HeldOutCheckOut {
   a_run_id: string;
   b_run_id: string;
@@ -722,7 +729,8 @@ export interface CompareStatisticsOut {
   cautions: string[];
   overall: ContractComparisonOut;
   per_contract: ContractComparisonOut[];
-  held_out?: HeldOutCheckOut | null;
+  /** null when no held-out pair of runs exists for this comparison */
+  held_out: HeldOutCheckOut | null;
 }
 
 export type AttributionVerdict = 'isolated' | 'confounded' | 'repeat';
@@ -757,17 +765,16 @@ export interface CompareOut {
   a: RunOut;
   b: RunOut;
   what_changed: WhatChanged;
-  /** older servers omit it */
-  attribution?: AttributionOut | null;
+  attribution: AttributionOut | null;
   newly_failing: CompareCell[];
   newly_passing: CompareCell[];
   unchanged_failing: number;
   unchanged_passing: number;
   per_contract: PerContractDelta[];
-  /** what a_fail/b_fail count (older servers omit it) */
-  failure_definition?: string;
-  /** "is this difference real?" — exact tests and Wilson intervals (older servers omit it) */
-  statistics?: CompareStatisticsOut | null;
+  /** what a_fail/b_fail count */
+  failure_definition: string;
+  /** "is this difference real?" — exact tests and Wilson intervals */
+  statistics: CompareStatisticsOut | null;
 }
 
 // ------------------------------------------------------------- contract metrics
@@ -978,7 +985,7 @@ export interface ReviewTaskOut {
   payload: JsonObject;
   allowed_transitions: string[];
   /** actionable = a human decides; advisory = visible aggregate, not a work item */
-  lane?: ReviewLane | string;
+  lane: ReviewLane | string;
 }
 
 export type ReviewLane = 'actionable' | 'advisory';
@@ -1121,6 +1128,13 @@ export type EvidenceFormat = 'json' | 'md';
 
 // ------------------------------------------------------------- audit
 
+/** GET /audit/actors — a person with at least one audit row, busiest first. */
+export interface AuditActorOut {
+  actor: string;
+  role: string;
+  events: number;
+}
+
 export interface AuditOut {
   id: number;
   ts: string;
@@ -1152,10 +1166,10 @@ export interface AuditVerifyOut {
   first_broken_id: number | null;
   reason: string | null;
   tip: string;
-  /** id of the last verified row (older servers omit it) */
-  tip_id?: number | null;
-  /** present when a checkpoint (through_id + tip) was checked */
-  checkpoint?: CheckpointCheckOut | null;
+  /** id of the last verified row; null for an empty log */
+  tip_id: number | null;
+  /** set when a checkpoint (through_id + tip) was checked */
+  checkpoint: CheckpointCheckOut | null;
 }
 
 // ------------------------------------------------------------- governance (admin)
@@ -1269,15 +1283,14 @@ export interface MeOut {
 
 // ------------------------------------------------------------- sandbox (nothing persisted)
 
+/** One count per PII kind the backend redacts (core/pii.py KINDS). */
 export interface RedactionCounts {
   medicare_number: number;
   ssn: number;
   dob: number;
-  /** newer servers also redact contact details */
-  phone?: number;
-  email?: number;
-  address?: number;
-  [key: string]: number | undefined;
+  phone: number;
+  email: number;
+  address: number;
 }
 
 export type SandboxVerdict = 'current' | 'stale' | 'ahead' | 'no_version_in_force';
@@ -1325,8 +1338,8 @@ export interface SandboxArtifactSummary {
   stale: number;
   current: number;
   rules_touched: number;
-  /** proposed readings a human must confirm; never counted as stale (older servers omit it) */
-  needs_review?: number;
+  /** proposed readings a human must confirm; never counted as stale */
+  needs_review: number;
   over_restrictive: number;
   under_restrictive: number;
   reverify: number;
@@ -1376,10 +1389,6 @@ export interface SandboxTranscriptOut {
   redacted: RedactionCounts;
   /** the workflow output: {extraction, composition, route} */
   output: JsonObject;
-  /** optional: cited spans located in the redacted text */
-  spans?: SpanOut[];
-  /** optional: deterministic route, when sent outside `output` */
-  route?: Route | string;
   contracts: SandboxContractResult[];
   persisted: boolean;
   note: string;

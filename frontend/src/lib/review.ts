@@ -34,20 +34,14 @@ export function filterTasksByRun<T extends Pick<ReviewTaskOut, 'run_id' | 'paylo
 export type Lane = 'actionable' | 'advisory';
 
 /**
- * The lane a task belongs to. The API sets `lane`; older payloads (and the
- * mock) fall back to the backend rule: an aggregate FLAGGED_RESULT is
- * advisory, everything else needs a human.
+ * The lane the API assigned (backend core/lanes.py). An unrecognised value is
+ * treated as actionable: work a human must decide is never hidden as advisory.
  */
-export function taskLane(task: Pick<ReviewTaskOut, 'lane' | 'kind' | 'payload'>): Lane {
-  if (task.lane === 'advisory' || task.lane === 'actionable') return task.lane;
-  const fromPayload = task.payload?.lane;
-  if (fromPayload === 'advisory' || fromPayload === 'actionable') return fromPayload;
-  return task.kind === 'FLAGGED_RESULT' && task.payload?.aggregate === true ? 'advisory' : 'actionable';
+export function taskLane(task: Pick<ReviewTaskOut, 'lane'>): Lane {
+  return task.lane === 'advisory' ? 'advisory' : 'actionable';
 }
 
-export function countByLane(
-  tasks: ReadonlyArray<Pick<ReviewTaskOut, 'lane' | 'kind' | 'payload'>> | undefined,
-): Record<Lane, number> {
+export function countByLane(tasks: ReadonlyArray<Pick<ReviewTaskOut, 'lane'>> | undefined): Record<Lane, number> {
   const out: Record<Lane, number> = { actionable: 0, advisory: 0 };
   for (const t of tasks ?? []) out[taskLane(t)] += 1;
   return out;

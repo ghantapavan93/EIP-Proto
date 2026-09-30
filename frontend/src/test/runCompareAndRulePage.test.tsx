@@ -33,11 +33,14 @@ function row(code: string, direction: string): ContractComparisonOut {
     discordant: 20,
     test: 'McNemar exact',
     p_value: 0.003,
+    p_holm: null,
     significant: true,
+    significant_holm: null,
     direction,
     verdict: `B is significantly ${direction} on the release-blocking contracts (p=0.003)`,
     cautions: [],
-  } as ContractComparisonOut;
+    excluded_not_evaluated: 0,
+  };
 }
 
 describe('held-out result on the compare page', () => {

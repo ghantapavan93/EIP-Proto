@@ -3,16 +3,15 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, X } from 'lucide-react';
 import { useImpactsAt, useReviewTasks, useRules, useRuns, useStatus } from '../../api/hooks';
 import type { RunOut } from '../../api/types';
-import { flipDate } from '../../lib/guide';
 import { groupActionable, taskLane } from '../../lib/review';
 import { latestByTrigger } from '../../lib/runStats';
 import { fmtDate, fmtNumber } from '../../lib/format';
 import { cn } from '../../lib/cn';
 import { GateChip } from '../runs/GateChip';
 import { TickNumber } from '../ui/TickNumber';
-import { latestGoverning } from '../../lib/ruleVersions';
+import { nextRuleChange } from '../../lib/ruleVersions';
 
-export const HONEST_LINE = 'Prototype · synthetic calls · real public pages · recorded real-model runs';
+export const PROTOTYPE_DISCLOSURE = 'Prototype · synthetic calls · real public pages · recorded real-model runs';
 
 function Step({
   n,
@@ -69,7 +68,7 @@ function gateLine(label: string, run: RunOut | undefined) {
 }
 
 /**
- * "Where we are": the whole story in four live steps, above the trigger
+ * "Where we are": the change-control loop in four live steps, above the trigger
  * cards. Each step is a link to the screen that proves it; every number is
  * read from the API. Dismissible (remembered in localStorage).
  */
@@ -79,11 +78,7 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
   const status = useStatus();
   const open = useReviewTasks({ state: 'open' });
 
-  const latestDates = useMemo(
-    () => (rules.data ?? []).map((r) => latestGoverning(r)?.effective_from).filter((d): d is string => Boolean(d)),
-    [rules.data],
-  );
-  const flip = flipDate(latestDates, today);
+  const flip = useMemo(() => nextRuleChange(rules.data, today), [rules.data, today]);
   const codes = useMemo(() => (rules.data ?? []).map((r) => r.code), [rules.data]);
   const impacts = useImpactsAt(codes, flip ?? '');
   const impactsReady = codes.length > 0 && impacts.every((q) => q.data);
@@ -106,7 +101,7 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
       <div className="flex items-start justify-between gap-3 px-2">
         <div className="min-w-0">
           <h2 className="text-[13px] font-semibold text-ink">Where we are</h2>
-          <p className="mt-0.5 text-[12px] text-ink-2">{HONEST_LINE}</p>
+          <p className="mt-0.5 text-[12px] text-ink-2">{PROTOTYPE_DISCLOSURE}</p>
         </div>
         <button
           type="button"

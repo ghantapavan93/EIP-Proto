@@ -50,9 +50,9 @@ import { evaluate, summarize, versionInForce } from './staleness';
 import { SAMPLES, sandboxArtifact, sandboxTranscript } from './sandbox';
 import { COMPARE_FAILURE_DEFINITION, compareStatistics, contractMetrics } from './metrics';
 import { readiness } from './readiness';
-import { ACTIONS, ROLES, fallbackMe } from '../lib/roles';
+import { ACTIONS, ROLE_ORDER, meFor, roleLabelFor, rolesOverview } from './permissions';
 import { governingVersions, governs } from '../lib/ruleVersions';
-import { attributeRuns } from '../lib/attribution';
+import { attributeRuns } from './attribution';
 
 /**
  * In-memory mock of the Backstop API. Same routes, same shapes, same refusal
@@ -110,7 +110,6 @@ const state: State = {
 const GENESIS = '0'.repeat(64);
 
 /** Mock actor -> role: people keep their demo role; "system" rows are automation; "demo-seed:*" rows are seeded examples. */
-const ROLE_ORDER = ['analyst', 'engineer', 'admin'];
 
 function actorRole(actor: string): string {
   if (actor.startsWith('demo-seed:')) return 'demo-seed';
@@ -346,6 +345,7 @@ function blankTask(kind: string, openedAt: string): ReviewTaskOut {
     closed_at: null,
     payload: {},
     allowed_transitions: [],
+    lane: 'actionable',
   };
 }
 
@@ -354,6 +354,7 @@ function openStaleTask(
   verdict: ReturnType<typeof evaluate>[number],
   asOf: string,
   openedAt: string,
+  actor = 'system',
 ): ReviewTaskOut {
   const e = verdict.edge;
   const asset = findAsset(e.asset_code);
@@ -380,7 +381,7 @@ function openStaleTask(
   };
   state.tasks.push(task);
   audit(
-    'system',
+    actor,
     'task.opened',
     'review_task',
     task.id,
@@ -991,6 +992,45 @@ function impact(rule: RuleOut, asOf: string): ImpactOut {
 }
 
 /**
+ * POST /rules/{code}/impact/evaluate (backend api/rules.py): open one
+ * STALE_ASSET task per stale artifact not yet in the queue, and return the
+ * blast radius. Refused (409) when `asOf` reads an older version than the one
+ * in force today. Compared by version, not by date, as core/impact.py does,
+ * so the change date stays actionable after it passes.
+ */
+function evaluateImpact(rule: RuleOut, asOf: string, actor: string, path: string): ImpactWhatIfOut {
+  const today = todayIso();
+  const now = versionInForce(rule, today);
+  const then = versionInForce(rule, asOf);
+  if (now && (!then || (then.effective_from ?? '') < (now.effective_from ?? ''))) {
+    throw new ApiError(
+      409,
+      `${rule.code} on ${asOf} is ${then ? `v${then.version}` : 'no version'}; v${now.version} is in force today. Tasks are opened only for the version in force.`,
+      path,
+    );
+  }
+  const verdicts = evaluate(
+    rule,
+    EDGES.filter((e) => e.rule_code === rule.code),
+    asOf,
+  );
+  const openedAt = nowIso();
+  let opened = 0;
+  for (const v of verdicts) {
+    const exists = state.tasks.some(
+      (t) => t.kind === 'STALE_ASSET' && t.edge_id === v.edge.id && t.rule_version === v.in_force_version,
+    );
+    if (!exists) {
+      openStaleTask(rule, v, asOf, openedAt, actor);
+      opened += 1;
+    }
+  }
+  if (opened)
+    audit(actor, 'staleness.evaluated', 'rule', rule.code, { as_of: asOf, opened, ...summarize(verdicts) }, openedAt);
+  return { ...impact(rule, asOf), hypothetical: false, assumed_version: null, note: '' };
+}
+
+/**
  * What-if blast radius (backend rules_impact with include_proposed): evaluate
  * as if a proposed version were enacted from its effective_from, every enacted
  * window still open on that day closing the day before. In memory only: no
@@ -1201,13 +1241,17 @@ function requireAdmin(actor: string, role: string, path: string): void {
   }
 }
 
+function roleRank(role: string): number {
+  return (ROLE_ORDER as readonly string[]).indexOf(role);
+}
+
 /** GET /admin/access, computed from the demo accounts and the in-memory audit log. */
 function accessReview(): AccessReviewOut {
   const now = Date.now();
   const within = (ts: string, ms: number) => now - Date.parse(ts) <= ms;
   const DAY = 86_400_000;
   const accounts = Object.entries(DEMO_USERS)
-    .sort(([an, a], [bn, b]) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role) || an.localeCompare(bn))
+    .sort(([an, a], [bn, b]) => roleRank(a.role) - roleRank(b.role) || an.localeCompare(bn))
     .map(([name, u]) => {
       const mine = state.audit.filter((e) => e.actor === name);
       const acted = mine.filter((e) => e.event_type !== 'auth.denied');
@@ -1215,7 +1259,7 @@ function accessReview(): AccessReviewOut {
       return {
         name,
         role: u.role,
-        role_label: ROLES.find((r) => r.role === u.role)?.label ?? u.role,
+        role_label: roleLabelFor(u.role),
         default_credentials: u.password === name,
         last_recorded_action_at: last?.ts ?? null,
         last_recorded_action: last?.event_type ?? null,
@@ -1251,13 +1295,8 @@ function accessReview(): AccessReviewOut {
               detail: `signed in as ${String(p.role ?? '?')}; needed ${required}`,
             };
       }),
-    matrix: (Object.keys(ACTIONS) as Array<keyof typeof ACTIONS>).map((action) => ({
-      action,
-      label: ACTIONS[action].label,
-      roles: ROLE_ORDER.filter((r) => ACTIONS[action].roles.includes(r)),
-      rule: '',
-    })),
-    roles: ROLES,
+    matrix: ACTIONS,
+    roles: rolesOverview(),
   };
 }
 
@@ -1328,7 +1367,7 @@ export async function mockRequest(
   }
 
   // ---- identity
-  if (method === 'GET' && head === 'me') return fallbackMe(actor, role);
+  if (method === 'GET' && head === 'me') return meFor(actor, role);
 
   // ---- sandbox: nothing persisted; only the hash is audited
   if (head === 'sandbox') {
@@ -1369,18 +1408,25 @@ export async function mockRequest(
       return {
         rules_created: 0,
         versions_created: 0,
+        versions_updated: 0,
         unchanged: state.rules.length,
         files: state.rules.map((r) => `rules/${r.code}.yaml`),
       };
     }
     const rule = state.rules.find((r) => r.code === second) ?? notFound(`rule ${second}`);
     if (method === 'GET' && !third) return ruleOut(rule);
-    if (method === 'GET' && third === 'impact') {
+    // GET reads the blast radius for every role and writes nothing (backend api/rules.py).
+    if (method === 'GET' && third === 'impact' && !fourth) {
       const asOf = query.get('as_of') || todayIso();
       const assume = query.get('assume_version');
       if (query.get('include_proposed') === 'true' || assume)
         return impactWhatIf(rule, asOf, assume ? Number(assume) : null, path);
-      return impact(rule, asOf);
+      return { ...impact(rule, asOf), hypothetical: false, assumed_version: null, note: '' };
+    }
+    // POST .../impact/evaluate opens the review tasks the stale set is missing.
+    if (method === 'POST' && third === 'impact' && fourth === 'evaluate') {
+      requireEditor(role, 'open stale-artifact review tasks', path);
+      return evaluateImpact(rule, query.get('as_of') || todayIso(), actor, path);
     }
     if (method === 'GET' && third === 'sources') return ruleSources(rule.code);
     if (method === 'POST' && third === 'versions') {
@@ -1948,6 +1994,3 @@ export async function mockRequest(
 
   throw new ApiError(404, `mock: no route for ${method} /api/${segments.join('/')}`, path);
 }
-
-/** Exposed for tests. */
-export const __mockState = state;

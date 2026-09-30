@@ -63,9 +63,11 @@ const STATS: CompareStatisticsOut = {
     p_value: 0.00073,
     p_holm: null,
     significant: true,
+    significant_holm: null,
     direction: 'better',
     verdict: 'B is significantly better on the release-blocking contracts (p=0.00073)',
     cautions: [],
+    excluded_not_evaluated: 0,
   },
   per_contract: [
     {
@@ -81,9 +83,11 @@ const STATS: CompareStatisticsOut = {
       p_value: 0.25,
       p_holm: 1,
       significant: false,
+      significant_holm: false,
       direction: 'none',
       verdict: 'No significant difference (p=0.25, n=3 discordant pairs)',
       cautions: ['Only 3 call(s) changed outcome: too few changed calls to conclude.'],
+      excluded_not_evaluated: 0,
     },
     {
       contract_code: 'C-TPMO-01',
@@ -98,11 +102,14 @@ const STATS: CompareStatisticsOut = {
       p_value: 0.00012,
       p_holm: 0.0011,
       significant: true,
+      significant_holm: true,
       direction: 'better',
       verdict: 'B is significantly better on this contract (p=0.00012)',
       cautions: [],
+      excluded_not_evaluated: 0,
     },
   ],
+  held_out: null,
 };
 
 describe('SignificancePanel', () => {
@@ -232,19 +239,20 @@ describe('rule version statuses', () => {
 });
 
 describe('RedactionTally', () => {
-  it('shows every reported kind, zeros included, and nothing for kinds an older server omits', () => {
+  it('shows every kind, zeros included', () => {
     const { rerender } = wrap(
       <RedactionTally counts={{ medicare_number: 0, ssn: 0, dob: 0, phone: 1, email: 0, address: 0 }} />,
     );
     expect(screen.getByTestId('redacted-phone')).toHaveTextContent('1 phone number');
     expect(screen.getByTestId('redacted-email')).toHaveTextContent('0 email addresses');
+    expect(screen.getByText('Redacted before matching:')).toBeInTheDocument();
     rerender(
       <QueryClientProvider client={new QueryClient()}>
-        <RedactionTally counts={{ medicare_number: 1, ssn: 0, dob: 0 }} />
+        <RedactionTally counts={{ medicare_number: 0, ssn: 0, dob: 0, phone: 0, email: 0, address: 0 }} />
       </QueryClientProvider>,
     );
-    expect(screen.queryByTestId('redacted-phone')).toBeNull();
-    expect(screen.getByText('Redacted before matching:')).toBeInTheDocument();
+    expect(screen.getByTestId('redacted-phone')).toHaveTextContent('0 phone numbers');
+    expect(screen.getByText('Nothing needed redacting:')).toBeInTheDocument();
   });
 });
 

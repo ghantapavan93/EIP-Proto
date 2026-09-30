@@ -1,9 +1,10 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Cog, Link2, ShieldCheck, ShieldAlert, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Cog, Link2, ShieldCheck, X } from 'lucide-react';
 import { useAudit, useAuditActors, useContracts, useRuns, useVerifyAuditChain } from '../api/hooks';
-import type { AuditOut, AuditVerifyOut, RunOut } from '../api/types';
+import type { AuditOut, RunOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
+import { VerifyResult } from '../components/audit/VerifyResult';
 import { PageHeader, Field } from '../components/layout/Page';
 import { Chip } from '../components/ui/Chip';
 import { JsonView } from '../components/ui/JsonView';
@@ -12,7 +13,7 @@ import { SkeletonRows } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { fmtNumber, fmtRelative, fmtTs, parsePageParam, shortHash } from '../lib/format';
-import { AUDIT_ENTITY_TYPES, AUDIT_EVENT_TYPES } from '../lib/vocab';
+import { AUDIT_ENTITY_TYPES, AUDIT_EVENT_TYPES, stateLabel } from '../lib/vocab';
 import {
   actorName,
   auditEntityLink,
@@ -97,12 +98,12 @@ function AuditDetail({ row, onCorrelation }: { row: AuditOut; onCorrelation: (id
           <section>
             <div className="eyebrow mb-1">Before → after</div>
             <div className="flex flex-wrap items-center gap-2">
-              <Chip tone="neutral">{transition.from.replace(/_/g, ' ')}</Chip>
+              <Chip tone="neutral">{stateLabel(transition.from)}</Chip>
               <span aria-hidden className="text-ink-3">
                 →
               </span>
               <Chip tone={row.event_type === 'task.transition_rejected' ? 'red' : 'slate'}>
-                {transition.to.replace(/_/g, ' ')}
+                {stateLabel(transition.to)}
               </Chip>
               {typeof p.reason_code === 'string' && (
                 <span className="font-mono text-[11px] text-ink-2">{p.reason_code}</span>
@@ -142,39 +143,6 @@ function AuditDetail({ row, onCorrelation }: { row: AuditOut; onCorrelation: (id
           className="max-h-[320px] overflow-auto border border-hairline bg-band p-2"
         />
       </section>
-    </div>
-  );
-}
-
-function VerifyResult({ result }: { result: AuditVerifyOut }) {
-  if (result.ok) {
-    return (
-      <div
-        role="status"
-        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[8px] border border-green/40 bg-green/10 px-3.5 py-2 text-[13px] text-ink"
-      >
-        <ShieldCheck size={15} className="shrink-0 text-green-ink" aria-hidden />
-        <span className="font-semibold text-green-ink">Chain verified</span>
-        <span className="text-ink-2">
-          · every row&apos;s hash recomputed from the row before it ·{' '}
-          <span className="font-mono text-ink">{fmtNumber(result.checked)}</span> rows · tip{' '}
-          <span className="font-mono text-ink" title={result.tip}>
-            {shortHash(result.tip, 12)}
-          </span>
-        </span>
-      </div>
-    );
-  }
-  return (
-    <div
-      role="alert"
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[8px] border border-red/30 bg-red/6 px-3.5 py-2 text-[13px] text-ink"
-    >
-      <ShieldAlert size={15} className="shrink-0 text-red" aria-hidden />
-      <span className="font-semibold text-red">Chain broken at row #{result.first_broken_id}</span>
-      <span>
-        · {result.reason} · <span className="font-mono">{fmtNumber(result.checked)}</span> rows verified before it
-      </span>
     </div>
   );
 }

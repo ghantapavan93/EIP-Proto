@@ -382,7 +382,7 @@ function BurnDown({ b, horizon }: { b: ReadinessOut['burn_down']; horizon: Readi
   );
 }
 
-function HonestPanels({ data }: { data: ReadinessOut }) {
+function NotEnforcedPanels({ data }: { data: ReadinessOut }) {
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
       <div className="card p-4" data-testid="vacated-panel">
@@ -594,7 +594,7 @@ export function ReadinessPage() {
           </div>
 
           <Section title="What Backstop does not enforce">
-            <HonestPanels data={d} />
+            <NotEnforcedPanels data={d} />
           </Section>
         </>
       )}

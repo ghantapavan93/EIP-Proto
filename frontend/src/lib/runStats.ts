@@ -158,31 +158,19 @@ export function judgeModelId(run: Pick<RunOut, 'stats' | 'model_id'>): string {
   return run.model_id;
 }
 
-/** RunOut.corpus is optional: servers before the held-out split did not send it. */
-type WithCorpus = { corpus?: string | null };
-
 /** The fields that identify a gate-strip configuration. */
-type ConfigFields = Pick<RunOut, 'workflow_code' | 'prompt_version' | 'model_id' | 'adapter' | 'rule_date' | 'stats'> &
-  WithCorpus;
-
-/**
- * Which call set a run replayed: RunOut.corpus, else stats.corpus, else
- * "synthetic" (servers before the held-out split only ran the development calls).
- */
-export function runCorpus(run: Pick<RunOut, 'stats'> & WithCorpus): string {
-  if (typeof run.corpus === 'string' && run.corpus) return run.corpus;
-  const s = run.stats;
-  if (isObject(s) && typeof s.corpus === 'string' && s.corpus) return s.corpus;
-  return 'synthetic';
-}
+type ConfigFields = Pick<
+  RunOut,
+  'workflow_code' | 'prompt_version' | 'model_id' | 'adapter' | 'rule_date' | 'stats' | 'corpus'
+>;
 
 /**
  * A run over the 60 development calls. Only these are comparable with each
  * other on the change-trigger cards; held-out, ingested and "all" runs answer
  * different questions and must never become a card's A, B or baseline.
  */
-export function isDevelopmentRun(run: Pick<RunOut, 'stats'> & WithCorpus): boolean {
-  return runCorpus(run) === 'synthetic';
+export function isDevelopmentRun(run: Pick<RunOut, 'corpus'>): boolean {
+  return run.corpus === 'synthetic';
 }
 
 export const HOLDOUT_MODEL = 'qwen2.5:7b-instruct';
@@ -192,14 +180,14 @@ export const HOLDOUT_MODEL = 'qwen2.5:7b-instruct';
  * qwen2.5 7B model at prompt v2 (before the fix) and v3 (after), or null
  * unless both exist.
  */
-type HoldoutFields = Pick<RunOut, 'stats' | 'model_id' | 'prompt_version' | 'status' | 'started_at'> & WithCorpus;
+type HoldoutFields = Pick<RunOut, 'corpus' | 'model_id' | 'prompt_version' | 'status' | 'started_at'>;
 
 export function holdoutPair<T extends HoldoutFields>(runs: T[] | undefined): { before: T; after: T } | null {
   const latest = (version: number): T | undefined =>
     (runs ?? [])
       .filter(
         (r) =>
-          runCorpus(r) === 'holdout' &&
+          r.corpus === 'holdout' &&
           r.prompt_version === version &&
           r.status === 'COMPLETE' &&
           (r.model_id === HOLDOUT_MODEL || r.model_id.endsWith(`/${HOLDOUT_MODEL}`)),
@@ -218,8 +206,15 @@ export function holdoutPair<T extends HoldoutFields>(runs: T[] | undefined): { b
  */
 export function gateStripKey(run: ConfigFields): string {
   const judge = judgeModelId(run);
-  const corpus = runCorpus(run);
-  const parts = [run.workflow_code, run.prompt_version, run.model_id, run.adapter ?? '', judge, run.rule_date, corpus];
+  const parts = [
+    run.workflow_code,
+    run.prompt_version,
+    run.model_id,
+    run.adapter ?? '',
+    judge,
+    run.rule_date,
+    run.corpus,
+  ];
   return parts.join('|');
 }
 

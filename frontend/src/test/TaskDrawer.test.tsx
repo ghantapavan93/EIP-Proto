@@ -31,6 +31,7 @@ const task: ReviewTaskOut = {
   closed_at: null,
   payload: { run_id: 'run-0002', contract: 'C-TPMO-01', severity: 'BLOCK', transcript_id: 'transcript-T-007' },
   allowed_transitions: ['upheld', 'overridden'],
+  lane: 'actionable',
 };
 
 const result = {
@@ -52,7 +53,7 @@ const result = {
 
 vi.mock('../api/hooks', () => ({
   useReviewTask: () => ({ data: task, isLoading: false, error: null, refetch: () => undefined }),
-  useTransition: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false, error: null }),
+  useReviewTransition: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false, error: null }),
   useTestCases: () => ({ data: [] }),
   useExportEvidence: () => ({ mutate: vi.fn(), isPending: false }),
   useStatus: () => ({ data: undefined, isLoading: false }),
@@ -60,7 +61,7 @@ vi.mock('../api/hooks', () => ({
   useRunResults: () => ({ data: [result], isLoading: false, error: null }),
 }));
 
-import { TaskDrawer } from '../pages/Review';
+import { TaskDrawer } from '../components/review/TaskDrawer';
 
 function renderDrawer() {
   const qc = new QueryClient();

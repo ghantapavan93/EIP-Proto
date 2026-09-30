@@ -5,7 +5,7 @@
  */
 
 import type { ContractComparisonOut, RateOut } from '../api/types';
-import { fmtP } from './stats';
+import { fmtP, MIN_DISCORDANT } from './stats';
 import type { Tone } from './vocab';
 
 /** 0.4523 → "45%"; below 10% one decimal ("4.5%") so small rates stay distinguishable. */
@@ -35,28 +35,43 @@ export function directionLabel(direction: string | null | undefined): string {
   return direction === 'better' ? 'better' : direction === 'worse' ? 'worse' : 'no significant difference';
 }
 
-/** True when a raw-significant row does not survive the Holm correction. */
-export function lostToHolm(row: Pick<ContractComparisonOut, 'significant' | 'p_holm'>, alpha: number): boolean {
-  return row.significant && typeof row.p_holm === 'number' && row.p_holm >= alpha;
+/**
+ * True when the raw test was significant but the row did not survive the
+ * Holm correction across the per-contract family (`significant_holm` is
+ * null on the ALL-BLOCK row, which is a single test).
+ */
+export function lostToHolm(row: Pick<ContractComparisonOut, 'significant' | 'significant_holm'>): boolean {
+  return row.significant && row.significant_holm === false;
+}
+
+/** Whether B fails more often than A: from the changed calls when paired, else from the two rates. */
+function bFailsMore(row: ContractComparisonOut): boolean {
+  if (row.paired) return row.paired.b_only_fail > row.paired.a_only_fail;
+  return (row.b.rate ?? 0) > (row.a.rate ?? 0);
 }
 
 /**
- * One sentence a non-statistician can act on. The backend's own verdict
- * ("B is significantly worse … (p=…)") stays next to it for the reader who
- * wants the test.
+ * One sentence a non-statistician can act on. `direction` is the server's
+ * conclusion (already "none" when too few calls changed or the row fails
+ * Holm); the backend's own verdict with the test stays next to it.
  */
-export function plainVerdict(row: ContractComparisonOut, alpha = 0.05, family = 0): string {
+export function plainVerdict(row: ContractComparisonOut, family = 0): string {
   const a = row.a.rate;
   const b = row.b.rate;
   if (row.a.n === 0 && row.b.n === 0) return 'Nothing scored in either run';
-  if (row.direction === 'better' || row.direction === 'worse') {
-    const head =
-      row.direction === 'better'
-        ? 'B fails less often — unlikely to be chance'
-        : 'B fails more often — unlikely to be chance';
-    return lostToHolm(row, alpha)
-      ? `${head} on its own, but not after correcting for ${family || 'all'} contracts`
-      : head;
+  if (row.direction === 'better') return 'B fails less often — unlikely to be chance';
+  if (row.direction === 'worse') return 'B fails more often — unlikely to be chance';
+  const more = bFailsMore(row) ? 'more' : 'less';
+  if (lostToHolm(row))
+    return `B fails ${more} often — unlikely to be chance on its own, but not after correcting for ${family || 'all'} contracts`;
+  if (
+    row.significant &&
+    row.paired &&
+    row.discordant !== null &&
+    row.discordant > 0 &&
+    row.discordant < MIN_DISCORDANT
+  ) {
+    return `B fails ${more} often, but only ${row.discordant} ${row.discordant === 1 ? 'call' : 'calls'} changed outcome — too few to conclude`;
   }
   if (row.paired && row.discordant === 0) return 'No call changed outcome';
   if (a !== null && b !== null && a === b) return 'Same failure rate; the calls that changed cancel out';

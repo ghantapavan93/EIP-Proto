@@ -29,8 +29,6 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
-export type QueryValue = string | number | boolean | null | undefined;
-
 /** Build "?a=1&b=2" from a params object, skipping empty values. */
 export function toQuery(params: object | undefined): string {
   if (!params) return '';

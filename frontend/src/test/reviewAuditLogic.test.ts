@@ -45,6 +45,7 @@ function task(over: Partial<ReviewTaskOut>): ReviewTaskOut {
     closed_at: null,
     payload: {},
     allowed_transitions: [],
+    lane: 'actionable',
     ...over,
   };
 }
@@ -54,6 +55,7 @@ function run(over: Partial<RunOut>): RunOut {
     id: 'run-a',
     run_key: 'qa-handoff:x',
     workflow_code: 'qa-handoff',
+    corpus: 'synthetic',
     prompt_version: 2,
     prompt_label: 'v2',
     prompt_hash: 'h',
@@ -103,12 +105,10 @@ const SEVERITY = new Map([
 ]);
 
 describe('review lanes and grouping', () => {
-  it('uses the API lane, then the payload, then the aggregate rule', () => {
+  it('uses the API lane and treats an unknown lane as actionable', () => {
     expect(taskLane(task({ lane: 'advisory' }))).toBe('advisory');
-    expect(taskLane(task({ payload: { lane: 'advisory' } }))).toBe('advisory');
-    expect(taskLane(task({ payload: { aggregate: true } }))).toBe('advisory');
-    expect(taskLane(task({ kind: 'STALE_ASSET', payload: { aggregate: true } }))).toBe('actionable');
-    expect(taskLane(task({}))).toBe('actionable');
+    expect(taskLane(task({ lane: 'actionable' }))).toBe('actionable');
+    expect(taskLane(task({ lane: 'something-new' }))).toBe('actionable');
   });
 
   it('counts by lane', () => {

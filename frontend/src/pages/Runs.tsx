@@ -2,11 +2,12 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { GitCompareArrows, Play } from 'lucide-react';
-import { canEdit, useContracts, useCreateRun, useMeta, useModels, useRole, useRuns, useWorkflows } from '../api/hooks';
-import type { ContractSummary, RunOut, RunRequest } from '../api/types';
+import { useContracts, useCreateRun, useMeta, useModels, useRules, useRuns, useWorkflows } from '../api/hooks';
+import type { ContractSummary, ModelOut, RunOut, RunRequest, WorkflowOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section, Field } from '../components/layout/Page';
 import { GatedButton } from '../components/access/GatedButton';
+import { usePermission } from '../components/access/usePermission';
 import { DataTable } from '../components/ui/DataTable';
 import { GateChip } from '../components/runs/GateChip';
 import { AdapterChip } from '../components/runs/AdapterChip';
@@ -16,6 +17,7 @@ import { Drawer } from '../components/ui/Drawer';
 import { ErrorState } from '../components/ui/ErrorState';
 import { useToast } from '../components/ui/useToast';
 import { durationBetween, fmtDuration, fmtTs, shortHash, todayIso } from '../lib/format';
+import { aroundChange, nextRuleChange } from '../lib/ruleVersions';
 import {
   ADAPTERS,
   adaptersForModel,
@@ -72,10 +74,33 @@ function ContractCode({ code }: { code: string }) {
   );
 }
 
+/** The newest prompt version of a workflow: what a new run most likely wants to measure. */
+function latestPromptVersion(workflow: WorkflowOut | undefined): number | undefined {
+  const versions = workflow?.prompt_versions.map((p) => p.version) ?? [];
+  return versions.length ? Math.max(...versions) : undefined;
+}
+
+/** A pinned simulated model: runs in seconds with no provider configured, so it is always a safe default. */
+function defaultModel(models: ModelOut[] | undefined): ModelOut | undefined {
+  return (
+    models?.find((m) => m.provider === 'simulated' && m.pinned) ??
+    models?.find((m) => m.provider === 'simulated') ??
+    models?.[0]
+  );
+}
+
+/**
+ * Fields the user has not touched stay undefined and are filled from the
+ * data on every render (latest prompt, a simulated model, the next rule
+ * change), so a list that arrives after the drawer opens still sets them.
+ */
+type RunForm = Partial<RunRequest>;
+
 function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => void }) {
   const meta = useMeta();
   const workflows = useWorkflows();
   const models = useModels();
+  const rules = useRules();
   const create = useCreateRun();
   // A refusal from the last attempt must not greet the user when the drawer reopens.
   const onClose = () => {
@@ -84,19 +109,16 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
   };
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [form, setForm] = useState<RunRequest>({
-    workflow: 'qa-handoff',
-    prompt_version: 2,
-    model_id: 'sim-large',
-    adapter: 'simulated',
-    rule_date: '2026-10-01',
-    trigger: 'MANUAL',
-    corpus: 'synthetic',
-  });
+  const [form, setForm] = useState<RunForm>({ trigger: 'MANUAL', corpus: 'synthetic' });
 
+  const today = meta.data?.today || todayIso();
+  const ruleChange = nextRuleChange(rules.data, today);
   const workflow = workflows.data?.find((w) => w.code === form.workflow) ?? workflows.data?.[0];
+  const promptVersion = form.prompt_version ?? latestPromptVersion(workflow);
+  const modelId = form.model_id ?? defaultModel(models.data)?.model_id ?? '';
+  const ruleDate = form.rule_date ?? ruleChange ?? today;
   const adapters = meta.data?.adapters ?? { simulated: true };
-  const selectedModel = models.data?.find((m) => m.model_id === form.model_id);
+  const selectedModel = models.data?.find((m) => m.model_id === modelId);
   const allowedAdapters = adaptersForModel(selectedModel);
   // If the model list arrives after the form was initialised, keep the adapter consistent with it.
   const adapter =
@@ -113,8 +135,16 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (create.isPending) return;
+    if (!workflow || promptVersion === undefined || !modelId) return;
     create.mutate(
-      { ...form, adapter, workflow: workflow?.code ?? form.workflow },
+      {
+        ...form,
+        adapter,
+        workflow: workflow.code,
+        prompt_version: promptVersion,
+        model_id: modelId,
+        rule_date: ruleDate,
+      },
       {
         onSuccess: (run) => {
           if (run.deduplicated) {
@@ -149,7 +179,7 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
             id="nr-workflow"
             className="input"
             value={workflow?.code ?? ''}
-            onChange={(e) => setForm({ ...form, workflow: e.target.value })}
+            onChange={(e) => setForm({ ...form, workflow: e.target.value, prompt_version: undefined })}
           >
             {(workflows.data ?? []).map((w) => (
               <option key={w.code} value={w.code}>
@@ -162,7 +192,7 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           <select
             id="nr-prompt"
             className="input"
-            value={form.prompt_version}
+            value={promptVersion ?? ''}
             onChange={(e) => setForm({ ...form, prompt_version: Number(e.target.value) })}
           >
             {(workflow?.prompt_versions ?? []).map((p) => (
@@ -173,7 +203,7 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           </select>
         </Field>
         <Field label="Model" htmlFor="nr-model">
-          <select id="nr-model" className="input" value={form.model_id} onChange={(e) => chooseModel(e.target.value)}>
+          <select id="nr-model" className="input" value={modelId} onChange={(e) => chooseModel(e.target.value)}>
             {(models.data ?? []).map((m) => (
               <option key={m.id} value={m.model_id}>
                 {m.model_id} — {m.label}
@@ -209,7 +239,7 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
               id="nr-date"
               type="date"
               className="input font-mono"
-              value={form.rule_date}
+              value={ruleDate}
               onChange={(e) => setForm({ ...form, rule_date: e.target.value })}
               required
             />
@@ -303,24 +333,21 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           </Field>
         </div>
         <div className="flex gap-2">
+          {/* the day before and the day of the next rule change, then today */}
+          {aroundChange(ruleChange).map((d) => (
+            <button
+              key={d}
+              type="button"
+              className="btn btn-ghost btn-sm font-mono normal-case"
+              onClick={() => setForm({ ...form, rule_date: d })}
+            >
+              {d}
+            </button>
+          ))}
           <button
             type="button"
             className="btn btn-ghost btn-sm font-mono normal-case"
-            onClick={() => setForm({ ...form, rule_date: '2026-09-30' })}
-          >
-            2026-09-30
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm font-mono normal-case"
-            onClick={() => setForm({ ...form, rule_date: '2026-10-01' })}
-          >
-            2026-10-01
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm font-mono normal-case"
-            onClick={() => setForm({ ...form, rule_date: todayIso() })}
+            onClick={() => setForm({ ...form, rule_date: today })}
           >
             today
           </button>
@@ -336,7 +363,11 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           <button type="button" className="btn btn-ghost" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="btn" disabled={create.isPending}>
+          <button
+            type="submit"
+            className="btn"
+            disabled={create.isPending || !workflow || promptVersion === undefined || !modelId}
+          >
             <Play size={13} aria-hidden /> {create.isPending ? 'Running…' : 'Start run'}
           </button>
         </div>
@@ -348,13 +379,13 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
 export function RunsPage() {
   useTopBar([{ label: 'Runs' }]);
   const navigate = useNavigate();
-  const role = useRole();
+  const startRuns = usePermission('start_runs');
   const runs = useRuns();
   const contracts = useContracts();
   const [selected, setSelected] = useState<string[]>([]);
   // ?new=1 opens the New run drawer (command palette, deep links); closing clears it.
   const [params, setParams] = useSearchParams();
-  const drawer = params.get('new') === '1' && canEdit(role);
+  const drawer = params.get('new') === '1' && startRuns.allowed;
   const setDrawer = (open: boolean) => {
     const next = new URLSearchParams(params);
     if (open) next.set('new', '1');

@@ -354,6 +354,7 @@ function compareOne(
     p_value: result.p_value,
     p_holm: null,
     significant: result.significant,
+    significant_holm: null,
     direction: result.direction,
     verdict: result.verdict,
     cautions: result.cautions,
@@ -396,10 +397,17 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
   holm(perContract.map((r) => r.p_value)).forEach((pHolm, i) => {
     const row = perContract[i];
     row.p_holm = pHolm;
-    if (row.significant && pHolm !== null && pHolm >= ALPHA) {
+    // As in backend core/compare.py: several contracts are tested at once, so a raw p under alpha
+    // is not a finding unless it survives Holm.
+    row.significant_holm = row.significant && pHolm !== null && pHolm < ALPHA;
+    if (row.significant && !row.significant_holm) {
       row.cautions.push(
         `Not significant after Holm correction across ${perContract.length} contracts (p_holm=${fmtP(pHolm)}).`,
       );
+      if (row.direction !== 'none') {
+        row.direction = 'none';
+        row.verdict = `No significant difference after Holm correction across ${perContract.length} contracts (p=${fmtP(row.p_value)}, p_holm=${fmtP(pHolm)})`;
+      }
     }
   });
 
@@ -441,6 +449,7 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
     cautions,
     overall,
     per_contract: perContract,
+    held_out: null,
   };
 }
 

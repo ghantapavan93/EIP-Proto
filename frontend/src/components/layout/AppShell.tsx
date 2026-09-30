@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getCredentials } from '../../api/auth';
 import { useMeta, useReviewTasks, useStatus } from '../../api/hooks';
@@ -7,6 +7,7 @@ import { TopBar } from './TopBar';
 import { EnvBanner } from './EnvBanner';
 import { ShellProvider } from './ShellProvider';
 import { ErrorState } from '../ui/ErrorState';
+import { LoadingState } from '../ui/LoadingState';
 import { StatusRail } from './StatusRail';
 import { CommandPalette } from './CommandPalette';
 
@@ -67,7 +68,10 @@ function Shell() {
           ) : (
             // Keyed on the path: a new screen fades up 4px; query-string changes (filters, tabs) do not replay it.
             <div key={location.pathname} className="route-enter">
-              <Outlet />
+              {/* Screens load on first visit (App.tsx); the shell stays up while one does. */}
+              <Suspense fallback={<LoadingState className="p-6" rows={5} />}>
+                <Outlet />
+              </Suspense>
             </div>
           )}
           <footer className="mt-6 border-t border-hairline px-4 py-3 text-[11px] leading-snug text-footer sm:px-6">

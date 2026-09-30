@@ -22,11 +22,3 @@ export function writeGuideHidden(hidden: boolean): void {
     /* storage unavailable — the choice lasts for this page only */
   }
 }
-
-/** The rule-change date the guide tells the story around: the nearest upcoming effective date, else the latest one. */
-export function flipDate(effectiveDates: string[], today: string): string | null {
-  if (!effectiveDates.length) return null;
-  const upcoming = effectiveDates.filter((d) => d > today).sort();
-  if (upcoming.length) return upcoming[0];
-  return [...effectiveDates].sort().reverse()[0];
-}

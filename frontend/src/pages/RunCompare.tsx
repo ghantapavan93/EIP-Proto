@@ -3,10 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowRight } from 'lucide-react';
 import { useCompare, usePromptDiff, useRuns, useWorkflow } from '../api/hooks';
-import type { CompareCell, PerContractDelta, RuleVersionRef, RunOut, WhatChanged } from '../api/types';
+import type { CompareCell, PerContractDelta, RunOut, WhatChanged } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section, Field } from '../components/layout/Page';
 import { DiffChips } from '../components/runs/DiffChips';
+import { RuleRefChips } from '../components/rules/RuleRefChips';
 import { DataTable } from '../components/ui/DataTable';
 import { GateChip } from '../components/runs/GateChip';
 import { AdapterChip } from '../components/runs/AdapterChip';
@@ -19,7 +20,6 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { fmtTs, shortHash } from '../lib/format';
 import { outcomeTone } from '../lib/vocab';
 import { cn } from '../lib/cn';
-import { runCorpus } from '../lib/runStats';
 import { CorpusChip } from '../components/runs/CorpusChip';
 import { ChangeMatrix } from '../components/charts/ChangeMatrix';
 import { Eyebrow } from '../components/ui/Eyebrow';
@@ -73,7 +73,7 @@ function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; chang
             key: 'Corpus',
             value: (
               <span className={hl('corpus')}>
-                {runCorpus(run)} · {shortHash(run.corpus_hash, 16)}
+                {run.corpus} · {shortHash(run.corpus_hash, 16)}
               </span>
             ),
           },
@@ -91,7 +91,7 @@ function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; chang
 
 /** " · HELD-OUT" / " · INGESTED" for the run picker; nothing for the development corpus. */
 function corpusSuffix(run: RunOut): string {
-  const corpus = runCorpus(run);
+  const { corpus } = run;
   if (corpus === 'synthetic') return '';
   return ` · ${corpus === 'holdout' ? 'HELD-OUT' : corpus.toUpperCase()}`;
 }
@@ -140,21 +140,6 @@ function FailCount({ fail, errors }: { fail: number; errors?: number }) {
     <span title={errors ? `${errors} of ${fail} are ERROR (no usable output)` : undefined}>
       {fail}
       {errors ? <span className="ml-1 text-[11px] text-ink-3">· {errors} err</span> : null}
-    </span>
-  );
-}
-
-function RefChips({ refs, tone }: { refs: RuleVersionRef[]; tone: 'red' | 'green' | 'neutral' }) {
-  if (!refs.length) return <span className="text-ink-3">none</span>;
-  return (
-    <span className="inline-flex flex-wrap gap-1">
-      {refs.map((r) => (
-        <Link key={`${r.rule}@${r.version}`} to={`/rules/${encodeURIComponent(r.rule)}`} className="hover:no-underline">
-          <Chip tone={tone} mono>
-            {r.rule}@v{r.version}
-          </Chip>
-        </Link>
-      ))}
     </span>
   );
 }
@@ -226,9 +211,17 @@ function PromptDiffPanel({ a, b }: { a: RunOut; b: RunOut }) {
         <div className="eyebrow mb-1">Declared rule dependencies</div>
         <KeyValue
           rows={[
-            { key: 'Removed', value: <RefChips refs={d.rule_dependencies.removed} tone="red" />, mono: false },
-            { key: 'Added', value: <RefChips refs={d.rule_dependencies.added} tone="green" />, mono: false },
-            { key: 'Unchanged', value: <RefChips refs={d.rule_dependencies.unchanged} tone="neutral" />, mono: false },
+            {
+              key: 'Removed',
+              value: <RuleRefChips linked refs={d.rule_dependencies.removed} tone="red" />,
+              mono: false,
+            },
+            { key: 'Added', value: <RuleRefChips linked refs={d.rule_dependencies.added} tone="green" />, mono: false },
+            {
+              key: 'Unchanged',
+              value: <RuleRefChips linked refs={d.rule_dependencies.unchanged} tone="neutral" />,
+              mono: false,
+            },
           ]}
         />
         <p className="mt-2 text-[12px] text-ink-2">

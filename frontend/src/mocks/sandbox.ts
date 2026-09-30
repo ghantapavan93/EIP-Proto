@@ -320,7 +320,8 @@ export async function sandboxArtifact(
       disputed,
     });
   }
-  const stale = matches.filter((m) => m.verdict === 'stale');
+  // As in the backend: a proposed reading is never counted as stale until a human confirms it.
+  const stale = matches.filter((m) => m.verdict === 'stale' && m.edge_status !== 'proposed');
   return {
     as_of: asOf,
     label,
@@ -336,6 +337,7 @@ export async function sandboxArtifact(
       over_restrictive: stale.filter((m) => m.direction === 'over_restrictive').length,
       under_restrictive: stale.filter((m) => m.direction === 'under_restrictive').length,
       reverify: stale.filter((m) => m.direction === 'reverify').length,
+      needs_review: matches.filter((m) => m.edge_status === 'proposed').length,
     },
     persisted: false,
     note: 'Redacted before matching. Nothing stored; only a SHA-256 of the text is written to the audit log.',
@@ -499,8 +501,6 @@ export async function sandboxTranscript(body: JsonObject, path: string): Promise
       },
       route,
     },
-    spans,
-    route,
     contracts,
     persisted: false,
     note: 'Redacted before the model saw it. Nothing stored; only a SHA-256 of the text is written to the audit log.',

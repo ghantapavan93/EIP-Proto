@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -11,7 +11,6 @@ import {
   isDevelopmentRun,
   latestByTrigger,
   latestPerConfiguration,
-  runCorpus,
 } from '../lib/runStats';
 import { safeNext } from '../lib/redirect';
 import { CorpusChip, HOLDOUT_TOOLTIP } from '../components/runs/CorpusChip';
@@ -21,6 +20,7 @@ import { ArtifactsPage } from '../pages/Artifacts';
 import { ShellProvider } from '../components/layout/ShellProvider';
 import { ToastProvider } from '../components/ui/Toast';
 import { clearCredentials, setCredentials } from '../api/auth';
+import { meFor } from '../mocks/permissions';
 
 /**
  * The held-out corpus (H001–H060) exists to check whether a prompt fix
@@ -40,6 +40,7 @@ function run(over: Partial<RunOut>): RunOut {
     model_label: 'Qwen2.5 7B',
     adapter: 'cassette',
     corpus_hash: 'c-dev',
+    corpus: 'synthetic',
     contract_set_hash: 's',
     rule_date: '2026-10-01',
     trigger: 'MANUAL',
@@ -56,11 +57,8 @@ function run(over: Partial<RunOut>): RunOut {
 }
 
 describe('run corpus', () => {
-  it('treats a missing corpus as the development corpus and reads stats.corpus as a fallback', () => {
-    expect(runCorpus(run({}))).toBe('synthetic');
-    expect(runCorpus(run({ stats: { corpus: 'holdout' } }))).toBe('holdout');
-    expect(runCorpus(run({ corpus: 'ingested', stats: { corpus: 'holdout' } }))).toBe('ingested');
-    expect(isDevelopmentRun(run({}))).toBe(true);
+  it('counts only synthetic runs as development runs', () => {
+    expect(isDevelopmentRun(run({ corpus: 'synthetic' }))).toBe(true);
     expect(isDevelopmentRun(run({ corpus: 'holdout' }))).toBe(false);
     expect(isDevelopmentRun(run({ corpus: 'all' }))).toBe(false);
   });
@@ -272,11 +270,75 @@ describe('Runs page', () => {
 
   it('offers only the development and ingested corpora in the New run form', async () => {
     setCredentials({ username: 'engineer', password: 'engineer' });
-    stubApi({ '/runs': [], '/contracts': [], '/meta': META, '/workflows': [], '/models': [] });
+    stubApi({
+      '/runs': [],
+      '/contracts': [],
+      '/meta': META,
+      '/me': meFor('engineer', 'engineer'),
+      '/workflows': [],
+      '/models': [],
+      '/rules': [],
+    });
     renderPage(<RunsPage />, '/runs?new=1');
     const select = (await screen.findByLabelText('Corpus')) as HTMLSelectElement;
     expect([...select.options].map((o) => o.value)).toEqual(['synthetic', 'ingested']);
     expect(screen.getByText(/blank = all 60 development calls/)).toBeInTheDocument();
+  });
+
+  it('fills the New run form from the data: newest prompt, a simulated model, the next rule change', async () => {
+    setCredentials({ username: 'engineer', password: 'engineer' });
+    const prompt = (version: number) => ({
+      id: `p${version}`,
+      version,
+      label: `v${version}`,
+      prompt_hash: `h${version}`,
+      author: 'a',
+      notes: '',
+      encodes_rule_versions: [],
+      created_at: '2026-09-01T00:00:00Z',
+      text: null,
+    });
+    const version = (n: number, effective_from: string) => ({
+      version: n,
+      status: 'in_force',
+      effective_from,
+      effective_to: null,
+    });
+    stubApi({
+      '/runs': [],
+      '/contracts': [],
+      '/meta': META,
+      '/me': meFor('engineer', 'engineer'),
+      '/workflows': [
+        {
+          id: 'w',
+          code: 'qa-handoff',
+          name: 'QA handoff',
+          description: '',
+          prompt_versions: [prompt(1), prompt(3), prompt(2)],
+        },
+      ],
+      '/models': [
+        {
+          id: 'm1',
+          provider: 'ollama',
+          model_id: 'ollama/qwen2.5:7b-instruct',
+          label: 'Qwen',
+          pinned: true,
+          notes: '',
+        },
+        { id: 'm2', provider: 'simulated', model_id: 'sim-large', label: 'Simulated large', pinned: true, notes: '' },
+      ],
+      '/rules': [{ code: 'soa-48h-wait', versions: [version(1, '2023-09-30'), version(2, '2026-10-01')] }],
+    });
+    renderPage(<RunsPage />, '/runs?new=1');
+    await waitFor(() => expect(screen.getByLabelText('Rule date')).toHaveValue('2026-10-01'));
+    expect(screen.getByLabelText('Prompt version')).toHaveValue('3');
+    expect(screen.getByLabelText('Model')).toHaveValue('sim-large');
+    // presets: the day before the change, the change, today
+    expect(screen.getByRole('button', { name: '2026-09-30' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'today' }));
+    expect(screen.getByLabelText('Rule date')).toHaveValue(META.today);
   });
 });
 

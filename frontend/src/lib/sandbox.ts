@@ -5,7 +5,14 @@
  */
 
 import { isApiError } from '../api/errors';
-import type { JsonObject, SandboxArtifactOut, SandboxMatch, SandboxTranscriptOut, SpanOut } from '../api/types';
+import type {
+  JsonObject,
+  RedactionCounts,
+  SandboxArtifactOut,
+  SandboxMatch,
+  SandboxTranscriptOut,
+  SpanOut,
+} from '../api/types';
 import { directionLabel, type Tone } from './vocab';
 
 export const ARTIFACT_LIMIT = 20_000;
@@ -164,7 +171,7 @@ export function pieces(text: string, placed: PlacedMatch[]): TextPiece[] {
 export interface RefusalCopy {
   title: string;
   detail: string;
-  /** the model is simply not running: show the calm offline card, not an error */
+  /** no model is running: the request was fine, so show the offline status card rather than an error */
   offline?: boolean;
 }
 
@@ -200,8 +207,8 @@ export function refusalCopy(err: unknown, limit: number): RefusalCopy {
   }
 }
 
-/** Every identifier the sandbox redacts, in display order: [key, singular, plural]. Older servers send only the first three. */
-export const REDACTION_KINDS: ReadonlyArray<readonly [string, string, string]> = [
+/** Every identifier the sandbox redacts, in display order: [key, singular, plural]. */
+export const REDACTION_KINDS: ReadonlyArray<readonly [keyof RedactionCounts, string, string]> = [
   ['medicare_number', 'Medicare number', 'Medicare numbers'],
   ['ssn', 'SSN', 'SSNs'],
   ['dob', 'date of birth', 'dates of birth'],
@@ -216,7 +223,7 @@ export function redactionLine(r: SandboxArtifactOut['redacted'] | undefined): st
   const parts: string[] = [];
   for (const [key, one, many] of REDACTION_KINDS) {
     const n = r[key];
-    if (typeof n === 'number' && n > 0) parts.push(`${n} ${n === 1 ? one : many}`);
+    if (n > 0) parts.push(`${n} ${n === 1 ? one : many}`);
   }
   return parts.join(' · ');
 }
@@ -265,26 +272,24 @@ export function extractionOf(out: SandboxTranscriptOut): JsonObject | null {
   return isObject(out.output.extraction) ? out.output.extraction : null;
 }
 
-/** The deterministic route: top-level when the server sends it, else inside the output. */
+/** The deterministic route the workflow produced (output.route), when the model returned one. */
 export function routeOf(out: SandboxTranscriptOut): string | null {
-  if (typeof out.route === 'string') return out.route;
   return typeof out.output.route === 'string' ? out.output.route : null;
 }
 
 /**
- * Spans the model cited, located in the pasted text. Uses the server's spans
- * when present; otherwise reads every `*_span` field of the extraction. A
- * span not found word-for-word is unverified (offset -1).
+ * Spans the model cited, read from every `*_span` field of the extraction and
+ * located in the pasted text. A span not found word-for-word is unverified
+ * (offset -1).
  */
 export function transcriptSpans(out: SandboxTranscriptOut, text: string): SpanOut[] {
-  const fromServer = out.spans;
-  const raw: Array<{ label: string; text: string }> = fromServer?.length
-    ? fromServer.map((s) => ({ label: s.label, text: s.text }))
-    : Object.entries(extractionOf(out) ?? {})
-        .filter(([k, v]) => k.endsWith('_span') && typeof v === 'string' && v.trim() !== '')
-        .map(([k, v]) => ({ label: k, text: v as string }));
-  return raw.map(({ label, text: span }) => {
-    const { at, length } = locateSpanRange(text, span, 0);
-    return { label, text: span, offset: at, length: at >= 0 ? length : span.length, verified: at >= 0 };
-  });
+  return Object.entries(extractionOf(out) ?? {})
+    .filter(
+      (entry): entry is [string, string] =>
+        entry[0].endsWith('_span') && typeof entry[1] === 'string' && entry[1].trim() !== '',
+    )
+    .map(([label, span]) => {
+      const { at, length } = locateSpanRange(text, span, 0);
+      return { label, text: span, offset: at, length: at >= 0 ? length : span.length, verified: at >= 0 };
+    });
 }

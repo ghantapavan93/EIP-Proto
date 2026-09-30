@@ -1,5 +1,4 @@
 import type { RuleOut, RuleVersionOut } from '../api/types';
-import { governs } from '../lib/ruleVersions';
 
 /**
  * Mirrors rules/*.yaml in the repo (CMS CY2027 marketing provisions effective
@@ -843,20 +842,90 @@ export const RULES: RuleOut[] = [
     dependents: 0,
     contracts: [],
   },
+  {
+    id: 'rule-tcpa-ai-generated-voice',
+    code: 'tcpa-ai-generated-voice',
+    title:
+      'TCPA — an AI-generated voice is an "artificial or prerecorded voice" (FCC 24-17); AI-call disclosure proposed (FCC 24-84)',
+    regulator: 'FCC',
+    citation: '47 U.S.C. 227(b)(1); 47 CFR 64.1200(a)(1)-(3), (b)(1)-(3); FCC 24-17 (CG Docket No. 23-362)',
+    applies_to: ['MA', 'PDP', 'MEDIGAP', 'LIFE'],
+    summary:
+      "The FCC confirmed in February 2024 that the TCPA's limits on calls using an \"artificial or prerecorded voice\" cover AI technologies that generate human voices, including voice cloning. An outbound call placed with an AI voice therefore needs the called party's prior express consent, and prior express written consent when it markets or sells; the message must identify the caller at the start, give a call-back number, and, for telemarketing, offer an automated opt-out. A live agent choosing what the AI voice says does not take the call outside the rule. The ruling is about calls an AI voice initiates; it does not address an AI voice answering inbound calls. A separate proposal (FCC 24-84) would add an AI disclosure at consent and at the start of each call; it has not been adopted. Nothing in EIP's public footprint confirms an outbound voice-AI deployment (assumptions ledger E4: unknown); this rule matters the day one is piloted.",
+    source_url: '',
+    versions: [
+      v('tcpa-ai-generated-voice', {
+        version: 1,
+        status: 'in_force',
+        effective_from: '2024-02-08',
+        effective_to: null,
+        change_classification: 'INITIAL',
+        clause_text:
+          '[FCC 24-17 para. 2, quoted] "we confirm that the TCPA\'s restrictions on the use of \'artificial or prerecorded voice\' encompass current AI technologies that generate human voices." [para. 5, paraphrase] Callers must obtain prior express consent before a call that uses an artificial or prerecorded voice simulated or generated through AI; voice cloning is covered. [n. 13, paraphrase] If the call introduces an advertisement or is telemarketing, prior express written consent is required (64.1200(a)(2), (3)). [para. 8, paraphrase] A live agent selecting the messages does not remove the call from the prohibition. [para. 9, paraphrase] The identification, disclosure and opt-out requirements of 64.1200(b) apply to "any AI technology that initiates any outbound telephone call using an artificial or prerecorded voice to consumers." [47 CFR 64.1200(b)(1), quoted] "At the beginning of the message, state clearly the identity of the business, individual, or other entity that is responsible for initiating the call." [64.1200(b)(3), paraphrase] Telemarketing messages provide an automated voice or key-press opt-out, with instructions, within two seconds of the identification; using it records the number on the caller\'s do-not-call list and ends the call.',
+        summary:
+          'In force since 2024-02-08. An outbound AI-voice call is a robocall: consent first (written consent for sales and marketing), identify the caller at the start, give a call-back number, offer an automated opt-out on telemarketing calls.',
+        params: {
+          synthetic_voice_is_artificial_voice: true,
+          live_agent_selecting_messages_exempts: false,
+          consent_required: 'prior_express_consent',
+          consent_required_if_telemarketing: 'prior_express_written_consent',
+          identify_caller_at_start: true,
+          callback_number_required: true,
+          automated_opt_out_within_seconds: 2,
+          scope: 'outbound_calls_initiated',
+          ai_disclosure_required: false,
+        },
+        disputed: false,
+        dispute_note: '',
+        source_url: '',
+        sources: [
+          {
+            authority: 'primary',
+            cite: 'FCC 24-17, Declaratory Ruling, CG Docket No. 23-362 (adopted 2024-02-02, released 2024-02-08), paras. 2, 5, 8, 9, 11',
+            url: 'https://docs.fcc.gov/public/attachments/FCC-24-17A1.pdf',
+            reading: '',
+          },
+          {
+            authority: 'primary',
+            cite: 'eCFR 47 CFR 64.1200(a)(2)-(3), (b)(1)-(3), (f)(9), read 2026-09-30 (up to date as of 2026-09-25)',
+            url: 'https://www.ecfr.gov/current/title-47/section-64.1200',
+            reading: '',
+          },
+        ],
+      }),
+      v('tcpa-ai-generated-voice', {
+        version: 2,
+        status: 'proposed',
+        // No final rule and no vote scheduled, so no date to apply from and no vote_date.
+        effective_from: null,
+        effective_to: null,
+        change_classification: 'ADDS_REQUIREMENT',
+        clause_text:
+          '[paraphrase of the proposed rule text, FCC 24-84, 89 FR 73321] Define an "AI-generated call" as an outbound call that uses computational technology or machine learning, including predictive algorithms and large language models, to produce voice or text content (proposed 64.1200(f)(20)). When obtaining consent, callers must clearly and conspicuously disclose that they intend to use AI-generated voice or text (proposed (a)(13)); written consent for AI-generated calls must say so and the signer must specifically agree (proposed (f)(9)(i)(C)). Each artificial or prerecorded voice message must disclose at the beginning whether the call uses an AI voice (proposed (b)(1)). Calls by people with speech or hearing disabilities using AI voice technology, with no telemarketing, would be exempt (proposed (a)(3)(vi), (a)(9)(v)).',
+        summary:
+          'Proposed 2024-08-08 (published 2024-09-10). Not law. If adopted, existing consent language on lead forms would need an AI disclosure before an AI voice could call on it.',
+        params: {
+          ai_disclosure_at_consent: true,
+          ai_disclosure_at_call_start: true,
+          written_consent_must_name_ai: true,
+          disability_exemption_non_telemarketing: true,
+        },
+        disputed: false,
+        dispute_note: '',
+        source_url: '',
+        vote_date: null,
+        sources: [
+          {
+            authority: 'primary',
+            cite: 'FCC 24-84, Notice of Proposed Rulemaking, CG Docket No. 23-362; 89 FR 73321 (2024-09-10), FR Doc. 2024-19028, proposed rule text',
+            url: 'https://www.federalregister.gov/documents/2024/09/10/2024-19028/implications-of-artificial-intelligence-technologies-on-protecting-consumers-from-unwanted-robocalls',
+            reading: '',
+          },
+        ],
+      }),
+    ],
+    in_force_version: null,
+    dependents: 0,
+    contracts: [],
+  },
 ];
-
-export function findRule(code: string): RuleOut | undefined {
-  return RULES.find((r) => r.code === code);
-}
-
-export function versionInForce(rule: RuleOut, asOf: string): RuleVersionOut | null {
-  const sorted = [...rule.versions].sort((a, b) => a.version - b.version);
-  for (const ver of sorted) {
-    // proposed (not law), vacated (set aside) and stayed (paused) versions never govern
-    if (!governs(ver)) continue;
-    if (ver.effective_from <= asOf && (ver.effective_to === null || asOf <= ver.effective_to)) {
-      return ver;
-    }
-  }
-  return null;
-}

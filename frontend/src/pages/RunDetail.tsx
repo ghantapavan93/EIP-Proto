@@ -21,7 +21,7 @@ import { useToast } from '../components/ui/useToast';
 import { durationBetween, fmtDuration, fmtNumber, fmtTs, shortHash } from '../lib/format';
 import { outcomeTone, severityTone, triggerTone } from '../lib/vocab';
 import { evidenceSummary, str } from '../lib/evidence';
-import { fmtUsd, outcomeTotals, runCorpus, runStats } from '../lib/runStats';
+import { fmtUsd, outcomeTotals, runStats } from '../lib/runStats';
 import { CorpusChip } from '../components/runs/CorpusChip';
 import { cn } from '../lib/cn';
 
@@ -376,7 +376,7 @@ export function RunDetailPage() {
                 { key: 'Prompt hash', value: r.prompt_hash },
                 { key: 'Model', value: `${r.model_id} · ${r.model_label}` },
                 { key: 'Adapter', value: <AdapterChip adapter={r.adapter} /> },
-                { key: 'Corpus', value: runCorpus(r) },
+                { key: 'Corpus', value: r.corpus },
                 { key: 'Corpus hash', value: r.corpus_hash },
                 { key: 'Contract set hash', value: r.contract_set_hash },
                 { key: 'Rule date', value: r.rule_date },

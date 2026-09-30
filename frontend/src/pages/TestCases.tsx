@@ -14,6 +14,7 @@ import { useIdentity, usePermission } from '../components/access/usePermission';
 import { useToast } from '../components/ui/useToast';
 import { fmtDate, fmtTs, shortHash } from '../lib/format';
 import { testCasesApplied } from '../lib/runStats';
+import { stateLabel } from '../lib/vocab';
 import { isSeededExample, whoCanApprove } from '../lib/testCases';
 
 function LoopStep({
@@ -98,7 +99,7 @@ export function TestCasesPage() {
   const runs = useRuns();
   const approve = useApproveTestCase();
   const { toast } = useToast();
-  const user = me.name;
+  const user = me?.name ?? null;
   const latestRun = useMemo(
     () => [...(runs.data ?? [])].sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0],
     [runs.data],
@@ -219,7 +220,7 @@ export function TestCasesPage() {
           return (
             <span className="cell-primary">
               <Chip tone={tc.status === 'APPROVED' ? 'green' : tc.status === 'EXPIRED' ? 'neutral' : 'amber'}>
-                {tc.status.replace('_', ' ').toLowerCase()}
+                {stateLabel(tc.status).toLowerCase()}
               </Chip>
               <span className="cell-sub whitespace-nowrap font-mono text-[11px]">expires {fmtDate(tc.expires_at)}</span>
             </span>
@@ -238,6 +239,14 @@ export function TestCasesPage() {
               <CheckCheck size={12} aria-hidden /> Approve
             </>
           );
+          if (!approvePermission.known) {
+            // identity not known yet: hold the control inert rather than guess either way
+            return (
+              <button type="button" className="btn btn-outline btn-sm" disabled>
+                {label}
+              </button>
+            );
+          }
           if (!approvePermission.allowed) {
             return (
               <DisabledWithReason className="btn btn-outline btn-sm" reason={approvePermission.why}>
@@ -276,7 +285,7 @@ export function TestCasesPage() {
         },
       },
     ],
-    [approvePermission.allowed, approvePermission.why, user, approve, toast],
+    [approvePermission.known, approvePermission.allowed, approvePermission.why, user, approve, toast],
   );
 
   return (

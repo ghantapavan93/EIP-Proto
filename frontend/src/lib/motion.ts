@@ -85,7 +85,7 @@ export function useTickingNumber(
   { delayMs = 0, animate = true, from: initial }: { delayMs?: number; animate?: boolean; from?: number } = {},
 ): number {
   const reduced = usePrefersReducedMotion();
-  // `from` makes the first render count up once (a hero number on mount); otherwise the first value shows as-is
+  // `from` makes the first render count up once (a headline count on mount); otherwise the first value shows as-is
   const [shown, setShown] = useState(initial ?? value);
   const from = useRef(initial ?? value);
   useEffect(() => {

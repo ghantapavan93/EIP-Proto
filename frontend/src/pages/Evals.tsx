@@ -4,10 +4,11 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { FileText } from 'lucide-react';
 import { useMatcherEvals } from '../api/hooks';
 import { openText } from '../api/client';
-import type { MatcherEvalCase, MatcherEvalCounts } from '../api/types';
+import type { MatcherEvalCase, MatcherEvalCounts, RuleVersionRef } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section } from '../components/layout/Page';
 import { DataTable } from '../components/ui/DataTable';
+import { RuleRefChips } from '../components/rules/RuleRefChips';
 import { Chip } from '../components/ui/Chip';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -24,29 +25,9 @@ function refKey([rule, version]: [string, number]): string {
   return `${rule}@v${version}`;
 }
 
-function RefChips({
-  refs,
-  tone,
-  statuses,
-}: {
-  refs: Array<[string, number]>;
-  tone: 'neutral' | 'green' | 'red' | 'amber';
-  statuses?: Record<string, string>;
-}) {
-  if (!refs.length) return <span className="text-ink-3">none</span>;
-  return (
-    <span className="inline-flex flex-wrap gap-1">
-      {refs.map((r) => {
-        const status = statuses?.[`${r[0]}@${r[1]}`];
-        return (
-          <Chip key={refKey(r)} tone={tone} mono title={status ? `edge status: ${status}` : undefined}>
-            {refKey(r)}
-            {status && status !== 'confirmed' ? ` · ${status}` : ''}
-          </Chip>
-        );
-      })}
-    </span>
-  );
+/** The matcher eval's [rule, version] tuples as the RuleVersionRef shape the chips take. */
+function asRefs(pairs: Array<[string, number]>): RuleVersionRef[] {
+  return pairs.map(([rule, version]) => ({ rule, version }));
 }
 
 export function EvalsPage() {
@@ -145,7 +126,7 @@ export function EvalsPage() {
         header: 'Expected',
         accessorFn: (r) => r.expected.map(refKey).join(','),
         meta: { wrap: true },
-        cell: (c) => <RefChips refs={c.row.original.expected} tone="neutral" />,
+        cell: (c) => <RuleRefChips refs={asRefs(c.row.original.expected)} tone="neutral" />,
       },
       {
         id: 'detected',
@@ -153,8 +134,8 @@ export function EvalsPage() {
         accessorFn: (r) => r.detected.map(refKey).join(','),
         meta: { wrap: true },
         cell: (c) => (
-          <RefChips
-            refs={c.row.original.detected}
+          <RuleRefChips
+            refs={asRefs(c.row.original.detected)}
             tone={c.row.original.false_positive.length ? 'red' : 'green'}
             statuses={c.row.original.detected_status}
           />

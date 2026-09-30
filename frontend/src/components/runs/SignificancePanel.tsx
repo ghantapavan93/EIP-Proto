@@ -143,7 +143,7 @@ function OverallCard({ row, alpha, max }: { row: ContractComparisonOut; alpha: n
   return (
     <div
       className={cn(
-        'card card-hero grid grid-cols-1 gap-x-6 gap-y-4 border-l-[3px] p-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.9fr)]',
+        'card card-raised grid grid-cols-1 gap-x-6 gap-y-4 border-l-[3px] p-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.9fr)]',
         tone === 'green' ? 'border-l-green' : tone === 'red' ? 'border-l-red' : 'border-l-input',
       )}
       data-testid="significance-overall"
@@ -153,7 +153,7 @@ function OverallCard({ row, alpha, max }: { row: ContractComparisonOut; alpha: n
           <span className="font-mono text-[12px] font-semibold text-slate">ALL-BLOCK</span>
           <SignificanceChip direction={row.direction} />
         </div>
-        <div className="mt-1.5 text-[16px] font-semibold leading-snug text-ink">{plainVerdict(row, alpha)}</div>
+        <div className="mt-1.5 text-[16px] font-semibold leading-snug text-ink">{plainVerdict(row)}</div>
         <div className="mt-1 text-[12px] leading-snug text-ink-2">
           The release question: a call fails if <em>any</em> release-blocking contract fails on it.
         </div>
@@ -218,7 +218,7 @@ function ContractRow({
   family: number;
 }) {
   const tone = directionTone(row.direction);
-  const holmLost = lostToHolm(row, alpha);
+  const holmLost = lostToHolm(row);
   const cautions = rowCautions(row);
   return (
     <li
@@ -243,7 +243,7 @@ function ContractRow({
           <div
             className={cn('text-[13px] leading-snug', row.direction === 'none' ? 'text-ink' : 'font-semibold text-ink')}
           >
-            {plainVerdict(row, alpha, family)}
+            {plainVerdict(row, family)}
           </div>
           <div className="mt-0.5 font-mono text-[11px] text-ink-3">
             {row.paired

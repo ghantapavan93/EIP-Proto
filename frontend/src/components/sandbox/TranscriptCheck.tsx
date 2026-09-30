@@ -87,7 +87,7 @@ function Progress({ seconds, onCancel }: { seconds: number; onCancel: () => void
   );
 }
 
-/** 409: the model is simply not running. Calm, and it points at what still works. */
+/** 409: no local model is running. Not an error in the request, so it is a status note that points at what still works. */
 function OfflineCard({
   detail,
   recordedHref,
@@ -173,7 +173,7 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
     : [];
   return (
     <section aria-label="Transcript result" className="space-y-3">
-      <div className="card card-hero flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
+      <div className="card card-raised flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
         {route && (
           <span className="inline-flex items-center gap-2 text-[13px] text-ink-2">
             route{' '}
@@ -298,8 +298,8 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
 /**
  * Tab two of /try: one pasted call through the real workflow on a local
  * model. It can take a minute, so it shows elapsed time and can be
- * cancelled; with no model reachable (409) it says so calmly and points at
- * what still works.
+ * cancelled; with no model reachable (409) it shows a status note, not an
+ * error, and points at what still works.
  */
 export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }) {
   const samples = useSandboxSamples();

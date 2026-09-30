@@ -19,22 +19,20 @@ export function PrivacyLine({ className, detail }: { className?: string; detail?
 
 /**
  * What was redacted before anything was matched or sent to a model: every
- * identifier kind the server reports, zeros included, so the reader sees what
- * is covered and not only what was found. Kinds an older server does not
- * report are left out rather than shown as zero.
+ * identifier kind, zeros included, so the reader sees what is covered and
+ * not only what was found.
  */
 export function RedactionTally({ counts, className }: { counts: RedactionCounts | undefined; className?: string }) {
-  const kinds = REDACTION_KINDS.filter(([key]) => typeof counts?.[key] === 'number');
-  if (!counts || !kinds.length) return null;
-  const total = kinds.reduce((n, [key]) => n + (counts[key] ?? 0), 0);
+  if (!counts) return null;
+  const total = REDACTION_KINDS.reduce((n, [key]) => n + counts[key], 0);
   return (
     <div
       className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px]', className)}
       aria-label="Redacted before matching"
     >
       <span className="text-ink-2">{total ? 'Redacted before matching:' : 'Nothing needed redacting:'}</span>
-      {kinds.map(([key, one, many]) => {
-        const n = counts[key] ?? 0;
+      {REDACTION_KINDS.map(([key, one, many]) => {
+        const n = counts[key];
         return (
           <span
             key={key}

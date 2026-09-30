@@ -1,7 +1,8 @@
 /**
- * Attribution, client side: the same rules as backend/backstop/core/attribution.py,
- * used by mock mode so the backend-free console answers "can this difference be
- * pinned on one change?" exactly as the server does.
+ * TypeScript port of backend/backstop/core/attribution.py, used only by the
+ * mock API in backend-free mode (`npm run dev:mock`) to fill CompareOut.attribution.
+ * The UI never computes attribution: it renders what GET /runs/compare returns.
+ * Keep the rules in step with the backend.
  */
 import type { AttributionOut, FactorChangeOut, IsolatingPairOut, RunOut } from '../api/types';
 

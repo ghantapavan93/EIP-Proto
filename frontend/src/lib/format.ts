@@ -95,6 +95,13 @@ export function todayIso(now: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+/** A YYYY-MM-DD date moved by whole days (UTC calendar arithmetic, so no DST drift). */
+export function shiftIsoDate(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 /** A zero-based page index from a query param; anything non-numeric, negative or fractional → 0. */
 export function parsePageParam(value: string | null | undefined): number {
   if (!value || !/^\d+$/.test(value.trim())) return 0;
@@ -109,13 +116,6 @@ export function hostname(url: string | null | undefined): string {
   } catch {
     return url;
   }
-}
-
-/** "over_restrictive" → "Over restrictive"; "STALE_ASSET" → "Stale asset". */
-export function humanize(value: string | null | undefined): string {
-  if (!value) return '—';
-  const s = value.replace(/_/g, ' ').toLowerCase();
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** "just now", "2m ago", "3h ago", "4d ago" — for status lines; absolute time belongs in a title. */

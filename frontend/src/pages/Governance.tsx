@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Check, FileCheck2, KeyRound, ShieldAlert, ShieldCheck, Stamp, Users } from 'lucide-react';
+import { Check, FileCheck2, KeyRound, ShieldAlert, Stamp, Users } from 'lucide-react';
 import {
   useAccessReview,
   useAuditCheckpoints,
@@ -9,10 +9,18 @@ import {
   useTakeCheckpoint,
   useVerifyCheckpoint,
 } from '../api/hooks';
-import type { AccessAccountOut, AuditCheckpointOut, AuditVerifyOut, DeniedAttemptOut } from '../api/types';
+import type {
+  AccessAccountOut,
+  AccessActionOut,
+  AuditCheckpointOut,
+  DeniedAttemptOut,
+  MeOut,
+  RoleInfo,
+} from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section } from '../components/layout/Page';
 import { GatedButton } from '../components/access/GatedButton';
+import { VerifyResult } from '../components/audit/VerifyResult';
 import { useIdentity, usePermission } from '../components/access/usePermission';
 import { Chip } from '../components/ui/Chip';
 import { DataTable } from '../components/ui/DataTable';
@@ -21,11 +29,8 @@ import { LoadingState } from '../components/ui/LoadingState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { fmtRelative, fmtTs, shortHash } from '../lib/format';
 import { eventLabel } from '../lib/audit';
-import { ACTIONS, roleTitle, type RoleAction } from '../lib/roles';
+import { roleTitle } from '../lib/roles';
 import { cn } from '../lib/cn';
-
-const ROLE_COLUMNS = ['analyst', 'engineer', 'admin'] as const;
-const ADMIN_ONLY: RoleAction[] = ['review_access', 'checkpoint_audit', 'reload_rules'];
 
 /** Shown in place of an admin-only panel: what it is, and why this role cannot see it. */
 function AdminOnly({ what, role }: { what: string; role: string }) {
@@ -43,8 +48,28 @@ function AdminOnly({ what, role }: { what: string; role: string }) {
 
 // ------------------------------------------------------------- separation of duties
 
-function DutiesMatrix() {
-  const rows = (Object.keys(ACTIONS) as RoleAction[]).map((action) => ({ action, ...ACTIONS[action] }));
+/**
+ * The matrix rows as GET /me describes them: each action the caller's role
+ * is told about, and which roles list it in `can`. The admin access review
+ * sends the server's own matrix (with each action's extra condition); every
+ * other role reads it from /me, which carries the same facts.
+ */
+function dutiesFromMe(me: MeOut): AccessActionOut[] {
+  return me.permissions.map((p) => ({
+    action: p.action,
+    label: p.label,
+    roles: me.roles.filter((r) => r.can.includes(p.action)).map((r) => r.role),
+    rule: '',
+  }));
+}
+
+/** An action only admins may take: platform governance rather than day-to-day work. */
+function isGovernance(row: AccessActionOut): boolean {
+  return row.roles.length === 1 && row.roles[0] === 'admin';
+}
+
+function DutiesMatrix({ rows, roles }: { rows: AccessActionOut[]; roles: RoleInfo[] }) {
+  const columns = roles.map((r) => r.role);
   return (
     <div className="card overflow-x-auto">
       <table className="w-full min-w-[560px] text-[12.5px]">
@@ -54,7 +79,7 @@ function DutiesMatrix() {
             <th scope="col" className="px-3 py-2 font-semibold text-ink-2">
               Action
             </th>
-            {ROLE_COLUMNS.map((r) => (
+            {columns.map((r) => (
               <th key={r} scope="col" className="w-24 px-3 py-2 text-center font-semibold text-ink-2">
                 {roleTitle(r)}
               </th>
@@ -63,18 +88,19 @@ function DutiesMatrix() {
         </thead>
         <tbody>
           {rows.map((row) => {
-            const adminOnly = ADMIN_ONLY.includes(row.action);
+            const governance = isGovernance(row);
             return (
-              <tr key={row.action} className={cn('border-b border-hairline last:border-0', adminOnly && 'bg-teal/5')}>
+              <tr key={row.action} className={cn('border-b border-hairline last:border-0', governance && 'bg-teal/5')}>
                 <th scope="row" className="px-3 py-1.5 text-left font-normal text-ink">
                   {row.label}
-                  {adminOnly && (
+                  {governance && (
                     <Chip tone="teal" size="xs" className="ml-2">
                       governance
                     </Chip>
                   )}
+                  {row.rule && <span className="block text-[11.5px] text-ink-3">{row.rule}</span>}
                 </th>
-                {ROLE_COLUMNS.map((r) => (
+                {columns.map((r) => (
                   <td key={r} className="px-3 py-1.5 text-center">
                     {row.roles.includes(r) ? (
                       <Check size={14} className="inline text-green-ink" aria-label="allowed" />
@@ -151,6 +177,14 @@ const accountColumns: ColumnDef<AccessAccountOut>[] = [
   },
 ];
 
+/** The server's matrix for an admin (GET /admin/access), else the same facts from GET /me. */
+function DutiesSection({ me, isAdmin }: { me: MeOut; isAdmin: boolean }) {
+  const review = useAccessReview(isAdmin);
+  if (isAdmin && review.data) return <DutiesMatrix rows={review.data.matrix} roles={review.data.roles} />;
+  if (isAdmin && review.isLoading) return <LoadingState className="p-4" rows={4} />;
+  return <DutiesMatrix rows={dutiesFromMe(me)} roles={me.roles} />;
+}
+
 function AccessReview() {
   const review = useAccessReview(true);
   if (review.isLoading) return <LoadingState className="p-4" rows={4} />;
@@ -219,30 +253,6 @@ function AccessReview() {
 
 // ------------------------------------------------------------- audit checkpoints
 
-function VerifyResult({ result }: { result: AuditVerifyOut }) {
-  const ok = result.ok;
-  return (
-    <div
-      role="status"
-      className={cn(
-        'mt-2 flex items-start gap-2 rounded-[6px] border px-3 py-2 text-[12.5px]',
-        ok ? 'border-green/40 bg-green/10 text-ink' : 'border-red/30 bg-red/8 text-ink',
-      )}
-    >
-      {ok ? (
-        <ShieldCheck size={14} className="mt-[2px] shrink-0 text-green-ink" aria-hidden />
-      ) : (
-        <ShieldAlert size={14} className="mt-[2px] shrink-0 text-red" aria-hidden />
-      )}
-      <span>
-        {ok
-          ? `Verified: the chain is intact across ${result.checked} rows and still contains this checkpoint.`
-          : `Not verified: ${result.reason ?? 'the chain does not match'}.`}
-      </span>
-    </div>
-  );
-}
-
 function CheckpointRow({ cp }: { cp: AuditCheckpointOut }) {
   const verify = useVerifyCheckpoint();
   return (
@@ -267,7 +277,7 @@ function CheckpointRow({ cp }: { cp: AuditCheckpointOut }) {
           Verify now
         </button>
       </div>
-      {verify.data && <VerifyResult result={verify.data} />}
+      {verify.data && <VerifyResult result={verify.data} className="mt-2" />}
       {verify.error && <p className="mt-1 text-red">{verify.error.message}</p>}
     </li>
   );
@@ -313,7 +323,7 @@ function VerifyReceipt() {
           Verify
         </button>
       </div>
-      {verify.data && <VerifyResult result={verify.data} />}
+      {verify.data && <VerifyResult result={verify.data} className="mt-2" />}
       {verify.error && <p className="mt-2 text-[12.5px] text-red">{verify.error.message}</p>}
     </form>
   );
@@ -428,7 +438,7 @@ export function GovernancePage() {
       />
 
       <Section title="Separation of duties" right={<Users size={15} className="text-ink-3" aria-hidden />}>
-        <DutiesMatrix />
+        {me ? <DutiesSection me={me} isAdmin={isAdmin} /> : <LoadingState className="p-4" rows={4} />}
         <p className="mt-2 text-[12px] text-ink-3">
           The same table drives the server's checks; a test fails if any guarded endpoint disagrees with it.
         </p>
@@ -441,7 +451,7 @@ export function GovernancePage() {
           <AccessReview />
         ) : (
           <AdminOnly
-            role={me.role}
+            role={me?.role ?? ''}
             what="The access review lists every account, its role, whether it still uses a default password, and every refused request."
           />
         )}

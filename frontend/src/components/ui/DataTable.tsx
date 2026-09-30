@@ -12,7 +12,6 @@ import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { cellWraps, type DataTableColumnMeta } from '../../lib/table';
 
-export type { DataTableColumnMeta } from '../../lib/table';
 import { EmptyState } from './EmptyState';
 import { SkeletonRows } from './Skeleton';
 import { ErrorState } from './ErrorState';
@@ -45,6 +44,13 @@ export interface DataTableProps<T> {
 }
 
 /**
+ * One shared empty array for "no data yet". TanStack Table resets derived
+ * state whenever `data` changes identity, and that reset re-renders; a fresh
+ * `[]` on every render would therefore re-render forever while data loads.
+ */
+const NO_ROWS: never[] = [];
+
+/**
  * Dense TanStack table: sticky header, click-to-sort, keyboard-activatable
  * rows (Enter / Space), loading / empty / error states built in.
  */
@@ -71,7 +77,7 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(initialSort);
   const table = useReactTable({
-    data: data ?? [],
+    data: data ?? NO_ROWS,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -175,7 +181,8 @@ export function DataTable<T>({
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                   onKeyDown={(e) => handleKey(e, row)}
                   className={rowClassName?.(row.original)}
-                  aria-selected={selectedIds ? selected : undefined}
+                  // aria-selected is only valid in a grid or listbox; a plain table row marks the picked one as current
+                  aria-current={selected ? 'true' : undefined}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const meta = cell.column.columnDef.meta as DataTableColumnMeta | undefined;

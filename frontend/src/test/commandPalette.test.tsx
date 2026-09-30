@@ -5,8 +5,9 @@ import { evidenceForLocation, filterPalette, type PaletteItem } from '../lib/pal
 
 const mutate = vi.fn();
 vi.mock('../api/hooks', () => ({
-  canEdit: (role: string | null) => role === 'engineer' || role === 'admin',
-  useRole: () => 'engineer',
+  useMe: () => ({
+    data: { permissions: [{ action: 'start_runs', label: 'Start a harness run', allowed: true, why: '' }] },
+  }),
   useExportEvidence: () => ({ mutate, isPending: false }),
   useRules: () => ({
     data: [{ code: 'soa-48h-wait', title: 'Scope of Appointment — 48-hour wait', citation: '42 CFR 422.2264(c)(3)' }],

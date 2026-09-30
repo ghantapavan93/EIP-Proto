@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Tests are entry points too: a helper only a test uses is still used.
+  "entry": ["src/**/*.test.{ts,tsx}"],
+  // CSS is included so the tailwindcss import in src/index.css counts as a use.
+  "project": ["src/**/*.{ts,tsx,css}"],
+  // An export also used inside its own module is part of that module's API, not dead code.
+  "ignoreExportsUsedInFile": true
+}

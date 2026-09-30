@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ExternalLink, ScanSearch } from 'lucide-react';
-import { canEdit, useAsset, useRole } from '../api/hooks';
+import { useAsset } from '../api/hooks';
 import type { AssetVersionOut, EdgeOut, ScanOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section } from '../components/layout/Page';
 import { GatedButton } from '../components/access/GatedButton';
+import { usePermission } from '../components/access/usePermission';
 import { Chip } from '../components/ui/Chip';
 import { SourceBadge } from '../components/artifacts/SourceBadge';
 import { HighlightedText, type HighlightSpan } from '../components/ui/HighlightedText';
@@ -21,7 +22,7 @@ import { RunScanControl } from '../components/artifacts/RunScanControl';
 
 export function ArtifactDetailPage() {
   const { code = '' } = useParams();
-  const role = useRole();
+  const scan = usePermission('start_scans');
   const asset = useAsset(code);
   const [lastScan, setLastScan] = useState<ScanOut | null>(null);
 
@@ -164,7 +165,7 @@ export function ArtifactDetailPage() {
           </div>
         }
         actions={
-          canEdit(role) ? (
+          scan.allowed ? (
             <RunScanControl onScanned={setLastScan} />
           ) : (
             <GatedButton action="start_scans" className="btn btn-outline">

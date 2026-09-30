@@ -32,13 +32,14 @@ const task: ReviewTaskOut = {
   closed_at: null,
   payload: {},
   allowed_transitions: [],
+  lane: 'actionable',
 };
 
 let current: ReviewTaskOut = task;
 
 vi.mock('../api/hooks', () => ({
   useReviewTask: () => ({ data: current, isLoading: false, error: null, refetch: () => undefined }),
-  useTransition: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false, error: null }),
+  useReviewTransition: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false, error: null }),
   useTestCases: () => ({ data: [] }),
   useExportEvidence: () => ({ mutate: vi.fn(), isPending: false }),
   useStatus: () => ({ data: undefined, isLoading: false }),
@@ -46,7 +47,7 @@ vi.mock('../api/hooks', () => ({
   useRunResults: () => ({ data: [], isLoading: false, error: null }),
 }));
 
-import { TaskDrawer } from '../pages/Review';
+import { TaskDrawer } from '../components/review/TaskDrawer';
 
 function renderDrawer() {
   return render(
@@ -73,6 +74,21 @@ describe('TaskDrawer with role-filtered transitions', () => {
     renderDrawer();
     expect(screen.getByText(/is terminal — no further transitions/)).toBeInTheDocument();
     expect(screen.queryByText(/for your role/)).toBeNull();
+  });
+
+  it('shows a bound version the task does not record as unknown instead of guessing one', () => {
+    current = {
+      ...task,
+      kind: 'STALE_ASSET',
+      rule_code: 'soa-48h-wait',
+      rule_version: 2,
+      payload: {},
+      allowed_transitions: [],
+    };
+    renderDrawer();
+    expect(screen.getByText('unknown')).toBeInTheDocument();
+    expect(screen.getByText('The task does not record this version.')).toBeInTheDocument();
+    expect(screen.queryByText('v1')).toBeNull();
   });
 
   it('renders exactly the transitions the server allowed', () => {

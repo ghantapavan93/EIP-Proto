@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ArrowRight, Cpu, KeyRound, Laptop, ShieldCheck } from 'lucide-react';
 import { useModelBoard } from '../api/hooks';
-import type { ModelBoardRow, ProviderBoardInfo, RunOut } from '../api/types';
+import type { ModelBoardOut, ModelBoardRow, ProviderBoardInfo, RunOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section } from '../components/layout/Page';
 import { DataTable } from '../components/ui/DataTable';
@@ -13,7 +13,7 @@ import { AdapterChip } from '../components/runs/AdapterChip';
 import { JudgeChip } from '../components/runs/RunFacts';
 import { EmptyState } from '../components/ui/EmptyState';
 import { fmtDuration, fmtNumber, fmtTs } from '../lib/format';
-import { isDevelopmentRun, runStats } from '../lib/runStats';
+import { runStats } from '../lib/runStats';
 import { providerStatusLabel, type Tone } from '../lib/vocab';
 import { cn } from '../lib/cn';
 
@@ -160,23 +160,29 @@ function ProviderCard({ name, info }: { name: string; info: ProviderBoardInfo })
   );
 }
 
+/**
+ * "60 development calls × 8 contracts", read from a matched run on the board
+ * (every matched run replays the same calls against the same contract set),
+ * or null before any model has one.
+ */
+function boardScope(board: ModelBoardOut | undefined): string | null {
+  const run = board?.rows.find((r) => r.matched && r.latest_run)?.latest_run;
+  if (!run) return null;
+  const calls = runStats(run).transcripts;
+  const contracts = run.contracts.length;
+  const callsPart = calls ? `${calls} development ${calls === 1 ? 'call' : 'calls'}` : 'development calls';
+  return `${callsPart} × ${contracts} ${contracts === 1 ? 'contract' : 'contracts'}`;
+}
+
 export function ModelsPage() {
   useTopBar([{ label: 'Models' }]);
-  const board = useModelBoard(2, '2026-10-01');
+  // No parameters: the server picks the prompt version and rule date and echoes them back.
+  const board = useModelBoard();
   const navigate = useNavigate();
   const [picked, setPicked] = useState<string[]>([]);
 
-  // The board compares models on the development calls only. The server already filters;
-  // this guard keeps an older server's held-out or ingested run off the board too.
-  const rows = useMemo(
-    () =>
-      board.data?.rows.map((r) =>
-        r.latest_run && !isDevelopmentRun(r.latest_run)
-          ? { ...r, latest_run: null, matched: false, measured: false }
-          : r,
-      ),
-    [board.data],
-  );
+  const rows = board.data?.rows;
+  const scope = useMemo(() => boardScope(board.data), [board.data]);
   const measured = rows?.filter((r) => r.measured && r.matched).length ?? 0;
   const readyLocal = rows?.filter((r) => r.tier === 'local' && r.availability === 'ready').length ?? 0;
   const keyless = rows?.filter((r) => r.availability === 'needs-key').length ?? 0;
@@ -442,7 +448,11 @@ export function ModelsPage() {
       </Section>
 
       <Section
-        title={`Scoreboard — prompt v${board.data?.prompt_version ?? 2} · rules as of ${board.data?.rule_date ?? '2026-10-01'} · 60 synthetic development calls (T001–T060) × 8 contracts`}
+        title={
+          board.data
+            ? `Scoreboard — prompt v${board.data.prompt_version} · rules as of ${board.data.rule_date}${scope ? ` · ${scope}` : ''}`
+            : 'Scoreboard'
+        }
         right={
           <span className="inline-flex items-center gap-1">
             <Cpu size={12} aria-hidden /> tick two rows, then Compare

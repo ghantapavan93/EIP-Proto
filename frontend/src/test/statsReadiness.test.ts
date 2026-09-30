@@ -63,6 +63,11 @@ describe('exact statistics (port of backend core/stats.py)', () => {
     const worse = compareRates(2, 60, 19, 60, { both_pass: 41, a_only_fail: 0, b_only_fail: 17, both_fail: 2 });
     expect(worse.direction).toBe('worse');
     expect(worse.verdict).toMatch(/^B is significantly worse/);
+    // p < 0.05 on 7 changed calls: the test is significant, but no direction is claimed (as in core/stats.py)
+    const thin = compareRates(0, 60, 7, 60, { both_pass: 53, a_only_fail: 0, b_only_fail: 7, both_fail: 0 });
+    expect(thin.significant).toBe(true);
+    expect(thin.direction).toBe('none');
+    expect(thin.verdict).toMatch(/^No conclusion: B looks worse .* only 7 call\(s\) changed outcome$/);
   });
 
   it('computes precision, recall and F1 with intervals; no specificity without true negatives', () => {
@@ -78,6 +83,7 @@ describe('exact statistics (port of backend core/stats.py)', () => {
 describe('significance wording', () => {
   const row = (over: Partial<Parameters<typeof plainVerdict>[0]>): Parameters<typeof plainVerdict>[0] => ({
     contract_code: 'C-X',
+    severity: 'BLOCK',
     failure_outcomes: ['FAIL', 'ERROR'],
     n_shared: 60,
     paired: { both_pass: 50, a_only_fail: 1, b_only_fail: 3, both_fail: 6 },
@@ -86,10 +92,13 @@ describe('significance wording', () => {
     discordant: 4,
     test: 'McNemar exact',
     p_value: 0.625,
+    p_holm: null,
     significant: false,
+    significant_holm: false,
     direction: 'none',
     verdict: 'No significant difference',
     cautions: [],
+    excluded_not_evaluated: 0,
     ...over,
   });
 
@@ -98,14 +107,36 @@ describe('significance wording', () => {
     expect(
       plainVerdict(row({ paired: { both_pass: 60, a_only_fail: 0, b_only_fail: 0, both_fail: 0 }, discordant: 0 })),
     ).toBe('No call changed outcome');
-    const holmLost = row({ direction: 'worse', significant: true, p_value: 0.02, p_holm: 0.14 });
-    expect(lostToHolm(holmLost, 0.05)).toBe(true);
-    expect(plainVerdict(holmLost, 0.05, 9)).toBe(
+    // the server sets direction "none" on a row that fails Holm; significant_holm says why
+    const holmLost = row({
+      direction: 'none',
+      significant: true,
+      significant_holm: false,
+      p_value: 0.02,
+      p_holm: 0.14,
+    });
+    expect(lostToHolm(holmLost)).toBe(true);
+    expect(plainVerdict(holmLost, 9)).toBe(
       'B fails more often — unlikely to be chance on its own, but not after correcting for 9 contracts',
     );
-    expect(plainVerdict(row({ direction: 'better', significant: true, p_value: 0.001, p_holm: 0.009 }))).toBe(
-      'B fails less often — unlikely to be chance',
-    );
+    expect(
+      plainVerdict(
+        row({ direction: 'better', significant: true, significant_holm: true, p_value: 0.001, p_holm: 0.009 }),
+      ),
+    ).toBe('B fails less often — unlikely to be chance');
+    // ALL-BLOCK has no Holm answer (null): never reported as lost to it
+    expect(lostToHolm(row({ significant: true, significant_holm: null }))).toBe(false);
+  });
+
+  it('says a significant paired test with few changed calls is too thin to conclude', () => {
+    const few = row({
+      significant: true,
+      significant_holm: true,
+      p_value: 0.03,
+      discordant: 6,
+      paired: { both_pass: 50, a_only_fail: 0, b_only_fail: 6, both_fail: 4 },
+    });
+    expect(plainVerdict(few)).toBe('B fails more often, but only 6 calls changed outcome — too few to conclude');
   });
 
   it('formats rates and picks a shared axis', () => {
@@ -180,7 +211,7 @@ describe('mock /contracts/{code}/metrics', () => {
 });
 
 describe('mock /readiness', () => {
-  it('counts down to Oct 1 and AEP, lists what flips, and is honest about vacated and proposed rules', async () => {
+  it('counts down to Oct 1 and AEP, lists what flips, and marks vacated and proposed rules as not enforced', async () => {
     const r = (await mockRequest('GET', '/readiness?as_of=2026-09-25', undefined, engineer)) as ReadinessOut;
     expect(r.burn_down.target).toBe('2026-10-01');
     expect(r.burn_down.days_left).toBe(6);

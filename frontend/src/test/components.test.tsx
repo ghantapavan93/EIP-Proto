@@ -86,6 +86,49 @@ describe('Drawer focus', () => {
       vi.useRealTimers();
     }
   });
+
+  it('is named by its heading, keeps Tab inside, and returns focus to the opener on close', () => {
+    vi.useFakeTimers();
+    try {
+      function Host() {
+        const [open, setOpen] = useState(false);
+        return (
+          <>
+            <button type="button" onClick={() => setOpen(true)}>
+              open
+            </button>
+            <Drawer open={open} title="Trap drawer" onClose={() => setOpen(false)}>
+              <input aria-label="only field" />
+            </Drawer>
+          </>
+        );
+      }
+      render(<Host />);
+      const opener = screen.getByRole('button', { name: 'open' });
+      opener.focus();
+      fireEvent.click(opener);
+      act(() => {
+        vi.runAllTimers();
+      });
+      const dialog = screen.getByRole('dialog', { name: 'Trap drawer' });
+      expect(dialog).toHaveFocus();
+
+      const close = screen.getByRole('button', { name: 'Close' });
+      const field = screen.getByRole('textbox', { name: 'only field' });
+      // Tab from the last focusable wraps to the first; Shift+Tab from the first wraps to the last.
+      field.focus();
+      fireEvent.keyDown(document, { key: 'Tab' });
+      expect(close).toHaveFocus();
+      fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+      expect(field).toHaveFocus();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).toBeNull();
+      expect(opener).toHaveFocus();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe('NavRail below lg', () => {
