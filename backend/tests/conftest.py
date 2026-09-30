@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -31,8 +33,22 @@ def settings():
     return get_settings()
 
 
+BACKEND = Path(__file__).resolve().parents[1]
+
+
+def _migrate_if_deployed_dialect() -> None:
+    """Postgres is schema-owned by Alembic (see db.init_schema), so the suite migrates it the
+    way a deployment does. A subprocess keeps alembic's logging config out of this process."""
+    if os.environ["BACKSTOP_DATABASE_URL"].startswith("sqlite"):
+        return
+    done = subprocess.run([sys.executable, "-m", "alembic", "-c", str(BACKEND / "alembic.ini"), "upgrade", "head"],
+                          env=os.environ.copy(), capture_output=True, text=True, timeout=300)
+    assert done.returncode == 0, done.stderr[-2000:]
+
+
 @pytest.fixture(scope="session")
 def seeded(settings):
+    _migrate_if_deployed_dialect()
     init_schema()
     with SessionLocal() as session:
         load_rules(session, settings.rules_dir, actor="tests")

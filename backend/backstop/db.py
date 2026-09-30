@@ -2,13 +2,18 @@
 
 Portable across SQLite (tests, zero-dependency local runs) and Postgres
 (docker-compose). Models use only generic SQLAlchemy types so both work.
+
+Schema ownership differs by path. SQLite is created from the models at startup.
+Postgres is a deployed database: Alembic owns its schema (``alembic upgrade head``
+from backend/), and startup refuses to run against one that is not at head.
 """
 
 from __future__ import annotations
 
 from collections.abc import Generator
+from pathlib import Path
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import Engine, create_engine, event, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from backstop.config import get_settings
@@ -72,10 +77,50 @@ def install_append_only_guard(bind) -> None:
         bind.execute(text(statement))
 
 
+class SchemaNotMigrated(RuntimeError):
+    """A deployed database whose schema is not at the Alembic head this code expects."""
+
+
 def init_schema() -> None:
-    """Create tables if they do not exist (prototype path; Alembic holds the history)."""
+    """Make the database ready at startup: create it on SQLite, verify it everywhere else."""
     from backstop import models  # noqa: F401 - registers mappings
 
-    Base.metadata.create_all(engine)
-    with engine.begin() as conn:
-        install_append_only_guard(conn)
+    if engine.dialect.name == "sqlite":
+        Base.metadata.create_all(engine)
+        with engine.begin() as conn:
+            install_append_only_guard(conn)
+        return
+    require_migrated(engine)
+
+
+def require_migrated(bind: Engine) -> None:
+    """Raise SchemaNotMigrated unless Alembic has brought the database to head."""
+    from alembic.runtime.migration import MigrationContext
+
+    with bind.connect() as conn:
+        current = set(MigrationContext.configure(conn).get_current_heads())
+        has_tables = inspect(conn).has_table("rules")
+    if not current:
+        hint = (" It has tables but no revision (created by an older build): check they match the models, "
+                "then run `alembic stamp head` once." if has_tables else "")
+        raise SchemaNotMigrated(f"database has no Alembic revision; run `alembic upgrade head` in backend/.{hint}")
+    expected = _migration_heads()
+    if expected is not None and current != expected:
+        raise SchemaNotMigrated(f"database is at revision {sorted(current)}, this build expects {sorted(expected)}; "
+                                "run `alembic upgrade head` in backend/")
+
+
+def _migration_heads() -> set[str] | None:
+    """Head revision(s) of the migration scripts, or None when they are not on disk here.
+
+    An editable install finds backend/alembic.ini next to the package; the image runs from
+    /app/backend, where the working directory has it. A wheel installed elsewhere has neither.
+    """
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    for directory in (Path(__file__).resolve().parents[1], Path.cwd()):
+        ini = directory / "alembic.ini"
+        if ini.is_file() and (directory / "alembic" / "env.py").is_file():
+            return set(ScriptDirectory.from_config(Config(str(ini))).get_heads())
+    return None

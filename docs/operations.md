@@ -38,6 +38,13 @@ powershell -ExecutionPolicy Bypass -File scripts\demo-up.ps1          # add -Fre
 ./scripts/demo-up.sh                                                   # --fresh to reseed
 ```
 
+Alembic owns the Postgres schema, and the API container runs `alembic upgrade head`
+before it starts. A database volume created before 2026-09-30 (when the tables were
+created directly) has the tables but no revision, so the upgrade stops with
+"relation already exists". For demo data, start fresh (`-Fresh` / `--fresh`). To keep
+the data, confirm the schema matches and record it once:
+`docker compose run --rm api sh -c "cd /app/backend && alembic stamp head"`.
+
 **3. Publish** (needs `cloudflared`: `winget install --id Cloudflare.cloudflared`):
 
 ```powershell

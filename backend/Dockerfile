@@ -25,4 +25,6 @@ RUN useradd --create-home --uid 10001 app
 USER app
 
 EXPOSE 8000
-CMD ["sh", "-c", "backstop demo && backstop serve --host 0.0.0.0 --port 8000"]
+# Alembic owns the Postgres schema (it also installs the audit log's append-only triggers);
+# the app refuses to start on a database that is not at head.
+CMD ["sh", "-c", "cd /app/backend && alembic upgrade head && backstop demo && backstop serve --host 0.0.0.0 --port 8000"]
