@@ -4,7 +4,7 @@
 
 ## Context
 
-The problem is small: 7 rules, 18 artifacts, 60 transcripts, 8 contracts (at the time of this decision; 13 rules and 24 artifacts since),
+The problem is small: 7 rules, 18 artifacts, 60 transcripts, 8 contracts (at the time of this decision; 14 rules and 24 artifacts since),
 a handful of comparisons. The organization is small: a handful of engineers
 who cannot operate a platform. Small teams do better with Compose-scale
 infrastructure and a named target shape (ECS) than with an orchestrator they

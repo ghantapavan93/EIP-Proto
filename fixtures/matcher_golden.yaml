@@ -423,3 +423,32 @@ cases:
   - id: fl-07-near-miss
     text: "The plan covers 5 visits per year to a chiropractor."
     expect: []
+
+  # ---------------------------------------------------------------- tcpa-ai-generated-voice (v1)
+  - id: aiv-01
+    text: "Outbound callbacks to web leads are placed by our AI voice agent, which reads the plan summary."
+    expect: [{rule: tcpa-ai-generated-voice, version: 1, status: confirmed}]
+  - id: aiv-02
+    text: "Pilot: an AI-generated voice will call leads who did not answer the first live attempt."
+    expect: [{rule: tcpa-ai-generated-voice, version: 1, status: confirmed}]
+  - id: aiv-03
+    text: "The voicebot calls members to confirm appointment times."
+    expect: [{rule: tcpa-ai-generated-voice, version: 1, status: confirmed}]
+  - id: aiv-04
+    text: "Because a supervisor monitors every conversation, the AI voice agent counts as a live agent and no consent is required for these outbound calls."
+    expect: [{rule: tcpa-ai-generated-voice, version: 1, status: proposed}]
+  - id: aiv-05
+    text: "Voice cloning of a licensed agent's voice may not be used on outbound dialer campaigns."
+    expect: [{rule: tcpa-ai-generated-voice, version: 1, status: confirmed}]
+  - id: aiv-06-near-miss
+    text: "AI scores 100% of calls on a 28-item scorecard."
+    expect: []   # AI reading calls, not speaking on them
+  - id: aiv-07-near-miss
+    text: "Our virtual assistant on the website answers questions about Part D."
+    expect: []   # web chat, no calling context
+  - id: aiv-08-near-miss
+    text: "Voice of the customer: callers said hold times were too long."
+    expect: []
+  - id: aiv-09-near-miss
+    text: "The AI voice feature in the phone app reads your messages aloud."
+    expect: []   # no calling context word in the window

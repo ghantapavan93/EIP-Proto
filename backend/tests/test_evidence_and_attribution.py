@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+from backstop.config import get_settings
 from backstop.core import audit, evidence
 from backstop.db import Base, install_append_only_guard
 from backstop.harness import workflow as wf
@@ -140,7 +141,8 @@ def test_flag_severity_and_judged_results_are_advisory_aggregates(client):
 
 def test_status_rail_is_live_state(client, red_run):
     body = client.get("/api/status", headers=auth("engineer")).json()
-    assert body["counts"]["rules"] == 13 and body["counts"]["contracts"] == 8 and body["counts"]["golden_cases"] > 0
+    rule_files = len(list(get_settings().rules_dir.glob("*.yaml")))
+    assert body["counts"]["rules"] == rule_files and body["counts"]["contracts"] == 8 and body["counts"]["golden_cases"] > 0
     assert body["last_run"]["gate"] in ("RED", "GREEN", "AMBER", "GREY")
     assert body["user"] == {"name": "engineer", "role": "engineer"}
     assert set(body["review"]) == {"actionable_open", "advisory_open"}

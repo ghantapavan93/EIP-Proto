@@ -25,14 +25,17 @@ watcher hashes). A version has:
 | `sources` | provenance list of `{authority, cite, url, reading}`; `authority` is `primary`, `preamble` or `secondary`, and the loader sorts in that order. A secondary reading can raise a question for counsel; it never overrides the primary text |
 | `vote_date` | optional: the date a regulator votes on a proposed version |
 | `deferrals` | optional list of `{provision, deferred_to, source}`: a clause whose compliance date moved while its text did not (e.g. an FCC waiver) |
+| `git_commit` | where the version came from: `seed` for the original corpus, a commit SHA once versions arrive through review, `ui:<user>` for a proposal made in the console. Defaults to `yaml` |
 
 A version's identity is its `status`, `clause_text`, `effective_from`,
 `change_classification` and `params`. If any of those change for a version
 that is already loaded, the loader refuses and asks for a new version instead.
 Closing an open window (`effective_to` from null to a date) is the one allowed
-edit. `sources`, `vote_date` and `deferrals` are annotations: they describe a
-version without changing it, and `vote_date` and `deferrals` are refreshed in
-place on reload (audited as `rule.version_annotated`).
+edit. Everything else — `sources`, `source_url`, `summary`, `disputed`,
+`dispute_note`, `regulation_effective`, `vote_date`, `deferrals` — is an
+annotation: it describes a version without changing what it requires, so a
+reload refreshes it in place and audits the before and after of each field
+(`rule.version_annotated`).
 
 A version proposed through `POST /api/rules/{code}/versions` is stored as
 `proposed` and is never in force. If a YAML file later claims its number, the
@@ -50,14 +53,20 @@ proposal moves to the next free number; Git owns the numbering.
 | `soa-all-personal-marketing-appointments.yaml` | CMS Scope of Appointment before every personal marketing appointment, inbound and unscheduled included | 2 |
 | `soa-educational-events.yaml` | CMS Scope of Appointment collection at educational events | 2 |
 | `superlatives.yaml` | CMS superlatives in marketing materials and sales language | 2 |
+| `tcpa-ai-generated-voice.yaml` | FCC TCPA: an AI-generated or cloned voice is an "artificial or prerecorded voice" (FCC 24-17, in force since 2024-02-08); v2 is the AI-call disclosure proposal (FCC 24-84), undated | 2 |
 | `tcpa-consent-revocation.yaml` | FCC TCPA: honouring revocation of consent for robocalls and robotexts. v1 carries a deferral; v2 is proposed, undated, with a vote date | 2 |
 | `tcpa-pewc-one-to-one.yaml` | FCC TCPA prior express written consent: the one-to-one amendment, vacated (v2) | 2 |
 | `tpmo-data-sharing-consent.yaml` | CMS: sharing beneficiary data between TPMOs needs prior express written consent, one recipient at a time | 1 |
 | `tpmo-disclaimer-text.yaml` | CMS TPMO disclaimer: required wording | 2 |
 | `tpmo-disclaimer-timing.yaml` | CMS TPMO disclaimer: when it must be delivered on a sales call (60-second timer, then before any benefits discussion from 2026-10-01) | 2 |
 
-Citations were checked against LII's mirror of 42 CFR Part 422 Subpart V on
-2026-09-21 (amendment history ends `91 FR 17583, Apr. 6, 2026`) and the Crowell
-& Moring CY2027 client alert. Paragraph-level citations marked `verify` were not
-re-read at paragraph level and should be confirmed before being quoted to a
-regulator.
+How each citation was checked, and when:
+
+| rules | checked against | date |
+|---|---|---|
+| The original seven (CMS marketing, TPMO, SOA, recording, superlatives, licensing) | First read from LII's mirror of 42 CFR Part 422 Subpart V (amendment history ends `91 FR 17583, Apr. 6, 2026`) and the Crowell & Moring CY2027 client alert; then re-checked against eCFR and the Federal Register | 2026-09-21, re-checked 2026-09-23 |
+| The six added on 2026-09-25 (compensation, data sharing, both TCPA consent rules, SOA scope, Florida) | The primary document named on each version (eCFR, the Federal Register, the court order, the Florida statute) | 2026-09-25 |
+| `tcpa-ai-generated-voice` | FCC 24-17 (paragraphs cited on the version), eCFR 47 CFR 64.1200, and the FCC 24-84 proposal in the Federal Register | 2026-09-30 |
+
+Paragraph-level citations marked `verify` were not re-read at paragraph level
+and should be confirmed before being quoted to a regulator.

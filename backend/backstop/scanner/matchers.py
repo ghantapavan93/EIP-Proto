@@ -235,6 +235,9 @@ PDP_CTX = _p(r"\b(PDP|Part D|prescription drug plans?)\b")
 CONSENT_CTX = _p(r"\b(consent|agree|authori[sz]e|share|sharing|shared|contact(ed)?)\b")
 CALL_CTX = _p(r"\b(calls?|calling|dial(s|ing|er)?|attempts?|outbound|telemarketing|solicitation)\b")
 OPT_OUT_CTX = _p(r"\b(opt[- ]?outs?|revok\w*|revocation|do[- ]not[- ]call|DNC|unsubscribe|stop requests?)\b")
+# "The AI voice agent counts as a live agent, so no consent is required": FCC 24-17 rejects this reading.
+AI_VOICE_EXEMPT_CLAIM = _p(r"\b(not a robocall|no (consent|PEWC) (is )?(needed|required)|counts? as a live (agent|call)|"
+                           r"treated as (a )?live (agent|call))")
 _KEYWORD = r"(?:stop|quit|end|revoke|opt[- ]?out|cancel|unsubscribe)"
 _QUOTE = r"[\"'“”]?"
 _OVER_THREE = r"(?:[4-9]|1\d|20|four|five|six|seven|eight|nine|ten|twelve|fifteen|twenty)"
@@ -615,6 +618,38 @@ MATCHERS: list[Matcher] = [
         note=("more than 3 calls per day or 24 hours. Florida allows at most three commercial telephone "
               "solicitation calls to a person in 24 hours on the same subject, from any number (501.616(6)(b)). "
               "A human checks whether the cadence applies to Florida numbers"),
+    ),
+    # ---- TCPA: an AI-generated voice is an "artificial or prerecorded voice" (FCC 24-17)
+    Matcher(
+        name="ai-voice-outbound",
+        merge_overlapping=True,
+        rule_code="tcpa-ai-generated-voice",
+        version=1,
+        pattern=_p(r"\b(AI|A\.I\.|artificial[- ]intelligence|synthetic|cloned|computer[- ]generated|virtual)"
+                   r"[- ](generated[- ])?(voices?|voice[- ]agents?|voice[- ]bots?|callers?|voice[- ]assistants?)\b|"
+                   r"\bvoice[- ]clon(e|es|ed|ing)\b|\bvoicebots?\b"),
+        context_all=[CALL_CTX],
+        # A sentence that also claims the call is exempt belongs to the matcher below.
+        span_none=[AI_VOICE_EXEMPT_CLAIM],
+        note=("an AI-generated or cloned voice on calls. FCC 24-17 (2024-02-08): an AI voice is an 'artificial or "
+              "prerecorded voice' under the TCPA, so an outbound AI-voice call needs prior express consent (written "
+              "for telemarketing), caller identification at the start and, on telemarketing calls, an automated "
+              "opt-out (47 CFR 64.1200(a)(2)-(3), (b))"),
+    ),
+    Matcher(
+        name="ai-voice-live-agent-exempt",
+        merge_overlapping=True,
+        rule_code="tcpa-ai-generated-voice",
+        version=1,
+        pattern=_p(r"\b(AI|synthetic|virtual)[- ](voice|voice[- ]agent|caller)s?\b[^.]{0,120}?"
+                   + AI_VOICE_EXEMPT_CLAIM.pattern),
+        context_all=[CALL_CTX],
+        status="proposed",
+        confidence=0.6,
+        force_polarity="PERMITS",  # it lets an AI-voice call go ahead without consent
+        note=("treats an AI-voice call as a live call or as needing no consent. FCC 24-17 paras. 6 and 8: no "
+              "carve-out for technology that purports to be the equivalent of a live agent, and a live agent "
+              "choosing the messages does not change that. A human checks what the artifact allows"),
     ),
     # ---- EIP internal fact: licensing footprint
     Matcher(
