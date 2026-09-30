@@ -6,6 +6,7 @@ Everything written about Backstop beyond the code, grouped by what the reader ne
 
 | If you have | Read |
 |---|---|
+| 10 minutes and the code | [`START-HERE.md`](START-HERE.md): five files, in order, each linked to the exact lines |
 | 5 minutes | The [root README](../README.md), then the [honesty page](honesty.md) |
 | 30 minutes | Add the [decision records](adr/), the [buy-vs-build analysis](buy-vs-build.md) and the [threat model](threat-model.md) |
 | A build to review | The [API contract](api-contract.md), the [backend](../backend/) and [frontend](../frontend/) READMEs, then the tests |
