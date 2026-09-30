@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `docs/START-HERE.md`: a ten-minute path through the five files that carry the
+  design, each link to the exact lines.
+- A forty-second walkthrough GIF at the top of the README, recorded against the
+  local stack.
+
 ## 0.2.0 — 2026-09-30
 
 A line-by-line review of the whole repository, and the fixes it led to. Each

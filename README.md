@@ -21,9 +21,18 @@ docker compose up --build        # then open http://localhost:5173 and sign in a
 
 Runs offline: no GPU, API key or network needed. The recorded model runs replay from `fixtures/cassettes/`.
 
+**Reviewing the code?** [`docs/START-HERE.md`](docs/START-HERE.md) is a ten-minute path through the five files that matter.
+
+![A rule flips on October 1: artifacts go stale, a review task opens, the evidence exports, the audit log records it](docs/images/walkthrough.gif)
+
+*Forty seconds, recorded against the local stack on 2026-09-30: the 48-hour Scope of Appointment wait ends on October 1, the five artifacts that still enforce it go stale, each opens a review task, and the evidence bundle and audit log record it. RED gates are expected: each is a change that broke something.*
+
+<details>
+<summary>The change-triggers overview</summary>
+
 ![Backstop change triggers](docs/images/home.png)
 
-*The console as of 2026-09-25. RED is the expected state: each card is a change that broke something, with the evidence one click away.*
+</details>
 
 ## Why I built this
 
