@@ -11,7 +11,7 @@ The backend finds this folder through `BACKSTOP_FIXTURES_DIR` (default: `fixture
 | `sources.yaml` | Artifact inventory: 6 public web pages (`real_pages`) and 15 stand-ins for internal artifacts (`synthetic`: scorecard items, scripts, a coaching prompt, an email template, training slides, an IVR line, a lead-form consent, a compensation sheet, a dialer policy). Synthetic entries carry their text inline. | Page URLs real; internal artifacts synthetic | `scanner/service.py` (`load_inventory`, scans) |
 | `pages/<code>.html` | Short attributed excerpts of the six public pages (the passages around each rule-bearing sentence; every matcher result is identical to the full page): `mfaq-home`, `mfaq-about`, `mfaq-soa`, `mfaq-ma-compare` (medicarefaq.com), `teb-home` (theelitebrokerage.com), `mcmp-rates` (rates.medicarecompared.com). | Real | `scanner/crawler.py` (snapshot mode; live mode overwrites) |
 | `sources/<host>-<hash>.html` | Short excerpts of the primary source each rule cites (`source_url`): the passages relevant to the rule. The watcher hashes them; a live check refreshes the full page locally. The name is the host plus the first 10 hex characters of the SHA-256 of the URL. | Real | `scanner/sources.py` (`backstop check-sources`, `POST /api/sources/check`) |
-| `matcher_golden.yaml` | 113 labelled snippets with the rule-version edges a careful analyst would draw, including near-misses. | Synthetic | `scanner/evaluate.py` (`backstop eval-matchers`, `GET /api/evals/matchers`), `api/ops.py` status rail |
+| `matcher_golden.yaml` | 122 labelled snippets with the rule-version edges a careful analyst would draw, including near-misses. | Synthetic | `scanner/evaluate.py` (`backstop eval-matchers`, `GET /api/evals/matchers`), `api/ops.py` status rail |
 | `pii_golden.yaml` | 42 labelled strings for scoring the PII redactor, including negatives. | Synthetic | `backend/tests/test_governance_and_pii.py` |
 | `judge_canary.yaml` | Six fixed coaching notes with expected score bands, re-judged on every judged run to detect judge drift. | Synthetic | `harness/canary.py` via `harness/runner.py` |
 | `simulated_profiles.yaml` | Declared defect rates for the two simulated models, `sim-large` (clean) and `sim-small` (defect-prone). | Synthetic | `harness/adapters.py` (simulated adapter) |
@@ -27,7 +27,7 @@ The backend finds this folder through `BACKSTOP_FIXTURES_DIR` (default: `fixture
 | `www-crowell-com-10babe5c9b.html` | Crowell & Moring client alert on the CY2027 final rule | `soa-48h-wait`, `soa-educational-events`, `superlatives` |
 | `www-medicarefaq-com-f10e3d8ece.html` | medicarefaq.com About Us | `eip-licensing-footprint` |
 
-The other six rules have no `source_url` yet, so the watcher skips them.
+The other seven rules have no `source_url` yet, so the watcher skips them.
 
 ## Real and synthetic
 

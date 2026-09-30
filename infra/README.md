@@ -19,7 +19,7 @@ Migrations run before the API starts (`alembic upgrade head`); seeding is
 idempotent, so a restarted task converges on the same state.
 
 Rough run cost: tens of dollars a month. No Kubernetes, no queue, no vector
-store — the workload does not need them, and a three-engineer team should not
+store — the workload does not need them, and a small team should not
 operate them.
 
 ## Assumptions and what is still open

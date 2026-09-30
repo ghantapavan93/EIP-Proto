@@ -29,7 +29,7 @@ conversation. A demo that depends on the live network is a demo that fails.
 - The blast-radius demo includes real, dated evidence from EIP's own estate
   without any private access.
 - The public-page crawl is a coverage check that EIP could run against its
-  whole estate tomorrow; the private-system adapters are the next step, not
+  whole estate now; the private-system adapters are the next step, not
   a precondition.
-- The honest framing in the room: "everything internal is a stand-in; the
+- The honest framing: "everything internal is a stand-in; the
   public pages are yours."

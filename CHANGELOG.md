@@ -9,6 +9,15 @@
 - A forty-second walkthrough GIF at the top of the README, recorded against the
   local stack.
 
+### Fixed
+
+- The readiness countdowns said "1 days"; one day is now singular.
+- The console footer still described the prototype as built for a meeting.
+- A full audit of the docs against the code: golden-case counts (122), the PII
+  contract, Alembic ownership of the Postgres schema, the read-only impact
+  endpoint, cassette behaviour on a miss, the design tokens, and wording that
+  read wrong after October 1. The README screenshots were retaken.
+
 ## 0.2.0 — 2026-09-30
 
 A line-by-line review of the whole repository, and the fixes it led to. Each

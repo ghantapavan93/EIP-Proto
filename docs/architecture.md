@@ -66,7 +66,7 @@ execute_run(prompt, model, adapter, rule date, corpus)
   → adapter: simulated | cassette replay | live model
   → contracts score every (call × contract)   → run_results
   → gate: RED if a blocking contract fails or errors, AMBER for advisory flags or
-          unlabelled calls, else GREEN (GREY until the run completes)
+          unlabelled calls, else GREEN (GREY while running or when the run failed)
   → review routing: one task per blocking finding, one advisory item per run × contract
   → run.completed
 ```
@@ -90,6 +90,6 @@ provider changes the experiment.
 | Which version is in force, and is this artifact stale? | `backend/backstop/core/staleness.py`, `core/impact.py` |
 | How is an artifact matched to a rule? | `backend/backstop/scanner/matchers.py` |
 | How is a run executed and gated? | `backend/backstop/harness/runner.py`, `harness/contracts.py` |
-| How are two runs compared? | `backend/backstop/api/runs.py`, `core/stats.py`, `core/attribution.py` |
+| How are two runs compared? | `backend/backstop/core/compare.py`, `core/stats.py`, `core/attribution.py` |
 | Who may do what? | `backend/backstop/core/permissions.py`, `api/deps.py` |
 | How is the audit chain kept? | `backend/backstop/core/audit.py` |

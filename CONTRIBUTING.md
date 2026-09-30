@@ -35,7 +35,7 @@ Run the app locally with `backstop demo` then `backstop serve` (backend on :8000
 backend/.venv/bin/python -m ruff check backend/backstop backend/tests
 backend/.venv/bin/python -m mypy --config-file backend/pyproject.toml backend/backstop
 backend/.venv/bin/python -m pytest backend/tests -q
-cd frontend && npm run lint && npm run typecheck && npm run test -- --run && npm run build
+cd frontend && npm run format:check && npm run lint && npm run knip && npm test && npm run build
 ```
 
 CI runs the same checks, the backend suite on both SQLite and PostgreSQL, and the

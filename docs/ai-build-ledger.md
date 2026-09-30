@@ -48,8 +48,8 @@ mistakes were caught, and what that says about how AI-assisted work should be ru
 
 ## How the work was run
 
-Research: AI research agents on public sources (vendors, rules, job
-postings, EIP's public pages) with a shared labeling standard
+Research: AI research agents on public sources (vendors, rules,
+public careers pages, EIP's public pages) with a shared labeling standard
 (FACT / INFERENCE / HYPOTHESIS / UNKNOWN); a second, independent tool as a
 cross-check; a synthesis pass that verified every claim it kept. Build: the domain model, rule corpus and contracts were
 written first by hand; the frontend was delegated against a written API

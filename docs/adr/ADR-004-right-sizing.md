@@ -6,7 +6,7 @@
 
 The problem is small: 7 rules, 18 artifacts, 60 transcripts, 8 contracts (at the time of this decision; 14 rules and 24 artifacts since),
 a handful of comparisons. The organization is small: a handful of engineers
-who cannot operate a platform. Small teams do better with Compose-scale
+whose time should not go to operating a platform. Small teams do better with Compose-scale
 infrastructure and a named target shape (ECS) than with an orchestrator they
 must run for one job. Sophistication should come from correct decisions, not
 component count.
@@ -25,7 +25,7 @@ component count.
 - **Not used, on purpose:** message queues, Kubernetes, vector databases,
   agent frameworks, workflow orchestrators, multiple services.
 
-## Production shape (stated, not built)
+## Production shape (written as Terraform, not applied)
 
 One ECS service for the API behind an ALB, RDS Postgres, a scheduled ECS task
 for nightly scans and canary runs, S3 for page snapshots and cassettes,

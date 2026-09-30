@@ -9,10 +9,10 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 | Module | Purpose |
 |---|---|
 | `backstop/__init__.py` | Package version (`0.2.0`). |
-| `backstop/main.py` | FastAPI app: lifespan (logging, credential check, schema), CORS, request-id middleware, mounts every router under `/api`. |
+| `backstop/main.py` | FastAPI app: lifespan (logging, credential check, schema readiness via `init_schema()`), CORS, request-id middleware, mounts every router under `/api`. |
 | `backstop/cli.py` | Typer command line (`backstop ...`); see [Command line](#command-line). |
 | `backstop/config.py` | Settings from the environment or `.env`; locates the repository root. |
-| `backstop/db.py` | Engine, sessions, `init_schema()`, and the append-only triggers on `audit_events`. |
+| `backstop/db.py` | Engine, sessions, `init_schema()` (creates tables on SQLite; on Postgres refuses to start unless Alembic is at head), and the append-only triggers on `audit_events`. |
 | `backstop/logging_setup.py` | JSON log lines and the request-id middleware. |
 | `backstop/models.py` | SQLAlchemy models: effective-dated rule versions, artifact edges, keyed runs, deduplicated review tasks, audit events. |
 | `backstop/schemas.py` | Pydantic request and response shapes the frontend is built against. |
@@ -20,12 +20,12 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 | `api/meta.py` | `GET /health` (no auth), `/meta`, `/me`. |
 | `api/audit.py` | `GET /audit` (filtered page) and `/audit/verify` (recomputes the hash chain; optionally checks an admin checkpoint). |
 | `api/admin.py` | Governance, admin only: access review and audit checkpoints. |
-| `api/rules.py` | Rule registry, reload, change impact as of a date, propose a version. |
+| `api/rules.py` | Rule registry, reload, read-only change impact as of a date, `POST …/impact/evaluate` to open tasks, propose a version. |
 | `api/assets.py` | Artifact inventory and scans. |
-| `api/runs.py` | Workflows, prompts, models and model board, contracts, transcripts, runs, paired comparison. |
+| `api/runs.py` | Workflows, prompts, models and model board, contracts, transcripts, runs, the compare endpoint (statistics in `core/compare.py`). |
 | `api/review.py` | Review queue, task transitions, test cases and their approval. |
 | `api/evidence.py` | Evidence bundle export for tasks, runs and rules (JSON or Markdown). |
-| `api/contracts_metrics.py` | Per-contract accuracy against ground truth, read from stored results. |
+| `api/contracts_metrics.py` | The contract-metrics endpoint; the computation is in `core/metrics.py`. |
 | `api/readiness.py` | Read-only 30/60/90-day view of rule changes, open work by owner, and the marketing calendar. |
 | `api/sandbox.py` | Check pasted text against the rules or run one pasted call; nothing stored. |
 | `api/ops.py` | Deep health, status rail, matcher evals, rule-source watch, run export, prompt diff, transcript ingest. |
@@ -42,12 +42,17 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 | `core/evidence.py` | Self-hashing evidence bundles with the audit chain tip. |
 | `core/pii.py` | Regex PII detection and redaction for real text. |
 | `core/sandbox.py` | Matches pasted text to rule versions and judges staleness; stores only a hash. |
-| `core/stats.py` | Wilson intervals, exact McNemar and Fisher tests. Pure Python. |
+| `core/stats.py` | Wilson intervals, exact McNemar and Fisher tests, Holm correction. Pure Python. |
+| `core/compare.py` | Run-comparison statistics: paired exact tests, Holm adjustment, `significant_holm`, verdict and cautions. |
+| `core/metrics.py` | Per-contract accuracy against ground truth, read from stored results. |
+| `core/clock.py` | The compliance clock: "today" is the calendar date in `BACKSTOP_COMPLIANCE_TZ` (default `America/New_York`). |
 | `core/attribution.py` | Whether a run comparison changed exactly one factor, and existing run pairs that isolate each factor when it did not. |
 | `harness/workflow.py` | The workflow under test (extract, check, compose, route), prompt versions, rule logic from params. |
 | `harness/contracts.py` | Contract checks; see [../contracts/README.md](../contracts/README.md). |
 | `harness/runner.py` | Seeds workflow, models, contracts and corpus; executes idempotent runs; computes the gate. |
 | `harness/adapters.py` | Simulated, cassette and Anthropic adapters. |
+| `harness/anthropic_params.py` | Sends `temperature` only to Anthropic models that still accept it. |
+| `harness/judge_score.py` | Reads a 1–5 score out of a judge's free-text reply; shared by every live adapter. |
 | `harness/openai_compat.py` | OpenAI-compatible adapter (Ollama, Groq, Gemini, OpenRouter) with pacing and retries. |
 | `harness/providers.py` | Provider registry, free-tier limits, real-data egress rules. |
 | `harness/corpus.py` | Deterministic synthetic call corpus with ground-truth labels. |
@@ -67,12 +72,12 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 
 1. `RequestIdMiddleware` assigns a request id (an inbound `X-Request-ID` is kept if it matches `[A-Za-z0-9._-]{8,64}`), returns it in the response header, and logs one JSON line per request.
 2. `api/deps.py` checks HTTP Basic credentials against `BACKSTOP_USERS` in constant time. A failure returns 401 and writes an `auth.denied` audit row (at most one per username per 60 seconds). `GET /api/health` and `GET /api/health/deep` need no credentials.
-3. Write endpoints use `require_role("engineer", "admin")`. A denied role returns 403 and is audited.
-4. Every state change goes through `core.audit.record`, which stores the request id as the correlation id and chains a SHA-256 hash to the previous row. Database triggers reject `UPDATE` and `DELETE` on `audit_events`.
+3. Operating endpoints use `require_role("engineer", "admin")`; governance endpoints use `require_role("admin")`; review transitions are checked per role by the state machine. A denied role returns 403 and is audited.
+4. Every state change goes through `core.audit.record`, which stores the request id as the correlation id and chains a SHA-256 hash to the previous row. Database triggers reject `UPDATE` and `DELETE` (and `TRUNCATE` on Postgres) on `audit_events`.
 
 ## Command line
 
-Installed as `backstop` (or `python -m backstop.cli`). Every command that touches the database creates missing tables first.
+Installed as `backstop` (or `python -m backstop.cli`). Every command that touches the database first makes it ready: it creates tables on SQLite and requires Alembic head on Postgres.
 
 | Command | What it does |
 |---|---|
@@ -102,6 +107,7 @@ Settings are read from the environment or a `.env` file in the working directory
 | `BACKSTOP_CRAWLER_USER_AGENT` | `BackstopPrototype/0.1 (...)` | User agent for live fetches. |
 | `BACKSTOP_CRAWLER_DELAY_SECONDS` | `2.0` | Delay between live fetches. |
 | `BACKSTOP_CRAWLER_LIVE` | `false` | Live fetch instead of snapshot replay. |
+| `BACKSTOP_COMPLIANCE_TZ` | `America/New_York` | Time zone whose calendar date is "today" for rule evaluation. |
 | `BACKSTOP_ENVIRONMENT_LABEL` | `PROTOTYPE · SYNTHETIC DATA` | Banner text in the UI. |
 | `BACKSTOP_REPO_ROOT` | auto-detected | Overrides repository-root detection. |
 
@@ -109,7 +115,7 @@ Read elsewhere in the code: `ANTHROPIC_API_KEY`, `GROQ_API_KEY`, `GEMINI_API_KEY
 
 ## Database and migrations
 
-`init_schema()` runs at API startup and in the CLI. It creates missing tables and installs the append-only triggers. It does not alter existing tables. Alembic (`alembic.ini`, `alembic/`) holds the schema history and reads the URL from settings:
+`init_schema()` runs at API startup and in the CLI. On SQLite it creates missing tables and installs the append-only triggers. On Postgres, Alembic (`alembic.ini`, `alembic/`) owns the schema and installs the triggers; `init_schema()` refuses to start unless the database is at head. The container runs `alembic upgrade head` before it serves. Alembic reads the URL from settings:
 
 | Revision | Change |
 |---|---|
@@ -122,11 +128,12 @@ To upgrade an existing database, run `alembic upgrade head` from `backend/`.
 
 ## Tests and lint
 
-From `backend/`, with the dev extras installed (`pip install -e ".[dev]"`):
+From `backend/`, with the dev extras installed (`pip install -c requirements.lock -e ".[dev]"`):
 
 ```
 pytest
 ruff check backstop tests
+mypy --config-file pyproject.toml backstop
 ```
 
 The suite uses a fresh SQLite file per session. Set `BACKSTOP_TEST_DATABASE_URL` to run it against a disposable Postgres database.

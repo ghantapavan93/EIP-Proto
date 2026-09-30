@@ -1,4 +1,4 @@
-# Backstop API contract (v0.1)
+# Backstop API contract (v0.2)
 
 Base path `/api`. JSON everywhere. Every endpoint except `/health` and `/health/deep` requires HTTP Basic auth (demo
 users: `analyst/analyst`, `engineer/engineer`, `admin/admin`; roles are the
@@ -30,9 +30,9 @@ the source of truth; this page is the map.
 | GET | `/runs/{id}` | one run + per-contract summary | `RunOut` |
 | GET | `/runs/{id}/results?contract=&outcome=&transcript=` | per-transcript × contract outcomes with evidence | `RunResultOut[]` |
 | GET | `/runs/{id}/transcripts/{code}` | transcript text, workflow output, results, verified spans | `RunTranscriptOut` |
-| GET | `/runs/compare?a=&b=` | diff two runs: what changed (prompt/model/rule date/adapter), newly failing/passing cells, per-contract deltas (`a_error`/`b_error` break out ERROR), `failure_definition`, and `statistics`: per contract plus `ALL-BLOCK`, a paired table on shared calls, failure rates with 95% Wilson CIs, exact McNemar p (Fisher exact when the corpus differs), Holm-adjusted p with `significant_holm`, a plain-language verdict at alpha 0.05 and cautions (`direction` is `none` unless at least 10 calls changed outcome and the difference survives Holm); and `attribution`: `isolated` (exactly one of prompt, model, rule date, calls scored, contract set, judge, approved overrides changed), `confounded` (two or more; `isolating_pairs` names existing run pairs that move each factor alone, and the statistics cautions lead with it) or `repeat` | `CompareOut` |
+| GET | `/runs/compare?a=&b=` | diff two runs: what changed (prompt/model/rule date/adapter/corpus/contract set), newly failing/passing cells, per-contract deltas (`a_error`/`b_error` break out ERROR), `failure_definition`, and `statistics`: per contract plus `ALL-BLOCK`, a paired table on shared calls, failure rates with 95% Wilson CIs, exact McNemar p (Fisher exact when the corpus differs), Holm-adjusted p with `significant_holm`, a plain-language verdict at alpha 0.05 and cautions (`direction` is `none` unless at least 10 calls changed outcome and the difference survives Holm); and `attribution`: `isolated` (exactly one of prompt, model, rule date, calls scored, contract set, judge, approved overrides changed), `confounded` (two or more; `isolating_pairs` names existing run pairs that move each factor alone, and the statistics cautions lead with it) or `repeat` | `CompareOut` |
 | GET | `/contracts/{code}/metrics?run_id=&corpus=synthetic&rule_date=&trend_limit=50` | one run, or the latest COMPLETE run per model/prompt on `corpus`: outcome counts, failure rate + CI; for C-TPMO-01/C-SOA-01 a per-call confusion matrix (positive = violation) and for C-SUP-01 a per-phrase one, with precision/recall/specificity/F1 and Wilson CIs; per-scenario and per-product-line slices with `notable` flags and `findings`; `trend` of the contract's failure rate across COMPLETE runs, oldest first | `ContractMetricsOut` |
-| GET | `/review?state=&kind=`, `/review/{id}` | review queue (STALE_ASSET, PROPOSED_EDGE, FLAGGED_RESULT, RULE_SOURCE_CHANGED) with allowed transitions for the caller's role | `ReviewTaskOut` |
+| GET | `/review?state=&kind=&lane=`, `/review/{id}` | review queue (STALE_ASSET, PROPOSED_EDGE, FLAGGED_RESULT, RULE_SOURCE_CHANGED) with allowed transitions for the caller's role | `ReviewTaskOut` |
 | POST | `/review/{id}/transition` | `{to, reason_code?, note}`; illegal → 409 (audit-logged); forbidden → 403 | `ReviewTaskOut` |
 | GET | `/test-cases` | test cases created by overrides | `TestCaseOut[]` |
 | POST | `/test-cases/{id}/approve` | approver ≠ creator; role engineer/admin | `TestCaseOut` |
@@ -60,7 +60,7 @@ the source of truth; this page is the map.
 
 **Failure, for statistics and metrics:** FAIL or ERROR on a BLOCK contract; FAIL, FLAG or ERROR on a FLAG contract. ERROR (no usable output) is a failure. Unlabelled ingested cells (ERROR with `not_evaluated`) are excluded and counted as `excluded_not_evaluated`. Verdicts are raw; approved overrides are not applied. Legacy `per_contract.a_fail`/`b_fail` count every non-PASS outcome.
 
-`RunRequest.corpus` = `synthetic` (default) \| `ingested` \| `all`. `RunOut.stats` carries `cost` (usd, per_call_usd, basis, projection) and `judge_stability` (canary notes with bands, means, variance, `stable`). Review task kind `RULE_SOURCE_CHANGED` transitions `open → in_review | dismissed`, `in_review → verified | dismissed`.
+`RunRequest.corpus` = `synthetic` (default) \| `holdout` \| `ingested` \| `all`. `RunOut.stats` carries `cost` (usd, per_call_usd, basis, projection) and `judge_stability` (canary notes with bands, means, variance, `stable`). Review task kind `RULE_SOURCE_CHANGED` transitions `open → in_review | dismissed`, `in_review → verified | dismissed`.
 
 ## Rule versions (statuses, undated proposals, annotations)
 

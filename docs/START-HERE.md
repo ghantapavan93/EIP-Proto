@@ -6,7 +6,7 @@ Every link opens the exact lines.
 
 ## 1. A rule is data, with its history (2 min)
 
-[`rules/agent-broker-compensation.yaml`](../rules/agent-broker-compensation.yaml#L44)
+[`rules/agent-broker-compensation.yaml`](../rules/agent-broker-compensation.yaml)
 — three versions of the CMS compensation rule. v2 was
 [vacated by a court](../rules/agent-broker-compensation.yaml#L44), so it is kept as
 history and never enforced; [v3](../rules/agent-broker-compensation.yaml#L84)
@@ -26,7 +26,7 @@ refuses anything else.
 right on a given date. It is a pure function over frozen views: no database, no
 model, no clock. Vacated and stayed versions are
 [never in force](../backend/backstop/core/staleness.py#L34), and the
-[direction table](../backend/backstop/core/staleness.py#L197) says whether a stale
+[direction table](../backend/backstop/core/staleness.py#L40) says whether a stale
 script is now too strict (costs sales) or too loose (costs a CMS finding).
 
 **Look for:** an artifact already updated for October 1 is "ahead", not stale, when
@@ -81,4 +81,4 @@ no longer links; an admin checkpoint catches even a full, consistent rewrite
 | Why each design choice was made | [`decisions.md`](decisions.md), [`adr/`](adr/) |
 
 To run it: `docker compose up --build`, then http://localhost:5173 as
-`engineer` / `engineer`. No GPU, key or network needed.
+`engineer` / `engineer`. Once the images are built, no GPU, key or network is needed.

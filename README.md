@@ -19,7 +19,7 @@ A rule changes. A prompt changes. A model changes. Backstop answers:
 docker compose up --build        # then open http://localhost:5173 and sign in as engineer / engineer
 ```
 
-Runs offline: no GPU, API key or network needed. The recorded model runs replay from `fixtures/cassettes/`.
+Once the images are built, it runs offline: no GPU, API key or network needed. The recorded model runs replay from `fixtures/cassettes/`.
 
 **Reviewing the code?** [`docs/START-HERE.md`](docs/START-HERE.md) is a ten-minute path through the five files that matter.
 
@@ -46,16 +46,17 @@ Period. From that date some of those artifacts are no longer right, and nothing 
 loudly: every API stays green while the output quietly goes wrong. The same happens
 when someone edits a prompt, or when a vendor swaps the model behind an endpoint.
 
-I built Backstop in about 48 hours as a falsifiable prototype rather than assume the
-problem was already solved. It is also my answer to "full stack or AI workflows?": it
-is both. It is not affiliated with or endorsed by Elite Insurance Partners, and every
+I built Backstop in about 48 hours of work, between 2026-09-21 and 2026-09-25, as a
+falsifiable prototype rather than assume the problem was already solved. It is both a
+full-stack application and an AI-workflow harness. It is not affiliated with or
+endorsed by Elite Insurance Partners, and every
 call transcript and internal artifact in it is synthetic.
 
 ## What it does
 
 - **Keeps rules as code.** Fourteen Medicare, TCPA and state rules as versioned,
-  effective-dated YAML with citations, including vacated, stayed and proposed versions
-  that are never enforced, and the FCC ruling that puts AI-generated voices under the
+  effective-dated YAML with citations, including vacated and proposed versions that
+  are never enforced, and the FCC ruling that puts AI-generated voices under the
   TCPA. History is appended, never edited.
 - **Finds what encodes each rule.** Deterministic matchers bind scripts, scorecard
   items, prompts and public pages to the exact rule version they encode, and show which
@@ -89,7 +90,7 @@ development result wherever the two are compared, and is pinned by a regression 
 Two more findings from the same runs:
 
 - **Correct extraction, wrong conclusion.** The 7B read the disclaimer at 25 s and the
-  benefits at 131 s, then called the call non-compliant. The deterministic contract
+  benefits at 131 s, then marked the call non-compliant. The deterministic contract
   caught what the model's own explanation did not.
 - **Grounding failures differ by model.** The 3B quoted a timestamp as evidence; the 8B
   returned the JSON schema instead of an answer 12 times.
@@ -175,7 +176,7 @@ and the [architecture overview](docs/architecture.md).
 | Models | Ollama locally; any OpenAI-compatible provider; recorded runs for replay |
 | Deployment | Docker Compose; Terraform sketch for ECS and RDS |
 | Demo access | Cloudflare Tunnel in front of the gateway only |
-| CI | GitHub Actions: lint, tests on SQLite and PostgreSQL, the contract gate |
+| CI | GitHub Actions: lint, types, tests on SQLite and PostgreSQL, the contract gate, Prettier, knip, Compose build, Terraform validate |
 
 ## What is real, and what is not
 
@@ -219,7 +220,7 @@ cd frontend && npm install && npm run dev              # in a second terminal
 backend/.venv/bin/python -m pytest backend/tests -q
 backend/.venv/bin/python -m ruff check backend/backstop backend/tests
 backend/.venv/bin/python -m mypy --config-file backend/pyproject.toml backend/backstop
-cd frontend && npm run lint && npm run test -- --run && npm run build
+cd frontend && npm run format:check && npm run lint && npm run knip && npm test && npm run build
 ```
 
 There are 389 backend tests, run on SQLite and PostgreSQL, and 255 frontend tests. The

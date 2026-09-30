@@ -5,13 +5,13 @@ is useful or already solved.
 
 ## Does the problem exist?
 
-1. When the 48-hour SOA rule ends on October 1, how will you find every
-   script, scorecard item, prompt, page and training doc that references it —
-   and how will you know you got them all?
+1. When the 48-hour SOA rule ended on October 1, how did you find every
+   script, scorecard item, prompt, page and training doc that referenced it —
+   and how do you know you got them all?
 2. Does a rule→artifact registry exist today, even as a spreadsheet? Who owns
    it, and what slipped in the last changeover?
 3. Does the 28-item Attention scorecard still encode the "first minute"
-   disclaimer timer, and who is updating it for October 1?
+   disclaimer timer, or was it updated for October 1, and by whom?
 
 ## Where do prompts and rules live?
 
@@ -57,8 +57,8 @@ is useful or already solved.
 
 15. What is the inventory of prototypes, automations and internal tools
     waiting to be productionized, and who built them on what?
-16. Where does the handoff between the Enablement Specialist's spec and the
-    Full Stack engineer's build hurt most?
+16. Where does the handoff between whoever specifies an AI workflow and
+    whoever builds it hurt most?
 17. If this harness ran on your Attention → Snowflake export after AEP, what
     is the first contract you would want it to check? (On unlabeled calls the
     rule-judgment contracts return ERROR; who could label a monthly sample?)

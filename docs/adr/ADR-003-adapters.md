@@ -24,8 +24,9 @@ records which one produced it:
   mechanism, not model behaviour; the CI gate on `sim-large` checks declared
   dependencies; results are idempotent.
 - **cassette** — replays outputs recorded from a live model, keyed by
-  (prompt hash, model, transcript). Missing cassettes fall back to the live
-  adapter when the provider is reachable, and record.
+  (prompt hash, model, transcript). On replay a missing cassette is an
+  adapter error for that call; only `backstop record` calls the live model on
+  a miss and writes the new file.
 - **live** — one OpenAI-compatible chat-completions client for local Ollama
   and the Groq / Google AI Studio / OpenRouter free tiers (forced tool call
   at temperature 0, falling back to JSON mode), plus Anthropic's API for

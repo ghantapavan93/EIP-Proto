@@ -52,8 +52,8 @@ piece real. Written so a skeptical reader can find the seams without asking.
   one-pager and a dialer policy. They are written in
   the shape those systems produce so an integration would be a source adapter,
   not a redesign. None is EIP's content.
-- **Call transcripts** (`backend/backstop/harness/corpus.py`): sixty calls
-  generated from a seed with ground-truth labels. Scenario mix is documented
+- **Call transcripts** (`backend/backstop/harness/corpus.py`): sixty development
+  calls and sixty held-out calls generated from a seed with ground-truth labels. Scenario mix is documented
   in the module docstring. Medicare numbers use the MBI shape with characters
   a real MBI cannot contain.
 
@@ -158,13 +158,14 @@ piece real. Written so a skeptical reader can find the seams without asking.
   and the advisory judge. Real value needs a QA-labelled stratified sample
   (for example 200 calls a month), with Attention scorecard verdicts used as
   a disagreement signal, not as truth.
-- **Matcher eval.** 113 author-written fixtures (2026-09-25): 61/61 expected
-  edges detected, 0 false positives on 54 negatives, 16 documented known
-  limitations. With n=61 the 95% Wilson lower bound on recall is ~0.94. This
+- **Matcher eval.** 122 author-written fixtures (2026-09-30): 66/66 expected
+  edges detected, 0 false positives on 58 no-edge cases, 16 documented known
+  limitations. With n=66 the 95% Wilson lower bound on recall is ~0.945. This
   is a regression suite, not production accuracy.
 - **Rules added 2026-09-25** (compensation, TPMO data sharing, FCC one-to-one
-  consent, TCPA revocation, SOA scope, Florida calling limits) have no
-  rule-level `source_url`: the source watcher needs a committed snapshot of
+  consent, TCPA revocation, SOA scope, Florida calling limits), and
+  `tcpa-ai-generated-voice` (added 2026-09-30), have no rule-level
+  `source_url`: the source watcher needs a committed snapshot of
   each watched page, and none was added. Their primary sources, with URLs, are
   on each version. The Florida rule is `disputed` (interstate reach, whether
   a requested callback is a solicitation, the enforcing agency). The CY2027
@@ -236,8 +237,9 @@ disclosed here rather than rushed in before an external review.
     read-only, and `POST …/impact/evaluate` does the write.
   - A crash while scoring left a run `RUNNING` that later requests deduplicated
     to. It is now marked `FAILED`.
-  - A "significantly better" verdict could survive Holm correction or rest on
-    six changed calls. The verdict now needs both (`significant_holm`).
+  - A "significantly better" verdict could stand after Holm correction had
+    removed it, or rest on six changed calls. The verdict now needs both:
+    significance after Holm (`significant_holm`) and at least ten changed calls.
 
 - **2026-09-25 — TPMO disclaimer, second wording.** `tpmo-disclaimer-text` v2
   carried only the wording for a TPMO that does *not* sell for every MA

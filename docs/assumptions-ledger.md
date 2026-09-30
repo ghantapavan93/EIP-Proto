@@ -27,7 +27,7 @@ was requested or used.
 | R14 | 422.2274(g)(4): TPMO-to-TPMO sharing of beneficiary data needs prior express written consent listing each recipient, in force since 2024-10-01, and was not vacated | FACT (text); FACT (secondary) that the court left it in place | eCFR 422.2274(g)(4); Healthcare Dive 2024-07-10; 91 FR 17449 |
 | R15 | The FCC one-to-one consent amendment (64.1200(f)(9), 2023) was vacated by the 11th Circuit on 2025-01-24 before it took effect; text removed by 90 FR 42137 (2025-08-29) | FACT | Federal Register; court decision per the research note |
 | R16 | TCPA revocation: any reasonable method, honored within 10 business days, in force 2025-04-11; revoke-all for informational messages deferred to 2027-01-31 | FACT | eCFR 64.1200(a)(10)-(12); DA 26-12 (2026-01-06) |
-| R17 | The FCC votes on a revocation rewrite 2026-09-30 (draft FCC-CIRC 2609-05); it would take effect 30 days after Federal Register publication | FACT that the draft says so; the outcome is unknown until the vote | docs.fcc.gov DOC-424844A1 |
+| R17 | The FCC scheduled a vote on a revocation rewrite for 2026-09-30 (draft FCC-CIRC 2609-05); it would take effect 30 days after Federal Register publication | FACT that the draft says so; the outcome was not known when this was written (2026-09-30), so v2 stays `proposed` until an order is published | docs.fcc.gov DOC-424844A1 |
 | R18 | From 2026-10-01 an SOA is required before every personal marketing appointment, inbound, walk-in, unscheduled call, web chat and web form included ("scheduled" removed from 422.2264(c)(3)(i)) | FACT | eCFR 422.2264(c)(3)(i); 91 FR 17456, 17459 |
 | R19 | Florida 501.616(6): no solicitation call before 8 a.m. or after 8 p.m. called-party time; at most 3 calls per 24 hours on the same subject; reaches licensed insurance agents via 501.604 | FACT | Fla. Stat. 501.616, 501.604 (2026) |
 | R20 | Whether 501.616(6) reaches interstate calls, and whether a requested callback is a solicitation | **Disputed** — ask counsel | — |
@@ -41,10 +41,10 @@ was requested or used.
 
 | # | Claim | Label | Source |
 |---|---|---|---|
-| E1 | EIP uses Salesforce (+ Marketing Cloud), MuleSoft, Snowflake, Attention, Vigil (vigilnow.com), Power BI | FACT | Vigil and Attention case studies; live SFMC CloudPages; job postings 2025–2026 |
+| E1 | EIP uses Salesforce (+ Marketing Cloud), MuleSoft, Snowflake, Attention, Vigil (vigilnow.com), Power BI | FACT | Vigil and Attention case studies; live SFMC CloudPages; EIP's public careers pages (2025–2026) |
 | E2 | Attention scores 100% of calls on a 28-item revenue-weighted scorecard with automated daily coaching | FACT (vendor-stated) | attention.com/customers/elite-insurance-partners |
 | E3 | EIP is building AI workflow, AI enablement and full-stack capability in-house; its public role descriptions ask for "systematic testing and evaluation approaches" and for turning prototypes into production applications | FACT | EIP's public careers pages (read 2026-09-21) |
-| E4 | Vapi is EIP's voice-AI vendor | **UNKNOWN** — named only in a removed 2025 posting; nothing here depends on it | search snippets |
+| E4 | Vapi is EIP's voice-AI vendor | **UNKNOWN** — named only in a removed 2025 careers page; nothing here depends on it | search snippets |
 | E5 | EIP has an eval / prompt-versioning tool today | **UNKNOWN** — no public evidence either way; the public role descriptions ask for evaluation approaches to be *created* | EIP's public careers pages |
 | E6 | A rule→artifact registry (even a spreadsheet) exists and is being used for Oct 1 | **UNKNOWN** — this is the kill evidence for the hypothesis | — |
 | E7 | The public SOA FAQ encodes the 48-hour window (correct until 2026-09-30); one footer carries the pre-CY2027 SHIP disclaimer wording; two pages give different licensing-footprint figures | FACT | excerpts under fixtures/pages/, read 2026-09-21 |
@@ -63,4 +63,4 @@ was requested or used.
 | A2 | The workflow under test is a post-call QA/handoff record | swap the workflow; contracts are per-workflow anyway |
 | A3 | Sixty synthetic calls with a designed scenario mix demonstrate the mechanism | they do not demonstrate EIP's base rates, and the README says so |
 | A4 | Deterministic-first with a proposal-only model is the right AI boundary for compliance content | if EIP wants the model to decide, that is a one-line change and a conversation about who signs |
-| A5 | Rule changes are rare (~2/year) so YAML-in-Git maintenance is cheap | if carrier bulletins count as rules, intake automation (docs/questions) moves up the list |
+| A5 | Rule changes are rare (~2/year) so YAML-in-Git maintenance is cheap | if carrier bulletins count as rules, intake automation (docs/open-questions.md) moves up the list |

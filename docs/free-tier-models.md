@@ -138,12 +138,13 @@ What the numbers say, and what they do not:
   a frontier model. They say nothing about a production model's base rates.
   They say a great deal about whether the harness measures what it claims to.
 
-## Why this matters in the room
+## Why this matters
 
-- The **MODEL trigger** becomes real: local 7B vs local 3B, or Groq Llama 70B
-  vs Gemini Flash — measured grounding defects, not a declared profile.
-- **Vendor independence is demonstrated, not claimed**: the same contract
-  set, the same corpus, three providers, one parameter.
+- The **MODEL trigger** becomes real: local 7B vs local 3B vs Llama 8B —
+  measured grounding defects, not a declared profile.
+- **Vendor independence is designed in and shown locally**: the same
+  contract set and corpus ran on three local models through one adapter; the
+  hosted free tiers are wired and mock-tested, but no hosted run was recorded.
 - **Cost is measured**: token usage comes from the provider; local runs
   report "$0 — local GPU" and hosted free tiers report "$0 — rate-limited",
   with the projection note that production volume needs a paid tier or a

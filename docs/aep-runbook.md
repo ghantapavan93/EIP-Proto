@@ -24,15 +24,17 @@ rule-to-artifact registry for October 1, the pilot shrinks to a coverage check o
 ## T-1: 2026-09-30
 
 1. `backstop seed`, then open `/readiness` with `as_of=2026-10-01`. It lists every
-   rule version that flips tomorrow, stale encodings per owner, and the AEP countdown.
+   rule version that flips on 2026-10-01, stale encodings per owner, and the AEP countdown.
 2. Note what flips on 2026-10-01 in this corpus: the 48-hour SOA wait ends; an SOA is
    needed before every personal marketing appointment, inbound and unscheduled
-   included; the TPMO disclaimer moves to "before any benefits discussion"; the SOA may
+   included; the TPMO disclaimer moves to "before any benefits discussion"; the TPMO
+   disclaimer wording is clarified (`tpmo-disclaimer-text` v2); the SOA may
    be collected at educational events; call-recording retention is written as 6 years;
    the superlatives documentation rule ends; the CY2027 compensation caps begin
    (Backstop's date for the CY2027 cycle, not a CMS calendar date).
-3. The FCC votes today on the TCPA revocation rewrite. **Change nothing** in
-   `rules/tcpa-consent-revocation.yaml` today. See "When the FCC order is published".
+3. The FCC's vote on the TCPA revocation rewrite is scheduled for this date. **Change
+   nothing** in `rules/tcpa-consent-revocation.yaml` until an order is published. See
+   "When the FCC order is published".
 
 ## Day 0: 2026-10-01
 

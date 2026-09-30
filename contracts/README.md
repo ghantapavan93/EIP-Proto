@@ -24,7 +24,7 @@ A contract names a check function in [`backend/backstop/harness/contracts.py`](.
 | `C-SCHEMA-01` | DETERMINISTIC | BLOCK | The output validates against the QA record schema. No output at all is an ERROR, not a FAIL. | None |
 | `C-SPAN-01` | DETERMINISTIC | BLOCK | `disclaimer_span`, `benefits_span`, `soa_span` and every superlative text occur verbatim in the transcript (whitespace and case normalized). | None |
 | `C-FACT-01` | DETERMINISTIC | BLOCK | Every dollar figure in the summary appears in the transcript. | None |
-| `C-PII-01` | DETERMINISTIC | BLOCK | No Medicare-number-shaped string, dashed SSN or slash-format date of birth, and no labelled PII value, in the summary, coaching note or CRM record. | None |
+| `C-PII-01` | DETERMINISTIC | BLOCK | No PII found by the `core.pii` detectors (Medicare numbers, SSNs, dates of birth, phone numbers, emails, street addresses), and no labelled PII value, in the summary, coaching note or CRM record. | None |
 | `C-TPMO-01` | DETERMINISTIC | BLOCK | The model's `disclaimer_compliant` equals ground truth under the rule in force. Medigap calls pass as not applicable. | `tpmo-disclaimer-timing`: `basis` (`timer` or `ordering`), `window_seconds` |
 | `C-SOA-01` | DETERMINISTIC | BLOCK | The model's `soa_wait_compliant` equals ground truth under the rule in force, honouring only the exceptions that rule version lists. Medigap calls pass as not applicable. | `soa-48h-wait`: `min_hours_between_soa_and_appointment`, `exceptions` |
 | `C-SUP-01` | DETERMINISTIC | FLAG | The superlatives the model flags equal the ones ground truth says must be flagged. A mismatch is FLAG, not FAIL. | `superlatives`: `substantiation_required` |
