@@ -33,7 +33,10 @@ export function ConfusionMatrix({ confusion, className }: { confusion: Confusion
         <span className="self-center text-[11px] font-semibold uppercase leading-tight tracking-[0.04em] text-ink-2">
           Truth: compliant
         </span>
-        <div className={cn(cell, c.fp ? 'border-amber/40 bg-amber/10' : 'border-hairline bg-surface')} data-testid="cm-fp">
+        <div
+          className={cn(cell, c.fp ? 'border-amber/40 bg-amber/10' : 'border-hairline bg-surface')}
+          data-testid="cm-fp"
+        >
           <span className={cn('stat text-[22px]', c.fp ? 'text-amber-ink' : 'text-ink-3')}>{c.fp}</span>
           <span className="leading-tight text-ink">false alarms</span>
         </div>
@@ -52,7 +55,8 @@ export function ConfusionMatrix({ confusion, className }: { confusion: Confusion
         </div>
       </div>
       <figcaption className="mt-2 text-[11.5px] leading-snug text-ink-3">
-        Counted per {c.unit}; positive = violation. {c.tp + c.fn} {c.tp + c.fn === 1 ? 'violation' : 'violations'} in the ground truth
+        Counted per {c.unit}; positive = violation. {c.tp + c.fn} {c.tp + c.fn === 1 ? 'violation' : 'violations'} in
+        the ground truth
         {c.tn !== null ? `, ${c.fp + c.tn} compliant ${unit}` : ''}.
       </figcaption>
     </figure>

@@ -18,7 +18,9 @@ function PermissionList({ me }: { me: MeOut }) {
   const refused = me.permissions.filter((p) => !p.allowed);
   // Most refusals share one reason ("only engineer or admin may do this"): say it once as a
   // heading; a refusal with its own condition (two-person rule, verified first) keeps it inline.
-  const editorsOnly = refused.filter((p) => /only engineer or admin may do this\.?$/i.test(p.why) || /^engineers and admins can /i.test(p.why));
+  const editorsOnly = refused.filter(
+    (p) => /only engineer or admin may do this\.?$/i.test(p.why) || /^engineers and admins can /i.test(p.why),
+  );
   const cannot = refused.filter((p) => !editorsOnly.includes(p));
   return (
     <div className="space-y-3">
@@ -61,18 +63,43 @@ function PermissionList({ me }: { me: MeOut }) {
 }
 
 /** The role explainer: what each role can do, and why a decision needs a second person. */
-export function RolesDrawer({ open, onClose, roles, current, me }: { open: boolean; onClose: () => void; roles?: RoleInfo[]; current?: string | null; me?: MeOut }) {
+export function RolesDrawer({
+  open,
+  onClose,
+  roles,
+  current,
+  me,
+}: {
+  open: boolean;
+  onClose: () => void;
+  roles?: RoleInfo[];
+  current?: string | null;
+  me?: MeOut;
+}) {
   const list = roles?.length ? roles : ROLES;
   // Each role lists only what it adds to the one before it (the roles are cumulative).
   const added = list.map((r, i) => {
     const prev = i > 0 ? new Set(list[i - 1].can) : null;
-    return { prevLabel: i > 0 ? roleTitle(list[i - 1].role).toLowerCase() : null, items: prev ? r.can.filter((c) => !prev.has(c)) : r.can };
+    return {
+      prevLabel: i > 0 ? roleTitle(list[i - 1].role).toLowerCase() : null,
+      items: prev ? r.can.filter((c) => !prev.has(c)) : r.can,
+    };
   });
   return (
-    <Drawer open={open} onClose={onClose} title="How roles work" subtitle="Three roles, one audit trail. The server enforces every rule below; the screens only explain it." width={520}>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      title="How roles work"
+      subtitle="Three roles, one audit trail. The server enforces every rule below; the screens only explain it."
+      width={520}
+    >
       <div className="space-y-3">
         {list.map((r, i) => (
-          <section key={r.role} className={cn('card px-4 py-3', current === r.role && 'border-teal')} aria-label={r.label}>
+          <section
+            key={r.role}
+            className={cn('card px-4 py-3', current === r.role && 'border-teal')}
+            aria-label={r.label}
+          >
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-[14px] font-semibold text-ink">{r.label}</h3>
               {current === r.role && <Chip tone="teal">you</Chip>}
@@ -80,7 +107,9 @@ export function RolesDrawer({ open, onClose, roles, current, me }: { open: boole
             <p className="mt-1 text-[12.5px] leading-relaxed text-ink-2">{r.description}</p>
             {added[i].prevLabel && (
               <div className="mt-2 text-[11.5px] font-medium text-ink-3">
-                {added[i].items.length ? `Everything an ${added[i].prevLabel} can, plus:` : `The same actions as an ${added[i].prevLabel}.`}
+                {added[i].items.length
+                  ? `Everything an ${added[i].prevLabel} can, plus:`
+                  : `The same actions as an ${added[i].prevLabel}.`}
               </div>
             )}
             <ul className="mt-1.5 space-y-1">
@@ -96,9 +125,15 @@ export function RolesDrawer({ open, onClose, roles, current, me }: { open: boole
         <section className="rounded-[8px] border border-hairline bg-band px-4 py-3" aria-label="Separation of duties">
           <h3 className="text-[13px] font-semibold text-ink">Decisions need a different approver</h3>
           <ul className="mt-1.5 list-disc space-y-1 pl-4 text-[12.5px] leading-relaxed text-ink-2">
-            <li>When a reviewer overrides a flagged call, Backstop pins that decision as a test case. It only takes effect after a different engineer or admin approves it. Nobody can approve their own.</li>
+            <li>
+              When a reviewer overrides a flagged call, Backstop pins that decision as a test case. It only takes effect
+              after a different engineer or admin approves it. Nobody can approve their own.
+            </li>
             <li>Approved exceptions expire after 365 days, so a one-off decision cannot quietly become policy.</li>
-            <li>Every transition, refusal and export is written to the hash-chained audit log with the person&apos;s name and role.</li>
+            <li>
+              Every transition, refusal and export is written to the hash-chained audit log with the person&apos;s name
+              and role.
+            </li>
           </ul>
         </section>
       </div>
@@ -156,7 +191,10 @@ export function IdentityMenu() {
         aria-label={`Signed in as ${me.name}, ${short}. What your role can do`}
         onClick={() => setOpen((o) => !o)}
       >
-        <span aria-hidden className="hidden h-7 w-7 items-center justify-center rounded-full bg-navy text-[11px] font-semibold text-on-navy sm:inline-flex">
+        <span
+          aria-hidden
+          className="hidden h-7 w-7 items-center justify-center rounded-full bg-navy text-[11px] font-semibold text-on-navy sm:inline-flex"
+        >
           {initials(me.name)}
         </span>
         <span className="hidden font-medium text-ink sm:inline" data-testid="topbar-user">
@@ -165,7 +203,14 @@ export function IdentityMenu() {
         <Chip tone="slate" title={`${label} (role: ${me.role})`}>
           {short}
         </Chip>
-        <ChevronDown size={12} aria-hidden className={cn('hidden text-ink-3 transition-transform motion-reduce:transition-none sm:block', open && 'rotate-180')} />
+        <ChevronDown
+          size={12}
+          aria-hidden
+          className={cn(
+            'hidden text-ink-3 transition-transform motion-reduce:transition-none sm:block',
+            open && 'rotate-180',
+          )}
+        />
       </button>
       {open && (
         <div
@@ -177,14 +222,19 @@ export function IdentityMenu() {
           className="pop-in absolute right-0 top-full z-40 mt-1.5 w-[300px] max-w-[calc(100vw-24px)] rounded-[8px] border border-hairline bg-surface p-4 text-left shadow-[0_8px_24px_-8px_rgba(16,24,40,0.25)] outline-none max-sm:fixed max-sm:inset-x-3 max-sm:top-14 max-sm:w-auto"
         >
           <div className="text-[12px] text-ink-2">
-            Signed in as <span className="font-mono font-semibold text-ink">{me.name}</span> · <span className="font-semibold text-ink">{label}</span>
+            Signed in as <span className="font-mono font-semibold text-ink">{me.name}</span> ·{' '}
+            <span className="font-semibold text-ink">{label}</span>
           </div>
-          {me.role_description && <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-2">{me.role_description}</p>}
+          {me.role_description && (
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-2">{me.role_description}</p>
+          )}
           <div className="mt-3 border-t border-hairline pt-3">
             <PermissionList me={me} />
           </div>
           <div className="mt-3 flex items-center justify-between gap-2 border-t border-hairline pt-3">
-            <span className="text-[11.5px] leading-snug text-ink-3">Every action is logged with your name and role.</span>
+            <span className="text-[11.5px] leading-snug text-ink-3">
+              Every action is logged with your name and role.
+            </span>
             <button
               type="button"
               className="btn btn-outline btn-sm shrink-0"

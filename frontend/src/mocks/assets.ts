@@ -181,7 +181,7 @@ const ASSET_SEEDS: AssetSeed[] = [
     owner_role: 'Training Supervisor',
     is_synthetic: true,
     content_text:
-      'CLOSE-07 · Scheduling the appointment. "I\'ll send the Scope of Appointment now. Because of CMS rules we\'ll need to wait 48 hours before we can meet to go over specific plans, so let\'s look at [day after tomorrow]." If the beneficiary is within the last four days of an election period, use CLOSE-07b instead.',
+      "CLOSE-07 · Scheduling the appointment. \"I'll send the Scope of Appointment now. Because of CMS rules we'll need to wait 48 hours before we can meet to go over specific plans, so let's look at [day after tomorrow].\" If the beneficiary is within the last four days of an election period, use CLOSE-07b instead.",
   },
   {
     code: 'sfmc-appt-confirm-04',

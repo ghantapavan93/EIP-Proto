@@ -46,15 +46,33 @@ const GROUPS: Array<{ direction: FanNode['direction']; reading: string }> = [
  * colored by direction. Plain CSS borders so labels wrap instead of
  * overlapping and the tree still reads as an indented list on a phone.
  */
-function Branch({ last, color, anchor, children, className }: { last: boolean; color: string; anchor: 'center' | 'head'; children: ReactNode; className?: string }) {
+function Branch({
+  last,
+  color,
+  anchor,
+  children,
+  className,
+}: {
+  last: boolean;
+  color: string;
+  anchor: 'center' | 'head';
+  children: ReactNode;
+  className?: string;
+}) {
   // "center": the branch meets the middle of the row; "head": it meets a 34px
   // header row at the top of the item (a group whose children hang below it).
   const joint = anchor === 'center' ? 'calc(50% + 4px)' : '25px';
   return (
     <li className={cn('relative pl-5 pt-2 sm:pl-6', className)}>
       <span aria-hidden className="absolute left-0 top-0 border-l-2 border-hairline" style={{ height: joint }} />
-      {!last && <span aria-hidden className="absolute bottom-0 left-0 border-l-2 border-hairline" style={{ top: joint }} />}
-      <span aria-hidden className={cn('absolute left-0 w-5 border-t-2 sm:w-6', color)} style={{ top: `calc(${joint} - 1px)` }} />
+      {!last && (
+        <span aria-hidden className="absolute bottom-0 left-0 border-l-2 border-hairline" style={{ top: joint }} />
+      )}
+      <span
+        aria-hidden
+        className={cn('absolute left-0 w-5 border-t-2 sm:w-6', color)}
+        style={{ top: `calc(${joint} - 1px)` }}
+      />
       {children}
     </li>
   );
@@ -67,7 +85,9 @@ function Branch({ last, color, anchor, children, className }: { last: boolean; c
  * provenance). Groups with no artifacts are left out.
  */
 export function FanDiagram({ ruleCode, ruleLabel, nodes, className, onNodeClick }: FanDiagramProps) {
-  const groups = GROUPS.map((g) => ({ ...g, nodes: nodes.filter((n) => n.direction === g.direction) })).filter((g) => g.nodes.length > 0);
+  const groups = GROUPS.map((g) => ({ ...g, nodes: nodes.filter((n) => n.direction === g.direction) })).filter(
+    (g) => g.nodes.length > 0,
+  );
   return (
     <figure className={cn('m-0', className)} aria-label={`${ruleCode}: ${nodes.length} linked artifacts`}>
       <div className="inline-flex max-w-full items-center gap-2.5 rounded-[8px] bg-navy px-3 py-2 text-on-navy">
@@ -96,15 +116,24 @@ export function FanDiagram({ ruleCode, ruleLabel, nodes, className, onNodeClick 
                 const body = (
                   <>
                     <span className="min-w-0 flex-1">
-                      {n.typeLabel && <span className="block text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-2">{n.typeLabel}</span>}
+                      {n.typeLabel && (
+                        <span className="block text-[10px] font-semibold uppercase tracking-[0.06em] text-ink-2">
+                          {n.typeLabel}
+                        </span>
+                      )}
                       <span className="block text-[13px] font-medium leading-snug text-ink">{n.label}</span>
-                      {n.sublabel && <span className="block font-mono text-[11px] text-ink-3 sm:hidden">{n.sublabel}</span>}
+                      {n.sublabel && (
+                        <span className="block font-mono text-[11px] text-ink-3 sm:hidden">{n.sublabel}</span>
+                      )}
                     </span>
-                    {n.sublabel && <span className="hidden shrink-0 font-mono text-[11px] text-ink-3 sm:inline">{n.sublabel}</span>}
+                    {n.sublabel && (
+                      <span className="hidden shrink-0 font-mono text-[11px] text-ink-3 sm:inline">{n.sublabel}</span>
+                    )}
                     {onNodeClick && <ChevronRight size={14} className="shrink-0 text-ink-3" aria-hidden />}
                   </>
                 );
-                const rowCls = 'flex w-full items-center gap-3 rounded-[6px] border border-hairline bg-surface px-3 py-2 text-left';
+                const rowCls =
+                  'flex w-full items-center gap-3 rounded-[6px] border border-hairline bg-surface px-3 py-2 text-left';
                 return (
                   <Branch key={n.id} last={i === g.nodes.length - 1} color={BRANCH[n.direction]} anchor="center">
                     {onNodeClick ? (

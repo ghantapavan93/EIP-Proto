@@ -125,7 +125,12 @@ function ProviderCard({ name, info }: { name: string; info: ProviderBoardInfo })
   const Icon = name === 'ollama' ? Laptop : name === 'simulated' ? ShieldCheck : KeyRound;
   const ready = info.available;
   return (
-    <div className={cn('flex min-w-0 flex-col gap-1.5 border border-hairline bg-white p-3', ready && name !== 'simulated' && 'border-t-2 border-t-teal')}>
+    <div
+      className={cn(
+        'flex min-w-0 flex-col gap-1.5 border border-hairline bg-white p-3',
+        ready && name !== 'simulated' && 'border-t-2 border-t-teal',
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-navy">
           <Icon size={14} aria-hidden />
@@ -166,7 +171,9 @@ export function ModelsPage() {
   const rows = useMemo(
     () =>
       board.data?.rows.map((r) =>
-        r.latest_run && !isDevelopmentRun(r.latest_run) ? { ...r, latest_run: null, matched: false, measured: false } : r,
+        r.latest_run && !isDevelopmentRun(r.latest_run)
+          ? { ...r, latest_run: null, matched: false, measured: false }
+          : r,
       ),
     [board.data],
   );
@@ -210,7 +217,9 @@ export function ModelsPage() {
         cell: (c) => (
           <span className="block max-w-[320px] leading-snug">
             <span className="font-semibold text-navy">{c.row.original.model.label}</span>
-            <span className="mt-0.5 block font-mono text-[11px] text-ink-2 [overflow-wrap:anywhere]">{c.row.original.model.model_id}</span>
+            <span className="mt-0.5 block font-mono text-[11px] text-ink-2 [overflow-wrap:anywhere]">
+              {c.row.original.model.model_id}
+            </span>
           </span>
         ),
       },
@@ -226,8 +235,12 @@ export function ModelsPage() {
         meta: { wrap: true },
         cell: (c) => (
           <span className="block max-w-[260px] leading-snug">
-            <Chip tone={availabilityTone(c.row.original.availability)}>{availabilityLabel(c.row.original.availability)}</Chip>
-            <span className="mt-0.5 block text-[11px] text-ink-2 [overflow-wrap:anywhere]">{c.row.original.availability_detail}</span>
+            <Chip tone={availabilityTone(c.row.original.availability)}>
+              {availabilityLabel(c.row.original.availability)}
+            </Chip>
+            <span className="mt-0.5 block text-[11px] text-ink-2 [overflow-wrap:anywhere]">
+              {c.row.original.availability_detail}
+            </span>
           </span>
         ),
       },
@@ -241,7 +254,10 @@ export function ModelsPage() {
           if (!r.latest_run) return <span className="text-ink-3">—</span>;
           return (
             <span className="inline-flex flex-col gap-0.5">
-              <Chip tone={r.measured ? 'teal' : 'neutral'} title={r.measured ? 'output came from the real model' : 'declared defect profile'}>
+              <Chip
+                tone={r.measured ? 'teal' : 'neutral'}
+                title={r.measured ? 'output came from the real model' : 'declared defect profile'}
+              >
                 {r.measured ? 'measured' : 'declared'}
               </Chip>
               {!r.matched && <span className="text-[10px] text-amber-ink">other prompt/date</span>}
@@ -261,7 +277,12 @@ export function ModelsPage() {
             <span className="inline-flex flex-wrap items-center gap-1">
               <GateChip gate={run.gate} />
               <AdapterChip adapter={run.adapter} />
-              <Link to={`/runs/${run.id}`} className="font-mono text-[11px]" onClick={(e) => e.stopPropagation()} title={fmtTs(run.started_at)}>
+              <Link
+                to={`/runs/${run.id}`}
+                className="font-mono text-[11px]"
+                onClick={(e) => e.stopPropagation()}
+                title={fmtTs(run.started_at)}
+              >
                 open
               </Link>
             </span>
@@ -273,7 +294,12 @@ export function ModelsPage() {
         header: 'Defect fingerprint',
         meta: { wrap: true },
         accessorFn: (r) => (r.latest_run ? r.latest_run.contracts.reduce((n, x) => n + x.failed + x.flagged, 0) : -1),
-        cell: (c) => (c.row.original.latest_run ? <DefectFingerprint run={c.row.original.latest_run} /> : <span className="text-ink-3">—</span>),
+        cell: (c) =>
+          c.row.original.latest_run ? (
+            <DefectFingerprint run={c.row.original.latest_run} />
+          ) : (
+            <span className="text-ink-3">—</span>
+          ),
       },
       {
         id: 'tokens',
@@ -327,7 +353,12 @@ export function ModelsPage() {
         header: 'Judge',
         size: 110,
         accessorFn: (r) => (runStats(r.latest_run).judge_stability?.stable ? 1 : 0),
-        cell: (c) => (c.row.original.latest_run ? <JudgeChip run={c.row.original.latest_run} compact /> : <span className="text-ink-3">—</span>),
+        cell: (c) =>
+          c.row.original.latest_run ? (
+            <JudgeChip run={c.row.original.latest_run} compact />
+          ) : (
+            <span className="text-ink-3">—</span>
+          ),
       },
       {
         id: 'cassettes',
@@ -341,7 +372,10 @@ export function ModelsPage() {
           return (
             <span className="inline-flex flex-col gap-0.5 text-[11px]">
               {sets.map((s) => (
-                <span key={s.prompt_hash} title={`prompt hash ${s.prompt_hash} · ${s.generate} outputs · ${s.judge} judge sets · ${s.canary} canary`}>
+                <span
+                  key={s.prompt_hash}
+                  title={`prompt hash ${s.prompt_hash} · ${s.generate} outputs · ${s.judge} judge sets · ${s.canary} canary`}
+                >
                   v{s.prompt_version ?? '?'} · {s.generate}/{s.judge}/{s.canary}
                 </span>
               ))}
@@ -354,7 +388,9 @@ export function ModelsPage() {
   );
 
   const providers = board.data?.providers ?? {};
-  const providerNames = PROVIDER_ORDER.filter((n) => n in providers).concat(Object.keys(providers).filter((n) => !PROVIDER_ORDER.includes(n)));
+  const providerNames = PROVIDER_ORDER.filter((n) => n in providers).concat(
+    Object.keys(providers).filter((n) => !PROVIDER_ORDER.includes(n)),
+  );
 
   return (
     <div>
@@ -363,8 +399,9 @@ export function ModelsPage() {
         title="Models"
         description={
           <>
-            One adapter speaks to every vendor; swapping the model is a run parameter, and the contracts do not move. Local models cost $0 and keep
-            transcripts on the machine; hosted free tiers need a key; simulated profiles are <em>declared</em>, never measured.
+            One adapter speaks to every vendor; swapping the model is a run parameter, and the contracts do not move.
+            Local models cost $0 and keep transcripts on the machine; hosted free tiers need a key; simulated profiles
+            are <em>declared</em>, never measured.
             {rows && (
               <>
                 {' '}
@@ -380,7 +417,9 @@ export function ModelsPage() {
             type="button"
             className="btn inline-flex items-center gap-1.5"
             disabled={picked.length !== 2}
-            onClick={() => navigate(`/runs/compare?a=${encodeURIComponent(picked[0])}&b=${encodeURIComponent(picked[1])}`)}
+            onClick={() =>
+              navigate(`/runs/compare?a=${encodeURIComponent(picked[0])}&b=${encodeURIComponent(picked[1])}`)
+            }
             title={picked.length === 2 ? 'Compare the two selected runs' : 'Select two rows with runs to compare'}
           >
             Compare A → B <ArrowRight size={14} aria-hidden />
@@ -419,18 +458,22 @@ export function ModelsPage() {
           retry={() => void board.refetch()}
           getRowId={(r) => r.model.model_id}
           onRowClick={toggle}
-          selectedIds={new Set(rows?.filter((r) => r.latest_run && picked.includes(r.latest_run.id)).map((r) => r.model.model_id))}
+          selectedIds={
+            new Set(rows?.filter((r) => r.latest_run && picked.includes(r.latest_run.id)).map((r) => r.model.model_id))
+          }
           initialSort={[{ id: 'evidence', desc: true }]}
           emptyTitle="No models registered"
           caption="Model board"
           compact
         />
         <p className="mt-3 max-w-4xl text-[12px] leading-relaxed text-ink-2">
-          <strong className="text-ink">How to read it.</strong> <em>Measured</em> rows replay a recorded cassette or ran live: token counts come from the
-          provider, latency is wall-clock, and every contract cell is the real model's answer. <em>Declared</em> rows are the deterministic stand-ins used
-          to script the rule-flip and prompt-change acts; their defects are configured, not observed. A model with no key still has a row so the swap is
-          one environment variable away — <code className="font-mono">backstop record --model groq/llama-3.3-70b-versatile --limit 20</code> records it into
-          cassettes the demo can replay offline.
+          <strong className="text-ink">How to read it.</strong> <em>Measured</em> rows replay a recorded cassette or ran
+          live: token counts come from the provider, latency is wall-clock, and every contract cell is the real model's
+          answer. <em>Declared</em> rows are the deterministic stand-ins used to script the rule-flip and prompt-change
+          acts; their defects are configured, not observed. A model with no key still has a row so the swap is one
+          environment variable away —{' '}
+          <code className="font-mono">backstop record --model groq/llama-3.3-70b-versatile --limit 20</code> records it
+          into cassettes the demo can replay offline.
         </p>
       </Section>
     </div>

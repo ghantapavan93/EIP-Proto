@@ -28,7 +28,10 @@ const META: MetaOut = {
 };
 
 function failEverything() {
-  const fetchMock = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ detail: 'upstream unavailable' }), { status: 503 }));
+  const fetchMock = vi.fn(
+    async (_input: RequestInfo | URL) =>
+      new Response(JSON.stringify({ detail: 'upstream unavailable' }), { status: 503 }),
+  );
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
@@ -87,7 +90,14 @@ describe('DataTable with a failed refetch', () => {
   const columns: ColumnDef<{ id: string }, unknown>[] = [{ header: 'Id', accessorKey: 'id' }];
 
   it('keeps the rows it already has', () => {
-    render(<DataTable columns={columns} data={[{ id: 'row-1' }]} error={new Error('refetch failed')} getRowId={(r) => r.id} />);
+    render(
+      <DataTable
+        columns={columns}
+        data={[{ id: 'row-1' }]}
+        error={new Error('refetch failed')}
+        getRowId={(r) => r.id}
+      />,
+    );
     expect(screen.getByText('row-1')).toBeInTheDocument();
     expect(screen.queryByText(/refetch failed/)).toBeNull();
   });

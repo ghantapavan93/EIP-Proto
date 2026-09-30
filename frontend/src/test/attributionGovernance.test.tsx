@@ -79,11 +79,23 @@ describe('attribution (lib, same rules as the backend)', () => {
 
 describe('attribution (mock API and Compare screen)', () => {
   it('marks the demo chain: each step isolated, the whole jump confounded with links to every step', async () => {
-    const step = (await mockRequest('GET', `/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`, undefined, analyst)) as CompareOut;
+    const step = (await mockRequest(
+      'GET',
+      `/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`,
+      undefined,
+      analyst,
+    )) as CompareOut;
     expect(step.attribution?.verdict).toBe('isolated');
-    const jump = (await mockRequest('GET', `/runs/compare?a=${RUN_IDS.baseline}&b=${RUN_IDS.modelSwap}`, undefined, analyst)) as CompareOut;
+    const jump = (await mockRequest(
+      'GET',
+      `/runs/compare?a=${RUN_IDS.baseline}&b=${RUN_IDS.modelSwap}`,
+      undefined,
+      analyst,
+    )) as CompareOut;
     expect(jump.attribution?.verdict).toBe('confounded');
-    expect(new Set(jump.attribution?.isolating_pairs.map((p) => p.factor))).toEqual(new Set(['prompt', 'model', 'rule_date']));
+    expect(new Set(jump.attribution?.isolating_pairs.map((p) => p.factor))).toEqual(
+      new Set(['prompt', 'model', 'rule_date']),
+    );
   });
 
   it('shows the verdict and the clean comparisons on /runs/compare', async () => {
@@ -99,7 +111,11 @@ describe('attribution (mock API and Compare screen)', () => {
 describe('governance (admin)', () => {
   it('refuses every governance endpoint to analysts and engineers, and logs the refusal', async () => {
     for (const who of [analyst, engineer]) {
-      for (const [method, path] of [['GET', '/admin/access'], ['POST', '/admin/audit-checkpoints'], ['POST', '/rules/reload']] as const) {
+      for (const [method, path] of [
+        ['GET', '/admin/access'],
+        ['POST', '/admin/audit-checkpoints'],
+        ['POST', '/rules/reload'],
+      ] as const) {
         const err = await mockRequest(method, path, undefined, who).catch((e: unknown) => e);
         expect(err).toBeInstanceOf(ApiError);
         expect((err as ApiError).status).toBe(403);
@@ -113,10 +129,20 @@ describe('governance (admin)', () => {
 
   it('issues a checkpoint receipt that verifies, and rejects a forged one', async () => {
     const cp = (await mockRequest('POST', '/admin/audit-checkpoints', undefined, admin)) as AuditCheckpointOut;
-    const good = (await mockRequest('GET', `/audit/verify?through_id=${cp.through_id}&tip=${cp.tip}`, undefined, analyst)) as AuditVerifyOut;
+    const good = (await mockRequest(
+      'GET',
+      `/audit/verify?through_id=${cp.through_id}&tip=${cp.tip}`,
+      undefined,
+      analyst,
+    )) as AuditVerifyOut;
     expect(good.ok).toBe(true);
     expect(good.checkpoint?.matches).toBe(true);
-    const forged = (await mockRequest('GET', `/audit/verify?through_id=${cp.through_id}&tip=${'0'.repeat(64)}`, undefined, analyst)) as AuditVerifyOut;
+    const forged = (await mockRequest(
+      'GET',
+      `/audit/verify?through_id=${cp.through_id}&tip=${'0'.repeat(64)}`,
+      undefined,
+      analyst,
+    )) as AuditVerifyOut;
     expect(forged.ok).toBe(false);
     expect(forged.reason).toMatch(/rewritten/);
   });
@@ -127,13 +153,17 @@ describe('governance (admin)', () => {
     expect(await screen.findByText(/Admins only\./, {}, { timeout: 8000 })).toBeInTheDocument();
     const matrix = screen.getByRole('table', { name: 'Actions each role may take' });
     expect(within(matrix).getByRole('rowheader', { name: /Review access/ })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole('button', { name: /Take checkpoint/ })).toHaveAttribute('aria-disabled', 'true'));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Take checkpoint/ })).toHaveAttribute('aria-disabled', 'true'),
+    );
   }, 15000);
 
   it('lets an admin review access and take a checkpoint', async () => {
     open('/governance', 'admin');
     expect(await screen.findByRole('table', { name: 'Accounts and roles' }, { timeout: 8000 })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Take checkpoint/ }));
-    expect(await screen.findByText(/Receipt — keep this outside the system/, {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Receipt — keep this outside the system/, {}, { timeout: 8000 }),
+    ).toBeInTheDocument();
   }, 15000);
 });

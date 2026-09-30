@@ -57,14 +57,7 @@ export type Route = 'PASS' | 'FLAG' | 'BLOCK';
 export type Adapter = 'simulated' | 'cassette' | 'live' | 'anthropic';
 
 export type ReviewKind = 'STALE_ASSET' | 'PROPOSED_EDGE' | 'FLAGGED_RESULT' | 'RULE_SOURCE_CHANGED';
-export type ReviewState =
-  | 'open'
-  | 'in_review'
-  | 'verified'
-  | 'republished'
-  | 'dismissed'
-  | 'upheld'
-  | 'overridden';
+export type ReviewState = 'open' | 'in_review' | 'verified' | 'republished' | 'dismissed' | 'upheld' | 'overridden';
 
 export type ReasonCode =
   | 'FALSE_POSITIVE_MATCHER'
@@ -872,7 +865,8 @@ export interface ContractMetricsQuery {
  * voted on; deferral_ends = a deferred provision lands; marketing_start /
  * aep_start / aep_end / oep_start = the Medicare calendar.
  */
-export type MilestoneKind = 'rule_applies' | 'vote' | 'deferral_ends' | 'marketing_start' | 'aep_start' | 'aep_end' | 'oep_start';
+export type MilestoneKind =
+  'rule_applies' | 'vote' | 'deferral_ends' | 'marketing_start' | 'aep_start' | 'aep_end' | 'oep_start';
 
 export interface ReadinessMilestone {
   date: string;

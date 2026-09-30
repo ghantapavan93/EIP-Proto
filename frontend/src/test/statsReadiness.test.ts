@@ -1,10 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { mockRequest, RUN_IDS } from '../mocks/server';
-import type { CompareOut, ContractMetricsOut, ImpactWhatIfOut, ReadinessOut, RuleOut, RuleVersionOut } from '../api/types';
+import type {
+  CompareOut,
+  ContractMetricsOut,
+  ImpactWhatIfOut,
+  ReadinessOut,
+  RuleOut,
+  RuleVersionOut,
+} from '../api/types';
 import type { ApiError } from '../api/errors';
 import { classifierMetrics, compareRates, fisherExact2x2, fmtP, holm, mcnemarExact, wilsonCi } from '../lib/stats';
 import { axisMax, fmtCi, fmtPct, lostToHolm, plainVerdict } from '../lib/significance';
-import { appliesLabel, classificationLabel, deferralLine, governs, latestGoverning, statusPresentation, versionStatusAsOf } from '../lib/ruleVersions';
+import {
+  appliesLabel,
+  classificationLabel,
+  deferralLine,
+  governs,
+  latestGoverning,
+  statusPresentation,
+  versionStatusAsOf,
+} from '../lib/ruleVersions';
 import { countdownLabel, daysLabel, milestoneKindLabel, requiredPace, sortOwners } from '../lib/readiness';
 import { auditSummary, eventLabel, eventTone } from '../lib/audit';
 import { AUDIT_EVENT_TYPES } from '../lib/vocab';
@@ -80,11 +95,17 @@ describe('significance wording', () => {
 
   it('says noise when it could be noise, and names the Holm loss', () => {
     expect(plainVerdict(row({}))).toBe('B fails more often, but the gap could be noise');
-    expect(plainVerdict(row({ paired: { both_pass: 60, a_only_fail: 0, b_only_fail: 0, both_fail: 0 }, discordant: 0 }))).toBe('No call changed outcome');
+    expect(
+      plainVerdict(row({ paired: { both_pass: 60, a_only_fail: 0, b_only_fail: 0, both_fail: 0 }, discordant: 0 })),
+    ).toBe('No call changed outcome');
     const holmLost = row({ direction: 'worse', significant: true, p_value: 0.02, p_holm: 0.14 });
     expect(lostToHolm(holmLost, 0.05)).toBe(true);
-    expect(plainVerdict(holmLost, 0.05, 9)).toBe('B fails more often — unlikely to be chance on its own, but not after correcting for 9 contracts');
-    expect(plainVerdict(row({ direction: 'better', significant: true, p_value: 0.001, p_holm: 0.009 }))).toBe('B fails less often — unlikely to be chance');
+    expect(plainVerdict(holmLost, 0.05, 9)).toBe(
+      'B fails more often — unlikely to be chance on its own, but not after correcting for 9 contracts',
+    );
+    expect(plainVerdict(row({ direction: 'better', significant: true, p_value: 0.001, p_holm: 0.009 }))).toBe(
+      'B fails less often — unlikely to be chance',
+    );
   });
 
   it('formats rates and picks a shared axis', () => {
@@ -98,7 +119,12 @@ describe('significance wording', () => {
 
 describe('mock /runs/compare statistics', () => {
   it('leads with ALL-BLOCK, pairs the same calls, and adjusts every contract with Holm', async () => {
-    const cmp = (await mockRequest('GET', `/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`, undefined, engineer)) as CompareOut;
+    const cmp = (await mockRequest(
+      'GET',
+      `/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`,
+      undefined,
+      engineer,
+    )) as CompareOut;
     const st = cmp.statistics;
     expect(st).toBeTruthy();
     if (!st) return;
@@ -118,7 +144,12 @@ describe('mock /runs/compare statistics', () => {
 
 describe('mock /contracts/{code}/metrics', () => {
   it('builds a confusion matrix per call for a judgment contract, with every call accounted for', async () => {
-    const m = (await mockRequest('GET', `/contracts/C-TPMO-01/metrics?run_id=${RUN_IDS.ruleFlip}`, undefined, engineer)) as ContractMetricsOut;
+    const m = (await mockRequest(
+      'GET',
+      `/contracts/C-TPMO-01/metrics?run_id=${RUN_IDS.ruleFlip}`,
+      undefined,
+      engineer,
+    )) as ContractMetricsOut;
     expect(m.metric_family).toBe('judgment');
     const run = m.runs[0];
     const c = run.confusion;
@@ -156,17 +187,34 @@ describe('mock /readiness', () => {
     expect(r.burn_down.aep).toEqual({ date: '2026-10-15', days_left: 20 });
     expect(r.burn_down.stale_encodings_on_target).toBeGreaterThan(0);
     const kinds = new Set(r.milestones.map((m) => m.kind));
-    for (const k of ['marketing_start', 'rule_applies', 'vote', 'deferral_ends', 'aep_start', 'aep_end', 'oep_start']) expect(kinds.has(k), k).toBe(true);
+    for (const k of ['marketing_start', 'rule_applies', 'vote', 'deferral_ends', 'aep_start', 'aep_end', 'oep_start'])
+      expect(kinds.has(k), k).toBe(true);
     expect(r.milestones.find((m) => m.kind === 'aep_start')).toMatchObject({ date: '2026-10-15', days_from_as_of: 20 });
-    expect(r.milestones.find((m) => m.rule_code === 'agent-broker-compensation')?.label).toBe('agent-broker-compensation v3 applies (restores prior)');
+    expect(r.milestones.find((m) => m.rule_code === 'agent-broker-compensation')?.label).toBe(
+      'agent-broker-compensation v3 applies (restores prior)',
+    );
     // bands are disjoint: Oct 1 sits in "30" only
-    expect(r.horizon['30'].some((i) => i.applies_from === '2026-10-01' && i.stale_encodings_on_that_date > 0)).toBe(true);
+    expect(r.horizon['30'].some((i) => i.applies_from === '2026-10-01' && i.stale_encodings_on_that_date > 0)).toBe(
+      true,
+    );
     expect([...r.horizon['60'], ...r.horizon['90']].some((i) => i.applies_from === '2026-10-01')).toBe(false);
-    expect(r.vacated.map((v) => `${v.rule_code}@${v.version}`)).toEqual(['agent-broker-compensation@2', 'tcpa-pewc-one-to-one@2']);
+    expect(r.vacated.map((v) => `${v.rule_code}@${v.version}`)).toEqual([
+      'agent-broker-compensation@2',
+      'tcpa-pewc-one-to-one@2',
+    ]);
     expect(r.vacated[0].source_url).toMatch(/^https:/);
-    expect(r.proposed).toContainEqual(expect.objectContaining({ rule_code: 'tcpa-consent-revocation', version: 2, vote_date: '2026-09-30', effective_from: null, origin: 'yaml' }));
+    expect(r.proposed).toContainEqual(
+      expect.objectContaining({
+        rule_code: 'tcpa-consent-revocation',
+        version: 2,
+        vote_date: '2026-09-30',
+        effective_from: null,
+        origin: 'yaml',
+      }),
+    );
     const ranked = sortOwners(r.owners);
-    for (let i = 1; i < ranked.length; i += 1) expect(ranked[i - 1].oldest_days ?? -1).toBeGreaterThanOrEqual(ranked[i].oldest_days ?? -1);
+    for (let i = 1; i < ranked.length; i += 1)
+      expect(ranked[i - 1].oldest_days ?? -1).toBeGreaterThanOrEqual(ranked[i].oldest_days ?? -1);
     expect(r.burn_down.note).toMatch(/no trend line/);
   });
 
@@ -174,12 +222,22 @@ describe('mock /readiness', () => {
     const abc = (await mockRequest('GET', '/rules/agent-broker-compensation', undefined, engineer)) as RuleOut;
     expect(abc.versions.find((v) => v.version === 2)?.status).toBe('vacated');
     // the one-to-one amendment (v2) was vacated before it took effect: v1 still governs, on any date
-    const oneToOne = (await mockRequest('GET', '/rules/tcpa-pewc-one-to-one/impact?as_of=2026-09-25', undefined, engineer)) as { in_force_version: number | null };
+    const oneToOne = (await mockRequest(
+      'GET',
+      '/rules/tcpa-pewc-one-to-one/impact?as_of=2026-09-25',
+      undefined,
+      engineer,
+    )) as { in_force_version: number | null };
     expect(oneToOne.in_force_version).toBe(1);
     const revocation = (await mockRequest('GET', '/rules/tcpa-consent-revocation', undefined, engineer)) as RuleOut;
     expect(revocation.in_force_version).toBe(1);
     // a proposal still awaiting its vote has no date: the what-if assumes it applies from as_of, and says so
-    const whatIf = (await mockRequest('GET', '/rules/tcpa-consent-revocation/impact?as_of=2026-10-01&assume_version=2', undefined, engineer)) as ImpactWhatIfOut;
+    const whatIf = (await mockRequest(
+      'GET',
+      '/rules/tcpa-consent-revocation/impact?as_of=2026-10-01&assume_version=2',
+      undefined,
+      engineer,
+    )) as ImpactWhatIfOut;
     expect(whatIf.hypothetical).toBe(true);
     expect(whatIf.in_force_version).toBe(2);
     expect(whatIf.note).toMatch(/no effective date yet, vote 2026-09-30; assumed from 2026-10-01/);
@@ -188,8 +246,20 @@ describe('mock /readiness', () => {
 
 describe('rule version vocabulary', () => {
   const base: RuleVersionOut = {
-    id: 'x', version: 2, status: 'vacated', clause_text: '', summary: '', effective_from: '2024-10-01', effective_to: null,
-    change_classification: 'TIGHTENS', params: {}, disputed: false, dispute_note: '', source_url: '', git_commit: '', created_at: '',
+    id: 'x',
+    version: 2,
+    status: 'vacated',
+    clause_text: '',
+    summary: '',
+    effective_from: '2024-10-01',
+    effective_to: null,
+    change_classification: 'TIGHTENS',
+    params: {},
+    disputed: false,
+    dispute_note: '',
+    source_url: '',
+    git_commit: '',
+    created_at: '',
   };
 
   it('keeps vacated, stayed and proposed versions out of force and says why', () => {
@@ -199,15 +269,29 @@ describe('rule version vocabulary', () => {
     expect(versionStatusAsOf(base, '2026-10-01', 2)).toBe('vacated');
     expect(statusPresentation(base)).toMatchObject({ tone: 'slate', strike: true });
     expect(statusPresentation({ ...base, status: 'stayed' }).tone).toBe('amber');
-    expect(statusPresentation({ ...base, status: 'proposed', vote_date: '2026-09-30' })).toMatchObject({ dashed: true, note: 'Not law yet — vote on Sep 30, 2026.' });
-    expect(latestGoverning({ versions: [{ ...base, version: 1, status: 'in_force', effective_from: '2022-10-01' }, base] })?.version).toBe(1);
+    expect(statusPresentation({ ...base, status: 'proposed', vote_date: '2026-09-30' })).toMatchObject({
+      dashed: true,
+      note: 'Not law yet — vote on Sep 30, 2026.',
+    });
+    expect(
+      latestGoverning({ versions: [{ ...base, version: 1, status: 'in_force', effective_from: '2022-10-01' }, base] })
+        ?.version,
+    ).toBe(1);
   });
 
   it('labels an undated proposal by its vote, deferrals by their new date, and RESTORES_PRIOR in words', () => {
     expect(appliesLabel({ effective_from: null, vote_date: '2026-09-30' })).toBe('awaiting vote Sep 30, 2026');
     expect(appliesLabel({ effective_from: null, vote_date: null })).toBe('no date yet');
-    expect(deferralLine({ provision: 'revoke-all', deferred_to: '2027-01-31', source: 'FCC' })).toBe('revoke-all deferred to Jan 31, 2027');
-    expect(deferralLine({ provision: 'Revoke-all: a revocation made in response to one type of message applies to all', deferred_to: '2027-01-31', source: '' })).toBe('Revoke-all deferred to Jan 31, 2027');
+    expect(deferralLine({ provision: 'revoke-all', deferred_to: '2027-01-31', source: 'FCC' })).toBe(
+      'revoke-all deferred to Jan 31, 2027',
+    );
+    expect(
+      deferralLine({
+        provision: 'Revoke-all: a revocation made in response to one type of message applies to all',
+        deferred_to: '2027-01-31',
+        source: '',
+      }),
+    ).toBe('Revoke-all deferred to Jan 31, 2027');
     expect(classificationLabel('RESTORES_PRIOR')).toBe('RESTORES PRIOR');
   });
 });
@@ -232,12 +316,40 @@ describe('readiness wording', () => {
 describe('audit vocabulary covers every backend event type', () => {
   // backend/backstop/core/audit.py EVENT_TYPES
   const BACKEND = [
-    'rules.reloaded', 'rule.version_created', 'rule.version_closed', 'rule.version_annotated', 'rule.proposal_renumbered', 'contract.version_created',
-    'rule.source_checked', 'export.generated', 'evidence.exported', 'ingest.completed', 'scan.started', 'scan.completed',
-    'artifact.content_changed', 'artifact.unchanged', 'artifact.fetch_error', 'edge.confirmed', 'edge.proposed', 'edge.rejected',
-    'edge.superseded', 'edge.restored', 'staleness.evaluated', 'task.opened', 'task.transitioned', 'task.transition_rejected',
-    'run.started', 'run.completed', 'run.failed', 'run.deduplicated', 'run.egress_refused', 'test_case.created',
-    'test_case.approved', 'auth.denied', 'sandbox.artifact_checked', 'sandbox.transcript_checked',
+    'rules.reloaded',
+    'rule.version_created',
+    'rule.version_closed',
+    'rule.version_annotated',
+    'rule.proposal_renumbered',
+    'contract.version_created',
+    'rule.source_checked',
+    'export.generated',
+    'evidence.exported',
+    'ingest.completed',
+    'scan.started',
+    'scan.completed',
+    'artifact.content_changed',
+    'artifact.unchanged',
+    'artifact.fetch_error',
+    'edge.confirmed',
+    'edge.proposed',
+    'edge.rejected',
+    'edge.superseded',
+    'edge.restored',
+    'staleness.evaluated',
+    'task.opened',
+    'task.transitioned',
+    'task.transition_rejected',
+    'run.started',
+    'run.completed',
+    'run.failed',
+    'run.deduplicated',
+    'run.egress_refused',
+    'test_case.created',
+    'test_case.approved',
+    'auth.denied',
+    'sandbox.artifact_checked',
+    'sandbox.transcript_checked',
   ];
 
   it('has a label, a tone and a filter entry for each', () => {
@@ -252,24 +364,61 @@ describe('audit vocabulary covers every backend event type', () => {
   });
 
   it('summarises the new events in one line', () => {
-    const row = (event_type: string, payload: Record<string, unknown>) => ({ id: 1, ts: '', actor: 'system:rules-loader', event_type, entity_type: 'rule_version', entity_id: 'x', payload });
-    expect(auditSummary(row('rule.proposal_renumbered', { rule: 'tcpa-consent-revocation', from_version: 2, to_version: 3, reason: 'tcpa-consent-revocation.yaml defines v2', yaml_matches_proposal: false }))).toBe(
+    const row = (event_type: string, payload: Record<string, unknown>) => ({
+      id: 1,
+      ts: '',
+      actor: 'system:rules-loader',
+      event_type,
+      entity_type: 'rule_version',
+      entity_id: 'x',
+      payload,
+    });
+    expect(
+      auditSummary(
+        row('rule.proposal_renumbered', {
+          rule: 'tcpa-consent-revocation',
+          from_version: 2,
+          to_version: 3,
+          reason: 'tcpa-consent-revocation.yaml defines v2',
+          yaml_matches_proposal: false,
+        }),
+      ),
+    ).toBe(
       'tcpa-consent-revocation proposal v2 → v3 · tcpa-consent-revocation.yaml defines v2 · enacted text differs from the proposal',
     );
-    expect(auditSummary(row('contract.version_created', { contract: 'C-TPMO-01', version: 3, previous_version: 2, changed: ['spec', 'title'], source: 'contracts.yaml' }))).toBe(
-      'C-TPMO-01 v2 → v3 · changed spec, title · contracts.yaml',
-    );
-    expect(auditSummary(row('rule.version_annotated', { rule: 'tcpa-consent-revocation', version: 1, after: { vote_date: null, deferrals: [{}] }, source: 'tcpa-consent-revocation.yaml' }))).toBe(
-      'tcpa-consent-revocation v1 · 1 deferral · text unchanged · tcpa-consent-revocation.yaml',
-    );
-    expect(auditSummary(row('sandbox.artifact_checked', { text_sha256: 'abcdef0123456789', matches: 2, stale: 1, as_of: '2026-10-01' }))).toBe(
-      '2 matches · 1 stale · as of 2026-10-01 · sha256 abcdef0123… · text not stored',
-    );
+    expect(
+      auditSummary(
+        row('contract.version_created', {
+          contract: 'C-TPMO-01',
+          version: 3,
+          previous_version: 2,
+          changed: ['spec', 'title'],
+          source: 'contracts.yaml',
+        }),
+      ),
+    ).toBe('C-TPMO-01 v2 → v3 · changed spec, title · contracts.yaml');
+    expect(
+      auditSummary(
+        row('rule.version_annotated', {
+          rule: 'tcpa-consent-revocation',
+          version: 1,
+          after: { vote_date: null, deferrals: [{}] },
+          source: 'tcpa-consent-revocation.yaml',
+        }),
+      ),
+    ).toBe('tcpa-consent-revocation v1 · 1 deferral · text unchanged · tcpa-consent-revocation.yaml');
+    expect(
+      auditSummary(
+        row('sandbox.artifact_checked', { text_sha256: 'abcdef0123456789', matches: 2, stale: 1, as_of: '2026-10-01' }),
+      ),
+    ).toBe('2 matches · 1 stale · as of 2026-10-01 · sha256 abcdef0123… · text not stored');
   });
 });
 
 describe('sandbox redaction line', () => {
   it('names the new contact-detail kinds and skips zeros', () => {
-    expect(redactionLine({ medicare_number: 0, ssn: 0, dob: 0, phone: 1, email: 2, address: 0 })).toBe('1 phone number · 2 email addresses');
+    expect(redactionLine({ medicare_number: 0, ssn: 0, dob: 0, phone: 1, email: 2, address: 0 })).toBe(
+      '1 phone number · 2 email addresses',
+    );
   });
 });

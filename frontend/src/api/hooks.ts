@@ -69,7 +69,8 @@ export const keys = {
   rules: () => ['backstop', 'rules'] as const,
   rule: (code: string) => ['backstop', 'rules', code] as const,
   impact: (code: string, asOf: string) => ['backstop', 'rules', code, 'impact', asOf] as const,
-  impactWhatIf: (code: string, asOf: string, version: number) => ['backstop', 'rules', code, 'impact', asOf, 'what-if', version] as const,
+  impactWhatIf: (code: string, asOf: string, version: number) =>
+    ['backstop', 'rules', code, 'impact', asOf, 'what-if', version] as const,
   ruleSources: (code: string) => ['backstop', 'rules', code, 'sources'] as const,
   assets: () => ['backstop', 'assets'] as const,
   asset: (code: string) => ['backstop', 'assets', code] as const,
@@ -248,7 +249,11 @@ export function useCheckSources() {
 // ---------------------------------------------------------------- assets / scans
 
 export function useAssets(opts?: QueryOpts<AssetOut[]>) {
-  return useQuery<AssetOut[], Error>({ queryKey: keys.assets(), queryFn: () => api.get<AssetOut[]>('/assets'), ...opts });
+  return useQuery<AssetOut[], Error>({
+    queryKey: keys.assets(),
+    queryFn: () => api.get<AssetOut[]>('/assets'),
+    ...opts,
+  });
 }
 
 export function useAsset(code: string | undefined) {
@@ -404,9 +409,7 @@ export function useRunTranscript(id: string | undefined, code: string | undefine
   return useQuery<RunTranscriptOut, Error>({
     queryKey: keys.runTranscript(id ?? '', code ?? ''),
     queryFn: () =>
-      api.get<RunTranscriptOut>(
-        `/runs/${encodeURIComponent(id ?? '')}/transcripts/${encodeURIComponent(code ?? '')}`,
-      ),
+      api.get<RunTranscriptOut>(`/runs/${encodeURIComponent(id ?? '')}/transcripts/${encodeURIComponent(code ?? '')}`),
     enabled: Boolean(id) && Boolean(code),
   });
 }

@@ -51,7 +51,12 @@ export function Drawer({ open, onClose, title, subtitle, children, footer, width
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end" role="presentation">
-      <div className="fade-in absolute inset-0 bg-slate/40" onClick={onClose} aria-hidden data-testid="drawer-backdrop" />
+      <div
+        className="fade-in absolute inset-0 bg-slate/40"
+        onClick={onClose}
+        aria-hidden
+        data-testid="drawer-backdrop"
+      />
       <div
         ref={panelRef}
         role="dialog"
@@ -59,7 +64,9 @@ export function Drawer({ open, onClose, title, subtitle, children, footer, width
         aria-label={typeof title === 'string' ? title : 'Drawer'}
         tabIndex={-1}
         data-drawer-panel=""
-        className={cn('drawer-in relative flex h-full max-w-full flex-col border-l border-hairline bg-surface shadow-[-8px_0_24px_rgba(16,24,40,0.08)] outline-none')}
+        className={cn(
+          'drawer-in relative flex h-full max-w-full flex-col border-l border-hairline bg-surface shadow-[-8px_0_24px_rgba(16,24,40,0.08)] outline-none',
+        )}
         style={{ width }}
       >
         <header className="flex items-start justify-between gap-3 border-b border-hairline px-5 py-4">

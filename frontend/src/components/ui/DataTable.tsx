@@ -95,7 +95,13 @@ export function DataTable<T>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div className={cn('overflow-auto rounded-[8px] border border-hairline bg-surface shadow-[var(--shadow-card)]', className)} style={maxHeight ? { maxHeight } : undefined}>
+    <div
+      className={cn(
+        'overflow-auto rounded-[8px] border border-hairline bg-surface shadow-[var(--shadow-card)]',
+        className,
+      )}
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       <table className={cn('dt', fixedLayout && 'dt-fixed', compact && 'dt-compact')}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <thead>

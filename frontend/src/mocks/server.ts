@@ -35,7 +35,16 @@ import { ASSETS, EDGES, findAsset, fixtureHash } from './assets';
 import { CORPUS_HASH, INGESTED, INGESTED_CORPUS_HASH, ingestedOut, SCENARIOS, transcriptOut } from './corpus';
 import { materializeRun, runTranscript } from './engine';
 import { healthDeep, ingestFormats, matcherEvals, matcherEvalsMarkdown, ruleSources } from './extras';
-import { CONTRACTS, CONTRACT_SET_HASH, MODELS, WORKFLOWS, findModel, findPromptVersion, modelBoard, PROVIDERS } from './registry';
+import {
+  CONTRACTS,
+  CONTRACT_SET_HASH,
+  MODELS,
+  WORKFLOWS,
+  findModel,
+  findPromptVersion,
+  modelBoard,
+  PROVIDERS,
+} from './registry';
 import { RULES } from './rules';
 import { evaluate, summarize, versionInForce } from './staleness';
 import { SAMPLES, sandboxArtifact, sandboxTranscript } from './sandbox';
@@ -114,12 +123,21 @@ function systemActorFor(entityType: string): string {
   return 'system:scanner';
 }
 
-function audit(actor: string, event_type: string, entity_type: string, entity_id: string, payload: JsonObject = {}, ts: string = nowIso()): AuditOut {
+function audit(
+  actor: string,
+  event_type: string,
+  entity_type: string,
+  entity_id: string,
+  payload: JsonObject = {},
+  ts: string = nowIso(),
+): AuditOut {
   state.auditSeq += 1;
   const prev = state.audit[state.audit.length - 1]?.row_hash ?? GENESIS;
   const role = actorRole(actor);
   const name = actor === 'system' ? systemActorFor(entity_type) : actor;
-  const row_hash = fixtureHash(`${prev}|${ts}|${name}|${event_type}|${entity_type}|${entity_id}|${JSON.stringify(payload)}`);
+  const row_hash = fixtureHash(
+    `${prev}|${ts}|${name}|${event_type}|${entity_type}|${entity_id}|${JSON.stringify(payload)}`,
+  );
   const event: AuditOut = {
     id: state.auditSeq,
     ts,
@@ -140,10 +158,24 @@ function audit(actor: string, event_type: string, entity_type: string, entity_id
 // ------------------------------------------------------------------ seed: runs
 
 function corpusHash(corpus: RunCorpus): string {
-  return corpus === 'synthetic' ? CORPUS_HASH : corpus === 'ingested' ? INGESTED_CORPUS_HASH : fixtureHash(CORPUS_HASH + INGESTED_CORPUS_HASH);
+  return corpus === 'synthetic'
+    ? CORPUS_HASH
+    : corpus === 'ingested'
+      ? INGESTED_CORPUS_HASH
+      : fixtureHash(CORPUS_HASH + INGESTED_CORPUS_HASH);
 }
 
-function makeRun(id: string, promptVersion: number, modelId: string, adapter: string, ruleDate: string, trigger: string, startedAt: string, requestedBy: string, corpus: RunCorpus = 'synthetic'): RunRecord {
+function makeRun(
+  id: string,
+  promptVersion: number,
+  modelId: string,
+  adapter: string,
+  ruleDate: string,
+  trigger: string,
+  startedAt: string,
+  requestedBy: string,
+  corpus: RunCorpus = 'synthetic',
+): RunRecord {
   const prompt = findPromptVersion('qa-handoff', promptVersion);
   const model = findModel(modelId);
   if (!prompt || !model) throw new Error('mock run: unknown prompt or model');
@@ -153,7 +185,15 @@ function makeRun(id: string, promptVersion: number, modelId: string, adapter: st
   const cHash = corpusHash(corpus);
   const run: RunOut = {
     id,
-    run_key: ['qa-handoff', prompt.prompt_hash.slice(0, 16), modelId, adapter, cHash.slice(0, 16), CONTRACT_SET_HASH.slice(0, 16), ruleDate].join(':'),
+    run_key: [
+      'qa-handoff',
+      prompt.prompt_hash.slice(0, 16),
+      modelId,
+      adapter,
+      cHash.slice(0, 16),
+      CONTRACT_SET_HASH.slice(0, 16),
+      ruleDate,
+    ].join(':'),
     workflow_code: 'qa-handoff',
     prompt_version: promptVersion,
     prompt_label: prompt.label,
@@ -180,10 +220,46 @@ function makeRun(id: string, promptVersion: number, modelId: string, adapter: st
 
 function seedRuns(): void {
   state.runs.push(
-    makeRun('2af8b83d-5c1e-4b7a-9f0d-1a2b3c4d5e01', 1, 'sim-large', 'simulated', '2026-09-30', 'MANUAL', '2026-09-19T15:04:12Z', 'engineer'),
-    makeRun('9c355594-e96b-4117-aeeb-103ec144d602', 1, 'sim-large', 'simulated', '2026-10-01', 'RULE', '2026-09-19T15:31:40Z', 'engineer'),
-    makeRun('45234b21-7d3a-4c8e-b2f1-6e7d8c9b0a03', 2, 'sim-large', 'simulated', '2026-10-01', 'PROMPT', '2026-09-20T09:12:55Z', 'engineer'),
-    makeRun('370b4848-7523-4acc-b76f-da9c29a5dd04', 2, 'sim-small', 'cassette', '2026-10-01', 'MODEL', '2026-09-21T11:47:03Z', 'admin'),
+    makeRun(
+      '2af8b83d-5c1e-4b7a-9f0d-1a2b3c4d5e01',
+      1,
+      'sim-large',
+      'simulated',
+      '2026-09-30',
+      'MANUAL',
+      '2026-09-19T15:04:12Z',
+      'engineer',
+    ),
+    makeRun(
+      '9c355594-e96b-4117-aeeb-103ec144d602',
+      1,
+      'sim-large',
+      'simulated',
+      '2026-10-01',
+      'RULE',
+      '2026-09-19T15:31:40Z',
+      'engineer',
+    ),
+    makeRun(
+      '45234b21-7d3a-4c8e-b2f1-6e7d8c9b0a03',
+      2,
+      'sim-large',
+      'simulated',
+      '2026-10-01',
+      'PROMPT',
+      '2026-09-20T09:12:55Z',
+      'engineer',
+    ),
+    makeRun(
+      '370b4848-7523-4acc-b76f-da9c29a5dd04',
+      2,
+      'sim-small',
+      'cassette',
+      '2026-10-01',
+      'MODEL',
+      '2026-09-21T11:47:03Z',
+      'admin',
+    ),
   );
 }
 
@@ -273,7 +349,12 @@ function blankTask(kind: string, openedAt: string): ReviewTaskOut {
   };
 }
 
-function openStaleTask(rule: RuleOut, verdict: ReturnType<typeof evaluate>[number], asOf: string, openedAt: string): ReviewTaskOut {
+function openStaleTask(
+  rule: RuleOut,
+  verdict: ReturnType<typeof evaluate>[number],
+  asOf: string,
+  openedAt: string,
+): ReviewTaskOut {
   const e = verdict.edge;
   const asset = findAsset(e.asset_code);
   const task: ReviewTaskOut = {
@@ -289,10 +370,23 @@ function openStaleTask(rule: RuleOut, verdict: ReturnType<typeof evaluate>[numbe
     staleness_direction: verdict.direction,
     reason: verdict.reason,
     assignee_role: asset?.owner_role ?? 'compliance',
-    payload: { rule: rule.code, bound_version: verdict.bound_version, in_force_version: verdict.in_force_version, as_of: asOf, disputed: verdict.disputed },
+    payload: {
+      rule: rule.code,
+      bound_version: verdict.bound_version,
+      in_force_version: verdict.in_force_version,
+      as_of: asOf,
+      disputed: verdict.disputed,
+    },
   };
   state.tasks.push(task);
-  audit('system', 'task.opened', 'review_task', task.id, { kind: task.kind, rule: rule.code, asset: e.asset_code }, openedAt);
+  audit(
+    'system',
+    'task.opened',
+    'review_task',
+    task.id,
+    { kind: task.kind, rule: rule.code, asset: e.asset_code },
+    openedAt,
+  );
   return task;
 }
 
@@ -305,7 +399,8 @@ function openFlaggedTasks(rec: RunRecord, openedAt: string): number {
     const contract = CONTRACTS.find((c) => c.code === code);
     if (contract?.kind === 'JUDGED') {
       const first = rows[0];
-      const mean = rows.reduce((a, r) => a + (typeof r.evidence.mean === 'number' ? r.evidence.mean : 0), 0) / rows.length;
+      const mean =
+        rows.reduce((a, r) => a + (typeof r.evidence.mean === 'number' ? r.evidence.mean : 0), 0) / rows.length;
       const task: ReviewTaskOut = {
         ...blankTask('FLAGGED_RESULT', openedAt),
         run_result_id: first.id,
@@ -314,10 +409,23 @@ function openFlaggedTasks(rec: RunRecord, openedAt: string): number {
         transcript_code: first.transcript_code,
         reason: `${code} flagged ${rows.length}/${rec.run.stats.transcripts as number} transcripts (advisory; judge mean ${mean.toFixed(2)})`,
         assignee_role: contract.owner_role,
-        payload: { run_id: rec.run.id, contract: code, severity: contract.severity, aggregate: true, flagged_transcripts: rows.map((r) => r.transcript_code) },
+        payload: {
+          run_id: rec.run.id,
+          contract: code,
+          severity: contract.severity,
+          aggregate: true,
+          flagged_transcripts: rows.map((r) => r.transcript_code),
+        },
       };
       state.tasks.push(task);
-      audit('system', 'task.opened', 'review_task', task.id, { kind: task.kind, run: rec.run.id, contract: code, aggregate: true }, openedAt);
+      audit(
+        'system',
+        'task.opened',
+        'review_task',
+        task.id,
+        { kind: task.kind, run: rec.run.id, contract: code, aggregate: true },
+        openedAt,
+      );
       opened += 1;
       continue;
     }
@@ -331,10 +439,22 @@ function openFlaggedTasks(rec: RunRecord, openedAt: string): number {
         transcript_code: r.transcript_code,
         reason: `${code} ${r.outcome} on ${r.transcript_code}${typeof r.evidence.direction === 'string' ? ` — ${r.evidence.direction}` : ''}`,
         assignee_role: contract?.owner_role ?? 'compliance',
-        payload: { run_id: rec.run.id, contract: code, severity: r.severity, transcript_id: `transcript-${r.transcript_code}` },
+        payload: {
+          run_id: rec.run.id,
+          contract: code,
+          severity: r.severity,
+          transcript_id: `transcript-${r.transcript_code}`,
+        },
       };
       state.tasks.push(task);
-      audit('system', 'task.opened', 'review_task', task.id, { kind: task.kind, run: rec.run.id, contract: code, transcript: r.transcript_code }, openedAt);
+      audit(
+        'system',
+        'task.opened',
+        'review_task',
+        task.id,
+        { kind: task.kind, run: rec.run.id, contract: code, transcript: r.transcript_code },
+        openedAt,
+      );
       opened += 1;
     }
   }
@@ -342,7 +462,14 @@ function openFlaggedTasks(rec: RunRecord, openedAt: string): number {
   return opened;
 }
 
-function transitionSeed(task: ReviewTaskOut, to: string, actor: string, at: string, reasonCode: string | null, note: string): void {
+function transitionSeed(
+  task: ReviewTaskOut,
+  to: string,
+  actor: string,
+  at: string,
+  reasonCode: string | null,
+  note: string,
+): void {
   const from = task.state;
   task.state = to;
   task.note = note;
@@ -354,18 +481,44 @@ function transitionSeed(task: ReviewTaskOut, to: string, actor: string, at: stri
 
 function seedTasks(): void {
   const scanAt = '2026-09-21T13:41:30Z';
-  audit('engineer', 'scan.started', 'scan', 'scan-0002', { idempotency_key: '2026-09-21-nightly', live: false, as_of: '2026-10-01' }, '2026-09-21T13:40:50Z');
+  audit(
+    'engineer',
+    'scan.started',
+    'scan',
+    'scan-0002',
+    { idempotency_key: '2026-09-21-nightly', live: false, as_of: '2026-10-01' },
+    '2026-09-21T13:40:50Z',
+  );
   ASSETS.forEach((asset, i) => {
     const changed = asset.versions.length > 1;
-    audit('system', changed ? 'artifact.content_changed' : 'artifact.unchanged', 'asset', asset.code, changed ? { new_hash: asset.latest_hash, versions: asset.versions.length } : { hash: asset.latest_hash }, `2026-09-21T13:41:0${i % 10}Z`);
+    audit(
+      'system',
+      changed ? 'artifact.content_changed' : 'artifact.unchanged',
+      'asset',
+      asset.code,
+      changed ? { new_hash: asset.latest_hash, versions: asset.versions.length } : { hash: asset.latest_hash },
+      `2026-09-21T13:41:0${i % 10}Z`,
+    );
   });
   for (const edge of EDGES) {
-    if (edge.status === 'proposed') audit('system', 'edge.proposed', 'edge', edge.id, { asset: edge.asset_code, rule: edge.rule_code, confidence: edge.confidence, matcher: edge.matcher }, scanAt);
+    if (edge.status === 'proposed')
+      audit(
+        'system',
+        'edge.proposed',
+        'edge',
+        edge.id,
+        { asset: edge.asset_code, rule: edge.rule_code, confidence: edge.confidence, matcher: edge.matcher },
+        scanAt,
+      );
   }
 
   // STALE_ASSET tasks: opened by the as-of 2026-10-01 evaluation in the nightly scan
   for (const rule of state.rules) {
-    const verdicts = evaluate(rule, EDGES.filter((e) => e.rule_code === rule.code), '2026-10-01');
+    const verdicts = evaluate(
+      rule,
+      EDGES.filter((e) => e.rule_code === rule.code),
+      '2026-10-01',
+    );
     audit('system', 'staleness.evaluated', 'rule', rule.code, { as_of: '2026-10-01', ...summarize(verdicts) }, scanAt);
     for (const v of verdicts) openStaleTask(rule, v, '2026-10-01', scanAt);
   }
@@ -396,7 +549,8 @@ function seedTasks(): void {
     ...blankTask('RULE_SOURCE_CHANGED', '2026-09-21T13:47:20Z'),
     rule_code: 'tpmo-disclaimer-text',
     rule_version: 2,
-    reason: 'Source text for tpmo-disclaimer-text changed since the last check (hash differs). Read the excerpt; add a rule version if the clause moved.',
+    reason:
+      'Source text for tpmo-disclaimer-text changed since the last check (hash differs). Read the excerpt; add a rule version if the clause moved.',
     assignee_role: 'compliance',
     payload: {
       rule: 'tpmo-disclaimer-text',
@@ -408,7 +562,14 @@ function seedTasks(): void {
     },
   };
   state.tasks.push(src);
-  audit('system', 'task.opened', 'review_task', src.id, { kind: src.kind, rule: 'tpmo-disclaimer-text' }, src.opened_at);
+  audit(
+    'system',
+    'task.opened',
+    'review_task',
+    src.id,
+    { kind: src.kind, rule: 'tpmo-disclaimer-text' },
+    src.opened_at,
+  );
 
   // FLAGGED_RESULT tasks from the rule-flip run and the model-swap run
   const run2 = state.runs.find((r) => r.run.id === RUN_IDS.ruleFlip);
@@ -420,37 +581,115 @@ function seedTasks(): void {
   const stale = state.tasks.filter((t) => t.kind === 'STALE_ASSET');
   const byAsset = (code: string) => stale.find((t) => t.asset_code === code);
   const scWait = byAsset('sc-12');
-  if (scWait) transitionSeed(scWait, 'in_review', 'analyst', '2026-09-21T14:05:10Z', null, 'Pulling the scorecard item from Attention; will confirm the weight before editing.');
+  if (scWait)
+    transitionSeed(
+      scWait,
+      'in_review',
+      'analyst',
+      '2026-09-21T14:05:10Z',
+      null,
+      'Pulling the scorecard item from Attention; will confirm the weight before editing.',
+    );
   const sfmc = byAsset('sfmc-appt-confirm-04');
   if (sfmc) {
     transitionSeed(sfmc, 'in_review', 'engineer', '2026-09-21T14:10:00Z', null, '');
-    transitionSeed(sfmc, 'verified', 'engineer', '2026-09-21T14:22:41Z', null, 'Copy updated in SFMC sandbox; awaiting publish to production on 2026-10-01 00:00 ET.');
+    transitionSeed(
+      sfmc,
+      'verified',
+      'engineer',
+      '2026-09-21T14:22:41Z',
+      null,
+      'Copy updated in SFMC sandbox; awaiting publish to production on 2026-10-01 00:00 ET.',
+    );
   }
   const slide8 = byAsset('slide-08');
   if (slide8) {
     transitionSeed(slide8, 'in_review', 'analyst', '2026-09-21T14:30:00Z', null, '');
     transitionSeed(slide8, 'verified', 'engineer', '2026-09-21T14:41:12Z', null, '');
-    transitionSeed(slide8, 'republished', 'engineer', '2026-09-21T14:44:03Z', null, 'Slide 8 replaced with the CY2027 timeline (SOA still required; no waiting period).');
+    transitionSeed(
+      slide8,
+      'republished',
+      'engineer',
+      '2026-09-21T14:44:03Z',
+      null,
+      'Slide 8 replaced with the CY2027 timeline (SOA still required; no waiting period).',
+    );
   }
   const events = byAsset('web-medicarefaq-events');
-  if (events) transitionSeed(events, 'dismissed', 'analyst', '2026-09-21T15:02:27Z', 'ARTIFACT_NOT_IN_SCOPE', 'Page is scheduled for removal in the Q4 content refresh; no edit needed.');
+  if (events)
+    transitionSeed(
+      events,
+      'dismissed',
+      'analyst',
+      '2026-09-21T15:02:27Z',
+      'ARTIFACT_NOT_IN_SCOPE',
+      'Page is scheduled for removal in the Q4 content refresh; no edit needed.',
+    );
   const supTask = state.tasks.find((t) => t.kind === 'FLAGGED_RESULT' && t.contract_code === 'C-SUP-01');
-  if (supTask) transitionSeed(supTask, 'upheld', 'analyst', '2026-09-19T16:12:44Z', 'CORRECT_AS_FLAGGED', 'Prompt v1 still applies the CY2024 superlative rule after Oct 1; fixed in prompt v2.');
+  if (supTask)
+    transitionSeed(
+      supTask,
+      'upheld',
+      'analyst',
+      '2026-09-19T16:12:44Z',
+      'CORRECT_AS_FLAGGED',
+      'Prompt v1 still applies the CY2024 superlative rule after Oct 1; fixed in prompt v2.',
+    );
   const factTask = state.tasks.find((t) => t.kind === 'FLAGGED_RESULT' && t.contract_code === 'C-FACT-01');
-  if (factTask) transitionSeed(factTask, 'in_review', 'engineer', '2026-09-21T12:03:15Z', null, 'Checking whether sim-small rounds figures under $15 to $0.00.');
+  if (factTask)
+    transitionSeed(
+      factTask,
+      'in_review',
+      'engineer',
+      '2026-09-21T12:03:15Z',
+      null,
+      'Checking whether sim-small rounds figures under $15 to $0.00.',
+    );
 
   // a rejected transition attempt, so the audit log shows the state machine refusing
-  audit('analyst', 'task.transition_rejected', 'review_task', slide8?.id ?? 'task-0000', { from: 'republished', to: 'in_review', error: 'STALE_ASSET: republished -> in_review is not allowed' }, '2026-09-21T15:20:09Z');
-  audit('analyst', 'auth.denied', 'review_task', sfmc?.id ?? 'task-0000', { attempted: 'republished', role: 'analyst', error: "role 'analyst' may not republish" }, '2026-09-21T15:21:40Z');
+  audit(
+    'analyst',
+    'task.transition_rejected',
+    'review_task',
+    slide8?.id ?? 'task-0000',
+    { from: 'republished', to: 'in_review', error: 'STALE_ASSET: republished -> in_review is not allowed' },
+    '2026-09-21T15:20:09Z',
+  );
+  audit(
+    'analyst',
+    'auth.denied',
+    'review_task',
+    sfmc?.id ?? 'task-0000',
+    { attempted: 'republished', role: 'analyst', error: "role 'analyst' may not republish" },
+    '2026-09-21T15:21:40Z',
+  );
 
   const changedAssets = ASSETS.filter((a) => a.versions.length > 1).length;
-  audit('system', 'scan.completed', 'scan', 'scan-0002', { artifacts: ASSETS.length, unchanged: ASSETS.length - changedAssets, new_versions: changedAssets, fetch_errors: 0, edges_new: 1, proposed_new: 1 }, '2026-09-21T13:42:11Z');
+  audit(
+    'system',
+    'scan.completed',
+    'scan',
+    'scan-0002',
+    {
+      artifacts: ASSETS.length,
+      unchanged: ASSETS.length - changedAssets,
+      new_versions: changedAssets,
+      fetch_errors: 0,
+      edges_new: 1,
+      proposed_new: 1,
+    },
+    '2026-09-21T13:42:11Z',
+  );
 }
 
 function stalenessSnapshot(asOf: string): Record<string, ReturnType<typeof summarize>> {
   const out: Record<string, ReturnType<typeof summarize>> = {};
   for (const rule of state.rules) {
-    const verdicts = evaluate(rule, EDGES.filter((e) => e.rule_code === rule.code), asOf);
+    const verdicts = evaluate(
+      rule,
+      EDGES.filter((e) => e.rule_code === rule.code),
+      asOf,
+    );
     if (verdicts.length) out[rule.code] = summarize(verdicts);
   }
   return out;
@@ -465,7 +704,18 @@ function seedScans(): void {
       status: 'completed',
       started_at: '2026-09-19T21:14:00Z',
       finished_at: '2026-09-19T21:14:39Z',
-      stats: { artifacts: ASSETS.length, unchanged: 0, new_versions: ASSETS.length, fetch_errors: 0, edges_new: EDGES.filter((e) => e.status === 'confirmed').length, edges_existing: 0, proposed_new: 0, mode: 'snapshot', as_of: '2026-09-19', staleness: {} },
+      stats: {
+        artifacts: ASSETS.length,
+        unchanged: 0,
+        new_versions: ASSETS.length,
+        fetch_errors: 0,
+        edges_new: EDGES.filter((e) => e.status === 'confirmed').length,
+        edges_existing: 0,
+        proposed_new: 0,
+        mode: 'snapshot',
+        as_of: '2026-09-19',
+        staleness: {},
+      },
       deduplicated: false,
     },
     {
@@ -474,24 +724,102 @@ function seedScans(): void {
       status: 'completed',
       started_at: '2026-09-21T13:40:50Z',
       finished_at: '2026-09-21T13:42:11Z',
-      stats: { artifacts: ASSETS.length, unchanged: ASSETS.length - changedAssets, new_versions: changedAssets, fetch_errors: 0, edges_new: 1, edges_existing: EDGES.length - 1, proposed_new: 1, mode: 'snapshot', as_of: '2026-10-01', staleness: stalenessSnapshot('2026-10-01') },
+      stats: {
+        artifacts: ASSETS.length,
+        unchanged: ASSETS.length - changedAssets,
+        new_versions: changedAssets,
+        fetch_errors: 0,
+        edges_new: 1,
+        edges_existing: EDGES.length - 1,
+        proposed_new: 1,
+        mode: 'snapshot',
+        as_of: '2026-10-01',
+        staleness: stalenessSnapshot('2026-10-01'),
+      },
       deduplicated: false,
     },
   );
 }
 
 function seedAudit(): void {
-  audit('admin', 'rules.reloaded', 'rules', 'rules/*.yaml', { rules_created: RULES.length, versions_created: RULES.length * 2, unchanged: 0, files: RULES.map((r) => `rules/${r.code}.yaml`) }, '2026-09-19T21:02:33Z');
-  audit('engineer', 'scan.started', 'scan', 'scan-0001', { idempotency_key: '2026-09-19-seed', live: false }, '2026-09-19T21:14:00Z');
-  audit('system', 'scan.completed', 'scan', 'scan-0001', { artifacts: ASSETS.length, new_versions: ASSETS.length }, '2026-09-19T21:14:39Z');
+  audit(
+    'admin',
+    'rules.reloaded',
+    'rules',
+    'rules/*.yaml',
+    {
+      rules_created: RULES.length,
+      versions_created: RULES.length * 2,
+      unchanged: 0,
+      files: RULES.map((r) => `rules/${r.code}.yaml`),
+    },
+    '2026-09-19T21:02:33Z',
+  );
+  audit(
+    'engineer',
+    'scan.started',
+    'scan',
+    'scan-0001',
+    { idempotency_key: '2026-09-19-seed', live: false },
+    '2026-09-19T21:14:00Z',
+  );
+  audit(
+    'system',
+    'scan.completed',
+    'scan',
+    'scan-0001',
+    { artifacts: ASSETS.length, new_versions: ASSETS.length },
+    '2026-09-19T21:14:39Z',
+  );
   EDGES.filter((e) => e.status === 'confirmed')
     .slice(0, 6)
-    .forEach((e, i) => audit(e.confirmed_by ?? 'analyst', 'edge.confirmed', 'edge', e.id, { asset: e.asset_code, rule: `${e.rule_code}@${e.rule_version}`, polarity: e.polarity, detection: e.detection }, `2026-09-19T21:2${i}:00Z`));
+    .forEach((e, i) =>
+      audit(
+        e.confirmed_by ?? 'analyst',
+        'edge.confirmed',
+        'edge',
+        e.id,
+        { asset: e.asset_code, rule: `${e.rule_code}@${e.rule_version}`, polarity: e.polarity, detection: e.detection },
+        `2026-09-19T21:2${i}:00Z`,
+      ),
+    );
   for (const rec of state.runs) {
-    audit(rec.run.requested_by, 'run.started', 'run', rec.run.id, { trigger: rec.run.trigger, prompt_version: rec.run.prompt_version, model_id: rec.run.model_id, rule_date: rec.run.rule_date, adapter: rec.run.adapter, corpus: rec.corpus }, rec.run.started_at);
-    audit('system', 'run.completed', 'run', rec.run.id, { gate: rec.run.gate, transcripts: rec.run.stats.transcripts as number, latency_ms_total: rec.run.stats.latency_ms_total as number }, rec.run.finished_at ?? rec.run.started_at);
+    audit(
+      rec.run.requested_by,
+      'run.started',
+      'run',
+      rec.run.id,
+      {
+        trigger: rec.run.trigger,
+        prompt_version: rec.run.prompt_version,
+        model_id: rec.run.model_id,
+        rule_date: rec.run.rule_date,
+        adapter: rec.run.adapter,
+        corpus: rec.corpus,
+      },
+      rec.run.started_at,
+    );
+    audit(
+      'system',
+      'run.completed',
+      'run',
+      rec.run.id,
+      {
+        gate: rec.run.gate,
+        transcripts: rec.run.stats.transcripts as number,
+        latency_ms_total: rec.run.stats.latency_ms_total as number,
+      },
+      rec.run.finished_at ?? rec.run.started_at,
+    );
   }
-  audit('engineer', 'run.deduplicated', 'run', RUN_IDS.promptV2, { run_key: state.runs[2]?.run.run_key ?? '', requested_by: 'engineer' }, '2026-09-20T09:40:12Z');
+  audit(
+    'engineer',
+    'run.deduplicated',
+    'run',
+    RUN_IDS.promptV2,
+    { run_key: state.runs[2]?.run.run_key ?? '', requested_by: 'engineer' },
+    '2026-09-20T09:40:12Z',
+  );
 }
 
 /**
@@ -501,7 +829,14 @@ function seedAudit(): void {
  * closed, so they never count as open work.
  */
 function seedExampleTestCases(): void {
-  const examples: Array<{ contract: string; transcript: string; reason: string; note: string; approved: boolean; at: string }> = [
+  const examples: Array<{
+    contract: string;
+    transcript: string;
+    reason: string;
+    note: string;
+    approved: boolean;
+    at: string;
+  }> = [
     {
       contract: 'C-FACT-01',
       transcript: 'T018',
@@ -531,7 +866,14 @@ function seedExampleTestCases(): void {
       payload: { seeded_example: true, contract: ex.contract, transcript_id: `transcript-${ex.transcript}` },
     };
     state.tasks.push(task);
-    audit('system', 'task.opened', 'review_task', task.id, { kind: task.kind, contract: ex.contract, transcript: ex.transcript, seeded_example: true }, ex.at);
+    audit(
+      'system',
+      'task.opened',
+      'review_task',
+      task.id,
+      { kind: task.kind, contract: ex.contract, transcript: ex.transcript, seeded_example: true },
+      ex.at,
+    );
     transitionSeed(task, 'overridden', 'demo-seed:qa-reviewer', ex.at, ex.reason, ex.note);
     const created = new Date(ex.at);
     const expires = new Date(created);
@@ -551,9 +893,29 @@ function seedExampleTestCases(): void {
     };
     state.testCases.push(tc);
     task.payload = { ...task.payload, test_case_id: tc.id };
-    audit('demo-seed:qa-reviewer', 'test_case.created', 'test_case', tc.id, { review_task: task.id, contract: tc.contract_code, transcript: tc.transcript_code, expires_at: tc.expires_at, seeded_example: true }, ex.at);
+    audit(
+      'demo-seed:qa-reviewer',
+      'test_case.created',
+      'test_case',
+      tc.id,
+      {
+        review_task: task.id,
+        contract: tc.contract_code,
+        transcript: tc.transcript_code,
+        expires_at: tc.expires_at,
+        seeded_example: true,
+      },
+      ex.at,
+    );
     if (ex.approved) {
-      audit('demo-seed:compliance-lead', 'test_case.approved', 'test_case', tc.id, { created_by: tc.created_by, seeded_example: true }, new Date(created.getTime() + 3_600_000).toISOString());
+      audit(
+        'demo-seed:compliance-lead',
+        'test_case.approved',
+        'test_case',
+        tc.id,
+        { created_by: tc.created_by, seeded_example: true },
+        new Date(created.getTime() + 3_600_000).toISOString(),
+      );
     }
   }
 }
@@ -586,7 +948,9 @@ function impact(rule: RuleOut, asOf: string): ImpactOut {
   const verdicts = evaluate(rule, edges, asOf);
   const inForce = versionInForce(rule, asOf);
   const stale: StaleItemOut[] = verdicts.map((v) => {
-    const task = state.tasks.find((t) => t.kind === 'STALE_ASSET' && t.edge_id === v.edge.id && t.rule_version === v.in_force_version);
+    const task = state.tasks.find(
+      (t) => t.kind === 'STALE_ASSET' && t.edge_id === v.edge.id && t.rule_version === v.in_force_version,
+    );
     return {
       edge: v.edge,
       bound_version: v.bound_version,
@@ -639,10 +1003,17 @@ function impactWhatIf(rule: RuleOut, asOf: string, assumeVersion: number | null,
     assumed = proposals.find((v) => v.version === assumeVersion);
     if (!assumed) throw new ApiError(404, `${rule.code} has no proposed version ${assumeVersion}`, path);
   } else {
-    assumed = proposals.filter((v) => v.effective_from !== null && v.effective_from <= asOf).sort((x, y) => y.version - x.version)[0];
+    assumed = proposals
+      .filter((v) => v.effective_from !== null && v.effective_from <= asOf)
+      .sort((x, y) => y.version - x.version)[0];
   }
   if (!assumed) {
-    return { ...impact(rule, asOf), hypothetical: false, assumed_version: null, note: `no proposed version of ${rule.code} is effective on ${asOf}; enacted history shown` };
+    return {
+      ...impact(rule, asOf),
+      hypothetical: false,
+      assumed_version: null,
+      note: `no proposed version of ${rule.code} is effective on ${asOf}; enacted history shown`,
+    };
   }
   // An undated proposal (awaiting a vote) is assumed to take effect on as_of, and the note says so.
   const assumedFrom = assumed.effective_from ?? asOf;
@@ -656,7 +1027,8 @@ function impactWhatIf(rule: RuleOut, asOf: string, assumeVersion: number | null,
     ...rule,
     versions: rule.versions.map((v) => {
       if (v.id === assumed?.id) return { ...v, status: 'in_force', effective_from: assumedFrom, effective_to: null };
-      if (governs(v) && v.effective_from <= cut && (v.effective_to === null || v.effective_to > cut)) return { ...v, effective_to: cut };
+      if (governs(v) && v.effective_from <= cut && (v.effective_to === null || v.effective_to > cut))
+        return { ...v, effective_to: cut };
       return v;
     }),
   };
@@ -705,7 +1077,11 @@ function compare(a: RunRecord, b: RunRecord): CompareOut {
   return {
     failure_definition: COMPARE_FAILURE_DEFINITION,
     statistics: compareStatistics(a, b),
-    attribution: attributeRuns(a.run, b.run, state.runs.filter((r) => r.run.status === 'COMPLETE').map((r) => r.run)),
+    attribution: attributeRuns(
+      a.run,
+      b.run,
+      state.runs.filter((r) => r.run.status === 'COMPLETE').map((r) => r.run),
+    ),
     a: a.run,
     b: b.run,
     what_changed: {
@@ -732,7 +1108,11 @@ function promptDiff(aId: string, bId: string): PromptDiffOut {
   const b = all.find((p) => p.id === bId) ?? notFound(`prompt ${bId}`);
   const aLines = (a.text ?? '').split(/(?<=\. )/);
   const bLines = (b.text ?? '').split(/(?<=\. )/);
-  const unified: string[] = [`--- v${a.version} (${a.prompt_hash.slice(0, 16)})`, `+++ v${b.version} (${b.prompt_hash.slice(0, 16)})`, `@@ -1,${aLines.length} +1,${bLines.length} @@`];
+  const unified: string[] = [
+    `--- v${a.version} (${a.prompt_hash.slice(0, 16)})`,
+    `+++ v${b.version} (${b.prompt_hash.slice(0, 16)})`,
+    `@@ -1,${aLines.length} +1,${bLines.length} @@`,
+  ];
   const bSet = new Set(bLines);
   const aSet = new Set(aLines);
   for (const line of aLines) unified.push(bSet.has(line) ? ` ${line}` : `-${line}`);
@@ -756,21 +1136,40 @@ function exportRun(rec: RunRecord, format: string): unknown {
   const { run, results } = rec;
   if (format === 'csv') {
     const header = 'run_id,transcript_code,contract_code,severity,outcome,latency_ms,evidence';
-    const rows = results.map((r) => [run.id, r.transcript_code, r.contract_code, r.severity, r.outcome, r.latency_ms, JSON.stringify(JSON.stringify(r.evidence))].join(','));
+    const rows = results.map((r) =>
+      [
+        run.id,
+        r.transcript_code,
+        r.contract_code,
+        r.severity,
+        r.outcome,
+        r.latency_ms,
+        JSON.stringify(JSON.stringify(r.evidence)),
+      ].join(','),
+    );
     return [header, ...rows].join('\n');
   }
   if (format === 'langsmith') {
     return {
       format: 'langsmith',
       dataset: `backstop/${run.workflow_code}`,
-      examples: results.map((r) => ({ inputs: { transcript: r.transcript_code, prompt_hash: run.prompt_hash, rule_date: run.rule_date }, outputs: { contract: r.contract_code, outcome: r.outcome }, metadata: { run_id: run.id, model: run.model_id, adapter: run.adapter, evidence: r.evidence } })),
+      examples: results.map((r) => ({
+        inputs: { transcript: r.transcript_code, prompt_hash: run.prompt_hash, rule_date: run.rule_date },
+        outputs: { contract: r.contract_code, outcome: r.outcome },
+        metadata: { run_id: run.id, model: run.model_id, adapter: run.adapter, evidence: r.evidence },
+      })),
     };
   }
   return {
     format: 'braintrust',
     project: 'backstop',
     experiment: run.run_key,
-    records: results.map((r) => ({ input: { transcript: r.transcript_code, prompt_hash: run.prompt_hash, rule_date: run.rule_date }, output: { contract: r.contract_code, outcome: r.outcome }, scores: { pass: r.outcome === 'PASS' ? 1 : 0 }, metadata: { severity: r.severity, evidence: r.evidence } })),
+    records: results.map((r) => ({
+      input: { transcript: r.transcript_code, prompt_hash: run.prompt_hash, rule_date: run.rule_date },
+      output: { contract: r.contract_code, outcome: r.outcome },
+      scores: { pass: r.outcome === 'PASS' ? 1 : 0 },
+      metadata: { severity: r.severity, evidence: r.evidence },
+    })),
   };
 }
 
@@ -832,13 +1231,26 @@ function accessReview(): AccessReviewOut {
     accounts,
     default_credential_accounts: accounts.filter((a) => a.default_credentials).length,
     denied_24h: denied.filter((e) => within(e.ts, DAY)).length,
-    recent_denied: denied.slice(-25).reverse().map((e) => {
-      const p = e.payload as Record<string, unknown>;
-      const required = Array.isArray(p.required) ? (p.required as string[]).join(' or ') : 'another role';
-      return e.entity_id === 'basic'
-        ? { ts: e.ts, actor: e.actor, kind: 'bad_credentials' as const, detail: String(p.reason ?? 'bad credentials') }
-        : { ts: e.ts, actor: e.actor, kind: 'insufficient_role' as const, detail: `signed in as ${String(p.role ?? '?')}; needed ${required}` };
-    }),
+    recent_denied: denied
+      .slice(-25)
+      .reverse()
+      .map((e) => {
+        const p = e.payload as Record<string, unknown>;
+        const required = Array.isArray(p.required) ? (p.required as string[]).join(' or ') : 'another role';
+        return e.entity_id === 'basic'
+          ? {
+              ts: e.ts,
+              actor: e.actor,
+              kind: 'bad_credentials' as const,
+              detail: String(p.reason ?? 'bad credentials'),
+            }
+          : {
+              ts: e.ts,
+              actor: e.actor,
+              kind: 'insufficient_role' as const,
+              detail: `signed in as ${String(p.role ?? '?')}; needed ${required}`,
+            };
+      }),
     matrix: (Object.keys(ACTIONS) as Array<keyof typeof ACTIONS>).map((action) => ({
       action,
       label: ACTIONS[action].label,
@@ -864,7 +1276,12 @@ function checkpointOut(e: AuditOut): AuditCheckpointOut {
 
 // ------------------------------------------------------------------ router
 
-export async function mockRequest(method: string, path: string, body?: unknown, credentials?: Credentials | null): Promise<unknown> {
+export async function mockRequest(
+  method: string,
+  path: string,
+  body?: unknown,
+  credentials?: Credentials | null,
+): Promise<unknown> {
   await sleep(LATENCY_MS);
   const { segments, query } = parse(path);
   const [head, second, third, fourth] = segments;
@@ -872,7 +1289,10 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   // /health and /health/deep need no auth
   if (method === 'GET' && head === 'health') {
     const last = state.scans[state.scans.length - 1];
-    const deep = healthDeep(SCENARIOS.length + state.ingested.length, last ? { id: last.id, status: last.status, finished_at: last.finished_at } : null);
+    const deep = healthDeep(
+      SCENARIOS.length + state.ingested.length,
+      last ? { id: last.id, status: last.status, finished_at: last.finished_at } : null,
+    );
     return second === 'deep' ? deep : { ready: deep.ready, version: deep.version };
   }
 
@@ -891,7 +1311,12 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
       version: '0.1.0-mock',
       environment_label: 'PROTOTYPE · SYNTHETIC DATA',
       adapters: { simulated: true, cassette: true, live: true, anthropic: false },
-      providers: Object.fromEntries(Object.entries(PROVIDERS).map(([name, info]) => [name, { ...info, models: MODELS.filter((m) => m.provider === name).map((m) => m.model_id) }])),
+      providers: Object.fromEntries(
+        Object.entries(PROVIDERS).map(([name, info]) => [
+          name,
+          { ...info, models: MODELS.filter((m) => m.provider === name).map((m) => m.model_id) },
+        ]),
+      ),
       default_adapter: 'cassette',
       synthetic_notice:
         'All call transcripts and internal artifacts are synthetic. Public web pages are real, fetched read-only and attributed. Simulated model runs use declared defect profiles; cassette runs replay recorded model output; live runs require an API key.',
@@ -910,14 +1335,27 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
     if (method === 'GET' && second === 'samples') return SAMPLES;
     if (method === 'POST' && second === 'artifact') {
       const out = await sandboxArtifact(asObject(body), state.rules, todayIso(), path);
-      audit(actor, 'sandbox.artifact_checked', 'sandbox', out.text_sha256, { text_sha256: out.text_sha256, chars: out.chars, matches: out.summary.matches, stale: out.summary.stale, as_of: out.as_of, label: out.label });
+      audit(actor, 'sandbox.artifact_checked', 'sandbox', out.text_sha256, {
+        text_sha256: out.text_sha256,
+        chars: out.chars,
+        matches: out.summary.matches,
+        stale: out.summary.stale,
+        as_of: out.as_of,
+        label: out.label,
+      });
       return out;
     }
     if (method === 'POST' && second === 'transcript') {
       const out = await sandboxTranscript(asObject(body), path);
       const text = typeof asObject(body).text === 'string' ? (asObject(body).text as string) : '';
       const digest = fixtureHash(text);
-      audit(actor, 'sandbox.transcript_checked', 'sandbox', digest, { text_sha256: digest, chars: text.length, model_id: out.model_id, latency_ms: out.latency_ms, outcomes: Object.fromEntries(out.contracts.map((c) => [c.code, c.outcome])) });
+      audit(actor, 'sandbox.transcript_checked', 'sandbox', digest, {
+        text_sha256: digest,
+        chars: text.length,
+        model_id: out.model_id,
+        latency_ms: out.latency_ms,
+        outcomes: Object.fromEntries(out.contracts.map((c) => [c.code, c.outcome])),
+      });
       return out;
     }
   }
@@ -928,14 +1366,20 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
     if (method === 'POST' && second === 'reload') {
       requireAdmin(actor, role, path);
       audit(actor, 'rules.reloaded', 'rules', 'rules/*.yaml', { unchanged: state.rules.length });
-      return { rules_created: 0, versions_created: 0, unchanged: state.rules.length, files: state.rules.map((r) => `rules/${r.code}.yaml`) };
+      return {
+        rules_created: 0,
+        versions_created: 0,
+        unchanged: state.rules.length,
+        files: state.rules.map((r) => `rules/${r.code}.yaml`),
+      };
     }
     const rule = state.rules.find((r) => r.code === second) ?? notFound(`rule ${second}`);
     if (method === 'GET' && !third) return ruleOut(rule);
     if (method === 'GET' && third === 'impact') {
       const asOf = query.get('as_of') || todayIso();
       const assume = query.get('assume_version');
-      if (query.get('include_proposed') === 'true' || assume) return impactWhatIf(rule, asOf, assume ? Number(assume) : null, path);
+      if (query.get('include_proposed') === 'true' || assume)
+        return impactWhatIf(rule, asOf, assume ? Number(assume) : null, path);
       return impact(rule, asOf);
     }
     if (method === 'GET' && third === 'sources') return ruleSources(rule.code);
@@ -954,9 +1398,15 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         throw new ApiError(422, 'clause_text, effective_from and change_classification are required', path);
       }
       const clause = req.clause_text.trim();
-      const duplicate = rule.versions.find((v) => v.effective_from === req.effective_from && v.clause_text.trim() === clause);
+      const duplicate = rule.versions.find(
+        (v) => v.effective_from === req.effective_from && v.clause_text.trim() === clause,
+      );
       if (duplicate) {
-        throw new ApiError(409, `${rule.code} v${duplicate.version} (${duplicate.status}) already has this effective_from and clause_text`, path);
+        throw new ApiError(
+          409,
+          `${rule.code} v${duplicate.version} (${duplicate.status}) already has this effective_from and clause_text`,
+          path,
+        );
       }
       const lastEnacted = governingVersions(rule).pop();
       if (lastEnacted && req.effective_from <= lastEnacted.effective_from) {
@@ -981,7 +1431,14 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         created_at: nowIso(),
       };
       rule.versions.push(version);
-      audit(actor, 'rule.version_created', 'rule_version', version.id, { rule: rule.code, version: version.version, status: version.status, effective_from: version.effective_from, change_classification: version.change_classification, source: 'api' });
+      audit(actor, 'rule.version_created', 'rule_version', version.id, {
+        rule: rule.code,
+        version: version.version,
+        status: version.status,
+        effective_from: version.effective_from,
+        change_classification: version.change_classification,
+        source: 'api',
+      });
       return version;
     }
   }
@@ -990,7 +1447,14 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   if (head === 'sources' && second === 'check' && method === 'POST') {
     requireEditor(role, 'check rule sources', path);
     const live = query.get('live') === 'true';
-    const out: SourcesCheckOut = { checked: 7, changed: 0, unchanged: 7, first_seen: 0, errors: 0, mode: live ? 'live' : 'snapshot' };
+    const out: SourcesCheckOut = {
+      checked: 7,
+      changed: 0,
+      unchanged: 7,
+      first_seen: 0,
+      errors: 0,
+      mode: live ? 'live' : 'snapshot',
+    };
     audit(actor, 'scan.completed', 'scan', `sources:${todayIso()}`, { kind: 'rule_sources', ...out });
     return out;
   }
@@ -1008,7 +1472,10 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
     if (method === 'POST') {
       requireEditor(role, 'run scans', path);
       const req = asObject(body);
-      const key = typeof req.idempotency_key === 'string' && req.idempotency_key ? req.idempotency_key : `${todayIso()}-${Date.now()}`;
+      const key =
+        typeof req.idempotency_key === 'string' && req.idempotency_key
+          ? req.idempotency_key
+          : `${todayIso()}-${Date.now()}`;
       const existing = state.scans.find((s) => s.idempotency_key === key);
       if (existing) return { ...existing, deduplicated: true };
       const asOf = typeof req.as_of === 'string' && req.as_of ? req.as_of : todayIso();
@@ -1018,7 +1485,18 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         status: 'completed',
         started_at: nowIso(),
         finished_at: new Date(Date.now() + 1400).toISOString(),
-        stats: { artifacts: ASSETS.length, unchanged: ASSETS.length, new_versions: 0, fetch_errors: 0, edges_new: 0, edges_existing: EDGES.length, proposed_new: 0, mode: req.live === true ? 'live' : 'snapshot', as_of: asOf, staleness: stalenessSnapshot(asOf) },
+        stats: {
+          artifacts: ASSETS.length,
+          unchanged: ASSETS.length,
+          new_versions: 0,
+          fetch_errors: 0,
+          edges_new: 0,
+          edges_existing: EDGES.length,
+          proposed_new: 0,
+          mode: req.live === true ? 'live' : 'snapshot',
+          as_of: asOf,
+          staleness: stalenessSnapshot(asOf),
+        },
         deduplicated: false,
       };
       state.scans.push(scan);
@@ -1030,7 +1508,8 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
 
   // ---- workflows / prompts / models / contracts
   if (head === 'workflows' && method === 'GET') {
-    if (!second) return WORKFLOWS.map((w) => ({ ...w, prompt_versions: w.prompt_versions.map((p) => ({ ...p, text: null })) }));
+    if (!second)
+      return WORKFLOWS.map((w) => ({ ...w, prompt_versions: w.prompt_versions.map((p) => ({ ...p, text: null })) }));
     return WORKFLOWS.find((w) => w.code === second) ?? notFound(`workflow ${second}`);
   }
   if (head === 'prompts' && method === 'GET') {
@@ -1039,7 +1518,11 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   }
   if (head === 'models' && method === 'GET') {
     if (second === 'board') {
-      return modelBoard(state.runs.map((r) => r.run), Number(query.get('prompt') ?? 2), query.get('rule_date') || '2026-10-01');
+      return modelBoard(
+        state.runs.map((r) => r.run),
+        Number(query.get('prompt') ?? 2),
+        query.get('rule_date') || '2026-10-01',
+      );
     }
     return MODELS;
   }
@@ -1078,7 +1561,8 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
 
   // ---- runs
   if (head === 'runs') {
-    if (method === 'GET' && !second) return state.runs.map((r) => r.run).sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
+    if (method === 'GET' && !second)
+      return state.runs.map((r) => r.run).sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
     if (method === 'GET' && second === 'compare') {
       const a = state.runs.find((r) => r.run.id === query.get('a')) ?? notFound(`run ${query.get('a')}`);
       const b = state.runs.find((r) => r.run.id === query.get('b')) ?? notFound(`run ${query.get('b')}`);
@@ -1093,22 +1577,52 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
       if (!prompt) throw new ApiError(422, `unknown prompt version ${req.prompt_version} for ${workflow}`, path);
       if (!model) throw new ApiError(422, `unknown model ${req.model_id}`, path);
       const adapter = req.adapter ?? 'simulated';
-      if (adapter === 'anthropic') throw new ApiError(409, 'adapter "anthropic" is not available: ANTHROPIC_API_KEY is not set', path);
+      if (adapter === 'anthropic')
+        throw new ApiError(409, 'adapter "anthropic" is not available: ANTHROPIC_API_KEY is not set', path);
       if (!req.rule_date) throw new ApiError(422, 'rule_date is required', path);
       if (req.corpus === 'holdout') throw new ApiError(422, "no transcripts in corpus 'holdout'", path);
       const corpus: RunCorpus = req.corpus === 'ingested' || req.corpus === 'all' ? req.corpus : 'synthetic';
-      const runKey = [workflow, prompt.prompt_hash.slice(0, 16), model.model_id, adapter, corpusHash(corpus).slice(0, 16), CONTRACT_SET_HASH.slice(0, 16), req.rule_date].join(':');
+      const runKey = [
+        workflow,
+        prompt.prompt_hash.slice(0, 16),
+        model.model_id,
+        adapter,
+        corpusHash(corpus).slice(0, 16),
+        CONTRACT_SET_HASH.slice(0, 16),
+        req.rule_date,
+      ].join(':');
       const existing = state.runs.find((r) => r.run.run_key === runKey);
       if (existing) {
         audit(actor, 'run.deduplicated', 'run', existing.run.id, { run_key: runKey });
         return { ...existing.run, deduplicated: true };
       }
       const id = `${fixtureHash(runKey).slice(0, 8)}-${fixtureHash(runKey + 'x').slice(0, 4)}-4${fixtureHash(runKey + 'y').slice(0, 3)}-a${fixtureHash(runKey + 'z').slice(0, 3)}-${fixtureHash(runKey + 'w').slice(0, 12)}`;
-      const rec = makeRun(id, prompt.version, model.model_id, adapter, req.rule_date, req.trigger ?? 'MANUAL', nowIso(), actor, corpus);
+      const rec = makeRun(
+        id,
+        prompt.version,
+        model.model_id,
+        adapter,
+        req.rule_date,
+        req.trigger ?? 'MANUAL',
+        nowIso(),
+        actor,
+        corpus,
+      );
       state.runs.push(rec);
-      audit(actor, 'run.started', 'run', id, { trigger: rec.run.trigger, prompt_version: rec.run.prompt_version, model_id: rec.run.model_id, rule_date: rec.run.rule_date, adapter, corpus });
+      audit(actor, 'run.started', 'run', id, {
+        trigger: rec.run.trigger,
+        prompt_version: rec.run.prompt_version,
+        model_id: rec.run.model_id,
+        rule_date: rec.run.rule_date,
+        adapter,
+        corpus,
+      });
       const opened = openFlaggedTasks(rec, nowIso());
-      audit('system', 'run.completed', 'run', id, { gate: rec.run.gate, transcripts: rec.run.stats.transcripts as number, review_tasks_opened: opened });
+      audit('system', 'run.completed', 'run', id, {
+        gate: rec.run.gate,
+        transcripts: rec.run.stats.transcripts as number,
+        review_tasks_opened: opened,
+      });
       return rec.run;
     }
     const rec = state.runs.find((r) => r.run.id === second) ?? notFound(`run ${second}`);
@@ -1118,7 +1632,12 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
       const contract = query.get('contract');
       const outcome = query.get('outcome');
       const transcript = query.get('transcript');
-      return rec.results.filter((r) => (!contract || r.contract_code === contract) && (!outcome || r.outcome === outcome) && (!transcript || r.transcript_code === transcript));
+      return rec.results.filter(
+        (r) =>
+          (!contract || r.contract_code === contract) &&
+          (!outcome || r.outcome === outcome) &&
+          (!transcript || r.transcript_code === transcript),
+      );
     }
     if (method === 'GET' && third === 'transcripts' && fourth) {
       return runTranscript(rec.run, fourth, rec.results) ?? notFound(`transcript ${fourth}`);
@@ -1142,21 +1661,35 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
       const req = asObject(body) as unknown as TransitionRequest;
       const legal = TRANSITIONS[task.kind]?.[task.state] ?? [];
       if (!legal.includes(req.to)) {
-        audit(actor, 'task.transition_rejected', 'review_task', task.id, { from: task.state, to: req.to, error: `${task.kind}: ${task.state} -> ${req.to} is not allowed` });
+        audit(actor, 'task.transition_rejected', 'review_task', task.id, {
+          from: task.state,
+          to: req.to,
+          error: `${task.kind}: ${task.state} -> ${req.to} is not allowed`,
+        });
         throw new ApiError(409, `${task.kind}: ${task.state} -> ${req.to} is not allowed`, path);
       }
       if (!allowedTransitions(task, role).includes(req.to)) {
         audit(actor, 'auth.denied', 'review_task', task.id, { attempted: req.to, role });
-        throw new ApiError(403, req.to === 'republished' ? `role '${role}' may not republish` : `role '${role}' may not decide review tasks`, path);
+        throw new ApiError(
+          403,
+          req.to === 'republished' ? `role '${role}' may not republish` : `role '${role}' may not decide review tasks`,
+          path,
+        );
       }
-      if (REASON_REQUIRED.has(req.to) && !req.reason_code) throw new ApiError(422, `reason_code is required for '${req.to}'`, path);
+      if (REASON_REQUIRED.has(req.to) && !req.reason_code)
+        throw new ApiError(422, `reason_code is required for '${req.to}'`, path);
       const from = task.state;
       task.state = req.to;
       task.note = req.note ?? task.note;
       task.reason_code = req.reason_code ?? task.reason_code;
       if (['verified', 'republished', 'dismissed', 'upheld', 'overridden'].includes(req.to)) task.decided_by = actor;
       if (['republished', 'dismissed', 'upheld', 'overridden'].includes(req.to)) task.closed_at = nowIso();
-      audit(actor, 'task.transitioned', 'review_task', task.id, { from, to: req.to, reason_code: req.reason_code ?? null, note: req.note ?? '' });
+      audit(actor, 'task.transitioned', 'review_task', task.id, {
+        from,
+        to: req.to,
+        reason_code: req.reason_code ?? null,
+        note: req.note ?? '',
+      });
       if (req.to === 'overridden' && task.contract_code) {
         const expires = new Date();
         expires.setUTCFullYear(expires.getUTCFullYear() + 1);
@@ -1165,7 +1698,12 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
           review_task_id: task.id,
           contract_code: task.contract_code,
           transcript_code: task.transcript_code,
-          expected: { outcome: 'PASS', reason_code: req.reason_code, note: req.note ?? '', overrides: task.payload.severity ?? null },
+          expected: {
+            outcome: 'PASS',
+            reason_code: req.reason_code,
+            note: req.note ?? '',
+            overrides: task.payload.severity ?? null,
+          },
           reason_code: req.reason_code ?? 'OTHER',
           created_by: actor,
           approver: null,
@@ -1175,7 +1713,12 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         };
         state.testCases.push(tc);
         task.payload = { ...task.payload, test_case_id: tc.id };
-        audit(actor, 'test_case.created', 'test_case', tc.id, { review_task: task.id, contract: tc.contract_code, transcript: tc.transcript_code, expires_at: tc.expires_at });
+        audit(actor, 'test_case.created', 'test_case', tc.id, {
+          review_task: task.id,
+          contract: tc.contract_code,
+          transcript: tc.transcript_code,
+          expires_at: tc.expires_at,
+        });
       }
       return withTransitions(task, role);
     }
@@ -1220,7 +1763,15 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
             product_line: i === 1 ? 'MA' : 'PDP',
             synthetic: false,
             duration_seconds: 140 + i * 17,
-            labels: { ingested: true, format, agent: 'Dana', started_at: nowIso(), ground_truth: null, redacted: { medicare_number: i === 1 ? 1 : 0, ssn: 0, dob: 1 }, batch_hash: batchHash },
+            labels: {
+              ingested: true,
+              format,
+              agent: 'Dana',
+              started_at: nowIso(),
+              ground_truth: null,
+              redacted: { medicare_number: i === 1 ? 1 : 0, ssn: 0, dob: 1 },
+              batch_hash: batchHash,
+            },
             text: null,
           });
         }
@@ -1233,7 +1784,12 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         batch_hash: batchHash,
         note: 'Ingested transcripts carry no ground truth; rule contracts report ERROR for them until labels exist.',
       };
-      audit(actor, 'scan.completed', 'scan', `ingest:${batchHash.slice(0, 8)}`, { kind: 'ingest', file: filename, ...out, redacted: undefined });
+      audit(actor, 'scan.completed', 'scan', `ingest:${batchHash.slice(0, 8)}`, {
+        kind: 'ingest',
+        file: filename,
+        ...out,
+        redacted: undefined,
+      });
       return out;
     }
   }
@@ -1257,7 +1813,15 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
         transcripts: SCENARIOS.length + state.ingested.length,
       },
       last_run: last
-        ? { id: last.id, finished_at: last.finished_at, gate: last.gate, status: last.status, model_id: last.model_id, prompt_version: last.prompt_version, trigger: last.trigger }
+        ? {
+            id: last.id,
+            finished_at: last.finished_at,
+            gate: last.gate,
+            status: last.status,
+            model_id: last.model_id,
+            prompt_version: last.prompt_version,
+            trigger: last.trigger,
+          }
         : null,
       review: {
         actionable_open: open.filter((t) => laneOf(t) === 'actionable').length,
@@ -1275,8 +1839,19 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
     const format = query.get('format') ?? 'json';
     const entityType = second === 'tasks' ? 'review_task' : second === 'runs' ? 'run' : 'rule';
     const sha = fixtureHash(`${second}/${third}/${query.get('as_of') ?? ''}/${state.audit.length}`);
-    audit(actor, 'evidence.exported', entityType, third, { format, bundle_sha256: sha, schema: 'backstop.evidence/1', audit_rows: 0 });
-    const bundle = { schema: 'backstop.evidence/1', subject: { type: entityType, id: third }, as_of: query.get('as_of'), exported_by: { name: actor, role }, bundle_sha256: sha };
+    audit(actor, 'evidence.exported', entityType, third, {
+      format,
+      bundle_sha256: sha,
+      schema: 'backstop.evidence/1',
+      audit_rows: 0,
+    });
+    const bundle = {
+      schema: 'backstop.evidence/1',
+      subject: { type: entityType, id: third },
+      as_of: query.get('as_of'),
+      exported_by: { name: actor, role },
+      bundle_sha256: sha,
+    };
     return format === 'md' ? `# Evidence bundle - ${entityType} ${third}\n\nsha256 ${sha}\n` : bundle;
   }
 
@@ -1294,10 +1869,19 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   }
   if (head === 'audit' && method === 'GET' && second === 'verify') {
     const last = state.audit[state.audit.length - 1];
-    const base = { ok: true, checked: state.audit.length, first_broken_id: null, reason: null, tip: last?.row_hash ?? GENESIS, tip_id: last?.id ?? null, checkpoint: null };
+    const base = {
+      ok: true,
+      checked: state.audit.length,
+      first_broken_id: null,
+      reason: null,
+      tip: last?.row_hash ?? GENESIS,
+      tip_id: last?.id ?? null,
+      checkpoint: null,
+    };
     const throughRaw = query.get('through_id');
     const tip = query.get('tip');
-    if ((throughRaw === null) !== (tip === null)) throw new ApiError(422, 'a checkpoint needs both through_id and tip', path);
+    if ((throughRaw === null) !== (tip === null))
+      throw new ApiError(422, 'a checkpoint needs both through_id and tip', path);
     if (throughRaw === null || tip === null) return base;
     const through_id = Number(throughRaw);
     const row = state.audit.find((e) => e.id === through_id);
@@ -1313,16 +1897,31 @@ export async function mockRequest(method: string, path: string, body?: unknown, 
   if (head === 'admin' && second === 'access' && method === 'GET') {
     requireAdmin(actor, role, path);
     const review = accessReview();
-    audit(actor, 'access.reviewed', 'access', 'review', { accounts: review.accounts.length, default_credential_accounts: review.default_credential_accounts, denied_24h: review.denied_24h });
+    audit(actor, 'access.reviewed', 'access', 'review', {
+      accounts: review.accounts.length,
+      default_credential_accounts: review.default_credential_accounts,
+      denied_24h: review.denied_24h,
+    });
     return review;
   }
   if (head === 'admin' && second === 'audit-checkpoints') {
     requireAdmin(actor, role, path);
-    if (method === 'GET') return state.audit.filter((e) => e.event_type === 'audit.checkpoint').reverse().slice(0, 50).map(checkpointOut);
+    if (method === 'GET')
+      return state.audit
+        .filter((e) => e.event_type === 'audit.checkpoint')
+        .reverse()
+        .slice(0, 50)
+        .map(checkpointOut);
     if (method === 'POST') {
       const last = state.audit[state.audit.length - 1];
       if (!last) throw new ApiError(409, 'the audit log is empty; there is nothing to checkpoint', path);
-      return checkpointOut(audit(actor, 'audit.checkpoint', 'audit', String(last.id), { through_id: last.id, tip: last.row_hash, rows_verified: state.audit.length }));
+      return checkpointOut(
+        audit(actor, 'audit.checkpoint', 'audit', String(last.id), {
+          through_id: last.id,
+          tip: last.row_hash,
+          rows_verified: state.audit.length,
+        }),
+      );
     }
   }
   if (head === 'audit' && method === 'GET') {

@@ -31,6 +31,11 @@ export function stateWord(c: HealthComponent): string {
 }
 
 export function statusTextClass(status: string | null | undefined): string {
-  return status === 'healthy' ? 'text-green-ink' : status === 'degraded' ? 'text-amber-ink' : status === 'down' ? 'text-red' : 'text-ink-3';
+  return status === 'healthy'
+    ? 'text-green-ink'
+    : status === 'degraded'
+      ? 'text-amber-ink'
+      : status === 'down'
+        ? 'text-red'
+        : 'text-ink-3';
 }
-

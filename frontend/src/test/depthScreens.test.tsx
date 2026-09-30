@@ -37,7 +37,13 @@ function openApp(path: string) {
   return render(<App />);
 }
 
-const rate = (k: number, n: number, lo: number, hi: number) => ({ k, n, rate: n ? k / n : null, ci_low: lo, ci_high: hi });
+const rate = (k: number, n: number, lo: number, hi: number) => ({
+  k,
+  n,
+  rate: n ? k / n : null,
+  ci_low: lo,
+  ci_high: hi,
+});
 
 const STATS: CompareStatisticsOut = {
   mode: 'paired',
@@ -45,22 +51,56 @@ const STATS: CompareStatisticsOut = {
   failure_definition: 'A cell fails when its outcome is FAIL or ERROR on a BLOCK contract.',
   cautions: ['Both runs are on the development calls; confirm on the held-out corpus.'],
   overall: {
-    contract_code: 'ALL-BLOCK', severity: 'BLOCK', failure_outcomes: ['FAIL', 'ERROR'], n_shared: 60,
+    contract_code: 'ALL-BLOCK',
+    severity: 'BLOCK',
+    failure_outcomes: ['FAIL', 'ERROR'],
+    n_shared: 60,
     paired: { both_pass: 38, a_only_fail: 17, b_only_fail: 2, both_fail: 3 },
-    a: rate(20, 60, 0.22, 0.46), b: rate(5, 60, 0.04, 0.18), discordant: 19, test: 'McNemar exact (two-sided binomial on discordant pairs, p=0.5)',
-    p_value: 0.00073, p_holm: null, significant: true, direction: 'better', verdict: 'B is significantly better on the release-blocking contracts (p=0.00073)', cautions: [],
+    a: rate(20, 60, 0.22, 0.46),
+    b: rate(5, 60, 0.04, 0.18),
+    discordant: 19,
+    test: 'McNemar exact (two-sided binomial on discordant pairs, p=0.5)',
+    p_value: 0.00073,
+    p_holm: null,
+    significant: true,
+    direction: 'better',
+    verdict: 'B is significantly better on the release-blocking contracts (p=0.00073)',
+    cautions: [],
   },
   per_contract: [
     {
-      contract_code: 'C-FACT-01', severity: 'BLOCK', failure_outcomes: ['FAIL', 'ERROR'], n_shared: 60,
-      paired: { both_pass: 57, a_only_fail: 0, b_only_fail: 3, both_fail: 0 }, a: rate(0, 60, 0, 0.06), b: rate(3, 60, 0.017, 0.137),
-      discordant: 3, test: 'McNemar exact', p_value: 0.25, p_holm: 1, significant: false, direction: 'none', verdict: 'No significant difference (p=0.25, n=3 discordant pairs)',
+      contract_code: 'C-FACT-01',
+      severity: 'BLOCK',
+      failure_outcomes: ['FAIL', 'ERROR'],
+      n_shared: 60,
+      paired: { both_pass: 57, a_only_fail: 0, b_only_fail: 3, both_fail: 0 },
+      a: rate(0, 60, 0, 0.06),
+      b: rate(3, 60, 0.017, 0.137),
+      discordant: 3,
+      test: 'McNemar exact',
+      p_value: 0.25,
+      p_holm: 1,
+      significant: false,
+      direction: 'none',
+      verdict: 'No significant difference (p=0.25, n=3 discordant pairs)',
       cautions: ['Only 3 call(s) changed outcome: too few changed calls to conclude.'],
     },
     {
-      contract_code: 'C-TPMO-01', severity: 'BLOCK', failure_outcomes: ['FAIL', 'ERROR'], n_shared: 60,
-      paired: { both_pass: 45, a_only_fail: 14, b_only_fail: 0, both_fail: 1 }, a: rate(15, 60, 0.15, 0.37), b: rate(1, 60, 0.003, 0.089),
-      discordant: 14, test: 'McNemar exact', p_value: 0.00012, p_holm: 0.0011, significant: true, direction: 'better', verdict: 'B is significantly better on this contract (p=0.00012)', cautions: [],
+      contract_code: 'C-TPMO-01',
+      severity: 'BLOCK',
+      failure_outcomes: ['FAIL', 'ERROR'],
+      n_shared: 60,
+      paired: { both_pass: 45, a_only_fail: 14, b_only_fail: 0, both_fail: 1 },
+      a: rate(15, 60, 0.15, 0.37),
+      b: rate(1, 60, 0.003, 0.089),
+      discordant: 14,
+      test: 'McNemar exact',
+      p_value: 0.00012,
+      p_holm: 0.0011,
+      significant: true,
+      direction: 'better',
+      verdict: 'B is significantly better on this contract (p=0.00012)',
+      cautions: [],
     },
   ],
 };
@@ -92,8 +132,19 @@ describe('SignificancePanel', () => {
 
 describe('ConfusionMatrix and TrendChart', () => {
   const confusion: ConfusionOut = {
-    unit: 'flagged phrase', positive: 'p', tp: 4, fp: 1, fn: 2, tn: null, not_applicable: 0, not_evaluated: 0, no_output: 0,
-    precision: rate(4, 5, 0.38, 0.96), recall: rate(4, 6, 0.3, 0.9), miss_rate: rate(2, 6, 0.1, 0.7), f1: 0.73,
+    unit: 'flagged phrase',
+    positive: 'p',
+    tp: 4,
+    fp: 1,
+    fn: 2,
+    tn: null,
+    not_applicable: 0,
+    not_evaluated: 0,
+    no_output: 0,
+    precision: rate(4, 5, 0.38, 0.96),
+    recall: rate(4, 6, 0.3, 0.9),
+    miss_rate: rate(2, 6, 0.1, 0.7),
+    f1: 0.73,
   };
 
   it('uses plain labels and says when true negatives cannot be counted', () => {
@@ -106,7 +157,14 @@ describe('ConfusionMatrix and TrendChart', () => {
 
   it('marks held-out runs with a hollow point and names each point for screen readers', () => {
     const p = (id: string, corpus: string, k: number): TrendPointOut => ({
-      run_id: id, started_at: '2026-09-20T10:00:00Z', model_id: 'm', prompt_version: 2, corpus, rule_date: '2026-10-01', adapter: 'cassette', failure: rate(k, 60, 0.01, 0.2),
+      run_id: id,
+      started_at: '2026-09-20T10:00:00Z',
+      model_id: 'm',
+      prompt_version: 2,
+      corpus,
+      rule_date: '2026-10-01',
+      adapter: 'cassette',
+      failure: rate(k, 60, 0.01, 0.2),
     });
     wrap(<TrendChart points={[p('a', 'synthetic', 5), p('b', 'holdout', 9)]} />);
     const points = screen.getAllByRole('button');
@@ -119,12 +177,31 @@ describe('ConfusionMatrix and TrendChart', () => {
 
 describe('rule version statuses', () => {
   const v = (over: Partial<RuleVersionOut>): RuleVersionOut => ({
-    id: `v${over.version}`, version: 1, status: 'in_force', clause_text: 'text', summary: '', effective_from: '2025-04-11', effective_to: null,
-    change_classification: 'INITIAL', params: {}, disputed: false, dispute_note: '', source_url: '', git_commit: '', created_at: '', ...over,
+    id: `v${over.version}`,
+    version: 1,
+    status: 'in_force',
+    clause_text: 'text',
+    summary: '',
+    effective_from: '2025-04-11',
+    effective_to: null,
+    change_classification: 'INITIAL',
+    params: {},
+    disputed: false,
+    dispute_note: '',
+    source_url: '',
+    git_commit: '',
+    created_at: '',
+    ...over,
   });
   const revocation = [
     v({ version: 1, deferrals: [{ provision: 'revoke-all', deferred_to: '2027-01-31', source: 'FCC order' }] }),
-    v({ version: 2, status: 'proposed', effective_from: null, change_classification: 'REMOVES_REQUIREMENT', vote_date: '2026-09-30' }),
+    v({
+      version: 2,
+      status: 'proposed',
+      effective_from: null,
+      change_classification: 'REMOVES_REQUIREMENT',
+      vote_date: '2026-09-30',
+    }),
   ];
 
   it('puts an undated proposal beside the track as "awaiting vote" and a deferral on it', () => {
@@ -136,7 +213,11 @@ describe('rule version statuses', () => {
   it('strikes a vacated version, reads stayed amber, and boxes a proposal with its vote', () => {
     const { container } = wrap(
       <Timeline
-        versions={[...revocation, v({ version: 3, status: 'vacated', effective_from: '2024-10-01' }), v({ version: 4, status: 'stayed', effective_from: '2026-11-01', change_classification: 'RESTORES_PRIOR' })]}
+        versions={[
+          ...revocation,
+          v({ version: 3, status: 'vacated', effective_from: '2024-10-01' }),
+          v({ version: 4, status: 'stayed', effective_from: '2026-11-01', change_classification: 'RESTORES_PRIOR' }),
+        ]}
         inForceVersion={1}
         asOf="2026-09-25"
       />,
@@ -152,7 +233,9 @@ describe('rule version statuses', () => {
 
 describe('RedactionTally', () => {
   it('shows every reported kind, zeros included, and nothing for kinds an older server omits', () => {
-    const { rerender } = wrap(<RedactionTally counts={{ medicare_number: 0, ssn: 0, dob: 0, phone: 1, email: 0, address: 0 }} />);
+    const { rerender } = wrap(
+      <RedactionTally counts={{ medicare_number: 0, ssn: 0, dob: 0, phone: 1, email: 0, address: 0 }} />,
+    );
     expect(screen.getByTestId('redacted-phone')).toHaveTextContent('1 phone number');
     expect(screen.getByTestId('redacted-email')).toHaveTextContent('0 email addresses');
     rerender(
@@ -171,7 +254,9 @@ describe('screens against the mock API', () => {
 
   it('run compare opens with "Is this difference real?" above the cell lists', async () => {
     openApp(`/runs/compare?a=${RUN_IDS.ruleFlip}&b=${RUN_IDS.promptV2}`);
-    expect(await screen.findByRole('heading', { name: 'Is this difference real?' }, { timeout: 8000 })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Is this difference real?' }, { timeout: 8000 }),
+    ).toBeInTheDocument();
     expect(screen.getByTestId('significance-overall')).toHaveTextContent('B fails less often — unlikely to be chance');
     expect(screen.getByText(/per_contract a_fail\/b_fail count every non-PASS outcome/)).toBeInTheDocument();
   }, 20000);
@@ -218,13 +303,20 @@ describe('screens against the mock API', () => {
     const drawer = await screen.findByRole('dialog');
     expect(within(drawer).getByText('Proposals never take effect from the UI')).toBeInTheDocument();
     expect(within(drawer).queryByRole('combobox', { name: 'Status' })).toBeNull();
-    fireEvent.change(within(drawer).getByLabelText(/Clause text/), { target: { value: 'SOA at least 24 hours before the appointment.' } });
-    fireEvent.change(within(drawer).getByLabelText(/Params/), { target: { value: '{"min_hours_between_soa_and_appointment": 24}' } });
+    fireEvent.change(within(drawer).getByLabelText(/Clause text/), {
+      target: { value: 'SOA at least 24 hours before the appointment.' },
+    });
+    fireEvent.change(within(drawer).getByLabelText(/Params/), {
+      target: { value: '{"min_hours_between_soa_and_appointment": 24}' },
+    });
     fireEvent.click(within(drawer).getByRole('button', { name: 'Record proposal' }));
     const toggle = await within(drawer).findByRole('button', { name: 'What-if impact' }, { timeout: 8000 });
     fireEvent.click(toggle);
     const whatIf = await within(drawer).findByTestId('what-if-impact', {}, { timeout: 8000 });
-    expect(within(whatIf).getByText('Hypothetical', { selector: '[data-tone]' })).toHaveAttribute('data-filled', 'true');
+    expect(within(whatIf).getByText('Hypothetical', { selector: '[data-tone]' })).toHaveAttribute(
+      'data-filled',
+      'true',
+    );
     expect(await within(whatIf).findByText(/If v3 were enacted/)).toBeInTheDocument();
     expect(await within(whatIf).findByText(/nothing was written/)).toBeInTheDocument();
   }, 25000);

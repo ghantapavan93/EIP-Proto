@@ -50,21 +50,43 @@ export function SourceBadge({ isSynthetic, type, url, className, stacked = false
   if (!url) return chip;
   if (stacked) {
     return (
-      <a href={url} target="_blank" rel="noreferrer noopener" className="inline-flex flex-col items-start gap-0.5 py-1 no-underline hover:no-underline" onClick={(e) => e.stopPropagation()} aria-label={`Open ${host} in a new tab`}>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="inline-flex flex-col items-start gap-0.5 py-1 no-underline hover:no-underline"
+        onClick={(e) => e.stopPropagation()}
+        aria-label={`Open ${host} in a new tab`}
+      >
         {chip}
         {host && <span className="text-[11px] leading-tight text-ink-2 [overflow-wrap:anywhere]">{host}</span>}
       </a>
     );
   }
   return (
-    <a href={url} target="_blank" rel="noreferrer noopener" className="inline-flex no-underline hover:no-underline" onClick={(e) => e.stopPropagation()} aria-label={`Open ${host} in a new tab`}>
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="inline-flex no-underline hover:no-underline"
+      onClick={(e) => e.stopPropagation()}
+      aria-label={`Open ${host} in a new tab`}
+    >
       {chip}
     </a>
   );
 }
 
 /** SYNTHETIC or INGESTED · REDACTED for transcripts (synthetic=false ⇒ ingested from a real export). */
-export function TranscriptBadge({ synthetic, labels, className }: { synthetic: boolean; labels?: Record<string, unknown> | null; className?: string }) {
+export function TranscriptBadge({
+  synthetic,
+  labels,
+  className,
+}: {
+  synthetic: boolean;
+  labels?: Record<string, unknown> | null;
+  className?: string;
+}) {
   if (synthetic) {
     return (
       <Chip tone="neutral" className={className} title="Synthetic transcript with ground-truth labels">
@@ -72,7 +94,10 @@ export function TranscriptBadge({ synthetic, labels, className }: { synthetic: b
       </Chip>
     );
   }
-  const redacted = labels && typeof labels.redacted === 'object' && labels.redacted !== null ? (labels.redacted as Record<string, unknown>) : null;
+  const redacted =
+    labels && typeof labels.redacted === 'object' && labels.redacted !== null
+      ? (labels.redacted as Record<string, unknown>)
+      : null;
   const counts = redacted
     ? Object.entries(redacted)
         .filter(([, v]) => typeof v === 'number' && v > 0)
@@ -80,7 +105,11 @@ export function TranscriptBadge({ synthetic, labels, className }: { synthetic: b
         .join(', ')
     : '';
   return (
-    <Chip tone="teal" className={className} title={`Ingested${typeof labels?.format === 'string' ? ` via ${labels.format}` : ''}; PII redacted at ingest${counts ? `: ${counts}` : ''}; no ground truth`}>
+    <Chip
+      tone="teal"
+      className={className}
+      title={`Ingested${typeof labels?.format === 'string' ? ` via ${labels.format}` : ''}; PII redacted at ingest${counts ? `: ${counts}` : ''}; no ground truth`}
+    >
       Ingested · redacted
     </Chip>
   );

@@ -63,21 +63,93 @@ export function CommandPalette() {
     }
   }, [open]);
 
-  const evidence = useMemo(() => evidenceForLocation(location.pathname, location.search), [location.pathname, location.search]);
+  const evidence = useMemo(
+    () => evidenceForLocation(location.pathname, location.search),
+    [location.pathname, location.search],
+  );
   const items = useMemo<PaletteItem[]>(() => {
     const actions: PaletteItem[] = [
-      { id: 'review', group: 'Actions', label: 'Open review queue', hint: '/review', keywords: 'tasks actionable', to: '/review' },
-      { id: 'try', group: 'Actions', label: 'Try it with your own text', hint: '/try', keywords: 'sandbox paste check artifact transcript', to: '/try' },
-      ...(canEdit(role) ? [{ id: 'new-run', group: 'Actions' as const, label: 'New run', hint: '/runs', keywords: 'start replay', to: '/runs?new=1' }] : []),
-      ...(evidence
-        ? [{ id: 'evidence', group: 'Actions' as const, label: `Export evidence for this ${evidence.scope === 'tasks' ? 'task' : evidence.scope === 'runs' ? 'run' : 'rule'}`, hint: 'json bundle', keywords: 'export bundle sha256', evidence }]
+      {
+        id: 'review',
+        group: 'Actions',
+        label: 'Open review queue',
+        hint: '/review',
+        keywords: 'tasks actionable',
+        to: '/review',
+      },
+      {
+        id: 'try',
+        group: 'Actions',
+        label: 'Try it with your own text',
+        hint: '/try',
+        keywords: 'sandbox paste check artifact transcript',
+        to: '/try',
+      },
+      ...(canEdit(role)
+        ? [
+            {
+              id: 'new-run',
+              group: 'Actions' as const,
+              label: 'New run',
+              hint: '/runs',
+              keywords: 'start replay',
+              to: '/runs?new=1',
+            },
+          ]
         : []),
-      { id: 'audit', group: 'Actions', label: 'Open audit log', hint: '/audit', keywords: 'chain verify', to: '/audit' },
-      { id: 'governance', group: 'Actions', label: 'Open governance', hint: '/governance', keywords: 'admin access roles permissions checkpoint rbac separation duties', to: '/governance' },
-      { id: 'readiness', group: 'Actions', label: 'Open readiness', hint: '/readiness', keywords: 'deadlines aep october milestones owners vacated proposed', to: '/readiness' },
+      ...(evidence
+        ? [
+            {
+              id: 'evidence',
+              group: 'Actions' as const,
+              label: `Export evidence for this ${evidence.scope === 'tasks' ? 'task' : evidence.scope === 'runs' ? 'run' : 'rule'}`,
+              hint: 'json bundle',
+              keywords: 'export bundle sha256',
+              evidence,
+            },
+          ]
+        : []),
+      {
+        id: 'audit',
+        group: 'Actions',
+        label: 'Open audit log',
+        hint: '/audit',
+        keywords: 'chain verify',
+        to: '/audit',
+      },
+      {
+        id: 'governance',
+        group: 'Actions',
+        label: 'Open governance',
+        hint: '/governance',
+        keywords: 'admin access roles permissions checkpoint rbac separation duties',
+        to: '/governance',
+      },
+      {
+        id: 'readiness',
+        group: 'Actions',
+        label: 'Open readiness',
+        hint: '/readiness',
+        keywords: 'deadlines aep october milestones owners vacated proposed',
+        to: '/readiness',
+      },
     ];
-    const ruleItems: PaletteItem[] = (rules.data ?? []).map((r) => ({ id: `rule-${r.code}`, group: 'Rules', label: r.title, hint: r.code, keywords: r.citation, to: `/rules/${encodeURIComponent(r.code)}` }));
-    const assetItems: PaletteItem[] = (assets.data ?? []).map((a) => ({ id: `asset-${a.code}`, group: 'Artifacts', label: a.name, hint: a.code, keywords: a.type, to: `/artifacts/${encodeURIComponent(a.code)}` }));
+    const ruleItems: PaletteItem[] = (rules.data ?? []).map((r) => ({
+      id: `rule-${r.code}`,
+      group: 'Rules',
+      label: r.title,
+      hint: r.code,
+      keywords: r.citation,
+      to: `/rules/${encodeURIComponent(r.code)}`,
+    }));
+    const assetItems: PaletteItem[] = (assets.data ?? []).map((a) => ({
+      id: `asset-${a.code}`,
+      group: 'Artifacts',
+      label: a.name,
+      hint: a.code,
+      keywords: a.type,
+      to: `/artifacts/${encodeURIComponent(a.code)}`,
+    }));
     const runItems: PaletteItem[] = [...(runs.data ?? [])]
       .sort((a, b) => (a.started_at < b.started_at ? 1 : -1))
       .map((r) => ({
@@ -102,7 +174,12 @@ export function CommandPalette() {
       exportEvidence.mutate(
         { ...item.evidence, format: 'json' },
         {
-          onSuccess: ({ filename, sha256 }) => toast({ title: `Evidence bundle exported · sha256 ${bundleHashLabel(sha256)}`, detail: filename, tone: 'green' }),
+          onSuccess: ({ filename, sha256 }) =>
+            toast({
+              title: `Evidence bundle exported · sha256 ${bundleHashLabel(sha256)}`,
+              detail: filename,
+              tone: 'green',
+            }),
           onError: (err) => toast({ title: 'Evidence export failed', detail: err.message, tone: 'red' }),
         },
       );
@@ -132,7 +209,11 @@ export function CommandPalette() {
   if (!open) return null;
   let lastGroup = '';
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-slate/40 px-4 pt-[12vh]" onMouseDown={() => setOpen(false)} role="presentation">
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center bg-slate/40 px-4 pt-[12vh]"
+      onMouseDown={() => setOpen(false)}
+      role="presentation"
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -161,18 +242,29 @@ export function CommandPalette() {
           <kbd className="shrink-0 border border-input px-1 text-[10px] text-ink-3">Esc</kbd>
         </div>
         <ul id={LIST_ID} role="listbox" aria-label="Results" className="max-h-[52vh] overflow-y-auto py-1">
-          {results.length === 0 && <li className="px-3 py-3 text-[13px] text-ink-2">{rules.isLoading || runs.isLoading ? 'Loading…' : 'No match.'}</li>}
+          {results.length === 0 && (
+            <li className="px-3 py-3 text-[13px] text-ink-2">
+              {rules.isLoading || runs.isLoading ? 'Loading…' : 'No match.'}
+            </li>
+          )}
           {results.map((item, i) => {
             const header = item.group !== lastGroup ? item.group : null;
             lastGroup = item.group;
             return (
               <li key={item.id} role="presentation">
-                {header && <div className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-[1px] text-ink-3">{header}</div>}
+                {header && (
+                  <div className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-[1px] text-ink-3">
+                    {header}
+                  </div>
+                )}
                 <div
                   id={`cmd-${item.id}`}
                   role="option"
                   aria-selected={i === activeIndex}
-                  className={cn('flex cursor-pointer items-center gap-3 px-3 py-1.5 text-[13px]', i === activeIndex ? 'bg-teal/10 text-navy' : 'text-ink')}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 px-3 py-1.5 text-[13px]',
+                    i === activeIndex ? 'bg-teal/10 text-navy' : 'text-ink',
+                  )}
                   onMouseMove={() => setActive(i)}
                   onClick={() => run(item)}
                 >
@@ -183,7 +275,9 @@ export function CommandPalette() {
             );
           })}
         </ul>
-        <div className="border-t border-hairline px-3 py-1.5 text-[11px] text-ink-3">↑↓ to move · Enter to open · Ctrl+K / ⌘K to toggle</div>
+        <div className="border-t border-hairline px-3 py-1.5 text-[11px] text-ink-3">
+          ↑↓ to move · Enter to open · Ctrl+K / ⌘K to toggle
+        </div>
       </div>
     </div>
   );

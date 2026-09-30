@@ -10,7 +10,9 @@ import type { Tone } from './vocab';
 export const NOT_GOVERNING = new Set(['proposed', 'vacated', 'stayed']);
 
 /** True when the version can be in force on some date: enacted, not vacated or stayed, with a start date. */
-export function governs<T extends Pick<RuleVersionOut, 'status' | 'effective_from'>>(v: T): v is T & { effective_from: string } {
+export function governs<T extends Pick<RuleVersionOut, 'status' | 'effective_from'>>(
+  v: T,
+): v is T & { effective_from: string } {
   return !NOT_GOVERNING.has(v.status) && typeof v.effective_from === 'string' && v.effective_from.length > 0;
 }
 
@@ -20,7 +22,9 @@ export function governingVersions(rule: Pick<RuleOut, 'versions'>): Array<RuleVe
 }
 
 /** The newest version that governs (or will): what the Rules list calls the next change. */
-export function latestGoverning(rule: Pick<RuleOut, 'versions'>): (RuleVersionOut & { effective_from: string }) | undefined {
+export function latestGoverning(
+  rule: Pick<RuleOut, 'versions'>,
+): (RuleVersionOut & { effective_from: string }) | undefined {
   const all = governingVersions(rule);
   return all[all.length - 1];
 }
@@ -34,7 +38,11 @@ export type VersionStatusAsOf = 'in_force_as_of' | 'superseded' | 'future' | 'va
  * Vacated, stayed and proposed versions keep their own status whatever the
  * date — none of them is ever in force.
  */
-export function versionStatusAsOf(v: RuleVersionOut, asOf: string | undefined, inForceVersion: number | null): VersionStatusAsOf {
+export function versionStatusAsOf(
+  v: RuleVersionOut,
+  asOf: string | undefined,
+  inForceVersion: number | null,
+): VersionStatusAsOf {
   if (v.status === 'vacated' || v.status === 'stayed' || v.status === 'proposed') return v.status;
   if (v.version === inForceVersion) return 'in_force_as_of';
   if (asOf && v.effective_to !== null && v.effective_to < asOf) return 'superseded';
@@ -54,17 +62,33 @@ export interface StatusPresentation {
 }
 
 /** How a version's status reads everywhere: vacated slate + struck, stayed amber, proposed dashed. */
-export function statusPresentation(v: Pick<RuleVersionOut, 'status' | 'vote_date' | 'effective_from'>): StatusPresentation {
+export function statusPresentation(
+  v: Pick<RuleVersionOut, 'status' | 'vote_date' | 'effective_from'>,
+): StatusPresentation {
   switch (v.status) {
     case 'vacated':
-      return { label: 'vacated', tone: 'slate', note: 'Court vacated — Backstop will not enforce this version.', strike: true, dashed: false };
+      return {
+        label: 'vacated',
+        tone: 'slate',
+        note: 'Court vacated — Backstop will not enforce this version.',
+        strike: true,
+        dashed: false,
+      };
     case 'stayed':
-      return { label: 'stayed', tone: 'amber', note: 'Stayed — enforcement is paused; Backstop does not enforce it while the stay holds.', strike: false, dashed: false };
+      return {
+        label: 'stayed',
+        tone: 'amber',
+        note: 'Stayed — enforcement is paused; Backstop does not enforce it while the stay holds.',
+        strike: false,
+        dashed: false,
+      };
     case 'proposed':
       return {
         label: 'proposed',
         tone: 'teal',
-        note: v.vote_date ? `Not law yet — vote on ${fmtDate(v.vote_date)}.` : 'Not law — a what-if until it is enacted.',
+        note: v.vote_date
+          ? `Not law yet — vote on ${fmtDate(v.vote_date)}.`
+          : 'Not law — a what-if until it is enacted.',
         strike: false,
         dashed: true,
       };

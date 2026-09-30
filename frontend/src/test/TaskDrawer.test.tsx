@@ -39,7 +39,14 @@ const result = {
   contract_code: 'C-TPMO-01',
   severity: 'BLOCK',
   outcome: 'FAIL',
-  evidence: { expected: true, got: false, truth_basis: 'ordering: delivered at 45s, benefits at 30s', model_basis: 'timer: delivered at 45s, window 60s', rule_logic: { basis: 'ordering', window_seconds: 0 }, direction: 'under_restrictive (missed violation)' },
+  evidence: {
+    expected: true,
+    got: false,
+    truth_basis: 'ordering: delivered at 45s, benefits at 30s',
+    model_basis: 'timer: delivered at 45s, window 60s',
+    rule_logic: { basis: 'ordering', window_seconds: 0 },
+    direction: 'under_restrictive (missed violation)',
+  },
   latency_ms: 4,
 };
 

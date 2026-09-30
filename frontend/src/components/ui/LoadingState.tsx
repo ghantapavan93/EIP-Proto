@@ -1,6 +1,14 @@
 import { cn } from '../../lib/cn';
 
-export function LoadingState({ label = 'Loading', className, rows = 3 }: { label?: string; className?: string; rows?: number }) {
+export function LoadingState({
+  label = 'Loading',
+  className,
+  rows = 3,
+}: {
+  label?: string;
+  className?: string;
+  rows?: number;
+}) {
   return (
     <div role="status" aria-live="polite" className={cn('px-3 py-4', className)}>
       <span className="sr-only">{label}…</span>

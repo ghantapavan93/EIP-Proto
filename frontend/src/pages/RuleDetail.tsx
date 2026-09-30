@@ -16,7 +16,14 @@ import {
   useRuleSources,
   useRuns,
 } from '../api/hooks';
-import type { ContractOut, ImpactPromptVersion, RuleSourceOut, RuleVersionCreate, RuleVersionOut, StaleItemOut } from '../api/types';
+import type {
+  ContractOut,
+  ImpactPromptVersion,
+  RuleSourceOut,
+  RuleVersionCreate,
+  RuleVersionOut,
+  StaleItemOut,
+} from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section, Field } from '../components/layout/Page';
 import { Chip } from '../components/ui/Chip';
@@ -38,7 +45,16 @@ import { GateChip } from '../components/runs/GateChip';
 import { TickNumber } from '../components/ui/TickNumber';
 import { CAUSALITY_STEPS, useCausalitySequence } from '../lib/motion';
 import { fmtDate, fmtTs, shortHash, todayIso } from '../lib/format';
-import { artifactTypeLabel, changeTone, directionLabel, polarityTone, PROPOSABLE_CLASSIFICATIONS, roleLabel, severityTone, stateTone } from '../lib/vocab';
+import {
+  artifactTypeLabel,
+  changeTone,
+  directionLabel,
+  polarityTone,
+  PROPOSABLE_CLASSIFICATIONS,
+  roleLabel,
+  severityTone,
+  stateTone,
+} from '../lib/vocab';
 import { classificationLabel, governingVersions, nextChangeWithin } from '../lib/ruleVersions';
 import { RuleStatusNotes, VersionStatusChip } from '../components/rules/RuleVersionBadges';
 import { cn } from '../lib/cn';
@@ -61,7 +77,9 @@ function StaleRow({ item, ruleCode, seq }: { item: StaleItemOut; ruleCode: strin
         <Link to={`/artifacts/${encodeURIComponent(e.asset_code)}`} className="text-[13px] font-semibold text-navy">
           {e.asset_name}
         </Link>
-        <span className="text-xs text-ink-2" title={e.owner_role}>· {roleLabel(e.owner_role)}</span>
+        <span className="text-xs text-ink-2" title={e.owner_role}>
+          · {roleLabel(e.owner_role)}
+        </span>
         <Chip tone={polarityTone(e.polarity)} className="ml-auto">
           {e.polarity}
         </Chip>
@@ -79,8 +97,11 @@ function StaleRow({ item, ruleCode, seq }: { item: StaleItemOut; ruleCode: strin
       />
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-2">
         <span className="font-mono">
-          bound <span className="font-semibold text-slate">{ruleCode}@v{item.bound_version}</span> → in force{' '}
-          <span className="font-semibold text-slate">v{item.in_force_version}</span>
+          bound{' '}
+          <span className="font-semibold text-slate">
+            {ruleCode}@v{item.bound_version}
+          </span>{' '}
+          → in force <span className="font-semibold text-slate">v{item.in_force_version}</span>
         </span>
         <span className="text-ink-3">·</span>
         <span>{item.reason}</span>
@@ -161,7 +182,15 @@ const PROPOSE_DEFAULTS = {
  * A prompt that declares a different version from the one in force is either behind
  * (declares a superseded version) or ahead (declares one that has not taken effect yet).
  */
-function DeclaredChip({ stale, declared, inForce }: { stale: boolean; declared: number | null; inForce: number | null }) {
+function DeclaredChip({
+  stale,
+  declared,
+  inForce,
+}: {
+  stale: boolean;
+  declared: number | null;
+  inForce: number | null;
+}) {
   if (!stale) return <Chip tone="green">current</Chip>;
   if (declared !== null && inForce !== null && declared > inForce) {
     return (
@@ -173,7 +202,19 @@ function DeclaredChip({ stale, declared, inForce }: { stale: boolean; declared: 
   return <Chip tone="amber">declares superseded version</Chip>;
 }
 
-export function WhatIfImpact({ code, version, asOf, undated = false, voteDate = null }: { code: string; version: number; asOf: string; undated?: boolean; voteDate?: string | null }) {
+export function WhatIfImpact({
+  code,
+  version,
+  asOf,
+  undated = false,
+  voteDate = null,
+}: {
+  code: string;
+  version: number;
+  asOf: string;
+  undated?: boolean;
+  voteDate?: string | null;
+}) {
   const whatIf = useImpactWhatIf(code, asOf, version);
   const enacted = useImpact(code, asOf);
   if (whatIf.isLoading) return <LoadingState rows={3} />;
@@ -189,7 +230,11 @@ export function WhatIfImpact({ code, version, asOf, undated = false, voteDate = 
     ['Re-verify', w.counts.reverify, e?.counts.reverify, 'text-slate'],
   ];
   return (
-    <div className="rounded-[8px] border-2 border-dashed border-slate/50 bg-band/60 p-3" data-testid="what-if-impact" aria-label="Hypothetical blast radius">
+    <div
+      className="rounded-[8px] border-2 border-dashed border-slate/50 bg-band/60 p-3"
+      data-testid="what-if-impact"
+      aria-label="Hypothetical blast radius"
+    >
       <div className="flex flex-wrap items-center gap-2">
         <Chip tone="slate" filled>
           Hypothetical
@@ -200,11 +245,16 @@ export function WhatIfImpact({ code, version, asOf, undated = false, voteDate = 
       </div>
       {undated && (
         <p className="mt-2 text-[12.5px] leading-snug text-ink">
-          v{version} has no date to apply from yet{voteDate ? ` (vote ${fmtDate(voteDate)})` : ''}, so this assumes it applies from{' '}
-          <span className="font-mono">{fmtDate(asOf)}</span>. Pick another date above to move the assumption.
+          v{version} has no date to apply from yet{voteDate ? ` (vote ${fmtDate(voteDate)})` : ''}, so this assumes it
+          applies from <span className="font-mono">{fmtDate(asOf)}</span>. Pick another date above to move the
+          assumption.
         </p>
       )}
-      {w.hypothetical === false && <p className="mt-2 text-[12.5px] text-amber-ink">{w.note || 'The server did not apply the proposal; this is the enacted history.'}</p>}
+      {w.hypothetical === false && (
+        <p className="mt-2 text-[12.5px] text-amber-ink">
+          {w.note || 'The server did not apply the proposal; this is the enacted history.'}
+        </p>
+      )}
       <table className="mt-2 w-full text-[12.5px]" aria-label="Hypothetical versus enacted">
         <thead>
           <tr className="text-[11px] uppercase tracking-[0.04em] text-ink-2">
@@ -249,7 +299,9 @@ export function WhatIfImpact({ code, version, asOf, undated = false, voteDate = 
           ))}
         </ul>
       )}
-      <p className="mt-2 text-[11.5px] leading-snug text-ink-3">{w.note || 'Nothing was written: no review tasks, no audit rows.'}</p>
+      <p className="mt-2 text-[11.5px] leading-snug text-ink-3">
+        {w.note || 'Nothing was written: no review tasks, no audit rows.'}
+      </p>
     </div>
   );
 }
@@ -284,7 +336,8 @@ function ProposeVersionDrawer({
     let params: Record<string, unknown> = {};
     try {
       const parsed: unknown = form.params.trim() ? JSON.parse(form.params) : {};
-      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error('params must be a JSON object');
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))
+        throw new Error('params must be a JSON object');
       params = parsed as Record<string, unknown>;
       setParamsError(null);
     } catch (err) {
@@ -304,7 +357,11 @@ function ProposeVersionDrawer({
     };
     propose.mutate(body, {
       onSuccess: (v) => {
-        toast({ title: `Proposed ${code} v${v.version}`, detail: 'Not law: the enacted history is unchanged. Open the what-if to see what it would break.', tone: 'green' });
+        toast({
+          title: `Proposed ${code} v${v.version}`,
+          detail: 'Not law: the enacted history is unchanged. Open the what-if to see what it would break.',
+          tone: 'green',
+        });
         setCreated(v);
         setForm(PROPOSE_DEFAULTS);
       },
@@ -312,28 +369,49 @@ function ProposeVersionDrawer({
   };
 
   return (
-    <Drawer open={open} onClose={close} title={created ? `Proposed v${created.version}` : `Propose version v${nextVersion}`} subtitle={`${code} · a proposal is a what-if; nothing is updated in place`}>
-      <div className="mb-3 rounded-[8px] border border-hairline bg-band px-3 py-2.5 text-[12.5px] leading-snug text-ink" role="note">
+    <Drawer
+      open={open}
+      onClose={close}
+      title={created ? `Proposed v${created.version}` : `Propose version v${nextVersion}`}
+      subtitle={`${code} · a proposal is a what-if; nothing is updated in place`}
+    >
+      <div
+        className="mb-3 rounded-[8px] border border-hairline bg-band px-3 py-2.5 text-[12.5px] leading-snug text-ink"
+        role="note"
+      >
         <div className="mb-0.5 flex items-center gap-1.5 font-semibold text-slate">
           <GitCommitHorizontal size={13} aria-hidden /> Proposals never take effect from the UI
         </div>
-        Enacted history comes from reviewed YAML in git (<span className="font-mono text-[11.5px]">rules/{code}.yaml</span>, merged by a second person, then reloaded). A proposal is recorded as{' '}
-        <span className="font-semibold">proposed</span>, is never in force and opens no review tasks. Use it to see what an enacted change would break.
+        Enacted history comes from reviewed YAML in git (
+        <span className="font-mono text-[11.5px]">rules/{code}.yaml</span>, merged by a second person, then reloaded). A
+        proposal is recorded as <span className="font-semibold">proposed</span>, is never in force and opens no review
+        tasks. Use it to see what an enacted change would break.
       </div>
       {created ? (
         <div className="space-y-3">
           <div className="card p-3">
             <div className="flex flex-wrap items-center gap-1.5">
               <VersionStatusChip version={created} />
-              <Chip tone={changeTone(created.change_classification)}>{classificationLabel(created.change_classification)}</Chip>
-              <span className="font-mono text-[12px] text-ink-2">would apply from {created.effective_from ? fmtDate(created.effective_from) : '—'}</span>
+              <Chip tone={changeTone(created.change_classification)}>
+                {classificationLabel(created.change_classification)}
+              </Chip>
+              <span className="font-mono text-[12px] text-ink-2">
+                would apply from {created.effective_from ? fmtDate(created.effective_from) : '—'}
+              </span>
             </div>
             {created.summary && <div className="mt-1 text-[13px] text-slate">{created.summary}</div>}
           </div>
-          <button type="button" className={cn('btn btn-sm', showWhatIf ? '' : 'btn-outline')} aria-pressed={showWhatIf} onClick={() => setShowWhatIf((v) => !v)}>
+          <button
+            type="button"
+            className={cn('btn btn-sm', showWhatIf ? '' : 'btn-outline')}
+            aria-pressed={showWhatIf}
+            onClick={() => setShowWhatIf((v) => !v)}
+          >
             What-if impact
           </button>
-          {showWhatIf && created.effective_from && <WhatIfImpact code={code} version={created.version} asOf={created.effective_from} />}
+          {showWhatIf && created.effective_from && (
+            <WhatIfImpact code={code} version={created.version} asOf={created.effective_from} />
+          )}
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" className="btn btn-ghost" onClick={() => setCreated(null)}>
               Propose another
@@ -355,11 +433,23 @@ function ProposeVersionDrawer({
               </div>
             </div>
             <Field label="Would apply from" htmlFor="pv-eff">
-              <input id="pv-eff" type="date" className="input font-mono" value={form.effective_from} onChange={(e) => setForm({ ...form, effective_from: e.target.value })} required />
+              <input
+                id="pv-eff"
+                type="date"
+                className="input font-mono"
+                value={form.effective_from}
+                onChange={(e) => setForm({ ...form, effective_from: e.target.value })}
+                required
+              />
             </Field>
           </div>
           <Field label="Change classification" htmlFor="pv-class">
-            <select id="pv-class" className="input" value={form.change_classification} onChange={(e) => setForm({ ...form, change_classification: e.target.value })}>
+            <select
+              id="pv-class"
+              className="input"
+              value={form.change_classification}
+              onChange={(e) => setForm({ ...form, change_classification: e.target.value })}
+            >
               {PROPOSABLE_CLASSIFICATIONS.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -368,24 +458,69 @@ function ProposeVersionDrawer({
             </select>
           </Field>
           <Field label="Summary" htmlFor="pv-summary">
-            <input id="pv-summary" className="input" value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="One line a reviewer can read" />
+            <input
+              id="pv-summary"
+              className="input"
+              value={form.summary}
+              onChange={(e) => setForm({ ...form, summary: e.target.value })}
+              placeholder="One line a reviewer can read"
+            />
           </Field>
-          <Field label="Clause text" htmlFor="pv-clause" hint="Quoted regulatory text or a faithful paraphrase — mark which.">
-            <textarea id="pv-clause" className="input" rows={5} value={form.clause_text} onChange={(e) => setForm({ ...form, clause_text: e.target.value })} required />
+          <Field
+            label="Clause text"
+            htmlFor="pv-clause"
+            hint="Quoted regulatory text or a faithful paraphrase — mark which."
+          >
+            <textarea
+              id="pv-clause"
+              className="input"
+              rows={5}
+              value={form.clause_text}
+              onChange={(e) => setForm({ ...form, clause_text: e.target.value })}
+              required
+            />
           </Field>
-          <Field label="Params (JSON)" htmlFor="pv-params" error={paramsError} hint="Machine-readable knobs contracts read, e.g. {&quot;window_seconds&quot;: 60}">
-            <textarea id="pv-params" className="input font-mono" rows={4} value={form.params} onChange={(e) => setForm({ ...form, params: e.target.value })} spellCheck={false} />
+          <Field
+            label="Params (JSON)"
+            htmlFor="pv-params"
+            error={paramsError}
+            hint='Machine-readable knobs contracts read, e.g. {"window_seconds": 60}'
+          >
+            <textarea
+              id="pv-params"
+              className="input font-mono"
+              rows={4}
+              value={form.params}
+              onChange={(e) => setForm({ ...form, params: e.target.value })}
+              spellCheck={false}
+            />
           </Field>
           <Field label="Source URL" htmlFor="pv-src">
-            <input id="pv-src" className="input font-mono" value={form.source_url} onChange={(e) => setForm({ ...form, source_url: e.target.value })} placeholder="https://" />
+            <input
+              id="pv-src"
+              className="input font-mono"
+              value={form.source_url}
+              onChange={(e) => setForm({ ...form, source_url: e.target.value })}
+              placeholder="https://"
+            />
           </Field>
           <label className="flex items-center gap-2 text-[13px]">
-            <input type="checkbox" checked={form.disputed} onChange={(e) => setForm({ ...form, disputed: e.target.checked })} />
+            <input
+              type="checkbox"
+              checked={form.disputed}
+              onChange={(e) => setForm({ ...form, disputed: e.target.checked })}
+            />
             Disputed reading — carry both, flag for counsel
           </label>
           {form.disputed && (
             <Field label="Dispute note" htmlFor="pv-dispute">
-              <textarea id="pv-dispute" className="input" rows={3} value={form.dispute_note} onChange={(e) => setForm({ ...form, dispute_note: e.target.value })} />
+              <textarea
+                id="pv-dispute"
+                className="input"
+                rows={3}
+                value={form.dispute_note}
+                onChange={(e) => setForm({ ...form, dispute_note: e.target.value })}
+              />
             </Field>
           )}
           {propose.error ? <ErrorState error={propose.error} title="Proposal refused" /> : null}
@@ -423,7 +558,11 @@ function SourceWatch({ code, canCheck }: { code: string; canCheck: boolean }) {
         <div className="flex flex-wrap items-center gap-3">
           <span className="eyebrow">Source watch</span>
           <span className="text-xs text-ink-2">
-            {rows.length ? `${latestByUrl.length} source${latestByUrl.length === 1 ? '' : 's'} · last checked ${fmtTs(rows[0]?.checked_at)}` : sources.isLoading ? 'loading…' : 'no source checks recorded'}
+            {rows.length
+              ? `${latestByUrl.length} source${latestByUrl.length === 1 ? '' : 's'} · last checked ${fmtTs(rows[0]?.checked_at)}`
+              : sources.isLoading
+                ? 'loading…'
+                : 'no source checks recorded'}
           </span>
           {rows.length > latestByUrl.length && (
             <button type="button" className="text-xs text-teal-ink" onClick={() => setShowAll((v) => !v)}>
@@ -470,7 +609,10 @@ function SourceWatch({ code, canCheck }: { code: string; canCheck: boolean }) {
         {visible.length > 0 && (
           <ul className="mt-2 space-y-2">
             {visible.map((s) => (
-              <li key={s.id} className="grid grid-cols-1 gap-x-4 gap-y-1 text-[12px] lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+              <li
+                key={s.id}
+                className="grid grid-cols-1 gap-x-4 gap-y-1 text-[12px] lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]"
+              >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
                     {s.error ? (
@@ -494,7 +636,13 @@ function SourceWatch({ code, canCheck }: { code: string; canCheck: boolean }) {
                     <span className="font-mono text-ink-3">{fmtTs(s.checked_at)}</span>
                     <Chip tone="neutral">{s.fetch_mode}</Chip>
                   </div>
-                  <a href={s.source_url} target="_blank" rel="noreferrer noopener" className="mt-0.5 block truncate font-mono text-[11px]" title={s.source_url}>
+                  <a
+                    href={s.source_url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="mt-0.5 block truncate font-mono text-[11px]"
+                    title={s.source_url}
+                  >
                     {s.source_url} <ExternalLink size={10} className="inline" aria-hidden />
                   </a>
                   {s.error && <div className="text-red">{s.error}</div>}
@@ -537,7 +685,10 @@ export function RuleDetailPage() {
   const seq = useCausalitySequence(settled ? { inForce: settled.in_force_version, asOf: settled.as_of } : null);
   // Gate of the latest completed run evaluated at exactly this rule date, if there is one.
   const gateRun = useMemo(
-    () => (runs.data ?? []).filter((x) => x.rule_date === asOf && x.status === 'COMPLETE').sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0],
+    () =>
+      (runs.data ?? [])
+        .filter((x) => x.rule_date === asOf && x.status === 'COMPLETE')
+        .sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0],
     [runs.data, asOf],
   );
 
@@ -574,17 +725,37 @@ export function RuleDetailPage() {
         prev.encodings += 1;
         if ((rank[dir] ?? 9) < (rank[prev.direction] ?? 9)) prev.direction = dir;
       } else {
-        byAsset.set(it.edge.asset_code, { id: it.edge.asset_code, label: it.edge.asset_name, typeLabel: artifactTypeLabel(it.edge.asset_type), direction: dir, synthetic: it.edge.asset_is_synthetic, href: `/artifacts/${encodeURIComponent(it.edge.asset_code)}`, encodings: 1 });
+        byAsset.set(it.edge.asset_code, {
+          id: it.edge.asset_code,
+          label: it.edge.asset_name,
+          typeLabel: artifactTypeLabel(it.edge.asset_type),
+          direction: dir,
+          synthetic: it.edge.asset_is_synthetic,
+          href: `/artifacts/${encodeURIComponent(it.edge.asset_code)}`,
+          encodings: 1,
+        });
       }
     }
     for (const e of healthy) {
       const prev = byAsset.get(e.asset_code);
       if (prev) prev.encodings += 1;
-      else byAsset.set(e.asset_code, { id: e.asset_code, label: e.asset_name, typeLabel: artifactTypeLabel(e.asset_type), direction: 'healthy', synthetic: e.asset_is_synthetic, href: `/artifacts/${encodeURIComponent(e.asset_code)}`, encodings: 1 });
+      else
+        byAsset.set(e.asset_code, {
+          id: e.asset_code,
+          label: e.asset_name,
+          typeLabel: artifactTypeLabel(e.asset_type),
+          direction: 'healthy',
+          synthetic: e.asset_is_synthetic,
+          href: `/artifacts/${encodeURIComponent(e.asset_code)}`,
+          encodings: 1,
+        });
     }
     return [...byAsset.values()]
       .sort((a, b) => (rank[a.direction] ?? 9) - (rank[b.direction] ?? 9) || a.label.localeCompare(b.label))
-      .map(({ encodings, ...n }) => ({ ...n, sublabel: `${n.synthetic ? 'synthetic' : 'real'}${encodings > 1 ? ` · ${encodings} encodings` : ''}` }));
+      .map(({ encodings, ...n }) => ({
+        ...n,
+        sublabel: `${n.synthetic ? 'synthetic' : 'real'}${encodings > 1 ? ` · ${encodings} encodings` : ''}`,
+      }));
   }, [impact.data]);
 
   const contractRows = useMemo(
@@ -594,12 +765,25 @@ export function RuleDetailPage() {
 
   const contractColumns = useMemo<ColumnDef<ContractOut, unknown>[]>(
     () => [
-      { header: 'Code', accessorKey: 'code', meta: { mono: true }, cell: (c) => <span className="font-semibold text-navy">{c.row.original.code}</span> },
+      {
+        header: 'Code',
+        accessorKey: 'code',
+        meta: { mono: true },
+        cell: (c) => <span className="font-semibold text-navy">{c.row.original.code}</span>,
+      },
       { header: 'Title', accessorKey: 'title', meta: { wrap: true } },
-      { header: 'Severity', accessorKey: 'severity', cell: (c) => <Chip tone={severityTone(c.row.original.severity)}>{c.row.original.severity}</Chip> },
+      {
+        header: 'Severity',
+        accessorKey: 'severity',
+        cell: (c) => <Chip tone={severityTone(c.row.original.severity)}>{c.row.original.severity}</Chip>,
+      },
       { header: 'Kind', accessorKey: 'kind', cell: (c) => <Chip tone="neutral">{c.row.original.kind}</Chip> },
       { header: 'Check', accessorKey: 'check', meta: { mono: true } },
-      { header: 'Owner', accessorKey: 'owner_role', cell: (c) => <span title={c.row.original.owner_role}>{roleLabel(c.row.original.owner_role)}</span> },
+      {
+        header: 'Owner',
+        accessorKey: 'owner_role',
+        cell: (c) => <span title={c.row.original.owner_role}>{roleLabel(c.row.original.owner_role)}</span>,
+      },
     ],
     [],
   );
@@ -608,7 +792,12 @@ export function RuleDetailPage() {
   const promptColumns = useMemo<ColumnDef<ImpactPromptVersion, unknown>[]>(
     () => [
       { header: 'Workflow', accessorKey: 'workflow', meta: { mono: true } },
-      { header: 'Prompt', accessorKey: 'version', cell: (c) => <span className="font-mono">v{c.row.original.version}</span>, size: 70 },
+      {
+        header: 'Prompt',
+        accessorKey: 'version',
+        cell: (c) => <span className="font-mono">v{c.row.original.version}</span>,
+        size: 70,
+      },
       { header: 'Label', accessorKey: 'label', meta: { wrap: true } },
       {
         header: 'Declares',
@@ -623,7 +812,12 @@ export function RuleDetailPage() {
           );
         },
       },
-      { header: 'Prompt hash', accessorKey: 'prompt_hash', meta: { mono: true }, cell: (c) => <span title={c.row.original.prompt_hash}>{shortHash(c.row.original.prompt_hash, 16)}</span> },
+      {
+        header: 'Prompt hash',
+        accessorKey: 'prompt_hash',
+        meta: { mono: true },
+        cell: (c) => <span title={c.row.original.prompt_hash}>{shortHash(c.row.original.prompt_hash, 16)}</span>,
+      },
     ],
     [code, inForceForPrompts],
   );
@@ -640,17 +834,41 @@ export function RuleDetailPage() {
   const r = rule.data;
   const counts = impact.data?.counts;
   const inForceAsOf = impact.data?.in_force_version ?? null;
-  const openTaskCount = (impact.data?.stale ?? []).filter((it) => it.task_id && (it.task_state === null || it.task_state === 'open' || it.task_state === 'in_review')).length;
-  const encodingsLabel = counts ? `${counts.artifacts} artifact${counts.artifacts === 1 ? '' : 's'} · ${counts.total} encoding${counts.total === 1 ? '' : 's'}` : '…';
+  const openTaskCount = (impact.data?.stale ?? []).filter(
+    (it) => it.task_id && (it.task_state === null || it.task_state === 'open' || it.task_state === 'in_review'),
+  ).length;
+  const encodingsLabel = counts
+    ? `${counts.artifacts} artifact${counts.artifacts === 1 ? '' : 's'} · ${counts.total} encoding${counts.total === 1 ? '' : 's'}`
+    : '…';
 
   const inForceV = r.versions.find((v) => v.version === (inForceAsOf ?? r.in_force_version));
   const primarySource = inForceV?.sources?.[0]?.authority === 'primary' ? inForceV.sources[0] : null;
   const evidencePreview = [
-    { label: 'Rule', value: `${r.code.toUpperCase()} · ${inForceAsOf === null ? 'no version in force' : `v${inForceAsOf} in force`}`, mono: true },
+    {
+      label: 'Rule',
+      value: `${r.code.toUpperCase()} · ${inForceAsOf === null ? 'no version in force' : `v${inForceAsOf} in force`}`,
+      mono: true,
+    },
     { label: 'As of', value: fmtDate(asOf), mono: true },
     { label: 'Citation', value: r.citation, mono: true },
-    { label: 'Blast radius', value: counts ? `${encodingsLabel} stale · ${counts.over_restrictive} over · ${counts.under_restrictive} under · ${counts.reverify} re-verify` : '…' },
-    ...(fanNodes.length ? [{ label: 'Artifacts', value: fanNodes.filter((n) => n.direction !== 'healthy').map((n) => n.label).join(' · ') || 'none stale' }] : []),
+    {
+      label: 'Blast radius',
+      value: counts
+        ? `${encodingsLabel} stale · ${counts.over_restrictive} over · ${counts.under_restrictive} under · ${counts.reverify} re-verify`
+        : '…',
+    },
+    ...(fanNodes.length
+      ? [
+          {
+            label: 'Artifacts',
+            value:
+              fanNodes
+                .filter((n) => n.direction !== 'healthy')
+                .map((n) => n.label)
+                .join(' · ') || 'none stale',
+          },
+        ]
+      : []),
     { label: 'Review tasks', value: `${openTaskCount} open on these encodings` },
     ...(gateRun ? [{ label: 'Gate', value: <GateChip gate={gateRun.gate} />, mono: false }] : []),
   ];
@@ -660,8 +878,12 @@ export function RuleDetailPage() {
       <PageHeader
         eyebrow={
           <span className="inline-flex items-center gap-2">
-            <span className="font-mono text-[12px] font-semibold tracking-[0.04em] text-slate">{r.code.toUpperCase()}</span>
-            <span aria-hidden className="text-input">·</span>
+            <span className="font-mono text-[12px] font-semibold tracking-[0.04em] text-slate">
+              {r.code.toUpperCase()}
+            </span>
+            <span aria-hidden className="text-input">
+              ·
+            </span>
             <span>Rule · {r.regulator}</span>
           </span>
         }
@@ -669,7 +891,12 @@ export function RuleDetailPage() {
         description={
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             {r.source_url ? (
-              <a href={r.source_url} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 font-mono text-[12px]">
+              <a
+                href={r.source_url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1 font-mono text-[12px]"
+              >
                 {r.citation} <ExternalLink size={11} aria-hidden />
               </a>
             ) : (
@@ -697,7 +924,11 @@ export function RuleDetailPage() {
               {openedOnUpcoming && (
                 <span className="text-[11.5px] text-ink-2" role="note">
                   Showing the next change on this rule ({fmtDate(asOf)}).{' '}
-                  <button type="button" className="font-semibold text-teal-ink hover:underline" onClick={() => setAsOf(today)}>
+                  <button
+                    type="button"
+                    className="font-semibold text-teal-ink hover:underline"
+                    onClick={() => setAsOf(today)}
+                  >
                     Show today
                   </button>
                 </span>
@@ -705,7 +936,11 @@ export function RuleDetailPage() {
             </div>
             <EvidenceExport scope="rules" id={r.code} asOf={asOf} className="self-end" preview={evidencePreview} />
             <span className="self-end">
-              <GatedButton action="propose_rule_versions" className="btn btn-outline" onClick={() => setProposeOpen(true)}>
+              <GatedButton
+                action="propose_rule_versions"
+                className="btn btn-outline"
+                onClick={() => setProposeOpen(true)}
+              >
                 <Plus size={13} aria-hidden /> Propose version
               </GatedButton>
             </span>
@@ -717,7 +952,9 @@ export function RuleDetailPage() {
         <div className="card px-4 pb-3 pt-3 sm:px-5">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <span className="eyebrow">Effective dates</span>
-            <span className="text-[12px] text-ink-2">{r.versions.length} version{r.versions.length === 1 ? '' : 's'} · nothing is updated in place</span>
+            <span className="text-[12px] text-ink-2">
+              {r.versions.length} version{r.versions.length === 1 ? '' : 's'} · nothing is updated in place
+            </span>
           </div>
           <VersionTrack versions={r.versions} inForceVersion={inForceAsOf} asOf={asOf} seq={seq} />
         </div>
@@ -731,11 +968,23 @@ export function RuleDetailPage() {
             right={
               <span className="inline-flex items-center gap-2 normal-case tracking-normal">
                 {impact.isFetching && <span className="text-[11px] font-medium text-ink-3">recomputing…</span>}
-                <Chip key={`v-${seq}`} tone={inForceAsOf === null ? 'neutral' : 'teal'} className={seq > 0 ? 'cz-version' : undefined} title="Version in force on the evaluation date">
+                <Chip
+                  key={`v-${seq}`}
+                  tone={inForceAsOf === null ? 'neutral' : 'teal'}
+                  className={seq > 0 ? 'cz-version' : undefined}
+                  title="Version in force on the evaluation date"
+                >
                   in force {inForceAsOf === null ? 'none' : `v${inForceAsOf}`}
                 </Chip>
                 {gateRun && (
-                  <span key={`g-${seq}`} className={cn('inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-ink-2', seq > 0 && 'cz-gate')} title={`Latest run at rule date ${asOf}: ${gateRun.id}`}>
+                  <span
+                    key={`g-${seq}`}
+                    className={cn(
+                      'inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-ink-2',
+                      seq > 0 && 'cz-gate',
+                    )}
+                    title={`Latest run at rule date ${asOf}: ${gateRun.id}`}
+                  >
                     run gate <GateChip gate={gateRun.gate} />
                   </span>
                 )}
@@ -750,9 +999,15 @@ export function RuleDetailPage() {
                   <div className="bg-surface px-4 py-3">
                     <div className="eyebrow">Stale artifacts</div>
                     <div className="stat mt-1 text-[24px] text-ink">
-                      {impact.isLoading ? '…' : <TickNumber value={counts?.artifacts ?? 0} delayMs={CAUSALITY_STEPS.counts} />}
+                      {impact.isLoading ? (
+                        '…'
+                      ) : (
+                        <TickNumber value={counts?.artifacts ?? 0} delayMs={CAUSALITY_STEPS.counts} />
+                      )}
                     </div>
-                    <div className="text-[11px] text-ink-2">{impact.isLoading ? '' : `${counts?.total ?? 0} encodings`}</div>
+                    <div className="text-[11px] text-ink-2">
+                      {impact.isLoading ? '' : `${counts?.total ?? 0} encodings`}
+                    </div>
                   </div>
                   {(
                     [
@@ -770,9 +1025,14 @@ export function RuleDetailPage() {
                       <div className="text-[11px] text-ink-2">encodings</div>
                     </div>
                   ))}
-                  <Link to="/review?kind=STALE_ASSET" className="relative block bg-surface px-4 py-3 transition-colors hover:bg-teal/5 hover:no-underline">
+                  <Link
+                    to="/review?kind=STALE_ASSET"
+                    className="relative block bg-surface px-4 py-3 transition-colors hover:bg-teal/5 hover:no-underline"
+                  >
                     {/* keyed overlay replays the step marker without remounting the ticking count */}
-                    {seq > 0 && <span key={`t-${seq}`} aria-hidden className="cz-tasks pointer-events-none absolute inset-0" />}
+                    {seq > 0 && (
+                      <span key={`t-${seq}`} aria-hidden className="cz-tasks pointer-events-none absolute inset-0" />
+                    )}
                     <div className="eyebrow">Review tasks</div>
                     <div className="stat mt-1 text-[24px] text-ink">
                       {impact.isLoading ? '…' : <TickNumber value={openTaskCount} delayMs={CAUSALITY_STEPS.tasks} />}
@@ -788,24 +1048,48 @@ export function RuleDetailPage() {
                   {impact.isLoading ? (
                     <LoadingState rows={2} />
                   ) : fanNodes.length ? (
-                    <FanDiagram ruleCode={r.code} ruleLabel={inForceAsOf === null ? `no version in force · ${fmtDate(asOf)}` : `v${inForceAsOf} in force · ${fmtDate(asOf)}`} nodes={fanNodes} onNodeClick={(n) => n.href && navigate(n.href)} />
+                    <FanDiagram
+                      ruleCode={r.code}
+                      ruleLabel={
+                        inForceAsOf === null
+                          ? `no version in force · ${fmtDate(asOf)}`
+                          : `v${inForceAsOf} in force · ${fmtDate(asOf)}`
+                      }
+                      nodes={fanNodes}
+                      onNodeClick={(n) => n.href && navigate(n.href)}
+                    />
                   ) : (
                     <EmptyState
                       title="No artifacts linked"
                       hint="Confirm edges from a scan to populate the fan."
                       className="py-4"
                       action={
-                        <Link to="/review?kind=PROPOSED_EDGE&state=open" className="btn btn-outline btn-sm hover:no-underline">
+                        <Link
+                          to="/review?kind=PROPOSED_EDGE&state=open"
+                          className="btn btn-outline btn-sm hover:no-underline"
+                        >
                           Review proposed edges
                         </Link>
                       }
                     />
                   )}
                   <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-hairline pt-2.5 text-[11px] text-ink-2">
-                    <span><span className="mr-1.5 inline-block h-0.5 w-3 bg-red align-middle" />under-restrictive</span>
-                    <span><span className="mr-1.5 inline-block h-0.5 w-3 bg-amber align-middle" />over-restrictive</span>
-                    <span><span className="mr-1.5 inline-block h-0.5 w-3 bg-slate align-middle" />re-verify</span>
-                    <span><span className="mr-1.5 inline-block h-0.5 w-3 bg-green align-middle" />current (bound to the version in force)</span>
+                    <span>
+                      <span className="mr-1.5 inline-block h-0.5 w-3 bg-red align-middle" />
+                      under-restrictive
+                    </span>
+                    <span>
+                      <span className="mr-1.5 inline-block h-0.5 w-3 bg-amber align-middle" />
+                      over-restrictive
+                    </span>
+                    <span>
+                      <span className="mr-1.5 inline-block h-0.5 w-3 bg-slate align-middle" />
+                      re-verify
+                    </span>
+                    <span>
+                      <span className="mr-1.5 inline-block h-0.5 w-3 bg-green align-middle" />
+                      current (bound to the version in force)
+                    </span>
                   </div>
                 </div>
               </>
@@ -817,19 +1101,57 @@ export function RuleDetailPage() {
               <LoadingState rows={4} />
             ) : (
               <div className="space-y-3">
-                <StaleGroup title="Over-restrictive — still enforces something the rule no longer requires" direction="over_restrictive" items={groups.over} ruleCode={r.code} hint="No confirmed encoding of this rule applies a stricter clause than the one in force." seq={seq} />
-                <StaleGroup title="Under-restrictive — encodes a weaker clause or misses a new requirement" direction="under_restrictive" items={groups.under} ruleCode={r.code} hint="No confirmed encoding of this rule is missing a requirement in force. An artifact no matcher recognised is not evaluated." seq={seq} />
-                <StaleGroup title="Re-verify — the basis or wording changed; a human must read it" direction="reverify" items={groups.reverify} ruleCode={r.code} hint="Nothing on this rule needs a human re-read as of this date." seq={seq} />
+                <StaleGroup
+                  title="Over-restrictive — still enforces something the rule no longer requires"
+                  direction="over_restrictive"
+                  items={groups.over}
+                  ruleCode={r.code}
+                  hint="No confirmed encoding of this rule applies a stricter clause than the one in force."
+                  seq={seq}
+                />
+                <StaleGroup
+                  title="Under-restrictive — encodes a weaker clause or misses a new requirement"
+                  direction="under_restrictive"
+                  items={groups.under}
+                  ruleCode={r.code}
+                  hint="No confirmed encoding of this rule is missing a requirement in force. An artifact no matcher recognised is not evaluated."
+                  seq={seq}
+                />
+                <StaleGroup
+                  title="Re-verify — the basis or wording changed; a human must read it"
+                  direction="reverify"
+                  items={groups.reverify}
+                  ruleCode={r.code}
+                  hint="Nothing on this rule needs a human re-read as of this date."
+                  seq={seq}
+                />
               </div>
             )}
           </Section>
 
           <Section band title="Contracts on this rule">
-            <DataTable columns={contractColumns} data={contractRows} isLoading={contracts.isLoading} error={contracts.error} getRowId={(c) => c.code} onRowClick={(c) => navigate(`/contracts/${encodeURIComponent(c.code)}`)} emptyTitle="No contracts read this rule" className="bg-surface" />
+            <DataTable
+              columns={contractColumns}
+              data={contractRows}
+              isLoading={contracts.isLoading}
+              error={contracts.error}
+              getRowId={(c) => c.code}
+              onRowClick={(c) => navigate(`/contracts/${encodeURIComponent(c.code)}`)}
+              emptyTitle="No contracts read this rule"
+              className="bg-surface"
+            />
           </Section>
 
           <Section title="Prompt versions declaring this rule">
-            <DataTable columns={promptColumns} data={impact.data?.prompt_versions ?? []} isLoading={impact.isLoading} error={impact.error} getRowId={(p) => p.id} emptyTitle="No prompt declares this rule" emptyHint="Prompt versions declare the rule versions they encode (encodes_rule_versions)." />
+            <DataTable
+              columns={promptColumns}
+              data={impact.data?.prompt_versions ?? []}
+              isLoading={impact.isLoading}
+              error={impact.error}
+              getRowId={(p) => p.id}
+              emptyTitle="No prompt declares this rule"
+              emptyHint="Prompt versions declare the rule versions they encode (encodes_rule_versions)."
+            />
           </Section>
         </div>
 
@@ -861,7 +1183,12 @@ export function RuleDetailPage() {
         )}
       </Drawer>
 
-      <ProposeVersionDrawer code={r.code} open={proposeOpen} onClose={() => setProposeOpen(false)} nextVersion={Math.max(0, ...r.versions.map((v) => v.version)) + 1} />
+      <ProposeVersionDrawer
+        code={r.code}
+        open={proposeOpen}
+        onClose={() => setProposeOpen(false)}
+        nextVersion={Math.max(0, ...r.versions.map((v) => v.version)) + 1}
+      />
     </div>
   );
 }

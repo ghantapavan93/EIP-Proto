@@ -55,10 +55,17 @@ describe('openText (Evals "Markdown report")', () => {
   afterEach(() => clearCredentials());
 
   it('opens the tab synchronously, before the fetch resolves, then points it at the report', async () => {
-    const fakeWin = { closed: false, close: vi.fn(), location: { href: '' }, document: { title: '', body: { textContent: '' } } };
+    const fakeWin = {
+      closed: false,
+      close: vi.fn(),
+      location: { href: '' },
+      document: { title: '', body: { textContent: '' } },
+    };
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(fakeWin as unknown as Window);
     let resolveFetch: (r: Response) => void = () => undefined;
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockReturnValue(new Promise<Response>((res) => (resolveFetch = res)));
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockReturnValue(new Promise<Response>((res) => (resolveFetch = res)));
     const createUrl = vi.fn(() => 'blob:report');
     Object.assign(URL, { createObjectURL: createUrl, revokeObjectURL: vi.fn() });
 
@@ -76,7 +83,12 @@ describe('openText (Evals "Markdown report")', () => {
   });
 
   it('closes the placeholder tab and rethrows when the fetch fails', async () => {
-    const fakeWin = { closed: false, close: vi.fn(), location: { href: '' }, document: { title: '', body: { textContent: '' } } };
+    const fakeWin = {
+      closed: false,
+      close: vi.fn(),
+      location: { href: '' },
+      document: { title: '', body: { textContent: '' } },
+    };
     vi.spyOn(window, 'open').mockReturnValue(fakeWin as unknown as Window);
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ detail: 'boom' }, 500));
     await expect(openText('/evals/matchers.md')).rejects.toThrow('boom');
@@ -126,7 +138,14 @@ describe('format', () => {
 
 describe('vocab', () => {
   it('lists the newer audit event and entity types in the Audit filters', () => {
-    for (const t of ['export.generated', 'ingest.completed', 'rule.source_checked', 'rule.version_closed', 'edge.superseded', 'edge.restored']) {
+    for (const t of [
+      'export.generated',
+      'ingest.completed',
+      'rule.source_checked',
+      'rule.version_closed',
+      'edge.superseded',
+      'edge.restored',
+    ]) {
       expect(AUDIT_EVENT_TYPES).toContain(t);
     }
     expect(AUDIT_ENTITY_TYPES).toContain('auth');
@@ -171,10 +190,27 @@ function run(partial: Partial<RunOut> & { id: string }): RunOut {
 
 describe('home gate strip grouping', () => {
   it('keeps runs that differ only by judge model or adapter as separate rows', () => {
-    const plain = run({ id: 'a', started_at: '2026-09-23T05:00:00Z', stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' } });
-    const judged = run({ id: 'b', started_at: '2026-09-23T05:01:00Z', stats: { judge_model_id: 'ollama/qwen2.5:7b-instruct' } });
-    const live = run({ id: 'c', started_at: '2026-09-23T05:02:00Z', adapter: 'live', stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' } });
-    const plainLater = run({ id: 'd', started_at: '2026-09-23T06:00:00Z', stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' } });
+    const plain = run({
+      id: 'a',
+      started_at: '2026-09-23T05:00:00Z',
+      stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' },
+    });
+    const judged = run({
+      id: 'b',
+      started_at: '2026-09-23T05:01:00Z',
+      stats: { judge_model_id: 'ollama/qwen2.5:7b-instruct' },
+    });
+    const live = run({
+      id: 'c',
+      started_at: '2026-09-23T05:02:00Z',
+      adapter: 'live',
+      stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' },
+    });
+    const plainLater = run({
+      id: 'd',
+      started_at: '2026-09-23T06:00:00Z',
+      stats: { judge_model_id: 'ollama/qwen2.5:3b-instruct' },
+    });
     const rows = latestPerConfiguration([plain, judged, live, plainLater]);
     expect(rows.map((r) => r.id)).toEqual(['d', 'c', 'b']);
     expect(gateStripKey(plain)).not.toBe(gateStripKey(judged));

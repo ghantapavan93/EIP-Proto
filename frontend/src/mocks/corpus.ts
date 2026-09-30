@@ -40,7 +40,18 @@ export interface Scenario {
 }
 
 const AGENTS = ['Dana', 'Marcus', 'Priya', 'Luis', 'Tamara', 'Evan', 'Nadia', 'Chris'];
-const CUSTOMERS = ['Mr. Alvarez', 'Mrs. Whitfield', 'Mr. Okafor', 'Ms. Brennan', 'Mr. Castellano', 'Mrs. Dubois', 'Mr. Lindqvist', 'Ms. Patel', 'Mrs. Hargrove', 'Mr. Nakamura'];
+const CUSTOMERS = [
+  'Mr. Alvarez',
+  'Mrs. Whitfield',
+  'Mr. Okafor',
+  'Ms. Brennan',
+  'Mr. Castellano',
+  'Mrs. Dubois',
+  'Mr. Lindqvist',
+  'Ms. Patel',
+  'Mrs. Hargrove',
+  'Mr. Nakamura',
+];
 const CARRIERS = ['Humana', 'UnitedHealthcare', 'Aetna', 'Wellcare', 'Cigna', 'Devoted Health'];
 const COUNTIES = ['Hillsborough', 'Pinellas', 'Pasco', 'Polk', 'Manatee', 'Lee'];
 const PREMIUMS = ['0', '12.40', '19.90', '24.50', '31.20', '38.70', '45'];
@@ -150,12 +161,20 @@ export interface TranscriptLines {
 
 export function buildTranscript(sc: Scenario): TranscriptLines {
   const lines: Array<[number, string, string]> = [];
-  const productWord = sc.product_line === 'MA' ? 'Medicare Advantage' : sc.product_line === 'PDP' ? 'Part D' : 'Medicare Supplement';
+  const productWord =
+    sc.product_line === 'MA' ? 'Medicare Advantage' : sc.product_line === 'PDP' ? 'Part D' : 'Medicare Supplement';
 
-  lines.push([0, 'AGENT', `Thanks for calling Elite Insurance Partners, this is ${sc.agent}. Am I speaking with ${sc.customer}?`]);
+  lines.push([
+    0,
+    'AGENT',
+    `Thanks for calling Elite Insurance Partners, this is ${sc.agent}. Am I speaking with ${sc.customer}?`,
+  ]);
   lines.push([6, 'CUSTOMER', `Yes, this is ${sc.customer.split(' ')[1]}.`]);
 
-  const recordingNotice = sc.recordingNoticeAt === null ? null : 'Great. Before we start, this call is being recorded for quality and compliance.';
+  const recordingNotice =
+    sc.recordingNoticeAt === null
+      ? null
+      : 'Great. Before we start, this call is being recorded for quality and compliance.';
   if (recordingNotice && sc.recordingNoticeAt !== null) lines.push([sc.recordingNoticeAt, 'AGENT', recordingNotice]);
   lines.push([16, 'CUSTOMER', "That's fine."]);
   lines.push([19, 'AGENT', 'One quick request: can I get your ZIP code so I can pull up the plans in your area?']);
@@ -167,9 +186,15 @@ export function buildTranscript(sc: Scenario): TranscriptLines {
   const benefits = `The ${sc.carrier} plan available in ${sc.county} County has a $${sc.premium} monthly premium, a $${sc.deductible} drug deductible and a $${sc.moop} maximum out-of-pocket.`;
   lines.push([sc.benefitsAt, 'AGENT', `Let's talk about what the ${productWord} plan covers. ${benefits}`]);
   lines.push([sc.benefitsAt + 14, 'CUSTOMER', 'Does it cover my cardiologist at Tampa General?']);
-  lines.push([sc.benefitsAt + 20, 'AGENT', 'Tampa General is in network for that plan, and your cardiologist is listed as accepting new patients.']);
+  lines.push([
+    sc.benefitsAt + 20,
+    'AGENT',
+    'Tampa General is in network for that plan, and your cardiologist is listed as accepting new patients.',
+  ]);
 
-  const superlative = sc.superlative ? `Honestly, this is the best plan in ${sc.county} County for someone in your situation.` : null;
+  const superlative = sc.superlative
+    ? `Honestly, this is the best plan in ${sc.county} County for someone in your situation.`
+    : null;
   if (superlative) lines.push([sc.benefitsAt + 30, 'AGENT', superlative]);
 
   let soa: string;
@@ -184,13 +209,25 @@ export function buildTranscript(sc: Scenario): TranscriptLines {
   lines.push([sc.benefitsAt + 55, 'CUSTOMER', 'That works. What happens next?']);
 
   if (sc.mbiReadBack) {
-    lines.push([sc.benefitsAt + 62, 'AGENT', 'Let me read back your Medicare number, 1EG4-TE5-MK73, to make sure I have it right.']);
+    lines.push([
+      sc.benefitsAt + 62,
+      'AGENT',
+      'Let me read back your Medicare number, 1EG4-TE5-MK73, to make sure I have it right.',
+    ]);
     lines.push([sc.benefitsAt + 70, 'CUSTOMER', 'That is correct.']);
   }
 
-  lines.push([sc.benefitsAt + 78, 'AGENT', `I'll send the enrollment summary to your email and a copy to your ${sc.county} County address on file. Anything else I can help with today?`]);
+  lines.push([
+    sc.benefitsAt + 78,
+    'AGENT',
+    `I'll send the enrollment summary to your email and a copy to your ${sc.county} County address on file. Anything else I can help with today?`,
+  ]);
   lines.push([sc.benefitsAt + 88, 'CUSTOMER', "No, that's everything. Thank you."]);
-  lines.push([sc.duration - 5, 'AGENT', `Thank you for calling Elite Insurance Partners, ${sc.customer}. Have a great day.`]);
+  lines.push([
+    sc.duration - 5,
+    'AGENT',
+    `Thank you for calling Elite Insurance Partners, ${sc.customer}. Have a great day.`,
+  ]);
 
   lines.sort((a, b) => a[0] - b[0]);
   const text = lines.map(([t, who, what]) => `${ts(t)} ${who}: ${what}`).join('\n');
@@ -261,8 +298,7 @@ export const INGESTED: IngestedSample[] = [
     started_at: '2026-10-02T14:03:11Z',
     duration: 171,
     redacted: { medicare_number: 1, ssn: 0, dob: 0 },
-    text:
-      "[00:00:00] AGENT: Thanks for calling Elite Insurance Partners, this is Dana. [00:00:06] CUSTOMER: Hi, I'm looking at plans for next year. [00:00:12] AGENT: Before we go further: We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options. [00:00:31] CUSTOMER: Okay. [00:00:34] AGENT: Can I confirm your Medicare number? [00:00:39] CUSTOMER: It's [REDACTED-MBI]. [00:00:46] AGENT: Thank you. The Humana plan in Hillsborough County has a $0 monthly premium and a $6600 maximum out-of-pocket. [00:01:20] CUSTOMER: What about my cardiologist? [00:01:26] AGENT: In network. I'll send the Scope of Appointment to your email now so we can go over specific plans. [00:02:40] CUSTOMER: Sounds good. [00:02:46] AGENT: Thank you for calling, have a great day.",
+    text: "[00:00:00] AGENT: Thanks for calling Elite Insurance Partners, this is Dana. [00:00:06] CUSTOMER: Hi, I'm looking at plans for next year. [00:00:12] AGENT: Before we go further: We do not offer every plan available in your area. Currently we represent 26 organizations which offer 3,740 products in your area. Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options. [00:00:31] CUSTOMER: Okay. [00:00:34] AGENT: Can I confirm your Medicare number? [00:00:39] CUSTOMER: It's [REDACTED-MBI]. [00:00:46] AGENT: Thank you. The Humana plan in Hillsborough County has a $0 monthly premium and a $6600 maximum out-of-pocket. [00:01:20] CUSTOMER: What about my cardiologist? [00:01:26] AGENT: In network. I'll send the Scope of Appointment to your email now so we can go over specific plans. [00:02:40] CUSTOMER: Sounds good. [00:02:46] AGENT: Thank you for calling, have a great day.",
   },
   {
     code: 'A-SAMPLE-0002',
@@ -271,8 +307,7 @@ export const INGESTED: IngestedSample[] = [
     started_at: '2026-10-02T15:41:57Z',
     duration: 96,
     redacted: { medicare_number: 0, ssn: 0, dob: 1 },
-    text:
-      "[00:00:00] AGENT: Elite Insurance Partners, this is Marcus. [00:00:04] CUSTOMER: I want to compare Medigap Plan G and Plan N. [00:00:10] AGENT: Happy to. Your date of birth for the quote? [00:00:14] CUSTOMER: [REDACTED-DOB]. [00:00:19] AGENT: Plan G in Pinellas County runs $158 a month with the Part B deductible; Plan N is $121 with small office copays. [00:00:58] CUSTOMER: Let me think about it. [00:01:30] AGENT: I'll email both quotes. Thank you for calling.",
+    text: "[00:00:00] AGENT: Elite Insurance Partners, this is Marcus. [00:00:04] CUSTOMER: I want to compare Medigap Plan G and Plan N. [00:00:10] AGENT: Happy to. Your date of birth for the quote? [00:00:14] CUSTOMER: [REDACTED-DOB]. [00:00:19] AGENT: Plan G in Pinellas County runs $158 a month with the Part B deductible; Plan N is $121 with small office copays. [00:00:58] CUSTOMER: Let me think about it. [00:01:30] AGENT: I'll email both quotes. Thank you for calling.",
   },
 ];
 

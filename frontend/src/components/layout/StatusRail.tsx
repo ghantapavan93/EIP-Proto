@@ -52,13 +52,21 @@ export function SystemPulse({ status }: { status: StatusOut | undefined }) {
   const now = useNow();
   const run = status?.last_run ?? null;
   return (
-    <div role="group" aria-label="System state" className="flex min-w-0 items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.06em]">
+    <div
+      role="group"
+      aria-label="System state"
+      className="flex min-w-0 items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.06em]"
+    >
       <HealthPopover status={status?.status ?? null} fallback={status?.components} />
       {status && (
         <Link
           to={run ? `/runs/${run.id}` : '/runs'}
           className="hidden shrink-0 items-center gap-1.5 text-ink-2 hover:text-teal-ink hover:no-underline md:inline-flex"
-          title={run ? `Run ${run.id} · ${run.model_id} · prompt v${run.prompt_version} · ${run.trigger} · finished ${fmtTs(run.finished_at)}` : 'No completed run yet'}
+          title={
+            run
+              ? `Run ${run.id} · ${run.model_id} · prompt v${run.prompt_version} · ${run.trigger} · finished ${fmtTs(run.finished_at)}`
+              : 'No completed run yet'
+          }
         >
           last run
           {run ? (
@@ -127,16 +135,27 @@ export function StatusRail({
           <Num>{status.review.actionable_open}</Num> actionable
           {layout !== null && status.review.actionable_open > 0 && (
             <span className="font-medium normal-case tracking-normal text-ink-3">
-              ({layout.groups.length} {layout.groups.length === 1 ? 'group' : 'groups'} · {layout.individual.length} {layout.individual.length === 1 ? 'task' : 'tasks'})
+              ({layout.groups.length} {layout.groups.length === 1 ? 'group' : 'groups'} · {layout.individual.length}{' '}
+              {layout.individual.length === 1 ? 'task' : 'tasks'})
             </span>
           )}
         </Item>,
         <Item key="advisory" to="/review?lane=advisory" title="Advisory observations — visible, not tickets">
           <Num>{status.review.advisory_open}</Num> advisory
         </Item>,
-        <Item key="chain" to="/audit" title={status.audit_chain.verified ? `Audit hash chain verified over ${status.audit_chain.rows} rows` : 'Audit hash chain did not verify — open the audit log'}>
+        <Item
+          key="chain"
+          to="/audit"
+          title={
+            status.audit_chain.verified
+              ? `Audit hash chain verified over ${status.audit_chain.rows} rows`
+              : 'Audit hash chain did not verify — open the audit log'
+          }
+        >
           chain{' '}
-          <span className={status.audit_chain.verified ? 'text-green-ink' : 'text-red'}>{status.audit_chain.verified ? 'verified' : 'broken'}</span>
+          <span className={status.audit_chain.verified ? 'text-green-ink' : 'text-red'}>
+            {status.audit_chain.verified ? 'verified' : 'broken'}
+          </span>
           <Num>{status.audit_chain.rows}</Num>
         </Item>,
       ]
@@ -153,14 +172,22 @@ export function StatusRail({
           items.map((node, i) => {
             const key = isValidElement(node) ? String(node.key) : String(i);
             return (
-              <span key={key} className={cn('shrink-0 items-center gap-2.5', WIDE_ONLY.has(key) ? 'hidden 2xl:inline-flex' : 'inline-flex')}>
+              <span
+                key={key}
+                className={cn(
+                  'shrink-0 items-center gap-2.5',
+                  WIDE_ONLY.has(key) ? 'hidden 2xl:inline-flex' : 'inline-flex',
+                )}
+              >
                 {i > 0 && <Sep />}
                 {node}
               </span>
             );
           })
         ) : error ? (
-          <span className="normal-case tracking-normal text-red">status unavailable — {error instanceof Error ? error.message : 'request failed'}</span>
+          <span className="normal-case tracking-normal text-red">
+            status unavailable — {error instanceof Error ? error.message : 'request failed'}
+          </span>
         ) : (
           <span className="normal-case tracking-normal text-ink-3" role="status">
             loading status…

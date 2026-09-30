@@ -52,8 +52,14 @@ describe('change matrix', () => {
     // 3 contracts × 2 moved calls; only the 3 delta cells are links
     const links = screen.getAllByRole('link');
     expect(links).toHaveLength(3);
-    expect(screen.getByRole('link', { name: /T004 · C-SOA-01: PASS → FAIL \(newly failing\)/ })).toHaveAttribute('href', '/runs/run-b/transcripts/T004');
-    expect(screen.getByRole('link', { name: /T004 · C-SUP-01: FAIL → PASS \(newly passing\)/ })).toHaveAttribute('href', '/runs/run-b/transcripts/T004');
+    expect(screen.getByRole('link', { name: /T004 · C-SOA-01: PASS → FAIL \(newly failing\)/ })).toHaveAttribute(
+      'href',
+      '/runs/run-b/transcripts/T004',
+    );
+    expect(screen.getByRole('link', { name: /T004 · C-SUP-01: FAIL → PASS \(newly passing\)/ })).toHaveAttribute(
+      'href',
+      '/runs/run-b/transcripts/T004',
+    );
     expect(screen.getByRole('rowheader', { name: 'C-PII-01' })).toBeInTheDocument();
   });
 

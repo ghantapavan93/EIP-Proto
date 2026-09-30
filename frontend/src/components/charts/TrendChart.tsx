@@ -41,22 +41,61 @@ export function TrendChart({ points, className }: { points: TrendPointOut[]; cla
   const x = (i: number) => (points.length === 1 ? W / 2 : PAD_X + (i * (W - 2 * PAD_X)) / (points.length - 1));
   const y = (v: number) => PAD_TOP + (1 - Math.min(v, max) / max) * (H - PAD_TOP - PAD_BOTTOM);
   const scored = points.map((p, i) => ({ p, i })).filter(({ p }) => p.failure.rate !== null);
-  const line = scored.map(({ p, i }, k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.failure.rate ?? 0).toFixed(1)}`).join(' ');
+  const line = scored
+    .map(({ p, i }, k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.failure.rate ?? 0).toFixed(1)}`)
+    .join(' ');
   const hot = active !== null ? points[active] : null;
   const hasHoldout = points.some((p) => p.corpus === 'holdout');
 
   return (
     <div className={cn('relative', className)}>
       <div className="flex items-start gap-2">
-        <div className="flex h-[132px] w-[26px] shrink-0 flex-col justify-between py-[6px] text-right font-mono text-[10px] text-ink-3" aria-hidden>
+        <div
+          className="flex h-[132px] w-[26px] shrink-0 flex-col justify-between py-[6px] text-right font-mono text-[10px] text-ink-3"
+          aria-hidden
+        >
           <span>{fmtPct(max)}</span>
           <span>0%</span>
         </div>
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-[132px] w-full" preserveAspectRatio="none" role="img" aria-label={`Failure rate across ${points.length} runs, oldest to newest`}>
-          <line x1={0} x2={W} y1={y(0)} y2={y(0)} stroke="var(--color-hairline)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-          <line x1={0} x2={W} y1={y(max / 2)} y2={y(max / 2)} stroke="var(--color-hairline)" strokeWidth={1} strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="h-[132px] w-full"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label={`Failure rate across ${points.length} runs, oldest to newest`}
+        >
+          <line
+            x1={0}
+            x2={W}
+            y1={y(0)}
+            y2={y(0)}
+            stroke="var(--color-hairline)"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1={0}
+            x2={W}
+            y1={y(max / 2)}
+            y2={y(max / 2)}
+            stroke="var(--color-hairline)"
+            strokeWidth={1}
+            strokeDasharray="3 4"
+            vectorEffect="non-scaling-stroke"
+          />
           {scored.map(({ p, i }) => (
-            <line key={`w-${p.run_id}`} x1={x(i)} x2={x(i)} y1={y(p.failure.ci_low)} y2={y(p.failure.ci_high)} stroke="var(--color-slate)" strokeOpacity={0.35} strokeWidth={3} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <line
+              key={`w-${p.run_id}`}
+              x1={x(i)}
+              x2={x(i)}
+              y1={y(p.failure.ci_low)}
+              y2={y(p.failure.ci_high)}
+              stroke="var(--color-slate)"
+              strokeOpacity={0.35}
+              strokeWidth={3}
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
           ))}
           <path d={line} fill="none" stroke="var(--color-teal-ink)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
         </svg>
@@ -90,7 +129,10 @@ export function TrendChart({ points, className }: { points: TrendPointOut[]; cla
       {hot && (
         <div
           className="pointer-events-none absolute z-10 -translate-x-1/2 rounded-[6px] bg-ink px-2 py-1 text-[11.5px] leading-snug text-on-navy shadow-[0_8px_24px_-8px_rgb(16_24_40/0.35)]"
-          style={{ left: `calc(34px + (100% - 34px) * ${x(active ?? 0) / W})`, top: Math.max(0, y(hot.failure.rate ?? 0) - 52) }}
+          style={{
+            left: `calc(34px + (100% - 34px) * ${x(active ?? 0) / W})`,
+            top: Math.max(0, y(hot.failure.rate ?? 0) - 52),
+          }}
           role="status"
         >
           <div className="font-mono">
@@ -103,11 +145,13 @@ export function TrendChart({ points, className }: { points: TrendPointOut[]; cla
       )}
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2 pl-[34px] text-[11px] text-ink-3">
         <span>
-          {spanLabel(points[0].started_at, points[points.length - 1].started_at, points.length)} · line: observed failure rate · bar: 95% interval
+          {spanLabel(points[0].started_at, points[points.length - 1].started_at, points.length)} · line: observed
+          failure rate · bar: 95% interval
         </span>
         {hasHoldout && (
           <span className="inline-flex items-center gap-1.5">
-            <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full border-2 border-teal-ink bg-surface" /> held-out run
+            <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full border-2 border-teal-ink bg-surface" />{' '}
+            held-out run
           </span>
         )}
       </div>

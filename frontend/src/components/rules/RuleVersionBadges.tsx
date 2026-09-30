@@ -23,7 +23,9 @@ export function VersionStatusChip({
   className?: string;
 }) {
   const p = statusPresentation(version);
-  const number = withNumber ? <span className={cn('font-mono normal-case', p.strike && 'line-through')}>v{version.version}</span> : null;
+  const number = withNumber ? (
+    <span className={cn('font-mono normal-case', p.strike && 'line-through')}>v{version.version}</span>
+  ) : null;
   if (version.status === 'vacated') {
     return (
       <Chip tone="slate" className={className} title={p.note}>
@@ -44,7 +46,9 @@ export function VersionStatusChip({
     return (
       <Chip tone="teal" className={cn('border-dashed border-teal-ink/60 bg-surface', className)} title={p.note}>
         {number} {p.label}
-        {showVote && version.vote_date ? <span className="font-normal normal-case tracking-normal">· vote {fmtDate(version.vote_date)}</span> : null}
+        {showVote && version.vote_date ? (
+          <span className="font-normal normal-case tracking-normal">· vote {fmtDate(version.vote_date)}</span>
+        ) : null}
       </Chip>
     );
   }
@@ -56,7 +60,15 @@ export function VersionStatusChip({
 }
 
 /** "revoke-all deferred to Jan 31, 2027" as a chip, with the source in its title. */
-export function DeferralChip({ provision, deferred_to, source }: { provision: string; deferred_to: string; source: string }) {
+export function DeferralChip({
+  provision,
+  deferred_to,
+  source,
+}: {
+  provision: string;
+  deferred_to: string;
+  source: string;
+}) {
   return (
     <Chip tone="neutral" wrap title={`${provision}${source ? ` — source: ${source}` : ''}`}>
       <CalendarClock size={10} aria-hidden />
@@ -71,7 +83,9 @@ export function DeferralChip({ provision, deferred_to, source }: { provision: st
  * with an ordinary history.
  */
 export function RuleStatusNotes({ rule, className }: { rule: Pick<RuleOut, 'versions'>; className?: string }) {
-  const unusual = [...rule.versions].filter((v) => ['vacated', 'stayed', 'proposed'].includes(v.status)).sort((a, b) => a.version - b.version);
+  const unusual = [...rule.versions]
+    .filter((v) => ['vacated', 'stayed', 'proposed'].includes(v.status))
+    .sort((a, b) => a.version - b.version);
   const deferrals = rule.versions.flatMap((v) => v.deferrals ?? []);
   if (!unusual.length && !deferrals.length) return null;
   return (

@@ -46,7 +46,10 @@ function Shell() {
     <div className="flex h-full min-h-screen w-full bg-canvas">
       <NavRail openReviewCount={openCount} mobileOpen={navOpen} onMobileClose={closeNav} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <EnvBanner label={meta.data?.environment_label ?? 'PROTOTYPE · SYNTHETIC DATA'} notice={meta.data?.synthetic_notice} />
+        <EnvBanner
+          label={meta.data?.environment_label ?? 'PROTOTYPE · SYNTHETIC DATA'}
+          notice={meta.data?.synthetic_notice}
+        />
         <TopBar
           user={status.data?.user.name ?? meta.data?.user ?? getCredentials()?.username ?? null}
           role={status.data?.user.role ?? meta.data?.role ?? null}
@@ -67,7 +70,9 @@ function Shell() {
               <Outlet />
             </div>
           )}
-          <footer className="mt-6 border-t border-hairline px-4 py-3 text-[11px] leading-snug text-footer sm:px-6">{FOOTER}</footer>
+          <footer className="mt-6 border-t border-hairline px-4 py-3 text-[11px] leading-snug text-footer sm:px-6">
+            {FOOTER}
+          </footer>
         </main>
         <CommandPalette />
       </div>

@@ -162,8 +162,7 @@ export async function request<T>(
 
 export const api = {
   get: <T>(path: string, opts?: RequestOptions) => request<T>('GET', path, undefined, opts),
-  post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
-    request<T>('POST', path, body ?? {}, opts),
+  post: <T>(path: string, body?: unknown, opts?: RequestOptions) => request<T>('POST', path, body ?? {}, opts),
 };
 
 // ------------------------------------------------------------- non-JSON helpers
@@ -204,11 +203,20 @@ export async function fetchRaw(path: string): Promise<RawResponse> {
   if (!response.ok) {
     if (response.status === 401) handleUnauthorized();
     const parsed = parseBody(await response.text());
-    throw new ApiError(response.status, messageFromBody(parsed, statusFallback(response.status, response.statusText)), path, parsed);
+    throw new ApiError(
+      response.status,
+      messageFromBody(parsed, statusFallback(response.status, response.statusText)),
+      path,
+      parsed,
+    );
   }
   const disposition = response.headers.get('content-disposition') ?? '';
   const match = /filename="?([^";]+)"?/i.exec(disposition);
-  return { blob: await response.blob(), filename: match ? match[1] : null, sha256: response.headers.get('x-bundle-sha256') };
+  return {
+    blob: await response.blob(),
+    filename: match ? match[1] : null,
+    sha256: response.headers.get('x-bundle-sha256'),
+  };
 }
 
 /** Download an authenticated resource to a file; returns the file name used. */
@@ -218,7 +226,10 @@ export async function download(path: string, fallbackName: string): Promise<stri
 }
 
 /** Download an authenticated resource; returns the file name and the bundle hash header, when present. */
-export async function downloadWithMeta(path: string, fallbackName: string): Promise<{ name: string; sha256: string | null }> {
+export async function downloadWithMeta(
+  path: string,
+  fallbackName: string,
+): Promise<{ name: string; sha256: string | null }> {
   const { blob, filename, sha256 } = await fetchRaw(path);
   const name = filename ?? fallbackName;
   saveBlob(blob, name);
@@ -271,14 +282,23 @@ export async function upload<T>(path: string, file: File, field = 'file'): Promi
   form.append(field, file, file.name);
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, { method: 'POST', headers: { ...XHR_HEADER, ...authHeader() }, body: form });
+    response = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: { ...XHR_HEADER, ...authHeader() },
+      body: form,
+    });
   } catch (err) {
     throw new ApiError(0, `Network error: ${err instanceof Error ? err.message : 'upload failed'}`, path);
   }
   const parsed = parseBody(await response.text());
   if (!response.ok) {
     if (response.status === 401) handleUnauthorized();
-    throw new ApiError(response.status, messageFromBody(parsed, statusFallback(response.status, response.statusText)), path, parsed);
+    throw new ApiError(
+      response.status,
+      messageFromBody(parsed, statusFallback(response.status, response.statusText)),
+      path,
+      parsed,
+    );
   }
   return parsed as T;
 }

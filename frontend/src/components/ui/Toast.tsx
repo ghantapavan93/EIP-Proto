@@ -39,7 +39,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[360px] max-w-[calc(100vw-32px)] flex-col gap-2" aria-live="polite">
+      <div
+        className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[360px] max-w-[calc(100vw-32px)] flex-col gap-2"
+        aria-live="polite"
+      >
         {items.map((t) => (
           <div
             key={t.id}
@@ -53,7 +56,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div className="font-semibold text-slate">{t.title}</div>
               {t.detail && <div className="mt-0.5 text-xs text-ink-2">{t.detail}</div>}
             </div>
-            <button type="button" className="text-ink-3 hover:text-slate" onClick={() => dismiss(t.id)} aria-label="Dismiss">
+            <button
+              type="button"
+              className="text-ink-3 hover:text-slate"
+              onClick={() => dismiss(t.id)}
+              aria-label="Dismiss"
+            >
               <X size={14} aria-hidden />
             </button>
           </div>

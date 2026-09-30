@@ -67,12 +67,16 @@ export function daysLabel(days: number | null | undefined): string {
 
 /** Oldest open item first; ties go to the longer queue. Roles with nothing open sink. */
 export function sortOwners(owners: ReadinessOwner[]): ReadinessOwner[] {
-  return [...owners].sort((a, b) => (b.oldest_days ?? -1) - (a.oldest_days ?? -1) || b.open - a.open || a.role.localeCompare(b.role));
+  return [...owners].sort(
+    (a, b) => (b.oldest_days ?? -1) - (a.oldest_days ?? -1) || b.open - a.open || a.role.localeCompare(b.role),
+  );
 }
 
 /** Upcoming milestones (days ≥ 0) in date order; past ones are kept only when asked. */
 export function upcoming(milestones: ReadinessMilestone[], includePast = false): ReadinessMilestone[] {
-  return [...milestones].filter((m) => includePast || m.days_from_as_of >= 0).sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label));
+  return [...milestones]
+    .filter((m) => includePast || m.days_from_as_of >= 0)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label));
 }
 
 /**

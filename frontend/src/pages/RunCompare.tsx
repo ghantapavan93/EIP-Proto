@@ -27,11 +27,18 @@ import { SignificancePanel } from '../components/runs/SignificancePanel';
 import { AttributionPanel } from '../components/runs/AttributionPanel';
 
 function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; changed: WhatChanged }) {
-  const hl = (k: keyof WhatChanged) => (changed[k] === true ? 'rounded-[3px] bg-teal/12 font-semibold text-ink px-1 -mx-1' : '');
+  const hl = (k: keyof WhatChanged) =>
+    changed[k] === true ? 'rounded-[3px] bg-teal/12 font-semibold text-ink px-1 -mx-1' : '';
   return (
     <div className="card p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className={cn('inline-flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[11px] font-semibold', side === 'B' ? 'bg-teal-ink text-on-navy' : 'bg-band text-slate')} aria-label={`Run ${side}`}>
+        <span
+          className={cn(
+            'inline-flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[11px] font-semibold',
+            side === 'B' ? 'bg-teal-ink text-on-navy' : 'bg-band text-slate',
+          )}
+          aria-label={`Run ${side}`}
+        >
           {side}
         </span>
         <Link to={`/runs/${run.id}`} className="font-mono text-[13px] font-semibold" title={run.id}>
@@ -44,10 +51,24 @@ function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; chang
       <KeyValue
         className="mt-2"
         rows={[
-          { key: 'Prompt', value: <span className={hl('prompt')}>{run.workflow_code} v{run.prompt_version} · {shortHash(run.prompt_hash, 16)}</span> },
+          {
+            key: 'Prompt',
+            value: (
+              <span className={hl('prompt')}>
+                {run.workflow_code} v{run.prompt_version} · {shortHash(run.prompt_hash, 16)}
+              </span>
+            ),
+          },
           { key: 'Model', value: <span className={hl('model')}>{run.model_id}</span> },
           { key: 'Rule date', value: <span className={hl('rule_date')}>{run.rule_date}</span> },
-          { key: 'Adapter', value: <span className={hl('adapter')}><AdapterChip adapter={run.adapter} /></span> },
+          {
+            key: 'Adapter',
+            value: (
+              <span className={hl('adapter')}>
+                <AdapterChip adapter={run.adapter} />
+              </span>
+            ),
+          },
           {
             key: 'Corpus',
             value: (
@@ -56,7 +77,10 @@ function RunHeader({ run, side, changed }: { run: RunOut; side: 'A' | 'B'; chang
               </span>
             ),
           },
-          { key: 'Contract set', value: <span className={hl('contract_set')}>{shortHash(run.contract_set_hash, 16)}</span> },
+          {
+            key: 'Contract set',
+            value: <span className={hl('contract_set')}>{shortHash(run.contract_set_hash, 16)}</span>,
+          },
           { key: 'Trigger', value: run.trigger },
         ]}
       />
@@ -83,8 +107,9 @@ export function CallSetNotice({ whatChanged }: { whatChanged: WhatChanged }) {
   if (whatChanged.corpus !== true && onlyA === 0 && onlyB === 0) return null;
   return (
     <div role="note" className="mb-4 rounded-[8px] border border-amber/40 bg-amber/8 px-4 py-2.5 text-[13px] text-ink">
-      <strong className="font-semibold text-amber-ink">Different call sets:</strong> {onlyA} {onlyA === 1 ? 'cell' : 'cells'} only
-      in A, {onlyB} only in B were not compared. Every count below covers only the cells both runs scored.
+      <strong className="font-semibold text-amber-ink">Different call sets:</strong> {onlyA}{' '}
+      {onlyA === 1 ? 'cell' : 'cells'} only in A, {onlyB} only in B were not compared. Every count below covers only the
+      cells both runs scored.
     </div>
   );
 }
@@ -95,11 +120,15 @@ function DeltaBar({ a, b, max }: { a: number; b: number; max: number }) {
     <div className="flex w-[220px] flex-col gap-0.5" aria-hidden>
       <div className="flex items-center gap-1">
         <span className="w-3 font-mono text-[10px] text-ink-3">A</span>
-        <div className="h-2 flex-1 bg-band"><div className="h-2 bg-ink-3" style={{ width: w(a) }} /></div>
+        <div className="h-2 flex-1 bg-band">
+          <div className="h-2 bg-ink-3" style={{ width: w(a) }} />
+        </div>
       </div>
       <div className="flex items-center gap-1">
         <span className="w-3 font-mono text-[10px] text-ink-3">B</span>
-        <div className="h-2 flex-1 bg-band"><div className={cn('h-2', b > a ? 'bg-red' : b < a ? 'bg-green' : 'bg-ink-3')} style={{ width: w(b) }} /></div>
+        <div className="h-2 flex-1 bg-band">
+          <div className={cn('h-2', b > a ? 'bg-red' : b < a ? 'bg-green' : 'bg-ink-3')} style={{ width: w(b) }} />
+        </div>
       </div>
     </div>
   );
@@ -133,14 +162,22 @@ function RefChips({ refs, tone }: { refs: RuleVersionRef[]; tone: 'red' | 'green
 /** Unified diff of the two prompt versions plus the declared rule dependencies that moved. */
 function PromptDiffPanel({ a, b }: { a: RunOut; b: RunOut }) {
   const workflow = useWorkflow(a.workflow_code);
-  const idFor = (run: RunOut) => workflow.data?.prompt_versions.find((p) => p.version === run.prompt_version)?.id ?? null;
+  const idFor = (run: RunOut) =>
+    workflow.data?.prompt_versions.find((p) => p.version === run.prompt_version)?.id ?? null;
   const aId = idFor(a);
   const bId = idFor(b);
   const diff = usePromptDiff(aId, bId);
   if (workflow.isLoading || diff.isLoading) return <LoadingState rows={4} />;
   if (workflow.error) return <ErrorState error={workflow.error} title="Could not map prompt versions to ids" />;
   if (diff.error) return <ErrorState error={diff.error} title="Prompt diff failed" />;
-  if (!diff.data) return <EmptyState title="No prompt diff" hint="The two runs use prompt versions this workflow does not list." className="py-4" />;
+  if (!diff.data)
+    return (
+      <EmptyState
+        title="No prompt diff"
+        hint="The two runs use prompt versions this workflow does not list."
+        className="py-4"
+      />
+    );
   const d = diff.data;
   return (
     <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -157,7 +194,16 @@ function PromptDiffPanel({ a, b }: { a: RunOut; b: RunOut }) {
         </div>
         <pre className="max-h-[420px] overflow-auto px-0 py-1 font-mono text-[12px] leading-[1.5]">
           {d.unified_diff.map((line, i) => {
-            const kind = line.startsWith('+++') || line.startsWith('---') ? 'meta' : line.startsWith('@@') ? 'hunk' : line.startsWith('+') ? 'add' : line.startsWith('-') ? 'del' : 'ctx';
+            const kind =
+              line.startsWith('+++') || line.startsWith('---')
+                ? 'meta'
+                : line.startsWith('@@')
+                  ? 'hunk'
+                  : line.startsWith('+')
+                    ? 'add'
+                    : line.startsWith('-')
+                      ? 'del'
+                      : 'ctx';
             return (
               <div
                 key={i}
@@ -185,7 +231,10 @@ function PromptDiffPanel({ a, b }: { a: RunOut; b: RunOut }) {
             { key: 'Unchanged', value: <RefChips refs={d.rule_dependencies.unchanged} tone="neutral" />, mono: false },
           ]}
         />
-        <p className="mt-2 text-[12px] text-ink-2">Each prompt version declares the rule versions it encodes; the blast-radius screen flags a prompt that declares a superseded version.</p>
+        <p className="mt-2 text-[12px] text-ink-2">
+          Each prompt version declares the rule versions it encodes; the blast-radius screen flags a prompt that
+          declares a superseded version.
+        </p>
       </div>
     </div>
   );
@@ -203,7 +252,13 @@ export function RunComparePage() {
 
   const cellColumns = useMemo<ColumnDef<CompareCell, unknown>[]>(
     () => [
-      { header: 'Transcript', accessorKey: 'transcript_code', meta: { mono: true }, cell: (c) => <span className="font-semibold text-navy">{c.row.original.transcript_code}</span>, size: 100 },
+      {
+        header: 'Transcript',
+        accessorKey: 'transcript_code',
+        meta: { mono: true },
+        cell: (c) => <span className="font-semibold text-navy">{c.row.original.transcript_code}</span>,
+        size: 100,
+      },
       { header: 'Contract', accessorKey: 'contract_code', meta: { mono: true }, size: 110 },
       {
         id: 'ab',
@@ -223,8 +278,18 @@ export function RunComparePage() {
         enableSorting: false,
         cell: (c) => (
           <span className="inline-flex gap-2 text-[12px]">
-            <Link to={`/runs/${a}/transcripts/${encodeURIComponent(c.row.original.transcript_code)}`} onClick={(e) => e.stopPropagation()}>in A</Link>
-            <Link to={`/runs/${b}/transcripts/${encodeURIComponent(c.row.original.transcript_code)}`} onClick={(e) => e.stopPropagation()}>in B</Link>
+            <Link
+              to={`/runs/${a}/transcripts/${encodeURIComponent(c.row.original.transcript_code)}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              in A
+            </Link>
+            <Link
+              to={`/runs/${b}/transcripts/${encodeURIComponent(c.row.original.transcript_code)}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              in B
+            </Link>
           </span>
         ),
       },
@@ -232,13 +297,31 @@ export function RunComparePage() {
     [a, b],
   );
 
-  const maxBad = useMemo(() => Math.max(1, ...(cmp.data?.per_contract ?? []).flatMap((p) => [p.a_fail, p.b_fail])), [cmp.data]);
+  const maxBad = useMemo(
+    () => Math.max(1, ...(cmp.data?.per_contract ?? []).flatMap((p) => [p.a_fail, p.b_fail])),
+    [cmp.data],
+  );
 
   const perContractColumns = useMemo<ColumnDef<PerContractDelta, unknown>[]>(
     () => [
-      { header: 'Contract', accessorKey: 'contract_code', meta: { mono: true }, cell: (c) => <span className="font-semibold text-navy">{c.row.original.contract_code}</span> },
-      { header: 'A failing', accessorKey: 'a_fail', meta: { align: 'right', mono: true }, cell: (c) => <FailCount fail={c.row.original.a_fail} errors={c.row.original.a_error} /> },
-      { header: 'B failing', accessorKey: 'b_fail', meta: { align: 'right', mono: true }, cell: (c) => <FailCount fail={c.row.original.b_fail} errors={c.row.original.b_error} /> },
+      {
+        header: 'Contract',
+        accessorKey: 'contract_code',
+        meta: { mono: true },
+        cell: (c) => <span className="font-semibold text-navy">{c.row.original.contract_code}</span>,
+      },
+      {
+        header: 'A failing',
+        accessorKey: 'a_fail',
+        meta: { align: 'right', mono: true },
+        cell: (c) => <FailCount fail={c.row.original.a_fail} errors={c.row.original.a_error} />,
+      },
+      {
+        header: 'B failing',
+        accessorKey: 'b_fail',
+        meta: { align: 'right', mono: true },
+        cell: (c) => <FailCount fail={c.row.original.b_fail} errors={c.row.original.b_error} />,
+      },
       {
         id: 'delta',
         header: 'Δ',
@@ -246,13 +329,40 @@ export function RunComparePage() {
         meta: { align: 'right', mono: true },
         cell: (c) => {
           const d = c.row.original.b_fail - c.row.original.a_fail;
-          return <span className={cn('font-semibold', d > 0 ? 'text-red' : d < 0 ? 'text-green-ink' : 'text-ink-3')}>{d > 0 ? `+${d}` : d}</span>;
+          return (
+            <span className={cn('font-semibold', d > 0 ? 'text-red' : d < 0 ? 'text-green-ink' : 'text-ink-3')}>
+              {d > 0 ? `+${d}` : d}
+            </span>
+          );
         },
         size: 60,
       },
-      { id: 'bars', header: 'Failing cells A vs B', enableSorting: false, cell: (c) => <DeltaBar a={c.row.original.a_fail} b={c.row.original.b_fail} max={maxBad} /> },
-      { header: 'Newly failing', accessorKey: 'newly_failing', meta: { align: 'right', mono: true }, cell: (c) => <span className={c.row.original.newly_failing ? 'font-semibold text-red' : 'text-ink-3'}>{c.row.original.newly_failing}</span> },
-      { header: 'Newly passing', accessorKey: 'newly_passing', meta: { align: 'right', mono: true }, cell: (c) => <span className={c.row.original.newly_passing ? 'font-semibold text-green-ink' : 'text-ink-3'}>{c.row.original.newly_passing}</span> },
+      {
+        id: 'bars',
+        header: 'Failing cells A vs B',
+        enableSorting: false,
+        cell: (c) => <DeltaBar a={c.row.original.a_fail} b={c.row.original.b_fail} max={maxBad} />,
+      },
+      {
+        header: 'Newly failing',
+        accessorKey: 'newly_failing',
+        meta: { align: 'right', mono: true },
+        cell: (c) => (
+          <span className={c.row.original.newly_failing ? 'font-semibold text-red' : 'text-ink-3'}>
+            {c.row.original.newly_failing}
+          </span>
+        ),
+      },
+      {
+        header: 'Newly passing',
+        accessorKey: 'newly_passing',
+        meta: { align: 'right', mono: true },
+        cell: (c) => (
+          <span className={c.row.original.newly_passing ? 'font-semibold text-green-ink' : 'text-ink-3'}>
+            {c.row.original.newly_passing}
+          </span>
+        ),
+      },
     ],
     [maxBad],
   );
@@ -362,7 +472,11 @@ export function RunComparePage() {
 
           <Section
             title="Newly failing — passed in A, fails / flags / errors in B"
-            right={<span className={cn('stat text-[13px]', d.newly_failing.length ? 'text-red' : 'text-ink-3')}>{d.newly_failing.length}</span>}
+            right={
+              <span className={cn('stat text-[13px]', d.newly_failing.length ? 'text-red' : 'text-ink-3')}>
+                {d.newly_failing.length}
+              </span>
+            }
           >
             {d.newly_failing.length ? (
               <DataTable
@@ -376,14 +490,22 @@ export function RunComparePage() {
               />
             ) : (
               <div className="card">
-                <EmptyState title="Nothing newly failing" hint="Every cell that passed in A still passes in B." className="py-5" />
+                <EmptyState
+                  title="Nothing newly failing"
+                  hint="Every cell that passed in A still passes in B."
+                  className="py-5"
+                />
               </div>
             )}
           </Section>
 
           <Section
             title="Newly passing — failed / flagged in A, passes in B"
-            right={<span className={cn('stat text-[13px]', d.newly_passing.length ? 'text-green-ink' : 'text-ink-3')}>{d.newly_passing.length}</span>}
+            right={
+              <span className={cn('stat text-[13px]', d.newly_passing.length ? 'text-green-ink' : 'text-ink-3')}>
+                {d.newly_passing.length}
+              </span>
+            }
           >
             <DataTable
               columns={cellColumns}
@@ -398,7 +520,13 @@ export function RunComparePage() {
           </Section>
 
           <Section title="Per-contract delta">
-            <DataTable columns={perContractColumns} data={d.per_contract} getRowId={(p) => p.contract_code} emptyTitle="No per-contract data" initialSort={[{ id: 'delta', desc: true }]} />
+            <DataTable
+              columns={perContractColumns}
+              data={d.per_contract}
+              getRowId={(p) => p.contract_code}
+              emptyTitle="No per-contract data"
+              initialSort={[{ id: 'delta', desc: true }]}
+            />
             {d.failure_definition && (
               <p className="mt-2 text-[11.5px] leading-snug text-ink-3">
                 <span className="font-semibold text-ink-2">Counting.</span> {d.failure_definition}

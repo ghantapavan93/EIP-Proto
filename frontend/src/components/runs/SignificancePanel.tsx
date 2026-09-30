@@ -2,7 +2,17 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 import type { CompareStatisticsOut, ContractComparisonOut, HeldOutCheckOut, PairedTableOut } from '../../api/types';
 import { cn } from '../../lib/cn';
-import { axisMax, directionLabel, directionTone, fmtCi, fmtPct, lostToHolm, pLine, plainVerdict, rowCautions } from '../../lib/significance';
+import {
+  axisMax,
+  directionLabel,
+  directionTone,
+  fmtCi,
+  fmtPct,
+  lostToHolm,
+  pLine,
+  plainVerdict,
+  rowCautions,
+} from '../../lib/significance';
 import { severityTone } from '../../lib/vocab';
 import { Chip } from '../ui/Chip';
 import { RatePair } from '../charts/RateRange';
@@ -10,7 +20,15 @@ import { RatePair } from '../charts/RateRange';
 /** better (green) / worse (red) / no significant difference (grey). */
 export function SignificanceChip({ direction, className }: { direction: string; className?: string }) {
   return (
-    <Chip tone={directionTone(direction)} className={className} title={direction === 'none' ? 'The test cannot tell B from A at α = 0.05' : `B is significantly ${direction} than A at α = 0.05`}>
+    <Chip
+      tone={directionTone(direction)}
+      className={className}
+      title={
+        direction === 'none'
+          ? 'The test cannot tell B from A at α = 0.05'
+          : `B is significantly ${direction} than A at α = 0.05`
+      }
+    >
       {directionLabel(direction)}
     </Chip>
   );
@@ -22,7 +40,10 @@ function Cautions({ items, className }: { items: string[]; className?: string })
   return (
     <ul className={cn('space-y-1', className)} aria-label="Cautions">
       {items.map((c) => (
-        <li key={c} className="flex items-start gap-1.5 rounded-[6px] border border-amber/35 bg-amber/8 px-2.5 py-1.5 text-[12px] leading-snug text-ink">
+        <li
+          key={c}
+          className="flex items-start gap-1.5 rounded-[6px] border border-amber/35 bg-amber/8 px-2.5 py-1.5 text-[12px] leading-snug text-ink"
+        >
           <AlertTriangle size={12} className="mt-[2px] shrink-0 text-amber-ink" aria-hidden />
           <span>{c}</span>
         </li>
@@ -39,7 +60,10 @@ function RateText({ row }: { row: ContractComparisonOut }) {
         {fmtPct(row.a.rate)}
       </span>
       <ArrowRight size={11} className="self-center text-ink-3" aria-label="to" />
-      <span className={cn('font-semibold', tone === 'green' ? 'text-green-ink' : tone === 'red' ? 'text-red' : 'text-ink')} title={`B: 95% CI ${fmtCi(row.b)}, ${row.b.k}/${row.b.n}`}>
+      <span
+        className={cn('font-semibold', tone === 'green' ? 'text-green-ink' : tone === 'red' ? 'text-red' : 'text-ink')}
+        title={`B: 95% CI ${fmtCi(row.b)}, ${row.b.k}/${row.b.n}`}
+      >
         {fmtPct(row.b.rate)}
       </span>
     </span>
@@ -51,7 +75,16 @@ function PValues({ row, alpha }: { row: ContractComparisonOut; alpha: number }) 
   return (
     <span className="inline-flex flex-col font-mono text-[12px] leading-tight">
       <span className={cn(row.p_value < alpha ? 'font-semibold text-ink' : 'text-ink-2')}>p {p}</span>
-      {holm !== null && <span className={cn('text-[11px]', typeof row.p_holm === 'number' && row.p_holm < alpha ? 'text-ink' : 'text-ink-3')}>Holm {holm}</span>}
+      {holm !== null && (
+        <span
+          className={cn(
+            'text-[11px]',
+            typeof row.p_holm === 'number' && row.p_holm < alpha ? 'text-ink' : 'text-ink-3',
+          )}
+        >
+          Holm {holm}
+        </span>
+      )}
     </span>
   );
 }
@@ -80,7 +113,10 @@ function PairedGrid({ t }: { t: PairedTableOut }) {
             A passes
           </th>
           <td className={cn(cell, 'text-ink-3')}>{t.both_pass}</td>
-          <td className={cn(cell, t.b_only_fail ? 'bg-red/8 font-semibold text-red' : 'text-ink-3')} title="Newly failing: passed in A, fails in B">
+          <td
+            className={cn(cell, t.b_only_fail ? 'bg-red/8 font-semibold text-red' : 'text-ink-3')}
+            title="Newly failing: passed in A, fails in B"
+          >
             {t.b_only_fail}
           </td>
         </tr>
@@ -88,7 +124,10 @@ function PairedGrid({ t }: { t: PairedTableOut }) {
           <th scope="row" className="px-2 py-1 text-left font-medium text-ink-2">
             A fails
           </th>
-          <td className={cn(cell, t.a_only_fail ? 'bg-green/14 font-semibold text-green-ink' : 'text-ink-3')} title="Newly passing: failed in A, passes in B">
+          <td
+            className={cn(cell, t.a_only_fail ? 'bg-green/14 font-semibold text-green-ink' : 'text-ink-3')}
+            title="Newly passing: failed in A, passes in B"
+          >
             {t.a_only_fail}
           </td>
           <td className={cn(cell, 'text-ink-3')}>{t.both_fail}</td>
@@ -125,7 +164,14 @@ function OverallCard({ row, alpha, max }: { row: ContractComparisonOut; alpha: n
         <div className="flex items-baseline gap-2">
           <span className="stat text-[22px] text-ink-2">{fmtPct(row.a.rate)}</span>
           <ArrowRight size={14} className="self-center text-ink-3" aria-label="to" />
-          <span className={cn('stat text-[22px]', tone === 'green' ? 'text-green-ink' : tone === 'red' ? 'text-red' : 'text-ink')}>{fmtPct(row.b.rate)}</span>
+          <span
+            className={cn(
+              'stat text-[22px]',
+              tone === 'green' ? 'text-green-ink' : tone === 'red' ? 'text-red' : 'text-ink',
+            )}
+          >
+            {fmtPct(row.b.rate)}
+          </span>
         </div>
         <div className="mb-2 mt-0.5 font-mono text-[11px] text-ink-2">
           95% CI {fmtCi(row.a)} → {fmtCi(row.b)} · n={row.n_shared}
@@ -150,7 +196,8 @@ function OverallCard({ row, alpha, max }: { row: ContractComparisonOut; alpha: n
           </>
         ) : (
           <div className="text-[12px] leading-snug text-ink-2">
-            {row.test}: {row.a.k}/{row.a.n} in A vs {row.b.k}/{row.b.n} in B. The pairing is gone, so the test is weaker and cannot isolate the change.
+            {row.test}: {row.a.k}/{row.a.n} in A vs {row.b.k}/{row.b.n} in B. The pairing is gone, so the test is weaker
+            and cannot isolate the change.
           </div>
         )}
       </div>
@@ -159,15 +206,31 @@ function OverallCard({ row, alpha, max }: { row: ContractComparisonOut; alpha: n
   );
 }
 
-function ContractRow({ row, alpha, max, family }: { row: ContractComparisonOut; alpha: number; max: number; family: number }) {
+function ContractRow({
+  row,
+  alpha,
+  max,
+  family,
+}: {
+  row: ContractComparisonOut;
+  alpha: number;
+  max: number;
+  family: number;
+}) {
   const tone = directionTone(row.direction);
   const holmLost = lostToHolm(row, alpha);
   const cautions = rowCautions(row);
   return (
-    <li className="border-b border-hairline px-3 py-2.5 last:border-b-0 sm:px-4" data-testid={`significance-${row.contract_code}`}>
+    <li
+      className="border-b border-hairline px-3 py-2.5 last:border-b-0 sm:px-4"
+      data-testid={`significance-${row.contract_code}`}
+    >
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 md:grid-cols-[150px_minmax(0,1.4fr)_minmax(150px,1fr)_92px_150px]">
         <div className="min-w-0">
-          <Link to={`/contracts/${encodeURIComponent(row.contract_code)}`} className="font-mono text-[12.5px] font-semibold">
+          <Link
+            to={`/contracts/${encodeURIComponent(row.contract_code)}`}
+            className="font-mono text-[12.5px] font-semibold"
+          >
             {row.contract_code}
           </Link>
           {row.severity && (
@@ -177,9 +240,15 @@ function ContractRow({ row, alpha, max, family }: { row: ContractComparisonOut; 
           )}
         </div>
         <div className="col-span-2 min-w-0 md:col-span-1">
-          <div className={cn('text-[13px] leading-snug', row.direction === 'none' ? 'text-ink' : 'font-semibold text-ink')}>{plainVerdict(row, alpha, family)}</div>
+          <div
+            className={cn('text-[13px] leading-snug', row.direction === 'none' ? 'text-ink' : 'font-semibold text-ink')}
+          >
+            {plainVerdict(row, alpha, family)}
+          </div>
           <div className="mt-0.5 font-mono text-[11px] text-ink-3">
-            {row.paired ? `${row.discordant ?? 0} changed: +${row.paired.b_only_fail} failing / −${row.paired.a_only_fail} failing` : `${row.a.k}/${row.a.n} vs ${row.b.k}/${row.b.n}`}
+            {row.paired
+              ? `${row.discordant ?? 0} changed: +${row.paired.b_only_fail} failing / −${row.paired.a_only_fail} failing`
+              : `${row.a.k}/${row.a.n} vs ${row.b.k}/${row.b.n}`}
             {row.excluded_not_evaluated ? ` · ${row.excluded_not_evaluated} unlabelled excluded` : ''}
           </div>
         </div>
@@ -222,7 +291,11 @@ function HeldOutBanner({ check }: { check: HeldOutCheckOut }) {
         contradicts ? 'border-red/40 bg-red/5' : 'border-hairline bg-surface',
       )}
     >
-      <AlertTriangle size={15} className={cn('mt-[2px] shrink-0', contradicts ? 'text-red' : 'text-ink-3')} aria-hidden />
+      <AlertTriangle
+        size={15}
+        className={cn('mt-[2px] shrink-0', contradicts ? 'text-red' : 'text-ink-3')}
+        aria-hidden
+      />
       <div className="min-w-0 flex-1">
         <div className="font-semibold text-ink">
           {contradicts ? 'The held-out calls reverse this result.' : 'The held-out calls agree.'}
@@ -258,13 +331,17 @@ export function SignificancePanel({ stats }: { stats: CompareStatisticsOut }) {
       </div>
       {stats.held_out && <HeldOutBanner check={stats.held_out} />}
       <OverallCard row={stats.overall} alpha={stats.alpha} max={max} />
-      <Cautions items={stats.cautions.filter((c) => !(stats.held_out && c.startsWith('Held-out check:')))} className="mt-2" />
+      <Cautions
+        items={stats.cautions.filter((c) => !(stats.held_out && c.startsWith('Held-out check:')))}
+        className="mt-2"
+      />
       <div className="card mt-3 overflow-hidden">
         <div className="hidden grid-cols-[150px_minmax(0,1.4fr)_minmax(150px,1fr)_92px_150px] gap-x-4 border-b border-hairline bg-band px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-2 md:grid">
           <span>Contract</span>
           <span>What the test says</span>
           <span>
-            Failure rate A → B <span className="font-mono normal-case tracking-normal text-ink-3">(0–{fmtPct(max)})</span>
+            Failure rate A → B{' '}
+            <span className="font-mono normal-case tracking-normal text-ink-3">(0–{fmtPct(max)})</span>
           </span>
           <span>p · Holm</span>
           <span className="text-right">Verdict</span>
@@ -275,7 +352,10 @@ export function SignificancePanel({ stats }: { stats: CompareStatisticsOut }) {
           ))}
         </ul>
         <div className="border-t border-hairline bg-band px-4 py-1.5 text-[11.5px] text-ink-2">
-          {moved.length ? `${moved.length} of ${rows.length} contracts moved significantly.` : `No contract moved significantly at α = ${stats.alpha}.`} Bars: 95% interval; tick: observed rate; A grey, B coloured by verdict.
+          {moved.length
+            ? `${moved.length} of ${rows.length} contracts moved significantly.`
+            : `No contract moved significantly at α = ${stats.alpha}.`}{' '}
+          Bars: 95% interval; tick: observed rate; A grey, B coloured by verdict.
         </div>
       </div>
       <p className="mt-2 text-[11.5px] leading-snug text-ink-3">

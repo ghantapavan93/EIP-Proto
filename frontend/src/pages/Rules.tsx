@@ -39,7 +39,9 @@ export function RulesPage() {
           const l = latest(r);
           return (
             <span className="cell-primary max-w-[560px]">
-              <span className="font-mono text-[12px] font-semibold tracking-[0.02em] text-ink">{r.code.toUpperCase()}</span>
+              <span className="font-mono text-[12px] font-semibold tracking-[0.02em] text-ink">
+                {r.code.toUpperCase()}
+              </span>
               <span className="mt-0.5 block text-[13px] leading-snug text-ink">{r.title}</span>
               <span className="cell-sub font-mono text-[11px]">
                 {r.citation}
@@ -50,7 +52,12 @@ export function RulesPage() {
           );
         },
       },
-      { header: 'Regulator', accessorKey: 'regulator', size: 90, cell: (c) => <span className="text-ink-2">{c.row.original.regulator}</span> },
+      {
+        header: 'Regulator',
+        accessorKey: 'regulator',
+        size: 90,
+        cell: (c) => <span className="text-ink-2">{c.row.original.regulator}</span>,
+      },
       {
         header: 'In force',
         accessorKey: 'in_force_version',
@@ -61,16 +68,27 @@ export function RulesPage() {
             const vacated = r.versions.some((v) => v.status === 'vacated');
             const pending = latest(r);
             return (
-              <span className="cell-primary text-[12px] text-ink-3" title={vacated ? 'The only enacted text was vacated by a court' : undefined}>
+              <span
+                className="cell-primary text-[12px] text-ink-3"
+                title={vacated ? 'The only enacted text was vacated by a court' : undefined}
+              >
                 none
-                <span className="cell-sub whitespace-nowrap font-mono text-[11px]">{vacated ? 'vacated — not enforced' : pending ? `from ${fmtDate(pending.effective_from)}` : 'no version'}</span>
+                <span className="cell-sub whitespace-nowrap font-mono text-[11px]">
+                  {vacated
+                    ? 'vacated — not enforced'
+                    : pending
+                      ? `from ${fmtDate(pending.effective_from)}`
+                      : 'no version'}
+                </span>
               </span>
             );
           }
           return (
             <span className="cell-primary">
               <span className="font-semibold text-ink">v{r.in_force_version}</span>
-              <span className="cell-sub whitespace-nowrap font-mono text-[11px]">since {fmtDate(inForce(r)?.effective_from)}</span>
+              <span className="cell-sub whitespace-nowrap font-mono text-[11px]">
+                since {fmtDate(inForce(r)?.effective_from)}
+              </span>
             </span>
           );
         },

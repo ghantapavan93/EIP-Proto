@@ -6,7 +6,12 @@
 import type { ReviewTaskOut } from '../api/types';
 
 /** Terminal review states — no transition leaves them, whatever the role. */
-export const TERMINAL_REVIEW_STATES: ReadonlySet<string> = new Set(['republished', 'dismissed', 'upheld', 'overridden']);
+export const TERMINAL_REVIEW_STATES: ReadonlySet<string> = new Set([
+  'republished',
+  'dismissed',
+  'upheld',
+  'overridden',
+]);
 
 /** The run a task came from: the top-level column, else payload.run_id. */
 export function taskRunId(task: Pick<ReviewTaskOut, 'run_id' | 'payload'>): string | null {
@@ -16,7 +21,10 @@ export function taskRunId(task: Pick<ReviewTaskOut, 'run_id' | 'payload'>): stri
 }
 
 /** Keep only tasks raised by `runId`; an empty/absent runId keeps everything. */
-export function filterTasksByRun<T extends Pick<ReviewTaskOut, 'run_id' | 'payload'>>(tasks: T[] | undefined, runId: string | null | undefined): T[] | undefined {
+export function filterTasksByRun<T extends Pick<ReviewTaskOut, 'run_id' | 'payload'>>(
+  tasks: T[] | undefined,
+  runId: string | null | undefined,
+): T[] | undefined {
   if (!tasks || !runId) return tasks;
   return tasks.filter((t) => taskRunId(t) === runId);
 }
@@ -37,7 +45,9 @@ export function taskLane(task: Pick<ReviewTaskOut, 'lane' | 'kind' | 'payload'>)
   return task.kind === 'FLAGGED_RESULT' && task.payload?.aggregate === true ? 'advisory' : 'actionable';
 }
 
-export function countByLane(tasks: ReadonlyArray<Pick<ReviewTaskOut, 'lane' | 'kind' | 'payload'>> | undefined): Record<Lane, number> {
+export function countByLane(
+  tasks: ReadonlyArray<Pick<ReviewTaskOut, 'lane' | 'kind' | 'payload'>> | undefined,
+): Record<Lane, number> {
   const out: Record<Lane, number> = { actionable: 0, advisory: 0 };
   for (const t of tasks ?? []) out[taskLane(t)] += 1;
   return out;
@@ -84,7 +94,9 @@ export function groupActionable<T extends Groupable>(tasks: T[] | undefined): Ac
   }
   return {
     individual: individual.sort((a, b) => (a.opened_at < b.opened_at ? 1 : -1)),
-    groups: [...groups.values()].sort((a, b) => b.tasks.length - a.tasks.length || a.contractCode.localeCompare(b.contractCode)),
+    groups: [...groups.values()].sort(
+      (a, b) => b.tasks.length - a.tasks.length || a.contractCode.localeCompare(b.contractCode),
+    ),
   };
 }
 

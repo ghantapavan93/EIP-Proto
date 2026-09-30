@@ -6,7 +6,17 @@ import { DeferralChip, VersionStatusChip } from './RuleVersionBadges';
 import { paramsToRows } from '../../lib/keyvalue';
 import { fmtDate } from '../../lib/format';
 import { changeTone } from '../../lib/vocab';
-import { appliesLabel, authorityLabel, classificationLabel, deferralLine, governs, provisionName, rankSources, statusPresentation, versionStatusAsOf } from '../../lib/ruleVersions';
+import {
+  appliesLabel,
+  authorityLabel,
+  classificationLabel,
+  deferralLine,
+  governs,
+  provisionName,
+  rankSources,
+  statusPresentation,
+  versionStatusAsOf,
+} from '../../lib/ruleVersions';
 import { cn } from '../../lib/cn';
 
 export interface TimelineProps {
@@ -29,10 +39,27 @@ export function ProvenanceList({ sources }: { sources: RuleSourceRef[] }) {
       <div className="eyebrow mb-1">Provenance</div>
       <ol className="space-y-1.5">
         {ranked.map((src, i) => (
-          <li key={`${src.cite}-${i}`} className={cn('border-l-2 pl-2', src.authority === 'primary' ? 'border-navy' : src.authority === 'preamble' ? 'border-slate' : 'border-input')}>
-            <div className="text-[10px] font-semibold uppercase tracking-[1px] text-ink-2">{authorityLabel(src.authority)}</div>
+          <li
+            key={`${src.cite}-${i}`}
+            className={cn(
+              'border-l-2 pl-2',
+              src.authority === 'primary'
+                ? 'border-navy'
+                : src.authority === 'preamble'
+                  ? 'border-slate'
+                  : 'border-input',
+            )}
+          >
+            <div className="text-[10px] font-semibold uppercase tracking-[1px] text-ink-2">
+              {authorityLabel(src.authority)}
+            </div>
             {src.url ? (
-              <a href={src.url} target="_blank" rel="noreferrer noopener" className="inline-flex items-start gap-1 font-mono text-[11.5px] leading-snug">
+              <a
+                href={src.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-start gap-1 font-mono text-[11.5px] leading-snug"
+              >
                 <span>{src.cite}</span>
                 <ExternalLink size={10} className="mt-[3px] shrink-0" aria-hidden />
               </a>
@@ -83,9 +110,22 @@ export function Timeline({ versions, inForceVersion, asOf, onWhatIf, className }
         return (
           <li key={v.id} className="relative pb-5 pl-5 last:pb-0" data-status={v.status}>
             <Dot status={status} />
-            <div className={cn(status === 'proposed' && '-ml-2 rounded-[6px] border border-dashed border-teal-ink/50 px-2 py-1.5', status === 'vacated' && 'opacity-90')}>
+            <div
+              className={cn(
+                status === 'proposed' && '-ml-2 rounded-[6px] border border-dashed border-teal-ink/50 px-2 py-1.5',
+                status === 'vacated' && 'opacity-90',
+              )}
+            >
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className={cn('font-mono text-[12px] font-semibold', status === 'superseded' || status === 'vacated' ? 'text-ink-3' : 'text-navy', presentation.strike && 'line-through')}>v{v.version}</span>
+                <span
+                  className={cn(
+                    'font-mono text-[12px] font-semibold',
+                    status === 'superseded' || status === 'vacated' ? 'text-ink-3' : 'text-navy',
+                    presentation.strike && 'line-through',
+                  )}
+                >
+                  v{v.version}
+                </span>
                 {status === 'superseded' ? (
                   <Chip tone="neutral" title={`${v.status.replace(/_/g, ' ')} until ${fmtDate(v.effective_to)}`}>
                     superseded
@@ -99,14 +139,22 @@ export function Timeline({ versions, inForceVersion, asOf, onWhatIf, className }
                     in force as of date
                   </Chip>
                 )}
-                {status === 'future' && v.effective_from && <Chip tone="teal">takes effect {fmtDate(v.effective_from)}</Chip>}
+                {status === 'future' && v.effective_from && (
+                  <Chip tone="teal">takes effect {fmtDate(v.effective_from)}</Chip>
+                )}
                 {v.disputed && (
                   <Chip tone="amber" title="Reading flagged for counsel review">
                     <AlertTriangle size={11} aria-hidden /> open question
                   </Chip>
                 )}
               </div>
-              {special && presentation.note && <div className={cn('mt-1 text-[12px] font-medium', status === 'stayed' ? 'text-amber-ink' : 'text-slate')}>{presentation.note}</div>}
+              {special && presentation.note && (
+                <div
+                  className={cn('mt-1 text-[12px] font-medium', status === 'stayed' ? 'text-amber-ink' : 'text-slate')}
+                >
+                  {presentation.note}
+                </div>
+              )}
               {status === 'proposed' && onWhatIf && (
                 <button type="button" className="btn btn-outline btn-sm mt-1.5" onClick={() => onWhatIf(v)}>
                   What-if impact
@@ -150,7 +198,9 @@ export function Timeline({ versions, inForceVersion, asOf, onWhatIf, className }
                 </div>
               )}
               {v.summary && <div className="mt-1 text-[13px] font-medium text-slate">{v.summary}</div>}
-              <blockquote className={cn('quote mt-2', status === 'vacated' && 'text-ink-2')}>{v.clause_text}</blockquote>
+              <blockquote className={cn('quote mt-2', status === 'vacated' && 'text-ink-2')}>
+                {v.clause_text}
+              </blockquote>
               {paramRows.length > 0 && (
                 <div className="mt-2">
                   <KeyValue rows={paramRows} />
@@ -162,11 +212,19 @@ export function Timeline({ versions, inForceVersion, asOf, onWhatIf, className }
                   <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[1px] text-amber-ink">
                     <Scale size={13} aria-hidden /> Open question · counsel review
                   </div>
-                  <div className="text-ink">{v.dispute_note || 'The reading of this version is flagged for counsel; both readings are carried until it is resolved.'}</div>
+                  <div className="text-ink">
+                    {v.dispute_note ||
+                      'The reading of this version is flagged for counsel; both readings are carried until it is resolved.'}
+                  </div>
                 </div>
               )}
               {v.source_url && !(v.sources && v.sources.length) && (
-                <a href={v.source_url} target="_blank" rel="noreferrer noopener" className="mt-2 inline-flex items-center gap-1 text-xs">
+                <a
+                  href={v.source_url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="mt-2 inline-flex items-center gap-1 text-xs"
+                >
                   Source <ExternalLink size={11} aria-hidden />
                 </a>
               )}
@@ -263,9 +321,11 @@ export function VersionTrack({
   const sorted = [...dated].sort((a, b) => a.effective_from.localeCompare(b.effective_from) || a.version - b.version);
   const stops: TrackStop[] = [];
   for (const v of sorted) {
-    if (v.regulation_effective && v.regulation_effective !== v.effective_from) stops.push({ date: v.regulation_effective, kind: 'regulation', version: v.version, status: v.status });
+    if (v.regulation_effective && v.regulation_effective !== v.effective_from)
+      stops.push({ date: v.regulation_effective, kind: 'regulation', version: v.version, status: v.status });
     stops.push({ date: v.effective_from, kind: 'applies', version: v.version, status: v.status });
-    for (const d of v.deferrals ?? []) stops.push({ date: d.deferred_to, kind: 'deferral', version: v.version, status: v.status, deferral: d });
+    for (const d of v.deferrals ?? [])
+      stops.push({ date: d.deferred_to, kind: 'deferral', version: v.version, status: v.status, deferral: d });
   }
   const kindRank: Record<StopKind, number> = { regulation: 0, applies: 1, deferral: 2 };
   stops.sort((a, b) => a.date.localeCompare(b.date) || kindRank[a.kind] - kindRank[b.kind] || a.version - b.version);
@@ -273,7 +333,9 @@ export function VersionTrack({
   const asOfP = asOfPosition(stops, pos, asOf);
 
   // One bar per governing version: from its "applies" stop to the next governing version's (or open-ended).
-  const governingIdx = stops.map((s, i) => (s.kind === 'applies' && governs({ status: s.status, effective_from: s.date }) ? i : -1)).filter((i) => i >= 0);
+  const governingIdx = stops
+    .map((s, i) => (s.kind === 'applies' && governs({ status: s.status, effective_from: s.date }) ? i : -1))
+    .filter((i) => i >= 0);
   const bars = governingIdx.map((idx, k) => {
     const next = governingIdx[k + 1];
     const v = sorted.find((x) => x.version === stops[idx].version);
@@ -292,7 +354,10 @@ export function VersionTrack({
         role="img"
         aria-label={`Rule versions: ${describe}. Evaluated as of ${fmtDate(asOf)}${inForceVersion !== null ? `, v${inForceVersion} in force` : ', no version in force'}.${pendingText.length ? ` Not yet dated: ${pendingText.join('; ')}.` : ''}`}
       >
-        <div className="absolute top-0 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.06em] text-teal-ink" style={anchor(asOfP)}>
+        <div
+          className="absolute top-0 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.06em] text-teal-ink"
+          style={anchor(asOfP)}
+        >
           As of {fmtDate(asOf)}
         </div>
         {bars.map((b) => {
@@ -335,7 +400,15 @@ export function VersionTrack({
                 <div
                   className={cn(
                     'whitespace-nowrap text-[11px] font-semibold',
-                    off ? (s.status === 'proposed' ? 'text-teal-ink' : s.status === 'stayed' ? 'text-amber-ink' : 'text-slate') : s.kind === 'deferral' ? 'text-amber-ink' : 'text-ink',
+                    off
+                      ? s.status === 'proposed'
+                        ? 'text-teal-ink'
+                        : s.status === 'stayed'
+                          ? 'text-amber-ink'
+                          : 'text-slate'
+                      : s.kind === 'deferral'
+                        ? 'text-amber-ink'
+                        : 'text-ink',
                   )}
                 >
                   {s.status === 'vacated' && s.kind === 'applies' ? (
@@ -351,10 +424,17 @@ export function VersionTrack({
             </div>
           );
         })}
-        <span aria-hidden className="absolute top-[16px] h-[44px] w-[2px] -translate-x-1/2 rounded-full bg-teal-ink" style={{ left: `${asOfP}%` }} />
+        <span
+          aria-hidden
+          className="absolute top-[16px] h-[44px] w-[2px] -translate-x-1/2 rounded-full bg-teal-ink"
+          style={{ left: `${asOfP}%` }}
+        />
       </div>
       {undated.length > 0 && (
-        <div className="mt-1 hidden flex-wrap items-center gap-2 text-[12px] text-ink-2 sm:flex" data-testid="track-undated">
+        <div
+          className="mt-1 hidden flex-wrap items-center gap-2 text-[12px] text-ink-2 sm:flex"
+          data-testid="track-undated"
+        >
           <span>Not on the track yet:</span>
           {undated.map((v) => (
             <span key={v.id} className="inline-flex items-center gap-1.5">
@@ -371,15 +451,31 @@ export function VersionTrack({
           As of {fmtDate(asOf)} · {inForceVersion === null ? 'no version in force' : `v${inForceVersion} in force`}
         </li>
         {stops.map((s) => (
-          <li key={`${s.kind}-${s.version}-${s.date}-m`} className="flex items-baseline justify-between gap-3 border-t border-hairline pt-1.5">
-            <span className={cn('font-medium', s.version === inForceVersion && s.kind === 'applies' ? 'text-teal-ink' : 'text-ink', s.status === 'vacated' && s.kind === 'applies' && 'text-slate')}>
-              {s.kind === 'regulation' ? `Regulation effective (v${s.version})` : s.kind === 'deferral' && s.deferral ? deferralLine(s.deferral) : stopTitle(s)}
+          <li
+            key={`${s.kind}-${s.version}-${s.date}-m`}
+            className="flex items-baseline justify-between gap-3 border-t border-hairline pt-1.5"
+          >
+            <span
+              className={cn(
+                'font-medium',
+                s.version === inForceVersion && s.kind === 'applies' ? 'text-teal-ink' : 'text-ink',
+                s.status === 'vacated' && s.kind === 'applies' && 'text-slate',
+              )}
+            >
+              {s.kind === 'regulation'
+                ? `Regulation effective (v${s.version})`
+                : s.kind === 'deferral' && s.deferral
+                  ? deferralLine(s.deferral)
+                  : stopTitle(s)}
             </span>
             <span className="font-mono text-ink-2">{fmtDate(s.date)}</span>
           </li>
         ))}
         {undated.map((v) => (
-          <li key={`${v.id}-m`} className="flex items-baseline justify-between gap-3 border-t border-dashed border-teal-ink/40 pt-1.5">
+          <li
+            key={`${v.id}-m`}
+            className="flex items-baseline justify-between gap-3 border-t border-dashed border-teal-ink/40 pt-1.5"
+          >
             <span className="font-medium text-teal-ink">
               v{v.version} {statusPresentation(v).label}
             </span>

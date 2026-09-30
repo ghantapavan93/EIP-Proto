@@ -14,7 +14,19 @@ import { latestGoverning } from '../../lib/ruleVersions';
 
 export const HONEST_LINE = 'Prototype · synthetic calls · real public pages · recorded real-model runs';
 
-function Step({ n, title, to, children, stale }: { n: number; title: string; to: string; children: ReactNode; stale?: boolean }) {
+function Step({
+  n,
+  title,
+  to,
+  children,
+  stale,
+}: {
+  n: number;
+  title: string;
+  to: string;
+  children: ReactNode;
+  stale?: boolean;
+}) {
   return (
     <li className="min-w-0">
       <Link
@@ -34,7 +46,11 @@ function Step({ n, title, to, children, stale }: { n: number; title: string; to:
           <span className="flex items-center gap-1 text-[12.5px] font-semibold text-ink">
             <span className="sr-only">Step {n}: </span>
             {title}
-            <ArrowRight size={12} aria-hidden className="text-ink-3 transition-transform group-hover:text-teal-ink motion-safe:group-hover:translate-x-0.5 motion-reduce:transition-none" />
+            <ArrowRight
+              size={12}
+              aria-hidden
+              className="text-ink-3 transition-transform group-hover:text-teal-ink motion-safe:group-hover:translate-x-0.5 motion-reduce:transition-none"
+            />
           </span>
           <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-2">{children}</span>
         </span>
@@ -73,7 +89,10 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
   const impactsReady = codes.length > 0 && impacts.every((q) => q.data);
   const stale = impacts.reduce((n, q) => n + (q.data?.counts.total ?? 0), 0);
   const staleArtifacts = new Set(impacts.flatMap((q) => q.data?.stale.map((s) => s.edge.asset_code) ?? [])).size;
-  const heaviest = impacts.map((q) => q.data).filter(Boolean).sort((a, b) => (b?.counts.total ?? 0) - (a?.counts.total ?? 0))[0];
+  const heaviest = impacts
+    .map((q) => q.data)
+    .filter(Boolean)
+    .sort((a, b) => (b?.counts.total ?? 0) - (a?.counts.total ?? 0))[0];
 
   const promptRun = latestByTrigger(runs.data, 'PROMPT');
   const modelRun = latestByTrigger(runs.data, 'MODEL');
@@ -89,12 +108,22 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
           <h2 className="text-[13px] font-semibold text-ink">Where we are</h2>
           <p className="mt-0.5 text-[12px] text-ink-2">{HONEST_LINE}</p>
         </div>
-        <button type="button" className="inline-flex h-7 shrink-0 items-center gap-1 rounded-[6px] px-1.5 text-[12px] text-ink-2 transition-colors hover:bg-band hover:text-ink" onClick={onDismiss} aria-label="Hide the where-we-are guide">
+        <button
+          type="button"
+          className="inline-flex h-7 shrink-0 items-center gap-1 rounded-[6px] px-1.5 text-[12px] text-ink-2 transition-colors hover:bg-band hover:text-ink"
+          onClick={onDismiss}
+          aria-label="Hide the where-we-are guide"
+        >
           <X size={13} aria-hidden /> <span className="hidden sm:inline">Hide</span>
         </button>
       </div>
       <ol className={cn('mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4', animate && 'stagger')}>
-        <Step n={1} title={flip ? `${fmtDate(flip)} rule change` : 'Rule change'} to={heaviest && flip ? `/rules/${encodeURIComponent(heaviest.rule_code)}?as_of=${flip}` : '/rules'} stale={stale > 0}>
+        <Step
+          n={1}
+          title={flip ? `${fmtDate(flip)} rule change` : 'Rule change'}
+          to={heaviest && flip ? `/rules/${encodeURIComponent(heaviest.rule_code)}?as_of=${flip}` : '/rules'}
+          stale={stale > 0}
+        >
           {impactsReady ? (
             <>
               <span className={cn('font-mono font-semibold', stale ? 'text-amber-ink' : 'text-green-ink')}>
@@ -120,7 +149,9 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
         <Step n={3} title="Review" to="/review">
           {open.data ? (
             <>
-              <span className="font-mono font-semibold text-ink">{fmtNumber(actionable.length)}</span> actionable ({groups} {groups === 1 ? 'group' : 'groups'}) · <span className="font-mono">{fmtNumber(advisory)}</span> advisory
+              <span className="font-mono font-semibold text-ink">{fmtNumber(actionable.length)}</span> actionable (
+              {groups} {groups === 1 ? 'group' : 'groups'}) · <span className="font-mono">{fmtNumber(advisory)}</span>{' '}
+              advisory
             </>
           ) : (
             'loading…'
@@ -130,7 +161,10 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
           {chain ? (
             <>
               audit chain{' '}
-              <span className={chain.verified ? 'font-semibold text-green-ink' : 'font-semibold text-red'}>{chain.verified ? 'verified' : 'broken'}</span> (<span className="font-mono">{fmtNumber(chain.rows)}</span> rows)
+              <span className={chain.verified ? 'font-semibold text-green-ink' : 'font-semibold text-red'}>
+                {chain.verified ? 'verified' : 'broken'}
+              </span>{' '}
+              (<span className="font-mono">{fmtNumber(chain.rows)}</span> rows)
             </>
           ) : (
             'loading…'
@@ -138,7 +172,9 @@ export function WhereWeAre({ today, onDismiss, animate }: { today: string; onDis
         </Step>
       </ol>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-hairline px-2 pt-2.5">
-        <p className="text-[12.5px] text-ink-2">Have a script or page of your own? See what Backstop makes of it — nothing is stored.</p>
+        <p className="text-[12.5px] text-ink-2">
+          Have a script or page of your own? See what Backstop makes of it — nothing is stored.
+        </p>
         <Link to="/try" className="btn btn-sm hover:no-underline">
           Try it with your own text <ArrowRight size={13} aria-hidden />
         </Link>

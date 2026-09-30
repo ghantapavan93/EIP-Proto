@@ -50,8 +50,13 @@ export function plainVerdict(row: ContractComparisonOut, alpha = 0.05, family = 
   const b = row.b.rate;
   if (row.a.n === 0 && row.b.n === 0) return 'Nothing scored in either run';
   if (row.direction === 'better' || row.direction === 'worse') {
-    const head = row.direction === 'better' ? 'B fails less often — unlikely to be chance' : 'B fails more often — unlikely to be chance';
-    return lostToHolm(row, alpha) ? `${head} on its own, but not after correcting for ${family || 'all'} contracts` : head;
+    const head =
+      row.direction === 'better'
+        ? 'B fails less often — unlikely to be chance'
+        : 'B fails more often — unlikely to be chance';
+    return lostToHolm(row, alpha)
+      ? `${head} on its own, but not after correcting for ${family || 'all'} contracts`
+      : head;
   }
   if (row.paired && row.discordant === 0) return 'No call changed outcome';
   if (a !== null && b !== null && a === b) return 'Same failure rate; the calls that changed cancel out';

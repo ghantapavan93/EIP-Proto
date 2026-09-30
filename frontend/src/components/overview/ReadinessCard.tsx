@@ -13,7 +13,9 @@ export function ReadinessCard({ asOf, className }: { asOf: string; className?: s
   const { data } = useReadiness(asOf);
   if (!data) return null;
   const b = data.burn_down;
-  const vote = data.proposed.filter((p) => p.vote_date).sort((x, y) => (x.vote_date ?? '').localeCompare(y.vote_date ?? ''))[0];
+  const vote = data.proposed
+    .filter((p) => p.vote_date)
+    .sort((x, y) => (x.vote_date ?? '').localeCompare(y.vote_date ?? ''))[0];
   const facts: Array<[string, string, boolean]> = [
     [String(Math.max(0, b.days_left)), `days to ${fmtDate(b.target)}`, false],
     [String(Math.max(0, b.aep.days_left)), 'days to AEP', false],
@@ -24,7 +26,10 @@ export function ReadinessCard({ asOf, className }: { asOf: string; className?: s
   return (
     <Link
       to="/readiness"
-      className={cn('card flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 transition-colors hover:border-teal hover:no-underline', className)}
+      className={cn(
+        'card flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 transition-colors hover:border-teal hover:no-underline',
+        className,
+      )}
       aria-label="Readiness: open the countdown, milestones and owner queues"
       data-testid="readiness-card"
     >
@@ -41,7 +46,8 @@ export function ReadinessCard({ asOf, className }: { asOf: string; className?: s
         ))}
       </dl>
       <span className="text-[12px] text-ink-2">
-        {data.vacated.length} vacated (not enforced){vote ? ` · vote ${fmtDate(vote.vote_date)} on ${vote.rule_code}` : ''}
+        {data.vacated.length} vacated (not enforced)
+        {vote ? ` · vote ${fmtDate(vote.vote_date)} on ${vote.rule_code}` : ''}
       </span>
       <span className="ml-auto inline-flex items-center gap-1 text-[12.5px] font-semibold text-teal-ink">
         Open readiness <ArrowRight size={13} aria-hidden />

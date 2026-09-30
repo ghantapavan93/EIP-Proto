@@ -18,11 +18,14 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 function htmlResponse(status: number, statusText: string): Response {
-  return new Response(`<html><head><title>${status} ${statusText}</title></head><body><center><h1>${status}</h1></center><hr><center>nginx</center></body></html>`, {
-    status,
-    statusText,
-    headers: { 'Content-Type': 'text/html' },
-  });
+  return new Response(
+    `<html><head><title>${status} ${statusText}</title></head><body><center><h1>${status}</h1></center><hr><center>nginx</center></body></html>`,
+    {
+      status,
+      statusText,
+      headers: { 'Content-Type': 'text/html' },
+    },
+  );
 }
 
 describe('error messages are readable text', () => {
@@ -34,7 +37,12 @@ describe('error messages are readable text', () => {
 
   it('flattens a FastAPI 422 validation array into "loc: msg" text', () => {
     const msg = messageFromBody(
-      { detail: [{ loc: ['body', 'limit'], msg: 'Input should be greater than 0', type: 'greater_than' }, { loc: ['body', 'model_id'], msg: 'Field required' }] },
+      {
+        detail: [
+          { loc: ['body', 'limit'], msg: 'Input should be greater than 0', type: 'greater_than' },
+          { loc: ['body', 'model_id'], msg: 'Field required' },
+        ],
+      },
       'fallback',
     );
     expect(msg).toBe('body.limit: Input should be greater than 0; body.model_id: Field required');
@@ -73,7 +81,9 @@ describe('mutations refresh the status rail and the screens that depend on them'
   let qc: QueryClient;
   let invalidated: unknown[][];
 
-  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  );
 
   beforeEach(() => {
     setCredentials({ username: 'engineer', password: 'engineer' });
@@ -126,7 +136,12 @@ describe('mutations refresh the status rail and the screens that depend on them'
 
   it('Ingest transcripts → transcript list and status counts', async () => {
     const { result } = renderHook(() => useIngestTranscripts(), { wrapper });
-    act(() => result.current.mutate({ file: new File(['call_id,transcript\n1,hi\n'], 'x.csv', { type: 'text/csv' }), format: 'attention-snowflake' }));
+    act(() =>
+      result.current.mutate({
+        file: new File(['call_id,transcript\n1,hi\n'], 'x.csv', { type: 'text/csv' }),
+        format: 'attention-snowflake',
+      }),
+    );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(has(['backstop', 'transcripts'])).toBe(true);
     expect(has(keys.status())).toBe(true);

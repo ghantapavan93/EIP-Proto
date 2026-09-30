@@ -1,4 +1,13 @@
-import { useCallback, useId, useMemo, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { ClipboardCopy, Pencil, ScanText } from 'lucide-react';
 import { useRules, useSandboxArtifact, useSandboxSamples } from '../../api/hooks';
@@ -51,7 +60,8 @@ function WhatItChecks({ rules }: { rules: RuleOut[] | undefined }) {
     <div className="card px-4 py-3">
       <div className="eyebrow mb-1">What it looks for</div>
       <p className="text-[12.5px] leading-relaxed text-ink-2">
-        Phrasing that encodes one of the {rules?.length ?? 13} versioned rules — a 48-hour wait, a first-minute disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
+        Phrasing that encodes one of the {rules?.length ?? 13} versioned rules — a 48-hour wait, a first-minute
+        disclaimer, a 10-year retention. Each hit is judged against the version in force on your date.
       </p>
       {rules && (
         <ul className="mt-2.5 divide-y divide-hairline border-t border-hairline">
@@ -60,10 +70,18 @@ function WhatItChecks({ rules }: { rules: RuleOut[] | undefined }) {
             return (
               <li key={r.code} className="flex items-baseline justify-between gap-3 py-1.5 text-[12.5px]">
                 {/* The full title: short heads collide ("TPMO disclaimer" is two different rules). */}
-                <Link to={`/rules/${encodeURIComponent(r.code)}`} className="min-w-0 leading-snug text-ink hover:text-teal-ink" title={r.code}>
+                <Link
+                  to={`/rules/${encodeURIComponent(r.code)}`}
+                  className="min-w-0 leading-snug text-ink hover:text-teal-ink"
+                  title={r.code}
+                >
                   {r.title}
                 </Link>
-                {latest && <span className="shrink-0 font-mono text-[11px] text-ink-3">v{latest.version} · {latest.effective_from}</span>}
+                {latest && (
+                  <span className="shrink-0 font-mono text-[11px] text-ink-3">
+                    v{latest.version} · {latest.effective_from}
+                  </span>
+                )}
               </li>
             );
           })}
@@ -138,11 +156,16 @@ function Finding({
       {(m.applies_from || m.regulation_effective) && (
         <div className="mt-1.5 text-[11.5px] text-ink-3">
           {m.applies_from && <>applies from {fmtDate(m.applies_from)}</>}
-          {m.regulation_effective && m.regulation_effective !== m.applies_from && <> · regulation effective {fmtDate(m.regulation_effective)}</>}
+          {m.regulation_effective && m.regulation_effective !== m.applies_from && (
+            <> · regulation effective {fmtDate(m.regulation_effective)}</>
+          )}
         </div>
       )}
       {placed.at < 0 && (
-        <blockquote className="quote mt-2 text-[12px]" title="This span contains redacted text, so it cannot be painted onto what you pasted">
+        <blockquote
+          className="quote mt-2 text-[12px]"
+          title="This span contains redacted text, so it cannot be painted onto what you pasted"
+        >
           {m.span}
         </blockquote>
       )}
@@ -183,7 +206,10 @@ function Summary({ result, onCopy }: { result: SandboxArtifactOut; onCopy: () =>
         <Chip tone="teal" mono title="Evaluation date">
           as of {result.as_of}
         </Chip>
-        <span className="font-mono text-[11px] text-ink-3" title={`SHA-256 of the text as pasted: ${result.text_sha256}`}>
+        <span
+          className="font-mono text-[11px] text-ink-3"
+          title={`SHA-256 of the text as pasted: ${result.text_sha256}`}
+        >
           sha256 {shortHash(result.text_sha256, 10)}
         </span>
         {s.matches > 0 && (
@@ -338,7 +364,9 @@ export function ArtifactCheck({ today }: { today: string }) {
               id={textareaId}
               ref={areaRef}
               className={cn('input min-h-[260px] font-mono text-[12.5px] leading-[1.65]', tooLong && 'border-red')}
-              placeholder={'Paste a call script, QA scorecard item, email template, web page or prompt…\n\nExample: "Complete the Scope of Appointment at least 48 hours before the appointment."'}
+              placeholder={
+                'Paste a call script, QA scorecard item, email template, web page or prompt…\n\nExample: "Complete the Scope of Appointment at least 48 hours before the appointment."'
+              }
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
@@ -348,7 +376,10 @@ export function ArtifactCheck({ today }: { today: string }) {
               spellCheck={false}
               aria-describedby={`${textareaId}-count`}
             />
-            <div id={`${textareaId}-count`} className={cn('mt-1 text-right font-mono text-[11px]', tooLong ? 'text-red' : 'text-ink-3')}>
+            <div
+              id={`${textareaId}-count`}
+              className={cn('mt-1 text-right font-mono text-[11px]', tooLong ? 'text-red' : 'text-ink-3')}
+            >
               {text.length.toLocaleString('en-US')} / {ARTIFACT_LIMIT.toLocaleString('en-US')}
               {tooLong && ' — too long for one check'}
             </div>
@@ -367,13 +398,21 @@ export function ArtifactCheck({ today }: { today: string }) {
             label="As of"
           />
           <p className="basis-full text-[11.5px] text-ink-3 sm:order-last">
-            Oct 1, 2026 is when the CY2027 marketing changes apply — switch to Sep 30 to see the same text before the change.
+            Oct 1, 2026 is when the CY2027 marketing changes apply — switch to Sep 30 to see the same text before the
+            change.
           </p>
           <div className="w-[220px] max-w-full">
             <label htmlFor={labelId} className="label">
               Label <span className="font-normal normal-case tracking-normal text-ink-3">(optional)</span>
             </label>
-            <input id={labelId} className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Q4 inbound script" maxLength={120} />
+            <input
+              id={labelId}
+              className="input"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g. Q4 inbound script"
+              maxLength={120}
+            />
           </div>
           <div className="ml-auto flex items-center gap-2">
             {!showEditor && (
@@ -381,7 +420,12 @@ export function ArtifactCheck({ today }: { today: string }) {
                 <Pencil size={13} aria-hidden /> Edit text
               </button>
             )}
-            <button type="submit" className="btn" disabled={!text.trim() || tooLong || check.isPending} aria-keyshortcuts="Control+Enter Meta+Enter">
+            <button
+              type="submit"
+              className="btn"
+              disabled={!text.trim() || tooLong || check.isPending}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+            >
               {check.isPending ? (
                 <>
                   <span aria-hidden className="pulse-dot bg-on-navy" /> Analyzing…
@@ -409,9 +453,17 @@ export function ArtifactCheck({ today }: { today: string }) {
           <div className="hidden rounded-[8px] border border-dashed border-input px-5 py-6 text-[13px] leading-relaxed text-ink-2 lg:block">
             <div className="font-semibold text-ink">What you will see</div>
             <ol className="mt-2 list-decimal space-y-1 pl-5">
-              <li>Your text, with every sentence a matcher recognised highlighted by verdict. Wording no matcher knows is not flagged.</li>
-              <li>For each: which rule, which version it encodes, and whether that version is in force on your date.</li>
-              <li>If it is stale, the direction: over-restrictive (stricter than the rule now is), under-restrictive (misses a new requirement) or re-verify.</li>
+              <li>
+                Your text, with every sentence a matcher recognised highlighted by verdict. Wording no matcher knows is
+                not flagged.
+              </li>
+              <li>
+                For each: which rule, which version it encodes, and whether that version is in force on your date.
+              </li>
+              <li>
+                If it is stale, the direction: over-restrictive (stricter than the rule now is), under-restrictive
+                (misses a new requirement) or re-verify.
+              </li>
             </ol>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]">
               <span className="inline-flex items-center gap-1.5">
@@ -439,7 +491,9 @@ export function ArtifactCheck({ today }: { today: string }) {
             <div className="card min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline px-4 py-2">
                 <span className="eyebrow">{result.label ? result.label : 'Your text'}</span>
-                <span className="text-[11px] text-ink-3">{out.summary.matches ? 'Click a highlight to see its finding' : 'Nothing highlighted'}</span>
+                <span className="text-[11px] text-ink-3">
+                  {out.summary.matches ? 'Click a highlight to see its finding' : 'Nothing highlighted'}
+                </span>
               </div>
               <div
                 ref={textRef}
@@ -454,7 +508,9 @@ export function ArtifactCheck({ today }: { today: string }) {
                   const tone = worstTone(p.covering.map((c) => matchTone(out.matches[c])));
                   const primary = byRank[0];
                   const firsts = p.covering.filter((c) => firstPieceOf.get(c) === i);
-                  const names = byRank.map((c) => `${out.matches[c].rule_code}: ${verdictLabel(out.matches[c])}`).join('; ');
+                  const names = byRank
+                    .map((c) => `${out.matches[c].rule_code}: ${verdictLabel(out.matches[c])}`)
+                    .join('; ');
                   return (
                     <mark
                       key={p.start}
@@ -490,7 +546,8 @@ export function ArtifactCheck({ today }: { today: string }) {
                 <div className="card px-4 py-4">
                   <div className="text-[14px] font-semibold text-ink">No rule-bearing language found</div>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-ink-2">
-                    Backstop only flags text that encodes one of the {rules.data?.length ?? 7} versioned rules. A clean result means none of them is spelled out here — not that the text is compliant.
+                    Backstop only flags text that encodes one of the {rules.data?.length ?? 7} versioned rules. A clean
+                    result means none of them is spelled out here — not that the text is compliant.
                   </p>
                   {firstSample && (
                     <button
@@ -528,7 +585,9 @@ export function ArtifactCheck({ today }: { today: string }) {
               )}
             </div>
           </div>
-          <PrivacyLine detail={`this check: sha256 ${shortHash(out.text_sha256, 10)}${redactionLine(out.redacted) ? ` · redacted ${redactionLine(out.redacted)}` : ' · nothing needed redacting'}`} />
+          <PrivacyLine
+            detail={`this check: sha256 ${shortHash(out.text_sha256, 10)}${redactionLine(out.redacted) ? ` · redacted ${redactionLine(out.redacted)}` : ' · nothing needed redacting'}`}
+          />
         </section>
       )}
     </div>

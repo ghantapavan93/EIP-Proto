@@ -44,8 +44,26 @@ export function ruleSources(code: string): RuleSourceOut[] {
   for (const url of urls) {
     const hash = hashFor(url, 'v1');
     const excerpt = EXCERPTS[hostOf(url)] ?? `Snapshot of ${hostOf(url)} — text excerpt around the cited clause.`;
-    out.push({ id: `src-${hashFor(url, 'n').slice(0, 8)}`, source_url: url, content_hash: hash, excerpt, fetch_mode: 'snapshot', error: null, changed: false, checked_at: CHECKED });
-    out.push({ id: `src-${hashFor(url, 'f').slice(0, 8)}`, source_url: url, content_hash: hash, excerpt, fetch_mode: 'snapshot', error: null, changed: false, checked_at: FIRST });
+    out.push({
+      id: `src-${hashFor(url, 'n').slice(0, 8)}`,
+      source_url: url,
+      content_hash: hash,
+      excerpt,
+      fetch_mode: 'snapshot',
+      error: null,
+      changed: false,
+      checked_at: CHECKED,
+    });
+    out.push({
+      id: `src-${hashFor(url, 'f').slice(0, 8)}`,
+      source_url: url,
+      content_hash: hash,
+      excerpt,
+      fetch_mode: 'snapshot',
+      error: null,
+      changed: false,
+      checked_at: FIRST,
+    });
   }
   return out.sort((a, b) => (a.checked_at < b.checked_at ? 1 : -1));
 }
@@ -53,7 +71,8 @@ export function ruleSources(code: string): RuleSourceOut[] {
 export function ingestFormats(): IngestFormatsOut {
   return {
     'attention-snowflake': {
-      description: 'Assumed shape of the Attention → Snowflake call export. CONFIRM column names against the real export.',
+      description:
+        'Assumed shape of the Attention → Snowflake call export. CONFIRM column names against the real export.',
       columns: {
         call_id: 'unique call identifier (becomes the transcript code, prefixed A-)',
         started_at: 'ISO timestamp',
@@ -81,36 +100,184 @@ interface GoldenCase {
 }
 
 const GOLDEN: GoldenCase[] = [
-  { id: 'soa-01', text: 'A Scope of Appointment must be documented at least 48 hours before any personal marketing appointment.', expected: [['soa-48h-wait', 1]], detected: [['soa-48h-wait', 1]] },
-  { id: 'soa-02', text: 'The standard expectation is 48 hours in advance, although walk-ins can be seen the same day.', expected: [['soa-48h-wait', 1]], detected: [['soa-48h-wait', 1]] },
-  { id: 'soa-03', text: "We'll need to wait 48 hours before we can meet to go over specific plans.", expected: [['soa-48h-wait', 1]], detected: [['soa-48h-wait', 1]] },
-  { id: 'soa-04-v2', text: 'There is no waiting period between the Scope of Appointment and the appointment; the SOA is still required.', expected: [['soa-48h-wait', 2]], detected: [['soa-48h-wait', 2]] },
-  { id: 'soa-05-neg', text: 'Our office is open 48 hours a week and appointments are available on weekends.', expected: [], detected: [] },
-  { id: 'soa-06-neg', text: 'Please allow 48 hours for the enrollment confirmation email to arrive.', expected: [], detected: [] },
-  { id: 'soa-09-near-miss', text: 'Forty-eight hours after the storm, the office reopened for appointments with existing clients.', expected: [['soa-48h-wait', 1]], detected: [['soa-48h-wait', 1]], known_limitation: true },
-  { id: 'tpmo-01', text: 'Deliver the TPMO disclaimer within the first minute of the call.', expected: [['tpmo-disclaimer-timing', 1]], detected: [['tpmo-disclaimer-timing', 1]] },
-  { id: 'tpmo-02', text: 'Score YES when the full disclaimer is delivered within the first 60 seconds.', expected: [['tpmo-disclaimer-timing', 1]], detected: [['tpmo-disclaimer-timing', 1]] },
-  { id: 'tpmo-03-v2', text: 'The disclaimer must be conveyed prior to the discussion of any benefits.', expected: [['tpmo-disclaimer-timing', 2]], detected: [['tpmo-disclaimer-timing', 2]] },
-  { id: 'tpmo-04-neg', text: 'The first minute of the webinar covers how Medicare enrollment periods work.', expected: [], detected: [] },
-  { id: 'tpmo-05', text: 'Flag the call if the TPMO disclaimer was not delivered within the first 60 seconds.', expected: [['tpmo-disclaimer-timing', 1]], detected: [['tpmo-disclaimer-timing', 1]] },
-  { id: 'text-01', text: 'Please contact Medicare.gov, 1-800-MEDICARE, or your local State Health Insurance Program (SHIP) to get information on all of your options.', expected: [['tpmo-disclaimer-text', 1]], detected: [['tpmo-disclaimer-text', 1]] },
-  { id: 'text-02-v2', text: 'Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.', expected: [['tpmo-disclaimer-text', 2]], detected: [['tpmo-disclaimer-text', 2]] },
-  { id: 'text-03-neg', text: 'Your State Health Insurance Program can help with Medicaid questions.', expected: [], detected: [] },
-  { id: 'ret-01', text: 'Recordings are kept for 10 years so that CMS and the carriers can audit what was said.', expected: [['call-recording-retention', 1]], detected: [['call-recording-retention', 1]] },
-  { id: 'ret-02', text: 'All calls are recorded and retained for a minimum of ten years.', expected: [['call-recording-retention', 1]], detected: [['call-recording-retention', 1]] },
-  { id: 'ret-03-v2', text: 'Recordings must be retained for a minimum period of 6 years; years 4-6 may be a complete transcript.', expected: [['call-recording-retention', 2]], detected: [['call-recording-retention', 2]] },
+  {
+    id: 'soa-01',
+    text: 'A Scope of Appointment must be documented at least 48 hours before any personal marketing appointment.',
+    expected: [['soa-48h-wait', 1]],
+    detected: [['soa-48h-wait', 1]],
+  },
+  {
+    id: 'soa-02',
+    text: 'The standard expectation is 48 hours in advance, although walk-ins can be seen the same day.',
+    expected: [['soa-48h-wait', 1]],
+    detected: [['soa-48h-wait', 1]],
+  },
+  {
+    id: 'soa-03',
+    text: "We'll need to wait 48 hours before we can meet to go over specific plans.",
+    expected: [['soa-48h-wait', 1]],
+    detected: [['soa-48h-wait', 1]],
+  },
+  {
+    id: 'soa-04-v2',
+    text: 'There is no waiting period between the Scope of Appointment and the appointment; the SOA is still required.',
+    expected: [['soa-48h-wait', 2]],
+    detected: [['soa-48h-wait', 2]],
+  },
+  {
+    id: 'soa-05-neg',
+    text: 'Our office is open 48 hours a week and appointments are available on weekends.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'soa-06-neg',
+    text: 'Please allow 48 hours for the enrollment confirmation email to arrive.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'soa-09-near-miss',
+    text: 'Forty-eight hours after the storm, the office reopened for appointments with existing clients.',
+    expected: [['soa-48h-wait', 1]],
+    detected: [['soa-48h-wait', 1]],
+    known_limitation: true,
+  },
+  {
+    id: 'tpmo-01',
+    text: 'Deliver the TPMO disclaimer within the first minute of the call.',
+    expected: [['tpmo-disclaimer-timing', 1]],
+    detected: [['tpmo-disclaimer-timing', 1]],
+  },
+  {
+    id: 'tpmo-02',
+    text: 'Score YES when the full disclaimer is delivered within the first 60 seconds.',
+    expected: [['tpmo-disclaimer-timing', 1]],
+    detected: [['tpmo-disclaimer-timing', 1]],
+  },
+  {
+    id: 'tpmo-03-v2',
+    text: 'The disclaimer must be conveyed prior to the discussion of any benefits.',
+    expected: [['tpmo-disclaimer-timing', 2]],
+    detected: [['tpmo-disclaimer-timing', 2]],
+  },
+  {
+    id: 'tpmo-04-neg',
+    text: 'The first minute of the webinar covers how Medicare enrollment periods work.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'tpmo-05',
+    text: 'Flag the call if the TPMO disclaimer was not delivered within the first 60 seconds.',
+    expected: [['tpmo-disclaimer-timing', 1]],
+    detected: [['tpmo-disclaimer-timing', 1]],
+  },
+  {
+    id: 'text-01',
+    text: 'Please contact Medicare.gov, 1-800-MEDICARE, or your local State Health Insurance Program (SHIP) to get information on all of your options.',
+    expected: [['tpmo-disclaimer-text', 1]],
+    detected: [['tpmo-disclaimer-text', 1]],
+  },
+  {
+    id: 'text-02-v2',
+    text: 'Please contact Medicare.gov or 1-800-MEDICARE to get information on all of your options.',
+    expected: [['tpmo-disclaimer-text', 2]],
+    detected: [['tpmo-disclaimer-text', 2]],
+  },
+  {
+    id: 'text-03-neg',
+    text: 'Your State Health Insurance Program can help with Medicaid questions.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'ret-01',
+    text: 'Recordings are kept for 10 years so that CMS and the carriers can audit what was said.',
+    expected: [['call-recording-retention', 1]],
+    detected: [['call-recording-retention', 1]],
+  },
+  {
+    id: 'ret-02',
+    text: 'All calls are recorded and retained for a minimum of ten years.',
+    expected: [['call-recording-retention', 1]],
+    detected: [['call-recording-retention', 1]],
+  },
+  {
+    id: 'ret-03-v2',
+    text: 'Recordings must be retained for a minimum period of 6 years; years 4-6 may be a complete transcript.',
+    expected: [['call-recording-retention', 2]],
+    detected: [['call-recording-retention', 2]],
+  },
   { id: 'ret-04-neg', text: 'The company celebrated ten years in business this spring.', expected: [], detected: [] },
-  { id: 'ret-05-near-miss', text: 'Keep your Medicare paperwork for ten years in case of an audit.', expected: [], detected: [], known_limitation: true },
-  { id: 'sup-01', text: 'Do not call any plan the best unless we can back that up with current or prior-year data.', expected: [['superlatives', 1]], detected: [['superlatives', 1]] },
-  { id: 'sup-02', text: 'Score NO when the agent uses a superlative without citing supporting data from the current or prior contract year.', expected: [['superlatives', 1]], detected: [['superlatives', 1]] },
-  { id: 'sup-03-neg', text: 'Our best-selling coffee mug is back in stock at the front desk.', expected: [], detected: [] },
-  { id: 'edu-01', text: 'Agents cannot collect a Scope of Appointment form at an educational event.', expected: [['soa-educational-events', 1]], detected: [['soa-educational-events', 1]] },
-  { id: 'edu-02-v2', text: 'SOA collection at educational events is permitted; the 12-hour gap is eliminated.', expected: [['soa-educational-events', 2]], detected: [['soa-educational-events', 2]] },
+  {
+    id: 'ret-05-near-miss',
+    text: 'Keep your Medicare paperwork for ten years in case of an audit.',
+    expected: [],
+    detected: [],
+    known_limitation: true,
+  },
+  {
+    id: 'sup-01',
+    text: 'Do not call any plan the best unless we can back that up with current or prior-year data.',
+    expected: [['superlatives', 1]],
+    detected: [['superlatives', 1]],
+  },
+  {
+    id: 'sup-02',
+    text: 'Score NO when the agent uses a superlative without citing supporting data from the current or prior contract year.',
+    expected: [['superlatives', 1]],
+    detected: [['superlatives', 1]],
+  },
+  {
+    id: 'sup-03-neg',
+    text: 'Our best-selling coffee mug is back in stock at the front desk.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'edu-01',
+    text: 'Agents cannot collect a Scope of Appointment form at an educational event.',
+    expected: [['soa-educational-events', 1]],
+    detected: [['soa-educational-events', 1]],
+  },
+  {
+    id: 'edu-02-v2',
+    text: 'SOA collection at educational events is permitted; the 12-hour gap is eliminated.',
+    expected: [['soa-educational-events', 2]],
+    detected: [['soa-educational-events', 2]],
+  },
   { id: 'edu-03-neg', text: 'The educational event starts at noon; lunch is provided.', expected: [], detected: [] },
-  { id: 'notice-01', text: 'This call is recorded for quality and compliance.', expected: [['eip-recording-notice', 1]], detected: [['eip-recording-notice', 1]] },
-  { id: 'notice-02-v2', text: 'State that the call is recorded before collecting any personal information and name the retention period.', expected: [['eip-recording-notice', 2]], detected: [['eip-recording-notice', 2]] },
-  { id: 'notice-03-neg', text: 'The training session was recorded and is available on the LMS.', expected: [], detected: [] },
-  { id: 'mixed-01', text: 'Deliver the disclaimer within the first minute, then confirm the SOA was signed at least 48 hours ago.', expected: [['tpmo-disclaimer-timing', 1], ['soa-48h-wait', 1]], detected: [['tpmo-disclaimer-timing', 1], ['soa-48h-wait', 1]] },
+  {
+    id: 'notice-01',
+    text: 'This call is recorded for quality and compliance.',
+    expected: [['eip-recording-notice', 1]],
+    detected: [['eip-recording-notice', 1]],
+  },
+  {
+    id: 'notice-02-v2',
+    text: 'State that the call is recorded before collecting any personal information and name the retention period.',
+    expected: [['eip-recording-notice', 2]],
+    detected: [['eip-recording-notice', 2]],
+  },
+  {
+    id: 'notice-03-neg',
+    text: 'The training session was recorded and is available on the LMS.',
+    expected: [],
+    detected: [],
+  },
+  {
+    id: 'mixed-01',
+    text: 'Deliver the disclaimer within the first minute, then confirm the SOA was signed at least 48 hours ago.',
+    expected: [
+      ['tpmo-disclaimer-timing', 1],
+      ['soa-48h-wait', 1],
+    ],
+    detected: [
+      ['tpmo-disclaimer-timing', 1],
+      ['soa-48h-wait', 1],
+    ],
+  },
 ];
 
 function counts(cases: GoldenCase[]) {
@@ -120,7 +287,9 @@ function counts(cases: GoldenCase[]) {
   for (const c of cases) {
     const exp = new Set(c.expected.map(([r, v]) => `${r}@${v}`));
     const det = new Set(c.detected.map(([r, v]) => `${r}@${v}`));
-    for (const d of det) if (exp.has(d)) tp += 1; else fp += 1;
+    for (const d of det)
+      if (exp.has(d)) tp += 1;
+      else fp += 1;
     for (const e of exp) if (!det.has(e)) fn += 1;
   }
   const precision = tp + fp ? Number((tp / (tp + fp)).toFixed(3)) : 1;
@@ -163,7 +332,9 @@ export function matcherEvals(): MatcherEvalOut {
         text: c.text,
         expected: c.expected,
         detected: c.detected,
-        detected_status: Object.fromEntries(c.detected.map(([r, v]) => [`${r}@${v}`, c.id.includes('near-miss') ? 'proposed' : 'confirmed'])),
+        detected_status: Object.fromEntries(
+          c.detected.map(([r, v]) => [`${r}@${v}`, c.id.includes('near-miss') ? 'proposed' : 'confirmed']),
+        ),
         false_positive: c.detected.filter(([r, v]) => !exp.has(`${r}@${v}`)),
         false_negative: c.expected.filter(([r, v]) => !det.has(`${r}@${v}`)),
         known_limitation: c.known_limitation === true,
@@ -194,12 +365,17 @@ export function matcherEvalsMarkdown(): string {
     '',
     '| rule | tp | fp | fn | precision | recall |',
     '|---|---|---|---|---|---|',
-    ...Object.entries(ev.per_rule).map(([r, c]) => `| ${r} | ${c.tp} | ${c.fp} | ${c.fn} | ${c.precision} | ${c.recall} |`),
+    ...Object.entries(ev.per_rule).map(
+      ([r, c]) => `| ${r} | ${c.tp} | ${c.fp} | ${c.fn} | ${c.precision} | ${c.recall} |`,
+    ),
   ];
   return lines.join('\n');
 }
 
-export function healthDeep(transcripts: number, lastScan: { id: string; status: string; finished_at: string | null } | null): HealthDeepOut {
+export function healthDeep(
+  transcripts: number,
+  lastScan: { id: string; status: string; finished_at: string | null } | null,
+): HealthDeepOut {
   return {
     version: '0.1.0-mock',
     time: new Date().toISOString(),

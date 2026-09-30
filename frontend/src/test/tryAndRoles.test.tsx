@@ -44,7 +44,13 @@ describe('/try — artifact check', () => {
 
     // click a highlight → its finding becomes the current one
     fireEvent.click(spans[0]);
-    await waitFor(() => expect(within(findings).getAllByRole('listitem').some((li) => li.getAttribute('aria-current') === 'true')).toBe(true));
+    await waitFor(() =>
+      expect(
+        within(findings)
+          .getAllByRole('listitem')
+          .some((li) => li.getAttribute('aria-current') === 'true'),
+      ).toBe(true),
+    );
     // the screen-reader summary is announced
     expect(screen.getByText(/^Checked as of 2026-10-01: \d+ matches, [1-9]\d* stale/)).toBeInTheDocument();
   }, 20000);
@@ -54,14 +60,18 @@ describe('/try — artifact check', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Call script · CY2024 wording' }, { timeout: 8000 }));
     await screen.findByText(/^Checked as of 2026-10-01/, {}, { timeout: 8000 });
     fireEvent.click(screen.getByRole('button', { name: '2026-09-30' }));
-    expect(await screen.findByText(/^Checked as of 2026-09-30: \d+ matches, 0 stale/, {}, { timeout: 8000 })).toBeInTheDocument();
+    expect(
+      await screen.findByText(/^Checked as of 2026-09-30: \d+ matches, 0 stale/, {}, { timeout: 8000 }),
+    ).toBeInTheDocument();
   }, 20000);
 
   it('re-checks as of Oct 1 with Ctrl+Enter and shows stale findings with directions', async () => {
     open('/try');
     fireEvent.click(await screen.findByRole('button', { name: '2026-10-01' }, { timeout: 8000 }));
     const box = screen.getByLabelText('Text to check');
-    fireEvent.change(box, { target: { value: 'Agents must complete the Scope of Appointment at least 48 hours before the appointment.' } });
+    fireEvent.change(box, {
+      target: { value: 'Agents must complete the Scope of Appointment at least 48 hours before the appointment.' },
+    });
     fireEvent.keyDown(box, { key: 'Enter', ctrlKey: true });
     expect(await screen.findByText('Over-restrictive', {}, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.getByText(/encodes v1 → in force v2/)).toBeInTheDocument();
@@ -74,7 +84,9 @@ describe('/try — artifact check', () => {
     open('/try');
     fireEvent.click(await screen.findByRole('button', { name: 'Welcome email · no rule language' }, { timeout: 8000 }));
     expect(await screen.findByText('No rule-bearing language found', {}, { timeout: 8000 })).toBeInTheDocument();
-    expect(screen.getByText(/Backstop only flags text that encodes one of the \d+ versioned rules/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Backstop only flags text that encodes one of the \d+ versioned rules/),
+    ).toBeInTheDocument();
   }, 20000);
 
   it('blocks text over the limit before it is sent', async () => {
@@ -89,7 +101,9 @@ describe('/try — artifact check', () => {
 describe('/try — call transcript', () => {
   it('shows a calm offline card when no local model is reachable (409)', async () => {
     open('/try?tab=transcript');
-    fireEvent.click(await screen.findByRole('button', { name: 'MA call · disclaimer after benefits' }, { timeout: 8000 }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'MA call · disclaimer after benefits' }, { timeout: 8000 }),
+    );
     fireEvent.click(screen.getByRole('button', { name: /Run on local model/ }));
     expect(await screen.findByText('The live model is offline right now', {}, { timeout: 8000 })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Open a recorded real-model call/ })).toBeInTheDocument();
@@ -101,7 +115,9 @@ describe('/try — call transcript', () => {
     sandboxModel.online = true;
     sandboxModel.latencyMs = 300;
     open('/try?tab=transcript');
-    fireEvent.click(await screen.findByRole('button', { name: 'MA call · disclaimer after benefits' }, { timeout: 8000 }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'MA call · disclaimer after benefits' }, { timeout: 8000 }),
+    );
     fireEvent.click(screen.getByRole('button', { name: /Run on local model/ }));
     expect(await screen.findByText('Running the call through the local model')).toBeInTheDocument();
     expect(document.documentElement.hasAttribute('data-live-busy')).toBe(true);
@@ -138,7 +154,8 @@ describe('roles and access', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Signed in as reviewer/ }, { timeout: 8000 }));
     fireEvent.click(await screen.findByRole('button', { name: /How roles work/ }));
     const drawer = await screen.findByRole('dialog', { name: 'How roles work' });
-    for (const role of ['QA Compliance Analyst', 'AI Enablement Engineer', 'Administrator']) expect(within(drawer).getByRole('heading', { name: role })).toBeInTheDocument();
+    for (const role of ['QA Compliance Analyst', 'AI Enablement Engineer', 'Administrator'])
+      expect(within(drawer).getByRole('heading', { name: role })).toBeInTheDocument();
     expect(within(drawer).getAllByText('Check pasted text in the sandbox').length).toBeGreaterThan(0);
     expect(within(drawer).queryByText('use_sandbox')).toBeNull();
     expect(within(drawer).getByText('Decisions need a different approver')).toBeInTheDocument();
@@ -147,7 +164,10 @@ describe('roles and access', () => {
 
   it('keeps "New run" visible for an analyst, refused with the reason', async () => {
     open('/runs');
-    await waitFor(() => expect(screen.getByRole('button', { name: /New run/ })).toHaveAttribute('aria-disabled', 'true'), { timeout: 8000 });
+    await waitFor(
+      () => expect(screen.getByRole('button', { name: /New run/ })).toHaveAttribute('aria-disabled', 'true'),
+      { timeout: 8000 },
+    );
     const btn = screen.getByRole('button', { name: /New run/ });
     expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Engineers and admins can start runs');
     expect(btn).toHaveAccessibleDescription('Engineers and admins can start runs');
@@ -171,7 +191,9 @@ describe('roles and access', () => {
 describe('test cases', () => {
   it('shows the loop and both seeded examples, with who can approve the pending one', async () => {
     open('/test-cases');
-    expect(await screen.findByRole('list', { name: 'How an override becomes a test case' }, { timeout: 8000 })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('list', { name: 'How an override becomes a test case' }, { timeout: 8000 }),
+    ).toBeInTheDocument();
     expect(await screen.findAllByText('seeded example', {}, { timeout: 8000 })).toHaveLength(2);
     expect(screen.getByText('awaiting an engineer or admin other than demo-seed:qa-reviewer')).toBeInTheDocument();
     const approve = screen.getByRole('button', { name: /Approve/ });
@@ -184,7 +206,9 @@ describe('change triggers guide', () => {
   it('shows four live steps and remembers when it is hidden', async () => {
     const view = open('/');
     const guide = await screen.findByRole('region', { name: 'Where we are' }, { timeout: 8000 });
-    expect(within(guide).getByText(/Prototype · synthetic calls · real public pages · recorded real-model runs/)).toBeInTheDocument();
+    expect(
+      within(guide).getByText(/Prototype · synthetic calls · real public pages · recorded real-model runs/),
+    ).toBeInTheDocument();
     expect(await within(guide).findByText(/stale encodings/, {}, { timeout: 8000 })).toBeInTheDocument();
     expect(await within(guide).findByText(/audit chain/, {}, { timeout: 8000 })).toBeInTheDocument();
     expect(within(guide).getByRole('link', { name: /Try it with your own text/ })).toHaveAttribute('href', '/try');

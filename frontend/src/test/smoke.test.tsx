@@ -46,14 +46,18 @@ describe('smoke: every screen renders against the mock API', () => {
   beforeAll(() => setCredentials({ username: 'engineer', password: 'engineer' }));
   afterAll(() => clearCredentials());
 
-  it.each(SCREENS)('%s', async (path, landmark) => {
-    queryClient.clear();
-    window.history.pushState({}, '', path);
-    render(<App />);
-    expect(await screen.findAllByText(landmark, {}, { timeout: 8000 })).not.toHaveLength(0);
-    // the chrome is always there
-    expect(screen.getAllByText('PROTOTYPE · SYNTHETIC DATA').length).toBeGreaterThan(0);
-  }, 15000);
+  it.each(SCREENS)(
+    '%s',
+    async (path, landmark) => {
+      queryClient.clear();
+      window.history.pushState({}, '', path);
+      render(<App />);
+      expect(await screen.findAllByText(landmark, {}, { timeout: 8000 })).not.toHaveLength(0);
+      // the chrome is always there
+      expect(screen.getAllByText('PROTOTYPE · SYNTHETIC DATA').length).toBeGreaterThan(0);
+    },
+    15000,
+  );
 
   it('redirects to /login when signed out', async () => {
     clearCredentials();

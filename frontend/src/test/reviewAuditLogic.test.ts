@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { AuditOut, ReviewTaskOut, RunOut } from '../api/types';
 import { actionableUnits, countByLane, groupActionable, taskLane } from '../lib/review';
 import { blockingFailures } from '../lib/runStats';
-import { actorName, auditEntityLink, auditSummary, auditTransition, eventLabel, eventTone, isSystemActor, shortModel } from '../lib/audit';
+import {
+  actorName,
+  auditEntityLink,
+  auditSummary,
+  auditTransition,
+  eventLabel,
+  eventTone,
+  isSystemActor,
+  shortModel,
+} from '../lib/audit';
 import { bundleHashLabel, fmtRelative } from '../lib/format';
 import { shouldReplayCausality } from '../lib/motion';
 import { authorityLabel, rankSources } from '../lib/ruleVersions';
@@ -74,7 +83,17 @@ function run(over: Partial<RunOut>): RunOut {
 }
 
 function row(over: Partial<AuditOut>): AuditOut {
-  return { id: 1, ts: '2026-09-23T07:00:00Z', actor: 'engineer', actor_role: 'engineer', event_type: 'x', entity_type: 'run', entity_id: 'run-a', payload: {}, ...over };
+  return {
+    id: 1,
+    ts: '2026-09-23T07:00:00Z',
+    actor: 'engineer',
+    actor_role: 'engineer',
+    event_type: 'x',
+    entity_type: 'run',
+    entity_id: 'run-a',
+    payload: {},
+    ...over,
+  };
 }
 
 const SEVERITY = new Map([
@@ -93,7 +112,10 @@ describe('review lanes and grouping', () => {
   });
 
   it('counts by lane', () => {
-    expect(countByLane([task({}), task({ lane: 'advisory' }), task({ kind: 'PROPOSED_EDGE' })])).toEqual({ actionable: 2, advisory: 1 });
+    expect(countByLane([task({}), task({ lane: 'advisory' }), task({ kind: 'PROPOSED_EDGE' })])).toEqual({
+      actionable: 2,
+      advisory: 1,
+    });
     expect(countByLane(undefined)).toEqual({ actionable: 0, advisory: 0 });
   });
 
@@ -128,7 +150,21 @@ describe('blocking failures', () => {
   });
 
   it('falls back to the run summary severity when the contracts API has not loaded', () => {
-    const r = run({ contracts: [{ code: 'C-TPMO-01', title: '', severity: 'BLOCK', kind: 'DETERMINISTIC', rule_code: null, passed: 0, failed: 0, flagged: 0, errored: 0 }] });
+    const r = run({
+      contracts: [
+        {
+          code: 'C-TPMO-01',
+          title: '',
+          severity: 'BLOCK',
+          kind: 'DETERMINISTIC',
+          rule_code: null,
+          passed: 0,
+          failed: 0,
+          flagged: 0,
+          errored: 0,
+        },
+      ],
+    });
     expect(blockingFailures(r, new Map()).failures).toBe(6);
   });
 
@@ -150,32 +186,60 @@ describe('audit meaning', () => {
   });
 
   it('summarizes a completed run with its identity and blocking failures', () => {
-    const r = row({ event_type: 'run.completed', payload: { gate: 'RED', contracts: run({}).stats.contracts, review_tasks_opened: 7, advisory_items_opened: 2 } });
+    const r = row({
+      event_type: 'run.completed',
+      payload: { gate: 'RED', contracts: run({}).stats.contracts, review_tasks_opened: 7, advisory_items_opened: 2 },
+    });
     const text = auditSummary(r, { runsById: new Map([['run-a', run({})]]), severityByCode: SEVERITY });
-    expect(text).toBe('qa-handoff · v2 · qwen2.5:3b-instruct → RED · 6 blocking failures · 7 review tasks opened · 2 advisory');
+    expect(text).toBe(
+      'qa-handoff · v2 · qwen2.5:3b-instruct → RED · 6 blocking failures · 7 review tasks opened · 2 advisory',
+    );
     // without the run in cache, still counts from the payload
     expect(auditSummary(r, { severityByCode: SEVERITY })).toContain('RED · 6 blocking failures');
     expect(eventTone(r)).toBe('red');
   });
 
   it('summarizes decisions, exports and superseded encodings', () => {
-    expect(auditSummary(row({ event_type: 'task.transitioned', payload: { from: 'open', to: 'overridden', reason_code: 'TRANSCRIPT_AMBIGUOUS', note: '' } }))).toBe(
-      'open → overridden · TRANSCRIPT_AMBIGUOUS',
-    );
-    expect(auditSummary(row({ event_type: 'evidence.exported', payload: { format: 'json', bundle_sha256: 'a1b2c3d4e5f6a7b8c9', audit_rows: 3 } }))).toBe(
-      'json bundle a1b2c3d4e5f6… · 3 audit rows included',
-    );
-    expect(auditSummary(row({ event_type: 'edge.superseded', entity_type: 'edge', payload: { asset: 'sc-12', span: 'The agent must wait 48 hours before the appointment.' } }))).toBe(
-      'sc-12 · “The agent must wait 48 hours before the appointment.” no longer in the artifact',
-    );
+    expect(
+      auditSummary(
+        row({
+          event_type: 'task.transitioned',
+          payload: { from: 'open', to: 'overridden', reason_code: 'TRANSCRIPT_AMBIGUOUS', note: '' },
+        }),
+      ),
+    ).toBe('open → overridden · TRANSCRIPT_AMBIGUOUS');
+    expect(
+      auditSummary(
+        row({
+          event_type: 'evidence.exported',
+          payload: { format: 'json', bundle_sha256: 'a1b2c3d4e5f6a7b8c9', audit_rows: 3 },
+        }),
+      ),
+    ).toBe('json bundle a1b2c3d4e5f6… · 3 audit rows included');
+    expect(
+      auditSummary(
+        row({
+          event_type: 'edge.superseded',
+          entity_type: 'edge',
+          payload: { asset: 'sc-12', span: 'The agent must wait 48 hours before the appointment.' },
+        }),
+      ),
+    ).toBe('sc-12 · “The agent must wait 48 hours before the appointment.” no longer in the artifact');
   });
 
   it('extracts before → after and an in-app link', () => {
-    const r = row({ event_type: 'task.transitioned', entity_type: 'review_task', entity_id: 'task-1', payload: { from: 'open', to: 'upheld' } });
+    const r = row({
+      event_type: 'task.transitioned',
+      entity_type: 'review_task',
+      entity_id: 'task-1',
+      payload: { from: 'open', to: 'upheld' },
+    });
     expect(auditTransition(r)).toEqual({ from: 'open', to: 'upheld' });
     expect(auditTransition(row({ payload: { gate: 'RED' } }))).toBeNull();
     expect(auditEntityLink(r)?.to).toBe('/review?lane=all&task=task-1');
-    expect(auditEntityLink(row({ entity_type: 'rule_version', payload: { rule: 'soa-48h-wait' } }))?.to).toBe('/rules/soa-48h-wait');
+    expect(auditEntityLink(row({ entity_type: 'rule_version', payload: { rule: 'soa-48h-wait' } }))?.to).toBe(
+      '/rules/soa-48h-wait',
+    );
   });
 });
 
@@ -221,7 +285,11 @@ describe('formatting, motion, provenance, health', () => {
   });
 
   it('builds evidence bundle paths; as_of only for rules', () => {
-    expect(evidencePath({ scope: 'runs', id: 'r 1', format: 'md', asOf: '2026-10-01' })).toBe('/evidence/runs/r%201?format=md');
-    expect(evidencePath({ scope: 'rules', id: 'soa-48h-wait', format: 'json', asOf: '2026-10-01' })).toBe('/evidence/rules/soa-48h-wait?format=json&as_of=2026-10-01');
+    expect(evidencePath({ scope: 'runs', id: 'r 1', format: 'md', asOf: '2026-10-01' })).toBe(
+      '/evidence/runs/r%201?format=md',
+    );
+    expect(evidencePath({ scope: 'rules', id: 'soa-48h-wait', format: 'json', asOf: '2026-10-01' })).toBe(
+      '/evidence/rules/soa-48h-wait?format=json&as_of=2026-10-01',
+    );
   });
 });

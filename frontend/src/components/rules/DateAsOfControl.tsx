@@ -11,13 +11,23 @@ export interface DateAsOfControlProps {
 }
 
 /** "Evaluate as of" date input with quick buttons. */
-export function DateAsOfControl({ value, onChange, quick = [], label = 'Evaluate as of', className }: DateAsOfControlProps) {
+export function DateAsOfControl({
+  value,
+  onChange,
+  quick = [],
+  label = 'Evaluate as of',
+  className,
+}: DateAsOfControlProps) {
   return (
     <div className={cn('flex flex-wrap items-end gap-2', className)}>
       <label className="block">
         <span className="label">{label}</span>
         <span className="relative block">
-          <CalendarDays size={14} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden />
+          <CalendarDays
+            size={14}
+            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink-3"
+            aria-hidden
+          />
           <input
             type="date"
             className="input w-[170px] pl-7 font-mono text-[12px]"

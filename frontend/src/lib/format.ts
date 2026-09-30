@@ -53,7 +53,10 @@ export function fmtTs(value: string | null | undefined): string {
   if (!value) return '—';
   const d = parseTs(value);
   if (Number.isNaN(d.getTime())) return value;
-  return d.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, 'Z');
+  return d
+    .toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d{3}Z$/, 'Z');
 }
 
 export function fmtNumber(value: number | null | undefined): string {
@@ -70,10 +73,7 @@ export function fmtDuration(ms: number | null | undefined): string {
   return `${m}m ${String(rem).padStart(2, '0')}s`;
 }
 
-export function durationBetween(
-  start: string | null | undefined,
-  end: string | null | undefined,
-): number | null {
+export function durationBetween(start: string | null | undefined, end: string | null | undefined): number | null {
   if (!start || !end) return null;
   const a = parseTs(start).getTime();
   const b = parseTs(end).getTime();

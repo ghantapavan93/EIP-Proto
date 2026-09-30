@@ -19,7 +19,9 @@ describe('explainRuleVerdict', () => {
   });
 
   it('distinguishes a misread time from a wrong conclusion', () => {
-    expect(explainRuleVerdict({ ...tpmo, model_disclaimer_seconds: 140 }, 'FAIL')?.finding).toMatch(/misread the disclaimer time/);
+    expect(explainRuleVerdict({ ...tpmo, model_disclaimer_seconds: 140 }, 'FAIL')?.finding).toMatch(
+      /misread the disclaimer time/,
+    );
   });
 
   it('stays silent rather than disagree with the stored ground truth', () => {
@@ -28,7 +30,16 @@ describe('explainRuleVerdict', () => {
   });
 
   it('explains the SOA wait under the rule in force', () => {
-    const why = explainRuleVerdict({ expected: false, got: true, rule_logic: { min_hours: 48 }, appointment_hours_after_soa: 3, soa_exception: null }, 'FAIL');
+    const why = explainRuleVerdict(
+      {
+        expected: false,
+        got: true,
+        rule_logic: { min_hours: 48 },
+        appointment_hours_after_soa: 3,
+        soa_exception: null,
+      },
+      'FAIL',
+    );
     expect(why?.check).toBe('3h < 48h wait → violation');
   });
 });

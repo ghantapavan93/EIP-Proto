@@ -1,6 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Activity, BookOpen, CalendarClock, Cpu, FileCheck2, FileText, FlaskConical, GitBranch, Inbox, ScanText, ScrollText, ShieldCheck, Target, X } from 'lucide-react';
+import {
+  Activity,
+  BookOpen,
+  CalendarClock,
+  Cpu,
+  FileCheck2,
+  FileText,
+  FlaskConical,
+  GitBranch,
+  Inbox,
+  ScanText,
+  ScrollText,
+  ShieldCheck,
+  Target,
+  X,
+} from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { MOBILE_NAV_ID } from './shellContext';
 
@@ -55,7 +70,9 @@ function RailBody({ openReviewCount, onNavigate }: { openReviewCount?: number; o
     <div className="mt-3 flex-1 space-y-4 overflow-y-auto px-3 pb-4">
       {GROUPS.map((group) => (
         <div key={group.label}>
-          <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-on-navy-faint">{group.label}</div>
+          <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-on-navy-faint">
+            {group.label}
+          </div>
           <ul className="space-y-px">
             {group.items.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
@@ -93,7 +110,10 @@ function RailBody({ openReviewCount, onNavigate }: { openReviewCount?: number; o
 function Mark() {
   return (
     <div className="flex items-center gap-2.5">
-      <span aria-hidden className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] bg-on-navy/10 text-on-navy">
+      <span
+        aria-hidden
+        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] bg-on-navy/10 text-on-navy"
+      >
         <ShieldCheck size={16} />
       </span>
       <div className="min-w-0">
@@ -148,8 +168,17 @@ export function NavRail({
       </nav>
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden" role="presentation">
-          <div className="absolute inset-0 bg-slate/40" onClick={onMobileClose} aria-hidden data-testid="nav-backdrop" />
-          <nav id={MOBILE_NAV_ID} className="relative flex h-full w-rail max-w-[85vw] flex-col bg-navy text-on-navy" aria-label="Primary">
+          <div
+            className="absolute inset-0 bg-slate/40"
+            onClick={onMobileClose}
+            aria-hidden
+            data-testid="nav-backdrop"
+          />
+          <nav
+            id={MOBILE_NAV_ID}
+            className="relative flex h-full w-rail max-w-[85vw] flex-col bg-navy text-on-navy"
+            aria-label="Primary"
+          >
             <div className="flex items-center justify-between gap-2 border-b border-on-navy/10 py-4 pl-5 pr-2">
               <div>
                 <Mark />

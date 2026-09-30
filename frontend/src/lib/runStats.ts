@@ -19,22 +19,20 @@ function numArray(v: unknown): number[] {
 
 function judgeStability(v: unknown): JudgeStability | undefined {
   if (!isObject(v) || !Array.isArray(v.notes)) return undefined;
-  const notes = v.notes
-    .filter(isObject)
-    .map((n) => {
-      const band = numArray(n.band);
-      return {
-        id: typeof n.id === 'string' ? n.id : '',
-        band: [band[0] ?? 0, band[1] ?? 0] as [number, number],
-        scores: numArray(n.scores),
-        mean: num(n.mean) ?? 0,
-        variance: num(n.variance) ?? 0,
-        in_band: n.in_band === true,
-      };
-    });
+  const notes = v.notes.filter(isObject).map((n) => {
+    const band = numArray(n.band);
+    return {
+      id: typeof n.id === 'string' ? n.id : '',
+      band: [band[0] ?? 0, band[1] ?? 0] as [number, number],
+      scores: numArray(n.scores),
+      mean: num(n.mean) ?? 0,
+      variance: num(n.variance) ?? 0,
+      in_band: n.in_band === true,
+    };
+  });
   return {
     notes,
-    n_per_note: num(v.n_per_note) ?? (notes[0]?.scores.length ?? 0),
+    n_per_note: num(v.n_per_note) ?? notes[0]?.scores.length ?? 0,
     out_of_band: num(v.out_of_band) ?? notes.filter((n) => !n.in_band).length,
     mean_variance: num(v.mean_variance) ?? 0,
     stable: v.stable === true,
@@ -101,8 +99,18 @@ export function testCasesApplied(run: Pick<RunOut, 'stats'> | undefined | null):
   return runStats(run).test_cases?.applied ?? null;
 }
 
-const usdFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const usdFmtSmall = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 5 });
+const usdFmt = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const usdFmtSmall = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 5,
+});
 
 export function fmtUsd(value: number | undefined | null, precise = false): string {
   if (value === undefined || value === null || Number.isNaN(value)) return '—';
@@ -113,7 +121,13 @@ export function fmtUsd(value: number | undefined | null, precise = false): strin
 export function costLabel(c: CostStats | undefined): string {
   if (!c) return '—';
   const basis = c.basis.toLowerCase();
-  const how = basis.includes('simulated') ? 'simulated' : basis.includes('estimat') ? 'estimated' : basis.includes('measur') ? 'measured' : c.basis || 'n/a';
+  const how = basis.includes('simulated')
+    ? 'simulated'
+    : basis.includes('estimat')
+      ? 'estimated'
+      : basis.includes('measur')
+        ? 'measured'
+        : c.basis || 'n/a';
   return `${fmtUsd(c.usd)} · ${how}`;
 }
 
@@ -277,7 +291,9 @@ export function baselineFor(
 }
 
 /** Sum stats.contracts (per-contract PASS/FAIL/FLAG/ERROR) into one set of counts. */
-export function sumOutcomes(byContract: Record<string, OutcomeCounts> | undefined): (OutcomeCounts & { total: number }) | null {
+export function sumOutcomes(
+  byContract: Record<string, OutcomeCounts> | undefined,
+): (OutcomeCounts & { total: number }) | null {
   if (!byContract) return null;
   const t = { PASS: 0, FAIL: 0, FLAG: 0, ERROR: 0, total: 0 };
   for (const c of Object.values(byContract)) {

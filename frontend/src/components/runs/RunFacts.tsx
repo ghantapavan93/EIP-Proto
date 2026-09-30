@@ -14,7 +14,10 @@ export function JudgeChip({ run, compact = false }: { run: RunOut; compact?: boo
   if (!js) return <span className="text-ink-3">—</span>;
   const label = compact ? (js.stable ? 'in band' : 'off band') : js.stable ? 'canary in band' : 'canary off band';
   return (
-    <Chip tone={js.stable ? 'green' : 'amber'} title={`Judge canary: ${js.out_of_band}/${js.notes.length} fixed notes outside author-set bands · mean variance ${js.mean_variance}. A calibration check, not drift over time.`}>
+    <Chip
+      tone={js.stable ? 'green' : 'amber'}
+      title={`Judge canary: ${js.out_of_band}/${js.notes.length} fixed notes outside author-set bands · mean variance ${js.mean_variance}. A calibration check, not drift over time.`}
+    >
       {label}
     </Chip>
   );
@@ -24,7 +27,15 @@ export function JudgeChip({ run, compact = false }: { run: RunOut; compact?: boo
  * Everywhere a run is shown: adapter badge, cost, latency per transcript and
  * judge stability. Inline, dense, no chart.
  */
-export function RunFacts({ run, className, showAdapter = true }: { run: RunOut; className?: string; showAdapter?: boolean }) {
+export function RunFacts({
+  run,
+  className,
+  showAdapter = true,
+}: {
+  run: RunOut;
+  className?: string;
+  showAdapter?: boolean;
+}) {
   const s = runStats(run);
   return (
     <span className={cn('inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-2', className)}>

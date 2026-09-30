@@ -35,7 +35,8 @@ function num(v: unknown): number {
 
 export function factorsOf(run: RunOut): RunFactors {
   const stats = (run.stats ?? {}) as Record<string, unknown>;
-  const judgeId = typeof stats.judge_model_id === 'string' && stats.judge_model_id ? stats.judge_model_id : run.model_id;
+  const judgeId =
+    typeof stats.judge_model_id === 'string' && stats.judge_model_id ? stats.judge_model_id : run.model_id;
   const judge = judgeId === run.model_id ? 'same model as the run' : judgeId;
   const testCases = (stats.test_cases ?? {}) as Record<string, unknown>;
   const overrides = String(num(testCases.in_scope));
@@ -105,20 +106,34 @@ export function attributeRuns(runA: RunOut, runB: RunOut, others: RunOut[] = [])
   const a = factorsOf(runA);
   const b = factorsOf(runB);
   const changed = changedFactors(a, b);
-  const rows: FactorChangeOut[] = changed.map((f) => ({ factor: f, label: FACTOR_LABELS[f], a: a.display[f], b: b.display[f] }));
+  const rows: FactorChangeOut[] = changed.map((f) => ({
+    factor: f,
+    label: FACTOR_LABELS[f],
+    a: a.display[f],
+    b: b.display[f],
+  }));
   const held = FACTORS.filter((f) => !changed.includes(f)).map((f) => FACTOR_LABELS[f]);
   const labels = changed.map((f) => FACTOR_LABELS[f]);
 
   if (changed.length === 0) {
     return {
-      verdict: 'repeat', changed: rows, held_constant: held, scope_note: null, isolating_pairs: [],
-      summary: 'No tracked input differs between A and B. A difference comes from run-to-run variation (which the significance test below weighs) or from something Backstop does not yet fingerprint: generation settings, a simulated defect profile, or model weights re-pulled under the same tag.',
+      verdict: 'repeat',
+      changed: rows,
+      held_constant: held,
+      scope_note: null,
+      isolating_pairs: [],
+      summary:
+        'No tracked input differs between A and B. A difference comes from run-to-run variation (which the significance test below weighs) or from something Backstop does not yet fingerprint: generation settings, a simulated defect profile, or model weights re-pulled under the same tag.',
     };
   }
   if (changed.length === 1) {
     const f = changed[0];
     return {
-      verdict: 'isolated', changed: rows, held_constant: held, scope_note: null, isolating_pairs: [],
+      verdict: 'isolated',
+      changed: rows,
+      held_constant: held,
+      scope_note: null,
+      isolating_pairs: [],
       summary: `Only the ${FACTOR_LABELS[f]} changed (${a.display[f]} → ${b.display[f]}). Every other tracked input was held constant, so the differences below are attributable to that change, subject to the significance test.`,
     };
   }
@@ -126,8 +141,10 @@ export function attributeRuns(runA: RunOut, runB: RunOut, others: RunOut[] = [])
   const found = pairs.map((p) => p.label);
   const missing = labels.filter((l) => !found.includes(l));
   let summary = `The ${join(labels)} changed together. The differences below are real, but they cannot be attributed to any one of these changes.`;
-  if (found.length && !missing.length) summary += ' Existing runs isolate each change on its own; compare those instead.';
-  else if (found.length) summary += ` Existing runs isolate the ${join(found)} change${found.length > 1 ? 's' : ''}; no pair isolates the ${join(missing)} change${missing.length > 1 ? 's' : ''} yet.`;
+  if (found.length && !missing.length)
+    summary += ' Existing runs isolate each change on its own; compare those instead.';
+  else if (found.length)
+    summary += ` Existing runs isolate the ${join(found)} change${found.length > 1 ? 's' : ''}; no pair isolates the ${join(missing)} change${missing.length > 1 ? 's' : ''} yet.`;
   else summary += ' No existing pair of runs isolates them; start runs that change one thing at a time.';
   const primary = changed.filter((f) => !JUDGED_ONLY.has(f));
   const scope_note =

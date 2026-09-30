@@ -4,7 +4,15 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import type { RunOut } from '../api/types';
-import { baselineFor, gateStripKey, holdoutPair, isDevelopmentRun, latestByTrigger, latestPerConfiguration, runCorpus } from '../lib/runStats';
+import {
+  baselineFor,
+  gateStripKey,
+  holdoutPair,
+  isDevelopmentRun,
+  latestByTrigger,
+  latestPerConfiguration,
+  runCorpus,
+} from '../lib/runStats';
 import { safeNext } from '../lib/redirect';
 import { CorpusChip, HOLDOUT_TOOLTIP } from '../components/runs/CorpusChip';
 import { CallSetNotice } from '../pages/RunCompare';
@@ -67,9 +75,22 @@ describe('run corpus', () => {
 
 describe('change-trigger card selection', () => {
   const devV2 = run({ id: 'dev-v2', prompt_hash: 'p2', trigger: 'MANUAL', started_at: '2026-09-23T06:00:00Z' });
-  const devV3 = run({ id: 'dev-v3', prompt_version: 3, prompt_hash: 'p3', trigger: 'PROMPT', started_at: '2026-09-23T07:00:00Z' });
+  const devV3 = run({
+    id: 'dev-v3',
+    prompt_version: 3,
+    prompt_hash: 'p3',
+    trigger: 'PROMPT',
+    started_at: '2026-09-23T07:00:00Z',
+  });
   const heldV2 = run({ id: 'held-v2', corpus: 'holdout', trigger: 'MANUAL', started_at: '2026-09-23T07:30:00Z' });
-  const heldV3 = run({ id: 'held-v3', corpus: 'holdout', prompt_version: 3, prompt_hash: 'p3', trigger: 'PROMPT', started_at: '2026-09-23T08:00:00Z' });
+  const heldV3 = run({
+    id: 'held-v3',
+    corpus: 'holdout',
+    prompt_version: 3,
+    prompt_hash: 'p3',
+    trigger: 'PROMPT',
+    started_at: '2026-09-23T08:00:00Z',
+  });
   const ingestedRule = run({ id: 'ing-rule', corpus: 'ingested', trigger: 'RULE', started_at: '2026-09-23T09:00:00Z' });
 
   it('never picks a held-out or ingested run as B', () => {
@@ -92,7 +113,12 @@ describe('held-out pair for the Runs callout', () => {
   const v3 = run({ id: 'h3', corpus: 'holdout', prompt_version: 3 });
 
   it('pairs the qwen2.5 7B held-out runs at prompt v2 and v3', () => {
-    const pair = holdoutPair([run({ id: 'dev', prompt_version: 3 }), v2, v3, run({ id: 'other', corpus: 'holdout', prompt_version: 3, model_id: 'ollama/qwen2.5:3b-instruct' })]);
+    const pair = holdoutPair([
+      run({ id: 'dev', prompt_version: 3 }),
+      v2,
+      v3,
+      run({ id: 'other', corpus: 'holdout', prompt_version: 3, model_id: 'ollama/qwen2.5:3b-instruct' }),
+    ]);
     expect(pair?.before.id).toBe('h2');
     expect(pair?.after.id).toBe('h3');
   });
@@ -123,7 +149,9 @@ describe('CorpusChip', () => {
 describe('Compare: different call sets', () => {
   it('says how many cells were left out of the comparison', () => {
     render(<CallSetNotice whatChanged={{ corpus: true, cells_only_in_a: 480, cells_only_in_b: 16 }} />);
-    expect(screen.getByRole('note')).toHaveTextContent('Different call sets: 480 cells only in A, 16 only in B were not compared.');
+    expect(screen.getByRole('note')).toHaveTextContent(
+      'Different call sets: 480 cells only in A, 16 only in B were not compared.',
+    );
   });
 
   it('warns on a corpus change even when the server sends no cell counts', () => {
@@ -132,7 +160,9 @@ describe('Compare: different call sets', () => {
   });
 
   it('stays silent when both runs scored the same cells', () => {
-    const { container } = render(<CallSetNotice whatChanged={{ corpus: false, cells_only_in_a: 0, cells_only_in_b: 0 }} />);
+    const { container } = render(
+      <CallSetNotice whatChanged={{ corpus: false, cells_only_in_a: 0, cells_only_in_b: 0 }} />,
+    );
     expect(container).toBeEmptyDOMElement();
   });
 });
@@ -144,7 +174,18 @@ describe('login next param', () => {
   });
 
   it('rejects protocol-relative, backslash and absolute targets', () => {
-    for (const bad of ['//evil.com', '/\\evil.com', '\\\\evil.com', 'https://evil.com', 'evil.com', '/\t/evil.com', '/\n/evil.com', '', null, undefined]) {
+    for (const bad of [
+      '//evil.com',
+      '/\\evil.com',
+      '\\\\evil.com',
+      'https://evil.com',
+      'evil.com',
+      '/\t/evil.com',
+      '/\n/evil.com',
+      '',
+      null,
+      undefined,
+    ]) {
       expect(safeNext(bad)).toBe('/');
     }
   });
@@ -200,18 +241,30 @@ describe('Runs page', () => {
 
   it('links the held-out v2 → v3 comparison and labels held-out rows', async () => {
     const heldV2 = run({ id: 'aaaaaaaa-held-v2', corpus: 'holdout', prompt_version: 2 });
-    const heldV3 = run({ id: 'bbbbbbbb-held-v3', corpus: 'holdout', prompt_version: 3, started_at: '2026-09-23T08:00:00Z' });
+    const heldV3 = run({
+      id: 'bbbbbbbb-held-v3',
+      corpus: 'holdout',
+      prompt_version: 3,
+      started_at: '2026-09-23T08:00:00Z',
+    });
     stubApi({ '/runs': [run({ id: 'cccccccc-dev' }), heldV2, heldV3], '/contracts': [], '/meta': META });
     renderPage(<RunsPage />, '/runs');
     const callout = await screen.findByText('Held-out check:');
     const note = callout.closest('p') as HTMLElement;
     expect(note).toHaveTextContent('Held-out check: prompt v3 vs v2 on 60 unseen calls → Compare');
-    expect(within(note).getByRole('link', { name: 'Compare' })).toHaveAttribute('href', '/runs/compare?a=aaaaaaaa-held-v2&b=bbbbbbbb-held-v3');
+    expect(within(note).getByRole('link', { name: 'Compare' })).toHaveAttribute(
+      'href',
+      '/runs/compare?a=aaaaaaaa-held-v2&b=bbbbbbbb-held-v3',
+    );
     expect(await screen.findAllByText('HELD-OUT · H001–H060')).toHaveLength(2);
   });
 
   it('shows no callout without both held-out runs', async () => {
-    stubApi({ '/runs': [run({ id: 'cccccccc-dev' }), run({ id: 'aaaaaaaa-held-v2', corpus: 'holdout' })], '/contracts': [], '/meta': META });
+    stubApi({
+      '/runs': [run({ id: 'cccccccc-dev' }), run({ id: 'aaaaaaaa-held-v2', corpus: 'holdout' })],
+      '/contracts': [],
+      '/meta': META,
+    });
     renderPage(<RunsPage />, '/runs');
     expect(await screen.findByText('HELD-OUT · H001–H060')).toBeInTheDocument();
     expect(screen.queryByText('Held-out check:')).toBeNull();
@@ -230,12 +283,27 @@ describe('Runs page', () => {
 describe('Artifacts transcript corpus', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  const transcript = { id: 't1', code: 'T001', product_line: 'MA', synthetic: true, duration_seconds: 600, labels: {}, text: null };
+  const transcript = {
+    id: 't1',
+    code: 'T001',
+    product_line: 'MA',
+    synthetic: true,
+    duration_seconds: 600,
+    labels: {},
+    text: null,
+  };
 
   it('counts only the calls the API returns and notes the held-out calls kept out of view', async () => {
-    stubApi({ '/assets': [], '/transcripts': [transcript], '/meta': META, '/health/deep': { holdout_transcripts: 60, components: [] } });
+    stubApi({
+      '/assets': [],
+      '/transcripts': [transcript],
+      '/meta': META,
+      '/health/deep': { holdout_transcripts: 60, components: [] },
+    });
     renderPage(<ArtifactsPage />, '/artifacts');
-    expect(await screen.findByText('+ 60 held-out calls kept out of view (used only to check prompt overfitting)')).toBeInTheDocument();
+    expect(
+      await screen.findByText('+ 60 held-out calls kept out of view (used only to check prompt overfitting)'),
+    ).toBeInTheDocument();
     expect(screen.getByText(/^1 transcripts · 0 ingested/)).toBeInTheDocument();
   });
 

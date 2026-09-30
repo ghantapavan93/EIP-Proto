@@ -27,7 +27,13 @@ export function KeyValue({
             >
               {row.key}
             </th>
-            <td className={cn('align-top text-ink [overflow-wrap:anywhere]', dense ? 'py-1' : 'py-1.5', row.mono !== false && 'font-mono text-[12px]')}>
+            <td
+              className={cn(
+                'align-top text-ink [overflow-wrap:anywhere]',
+                dense ? 'py-1' : 'py-1.5',
+                row.mono !== false && 'font-mono text-[12px]',
+              )}
+            >
               {row.value === null || row.value === undefined || row.value === '' ? (
                 <span className="text-ink-3">—</span>
               ) : (

@@ -28,7 +28,15 @@ const BANDS: Array<[string, number, number]> = [
   ['60', 31, 60],
   ['90', 61, 90],
 ];
-const KIND_ORDER: Record<string, number> = { marketing_start: 0, aep_start: 1, aep_end: 2, oep_start: 3, rule_applies: 4, vote: 5, deferral_ends: 6 };
+const KIND_ORDER: Record<string, number> = {
+  marketing_start: 0,
+  aep_start: 1,
+  aep_end: 2,
+  oep_start: 3,
+  rule_applies: 4,
+  vote: 5,
+  deferral_ends: 6,
+};
 const SET_ASIDE = new Set(['vacated', 'stayed']);
 const OPEN_STATES = new Set(['open', 'in_review', 'verified']);
 
@@ -79,7 +87,12 @@ export function readiness(
 ): ReadinessOut {
   const horizonEnd = addDays(asOf, MILESTONE_HORIZON_DAYS);
   const within = (d: string) => asOf <= d && d <= horizonEnd;
-  const staleOn = (rule: RuleOut, date: string) => evaluate(rule, edges.filter((e) => e.rule_code === rule.code), date);
+  const staleOn = (rule: RuleOut, date: string) =>
+    evaluate(
+      rule,
+      edges.filter((e) => e.rule_code === rule.code),
+      date,
+    );
   const openTasks = tasks.filter(isOpen);
 
   const marketing = nextOnOrAfter(asOf, 10, 1);
@@ -87,10 +100,38 @@ export function readiness(
   const aepEnd = nextOnOrAfter(asOf, 12, 7);
   const oepStart = nextOnOrAfter(asOf, 1, 1);
   const milestones: Array<Omit<ReadinessMilestone, 'days_from_as_of'>> = [
-    { date: marketing, kind: 'marketing_start', label: `CY${Number(marketing.slice(0, 4)) + 1} marketing may begin (42 CFR 422.2263(a))`, rule_code: null, version: null, status: null },
-    { date: aepStart, kind: 'aep_start', label: `AEP opens for CY${Number(aepStart.slice(0, 4)) + 1} coverage`, rule_code: null, version: null, status: null },
-    { date: aepEnd, kind: 'aep_end', label: `AEP closes (CY${Number(aepEnd.slice(0, 4)) + 1} coverage)`, rule_code: null, version: null, status: null },
-    { date: oepStart, kind: 'oep_start', label: `MA Open Enrollment Period opens (CY${oepStart.slice(0, 4)})`, rule_code: null, version: null, status: null },
+    {
+      date: marketing,
+      kind: 'marketing_start',
+      label: `CY${Number(marketing.slice(0, 4)) + 1} marketing may begin (42 CFR 422.2263(a))`,
+      rule_code: null,
+      version: null,
+      status: null,
+    },
+    {
+      date: aepStart,
+      kind: 'aep_start',
+      label: `AEP opens for CY${Number(aepStart.slice(0, 4)) + 1} coverage`,
+      rule_code: null,
+      version: null,
+      status: null,
+    },
+    {
+      date: aepEnd,
+      kind: 'aep_end',
+      label: `AEP closes (CY${Number(aepEnd.slice(0, 4)) + 1} coverage)`,
+      rule_code: null,
+      version: null,
+      status: null,
+    },
+    {
+      date: oepStart,
+      kind: 'oep_start',
+      label: `MA Open Enrollment Period opens (CY${oepStart.slice(0, 4)})`,
+      rule_code: null,
+      version: null,
+      status: null,
+    },
   ];
   const horizon: Record<string, ReadinessHorizonItem[]> = { '30': [], '60': [], '90': [] };
   const vacated: ReadinessVacated[] = [];
@@ -100,20 +141,48 @@ export function readiness(
     for (const v of rule.versions) {
       if (SET_ASIDE.has(v.status)) {
         const top = v.sources?.[0];
-        vacated.push({ rule_code: rule.code, version: v.version, status: v.status, why: clip(v.summary || v.clause_text, 400), source: top?.cite || v.source_url || rule.citation, source_url: top?.url || v.source_url || '' });
+        vacated.push({
+          rule_code: rule.code,
+          version: v.version,
+          status: v.status,
+          why: clip(v.summary || v.clause_text, 400),
+          source: top?.cite || v.source_url || rule.citation,
+          source_url: top?.url || v.source_url || '',
+        });
         continue;
       }
       if (v.status === 'proposed') {
-        proposed.push({ rule_code: rule.code, version: v.version, vote_date: v.vote_date ?? null, why: clip(v.summary || v.clause_text, 400), effective_from: v.effective_from, origin: v.git_commit.startsWith('ui:') || v.git_commit === 'uncommitted' ? 'api' : 'yaml' });
+        proposed.push({
+          rule_code: rule.code,
+          version: v.version,
+          vote_date: v.vote_date ?? null,
+          why: clip(v.summary || v.clause_text, 400),
+          effective_from: v.effective_from,
+          origin: v.git_commit.startsWith('ui:') || v.git_commit === 'uncommitted' ? 'api' : 'yaml',
+        });
         if (v.vote_date && within(v.vote_date)) {
-          milestones.push({ date: v.vote_date, kind: 'vote', rule_code: rule.code, version: v.version, status: v.status, label: `${rule.regulator} vote on ${rule.code} v${v.version} (proposed)` });
+          milestones.push({
+            date: v.vote_date,
+            kind: 'vote',
+            rule_code: rule.code,
+            version: v.version,
+            status: v.status,
+            label: `${rule.regulator} vote on ${rule.code} v${v.version} (proposed)`,
+          });
         }
         continue;
       }
       if (!governs(v)) continue;
       for (const d of v.deferrals ?? []) {
         if (within(d.deferred_to)) {
-          milestones.push({ date: d.deferred_to, kind: 'deferral_ends', rule_code: rule.code, version: v.version, status: v.status, label: `${rule.code} v${v.version}: deferral ends — ${clip(d.provision, 90)}` });
+          milestones.push({
+            date: d.deferred_to,
+            kind: 'deferral_ends',
+            rule_code: rule.code,
+            version: v.version,
+            status: v.status,
+            label: `${rule.code} v${v.version}: deferral ends — ${clip(d.provision, 90)}`,
+          });
         }
       }
       if (!within(v.effective_from)) continue;
@@ -141,18 +210,31 @@ export function readiness(
       });
     }
   }
-  milestones.sort((a, b) => a.date.localeCompare(b.date) || (KIND_ORDER[a.kind] ?? 9) - (KIND_ORDER[b.kind] ?? 9) || (a.rule_code ?? '').localeCompare(b.rule_code ?? '') || (a.version ?? 0) - (b.version ?? 0));
+  milestones.sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) ||
+      (KIND_ORDER[a.kind] ?? 9) - (KIND_ORDER[b.kind] ?? 9) ||
+      (a.rule_code ?? '').localeCompare(b.rule_code ?? '') ||
+      (a.version ?? 0) - (b.version ?? 0),
+  );
   for (const items of Object.values(horizon)) {
-    items.sort((a, b) => a.applies_from.localeCompare(b.applies_from) || b.stale_encodings_on_that_date - a.stale_encodings_on_that_date || a.rule_code.localeCompare(b.rule_code));
+    items.sort(
+      (a, b) =>
+        a.applies_from.localeCompare(b.applies_from) ||
+        b.stale_encodings_on_that_date - a.stale_encodings_on_that_date ||
+        a.rule_code.localeCompare(b.rule_code),
+    );
   }
 
   const byRole = new Map<string, ReviewTaskOut[]>();
-  for (const t of openTasks) byRole.set(t.assignee_role || 'unassigned', [...(byRole.get(t.assignee_role || 'unassigned') ?? []), t]);
+  for (const t of openTasks)
+    byRole.set(t.assignee_role || 'unassigned', [...(byRole.get(t.assignee_role || 'unassigned') ?? []), t]);
   const owners: ReadinessOwner[] = [...byRole.entries()]
     .map(([role, list]) => {
       const ages = list.map((t) => Math.max(0, (now.getTime() - Date.parse(t.opened_at)) / DAY_MS));
       const byKind: Record<string, number> = {};
-      for (const t of [...list].sort((a, b) => a.kind.localeCompare(b.kind))) byKind[t.kind] = (byKind[t.kind] ?? 0) + 1;
+      for (const t of [...list].sort((a, b) => a.kind.localeCompare(b.kind)))
+        byKind[t.kind] = (byKind[t.kind] ?? 0) + 1;
       const round = (x: number | null) => (x === null ? null : Math.round(x * 10) / 10);
       return {
         role,
@@ -181,6 +263,11 @@ export function readiness(
       note: 'Open counts are live. There is no history table, so there is no trend line; stale encodings on the target date are evaluated in memory and open no tasks.',
     },
     vacated: vacated.sort((a, b) => a.rule_code.localeCompare(b.rule_code) || a.version - b.version),
-    proposed: proposed.sort((a, b) => (a.vote_date ?? '9999').localeCompare(b.vote_date ?? '9999') || a.rule_code.localeCompare(b.rule_code) || a.version - b.version),
+    proposed: proposed.sort(
+      (a, b) =>
+        (a.vote_date ?? '9999').localeCompare(b.vote_date ?? '9999') ||
+        a.rule_code.localeCompare(b.rule_code) ||
+        a.version - b.version,
+    ),
   };
 }

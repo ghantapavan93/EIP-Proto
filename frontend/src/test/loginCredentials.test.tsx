@@ -12,11 +12,15 @@ import { LoginPage } from '../pages/Login';
 function renderWithHealth(defaultCredentials: boolean) {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () =>
-      new Response(JSON.stringify({ status: 'healthy', ready: true, default_credentials: defaultCredentials, components: [] }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ status: 'healthy', ready: true, default_credentials: defaultCredentials, components: [] }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
     ),
   );
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

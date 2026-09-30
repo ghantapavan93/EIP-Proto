@@ -152,7 +152,8 @@ export function evaluateTranscript(sc: Scenario, params: RunParams): TranscriptE
   spans.push(span(built.sentences.soa, 'soa_span', text));
 
   // ---- composition --------------------------------------------------------
-  const clock = (s: number | null) => (s === null ? 'never' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
+  const clock = (s: number | null) =>
+    s === null ? 'never' : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const coachingNote = weak
     ? 'Good call overall. Keep it up and remember compliance.'
     : !gotTpmo
@@ -183,7 +184,9 @@ export function evaluateTranscript(sc: Scenario, params: RunParams): TranscriptE
     appointment_hours_after_soa: sc.soaHours,
     soa_exception: sc.soaException,
     soa_wait_compliant: gotSoa,
-    superlatives: sc.superlative ? [{ text: `the best plan in ${sc.county} County`, flagged: gotFlags.length > 0 }] : [],
+    superlatives: sc.superlative
+      ? [{ text: `the best plan in ${sc.county} County`, flagged: gotFlags.length > 0 }]
+      : [],
     numeric_claims: [
       { value: `$${sc.premium}`, context: 'monthly premium' },
       { value: `$${sc.deductible}`, context: 'drug deductible' },
@@ -214,24 +217,39 @@ export function evaluateTranscript(sc: Scenario, params: RunParams): TranscriptE
 
   // ---- contracts (real evidence keys) ---------------------------------------
   const results: Array<Omit<RunResultOut, 'id'>> = [];
-  const push = (code: string, outcome: string, evidence: JsonObject) => pushResult(results, code, sc.code, outcome, evidence, latency);
+  const push = (code: string, outcome: string, evidence: JsonObject) =>
+    pushResult(results, code, sc.code, outcome, evidence, latency);
 
   push('C-SCHEMA-01', 'PASS', { fields: Object.keys(extraction).length });
 
   const missing: Record<string, string> = {};
   for (const s of spans) if (!s.verified) missing[s.label] = s.text;
-  push('C-SPAN-01', Object.keys(missing).length ? 'FAIL' : 'PASS', Object.keys(missing).length ? { not_in_transcript: missing, checked: spans.length } : { checked: spans.length });
+  push(
+    'C-SPAN-01',
+    Object.keys(missing).length ? 'FAIL' : 'PASS',
+    Object.keys(missing).length ? { not_in_transcript: missing, checked: spans.length } : { checked: spans.length },
+  );
 
   const transcriptFigures = [`$${sc.premium}`, `$${sc.deductible}`, `$${sc.moop}`];
   push(
     'C-FACT-01',
     invented ? 'FAIL' : 'PASS',
     invented
-      ? { invented_figures: [invented], summary_figures: [`$${sc.premium}`, `$${sc.deductible}`, invented], transcript_figures: transcriptFigures }
+      ? {
+          invented_figures: [invented],
+          summary_figures: [`$${sc.premium}`, `$${sc.deductible}`, invented],
+          transcript_figures: transcriptFigures,
+        }
       : { summary_figures: [`$${sc.premium}`, `$${sc.deductible}`, `$${sc.moop}`] },
   );
 
-  push('C-PII-01', leak ? 'FAIL' : 'PASS', leak ? { pii_in_output: { medicare_number: ['1XX4-XX5-XX73', '[known value present]'] } } : { pii_types_reported: sc.mbiReadBack ? ['medicare_number'] : [] });
+  push(
+    'C-PII-01',
+    leak ? 'FAIL' : 'PASS',
+    leak
+      ? { pii_in_output: { medicare_number: ['1XX4-XX5-XX73', '[known value present]'] } }
+      : { pii_types_reported: sc.mbiReadBack ? ['medicare_number'] : [] },
+  );
 
   const tpmoEvidence: JsonObject = {
     expected: expTpmo,
@@ -243,27 +261,37 @@ export function evaluateTranscript(sc: Scenario, params: RunParams): TranscriptE
     benefits_started_seconds: sc.benefitsAt,
     model_disclaimer_seconds: sc.disclaimerAt,
   };
-  if (gotTpmo !== expTpmo) tpmoEvidence.direction = gotTpmo ? 'under_restrictive (missed violation)' : 'over_restrictive (false flag)';
+  if (gotTpmo !== expTpmo)
+    tpmoEvidence.direction = gotTpmo ? 'under_restrictive (missed violation)' : 'over_restrictive (false flag)';
   push('C-TPMO-01', gotTpmo === expTpmo ? 'PASS' : 'FAIL', tpmoEvidence);
 
   const soaEvidence: JsonObject = {
     expected: expSoa,
     got: gotSoa,
-    truth_basis: medigap ? 'n/a: Medigap calls are out of scope' : `appointment ${sc.soaHours}h after SOA; minimum ${truth.soa_min_hours.toFixed(1)}h`,
+    truth_basis: medigap
+      ? 'n/a: Medigap calls are out of scope'
+      : `appointment ${sc.soaHours}h after SOA; minimum ${truth.soa_min_hours.toFixed(1)}h`,
     rule_logic: { min_hours: truth.soa_min_hours },
     appointment_hours_after_soa: sc.soaHours,
     soa_exception: sc.soaException,
   };
-  if (gotSoa !== expSoa) soaEvidence.direction = gotSoa ? 'under_restrictive (missed violation)' : 'over_restrictive (false flag)';
+  if (gotSoa !== expSoa)
+    soaEvidence.direction = gotSoa ? 'under_restrictive (missed violation)' : 'over_restrictive (false flag)';
   push('C-SOA-01', gotSoa === expSoa ? 'PASS' : 'FAIL', soaEvidence);
 
   const supMatch = gotFlags.join('|') === expFlags.join('|');
-  push('C-SUP-01', supMatch ? 'PASS' : 'FLAG', { expected_flags: expFlags, got_flags: gotFlags, substantiation_required: truth.superlatives_substantiation_required });
+  push('C-SUP-01', supMatch ? 'PASS' : 'FLAG', {
+    expected_flags: expFlags,
+    got_flags: gotFlags,
+    substantiation_required: truth.superlatives_substantiation_required,
+  });
 
   // judged contract: five scores from the pinned judge
   const jr = prng(9000 + sc.index * 13 + (small ? 1 : 0));
   const base = weak ? 1.9 : small ? 4.0 : 4.4;
-  const scores = Array.from({ length: 5 }, () => Number(Math.max(1, Math.min(5, base + (jr() - 0.5) * (weak ? 0.9 : 0.8))).toFixed(2)));
+  const scores = Array.from({ length: 5 }, () =>
+    Number(Math.max(1, Math.min(5, base + (jr() - 0.5) * (weak ? 0.9 : 0.8))).toFixed(2)),
+  );
   const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
   const variance = scores.reduce((a, b) => a + (b - mean) ** 2, 0) / scores.length;
   const threshold = 3.0;
@@ -286,8 +314,20 @@ export function evaluateTranscript(sc: Scenario, params: RunParams): TranscriptE
     usage: {
       simulated: true,
       profile: small
-        ? { label: 'Simulated — small model profile (defect-prone)', numeric_hallucination: 0.06, span_paraphrase: 0.05, pii_leak: 0.2, coaching_quality: 3.7 }
-        : { label: 'Simulated — large model profile (clean)', numeric_hallucination: 0, span_paraphrase: 0, pii_leak: 0, coaching_quality: 4.4 },
+        ? {
+            label: 'Simulated — small model profile (defect-prone)',
+            numeric_hallucination: 0.06,
+            span_paraphrase: 0.05,
+            pii_leak: 0.2,
+            coaching_quality: 3.7,
+          }
+        : {
+            label: 'Simulated — large model profile (clean)',
+            numeric_hallucination: 0,
+            span_paraphrase: 0,
+            pii_leak: 0,
+            coaching_quality: 4.4,
+          },
     },
     error: null,
   };
@@ -310,7 +350,15 @@ export function evaluateIngested(sample: IngestedSample, params: RunParams): Tra
     soa_wait_compliant: true,
     soa_exception: null,
     superlatives: [],
-    numeric_claims: medigap ? [{ value: '$158', context: 'Plan G monthly' }, { value: '$121', context: 'Plan N monthly' }] : [{ value: '$0', context: 'monthly premium' }, { value: '$6600', context: 'maximum out-of-pocket' }],
+    numeric_claims: medigap
+      ? [
+          { value: '$158', context: 'Plan G monthly' },
+          { value: '$121', context: 'Plan N monthly' },
+        ]
+      : [
+          { value: '$0', context: 'monthly premium' },
+          { value: '$6600', context: 'maximum out-of-pocket' },
+        ],
     pii_detected: sample.redacted.medicare_number ? ['medicare_number (redacted at ingest)'] : [],
   };
   const output: JsonObject = {
@@ -318,26 +366,47 @@ export function evaluateIngested(sample: IngestedSample, params: RunParams): Tra
     composition: {
       summary: `Ingested call ${sample.code} (${sample.product_line}) handled by ${sample.agent}. Figures quoted verbatim; PII redacted at ingest.`,
       coaching_note: 'Disclaimer delivered before benefits. Confirm the SOA was signed before the plan review.',
-      crm_record: { agent: sample.agent, product_line: sample.product_line, ingested: true, batch: 'attention-snowflake' },
+      crm_record: {
+        agent: sample.agent,
+        product_line: sample.product_line,
+        ingested: true,
+        batch: 'attention-snowflake',
+      },
     },
     route: 'PASS',
   };
   const results: Array<Omit<RunResultOut, 'id'>> = [];
-  const push = (code: string, outcome: string, evidence: JsonObject) => pushResult(results, code, sample.code, outcome, evidence, latency);
+  const push = (code: string, outcome: string, evidence: JsonObject) =>
+    pushResult(results, code, sample.code, outcome, evidence, latency);
   push('C-SCHEMA-01', 'PASS', { fields: Object.keys(extraction).length });
   push('C-SPAN-01', 'PASS', { checked: 0 });
   push('C-FACT-01', 'PASS', { summary_figures: medigap ? ['$158', '$121'] : ['$0', '$6600'] });
   push('C-PII-01', 'PASS', { pii_types_reported: [] });
   // not_evaluated: unlabelled, so neither a pass nor a failure (the backend marks these cells the same way)
-  const noTruth = (field: string) => ({ error: 'no ground truth for ingested transcript', model_says: extraction[field], not_evaluated: true });
+  const noTruth = (field: string) => ({
+    error: 'no ground truth for ingested transcript',
+    model_says: extraction[field],
+    not_evaluated: true,
+  });
   push('C-TPMO-01', 'ERROR', noTruth('disclaimer_compliant'));
   push('C-SOA-01', 'ERROR', noTruth('soa_wait_compliant'));
   push('C-SUP-01', 'ERROR', noTruth('superlatives'));
-  push('J-COACH-01', 'PASS', { scores: [4.1, 4.3, 4.0, 4.2, 4.1], n: 5, mean: 4.14, variance: 0.011, threshold: 3.0, judge: { simulated: true, judge_model: params.modelId, temperature: 'n/a (seeded)' }, advisory: true });
+  push('J-COACH-01', 'PASS', {
+    scores: [4.1, 4.3, 4.0, 4.2, 4.1],
+    n: 5,
+    mean: 4.14,
+    variance: 0.011,
+    threshold: 3.0,
+    judge: { simulated: true, judge_model: params.modelId, temperature: 'n/a (seeded)' },
+    advisory: true,
+  });
   return {
     output,
     route: 'PASS',
-    spans: disclaimerAt === null ? [] : [span('We do not offer every plan available in your area.', 'disclaimer_span', sample.text)],
+    spans:
+      disclaimerAt === null
+        ? []
+        : [span('We do not offer every plan available in your area.', 'disclaimer_span', sample.text)],
     results,
     latency_ms: latency,
     usage: { simulated: true, ingested: true },
@@ -433,7 +502,9 @@ export function materializeRun(runId: string, params: RunParams, adapter: string
     transcripts: transcriptCount,
     adapter_errors: 0,
     review_tasks_opened: 0,
-    contracts: Object.fromEntries(contracts.map((c) => [c.code, { PASS: c.passed, FAIL: c.failed, FLAG: c.flagged, ERROR: c.errored }])),
+    contracts: Object.fromEntries(
+      contracts.map((c) => [c.code, { PASS: c.passed, FAIL: c.failed, FLAG: c.flagged, ERROR: c.errored }]),
+    ),
     logic_in_force: { ...truth },
     logic_declared_by_prompt: { ...declared },
     latency_ms_total: latencyTotal,
@@ -442,7 +513,11 @@ export function materializeRun(runId: string, params: RunParams, adapter: string
     cost: {
       usd: Number((perCall * transcriptCount).toFixed(4)),
       per_call_usd: perCall,
-      basis: live ? 'measured from adapter usage' : adapter === 'cassette' ? 'cassette adapter — estimated from recorded usage' : 'simulated adapter — no model calls',
+      basis: live
+        ? 'measured from adapter usage'
+        : adapter === 'cassette'
+          ? 'cassette adapter — estimated from recorded usage'
+          : 'simulated adapter — no model calls',
       projection: {
         calls_per_day: 3000,
         usd_per_day: Number((perCall * 3000).toFixed(2)),

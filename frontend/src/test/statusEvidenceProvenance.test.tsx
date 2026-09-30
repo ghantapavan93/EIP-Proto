@@ -40,7 +40,15 @@ const STATUS: StatusOut = {
     { name: 'ollama', state: 'offline', detail: 'not reachable — recorded cassettes still replay', required: false },
   ],
   counts: { rules: 7, artifacts: 21, contracts: 8, golden_cases: 37, transcripts: 60 },
-  last_run: { id: 'run-1', finished_at: new Date(Date.now() - 120_000).toISOString(), gate: 'RED', status: 'COMPLETE', model_id: 'ollama/qwen2.5:3b', prompt_version: 2, trigger: 'MODEL' },
+  last_run: {
+    id: 'run-1',
+    finished_at: new Date(Date.now() - 120_000).toISOString(),
+    gate: 'RED',
+    status: 'COMPLETE',
+    model_id: 'ollama/qwen2.5:3b',
+    prompt_version: 2,
+    trigger: 'MODEL',
+  },
   review: { actionable_open: 12, advisory_open: 3 },
   audit_chain: { verified: true, rows: 114 },
   user: { name: 'engineer', role: 'engineer' },
@@ -49,10 +57,32 @@ const STATUS: StatusOut = {
 
 function flagged(id: string, run: string, contract: string): ReviewTaskOut {
   return {
-    id, kind: 'FLAGGED_RESULT', state: 'open', rule_code: null, rule_version: null, asset_code: null, asset_name: null, asset_type: null,
-    asset_is_synthetic: null, edge_id: null, evidence_span: null, run_result_id: null, run_id: run, contract_code: contract, transcript_code: 'T1',
-    staleness_direction: null, reason: '', assignee_role: 'compliance', reason_code: null, note: '', decided_by: null, opened_at: '2026-09-23T07:00:00Z',
-    closed_at: null, payload: {}, allowed_transitions: [], lane: 'actionable',
+    id,
+    kind: 'FLAGGED_RESULT',
+    state: 'open',
+    rule_code: null,
+    rule_version: null,
+    asset_code: null,
+    asset_name: null,
+    asset_type: null,
+    asset_is_synthetic: null,
+    edge_id: null,
+    evidence_span: null,
+    run_result_id: null,
+    run_id: run,
+    contract_code: contract,
+    transcript_code: 'T1',
+    staleness_direction: null,
+    reason: '',
+    assignee_role: 'compliance',
+    reason_code: null,
+    note: '',
+    decided_by: null,
+    opened_at: '2026-09-23T07:00:00Z',
+    closed_at: null,
+    payload: {},
+    allowed_transitions: [],
+    lane: 'actionable',
   };
 }
 
@@ -62,7 +92,12 @@ afterEach(() => {
 
 describe('StatusRail', () => {
   it('shows live counts, last run and the review breakdown from real state', () => {
-    const tasks = [flagged('a', 'r1', 'C-TPMO-01'), flagged('b', 'r1', 'C-TPMO-01'), flagged('c', 'r2', 'C-SOA-01'), { ...flagged('d', 'r1', 'x'), kind: 'STALE_ASSET' }];
+    const tasks = [
+      flagged('a', 'r1', 'C-TPMO-01'),
+      flagged('b', 'r1', 'C-TPMO-01'),
+      flagged('c', 'r2', 'C-SOA-01'),
+      { ...flagged('d', 'r1', 'x'), kind: 'STALE_ASSET' },
+    ];
     wrap(
       <>
         <SystemPulse status={STATUS} />
@@ -103,7 +138,9 @@ describe('health components', () => {
 describe('EvidenceExport', () => {
   it('previews the bundle in a drawer, downloads it and shows the first 12 chars of its sha256', async () => {
     downloadWithMeta.mockResolvedValue({ name: 'backstop-evidence-run-abc.json', sha256: 'a1b2c3d4e5f6a7b8c9d0' });
-    wrap(<EvidenceExport scope="runs" id="run-1" preview={[{ label: 'Run', value: 'run-1 · gate RED', mono: true }]} />);
+    wrap(
+      <EvidenceExport scope="runs" id="run-1" preview={[{ label: 'Run', value: 'run-1 · gate RED', mono: true }]} />,
+    );
     // the button opens a preview drawer first; nothing downloads until a format is chosen
     fireEvent.click(screen.getByRole('button', { name: /Export evidence/ }));
     const drawer = screen.getByRole('dialog', { name: 'Evidence bundle' });
@@ -122,15 +159,30 @@ describe('EvidenceExport', () => {
     fireEvent.click(screen.getByRole('button', { name: /Export evidence/ }));
     fireEvent.click(screen.getByRole('button', { name: /Download Markdown/ }));
     expect(await screen.findByText('Evidence export failed')).toBeInTheDocument();
-    expect(downloadWithMeta).toHaveBeenCalledWith('/evidence/rules/soa-48h-wait?format=md&as_of=2026-10-01', expect.any(String));
+    expect(downloadWithMeta).toHaveBeenCalledWith(
+      '/evidence/rules/soa-48h-wait?format=md&as_of=2026-10-01',
+      expect.any(String),
+    );
   });
 });
 
 describe('Timeline provenance', () => {
   const v: RuleVersionOut = {
-    id: 'v2', version: 2, status: 'in_force', clause_text: 'Retention 6 years.', summary: 'Six years', effective_from: '2026-10-01', effective_to: null,
-    regulation_effective: '2026-06-01', change_classification: 'LOOSENS', params: {}, disputed: true, dispute_note: 'Whether enrollment calls fall under 422.504(d).',
-    source_url: '', git_commit: '', created_at: '2026-09-01T00:00:00Z',
+    id: 'v2',
+    version: 2,
+    status: 'in_force',
+    clause_text: 'Retention 6 years.',
+    summary: 'Six years',
+    effective_from: '2026-10-01',
+    effective_to: null,
+    regulation_effective: '2026-06-01',
+    change_classification: 'LOOSENS',
+    params: {},
+    disputed: true,
+    dispute_note: 'Whether enrollment calls fall under 422.504(d).',
+    source_url: '',
+    git_commit: '',
+    created_at: '2026-09-01T00:00:00Z',
     sources: [
       { authority: 'secondary', cite: 'Law firm alert', url: 'https://example.com/a', reading: 'Commentary.' },
       { authority: 'primary', cite: '42 CFR 422.2274(g)(2)(ii)', url: 'https://www.ecfr.gov/x', reading: 'Six years.' },

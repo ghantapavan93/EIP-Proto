@@ -48,7 +48,10 @@ export function usePrefersReducedMotion(): boolean {
  * crossed an effective date). Moving the date within one version's window
  * does not replay — nothing causal happened.
  */
-export function shouldReplayCausality(prev: { inForce: number | null } | null, next: { inForce: number | null }): boolean {
+export function shouldReplayCausality(
+  prev: { inForce: number | null } | null,
+  next: { inForce: number | null },
+): boolean {
   if (prev === null) return true;
   return prev.inForce !== next.inForce;
 }
@@ -77,7 +80,10 @@ export function useCausalitySequence(result: { inForce: number | null; asOf: str
  * Tween a number from its previous value to `value` after `delayMs`. Under
  * reduced motion (or when `animate` is false) it shows the new value at once.
  */
-export function useTickingNumber(value: number, { delayMs = 0, animate = true, from: initial }: { delayMs?: number; animate?: boolean; from?: number } = {}): number {
+export function useTickingNumber(
+  value: number,
+  { delayMs = 0, animate = true, from: initial }: { delayMs?: number; animate?: boolean; from?: number } = {},
+): number {
   const reduced = usePrefersReducedMotion();
   // `from` makes the first render count up once (a hero number on mount); otherwise the first value shows as-is
   const [shown, setShown] = useState(initial ?? value);

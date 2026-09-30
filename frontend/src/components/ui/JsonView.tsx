@@ -114,7 +114,9 @@ function Node({
 /** Collapsible pretty JSON in the monospace stack. */
 export function JsonView({ value, collapsedBelow = 3, className, highlightKeys }: JsonViewProps) {
   return (
-    <div className={cn('overflow-auto bg-band px-3 py-2 pl-6 font-mono text-[12px] leading-[1.55] text-ink', className)}>
+    <div
+      className={cn('overflow-auto bg-band px-3 py-2 pl-6 font-mono text-[12px] leading-[1.55] text-ink', className)}
+    >
       <Node name={null} value={value} depth={0} collapsedBelow={collapsedBelow} highlightKeys={highlightKeys} isLast />
     </div>
   );

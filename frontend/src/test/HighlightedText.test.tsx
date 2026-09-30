@@ -7,12 +7,7 @@ const TEXT = 'The monthly premium is $12.40, and it includes dental.';
 
 describe('HighlightedText', () => {
   it('renders a verified span as a teal mark with the label as tooltip', () => {
-    render(
-      <HighlightedText
-        text={TEXT}
-        spans={[{ offset: 4, length: 25, label: 'premium_claim', verified: true }]}
-      />,
-    );
+    render(<HighlightedText text={TEXT} spans={[{ offset: 4, length: 25, label: 'premium_claim', verified: true }]} />);
     const marks = screen.getAllByTestId('hl-span');
     expect(marks).toHaveLength(1);
     expect(marks[0]).toHaveTextContent('monthly premium is $12.40');
@@ -23,12 +18,7 @@ describe('HighlightedText', () => {
   });
 
   it('renders an unverified span red with a "not found in transcript" tag', () => {
-    render(
-      <HighlightedText
-        text={TEXT}
-        spans={[{ offset: 23, length: 6, label: 'hallucinated', verified: false }]}
-      />,
-    );
+    render(<HighlightedText text={TEXT} spans={[{ offset: 23, length: 6, label: 'hallucinated', verified: false }]} />);
     const mark = screen.getByTestId('hl-span');
     expect(mark).toHaveTextContent('$12.40');
     expect(mark).toHaveAttribute('data-verified', 'false');
@@ -44,11 +34,7 @@ describe('HighlightedText', () => {
     ];
     const segments = segmentText(TEXT, spans);
     const covered = segments.filter((s) => s.covering.length > 0);
-    expect(covered.map((s) => TEXT.slice(s.start, s.end))).toEqual([
-      'monthly premium is ',
-      '$12.40',
-      ', and it',
-    ]);
+    expect(covered.map((s) => TEXT.slice(s.start, s.end))).toEqual(['monthly premium is ', '$12.40', ', and it']);
     expect(covered[1].covering.map((s) => s.label)).toEqual(['premium_claim', 'numeric']);
 
     render(<HighlightedText text={TEXT} spans={spans} tagUnverified={false} />);

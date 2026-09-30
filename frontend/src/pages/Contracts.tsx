@@ -21,7 +21,11 @@ export function ContractsPage() {
         accessorKey: 'code',
         meta: { mono: true },
         cell: (c) => (
-          <Link to={`/contracts/${encodeURIComponent(c.row.original.code)}`} className="font-semibold" onClick={(e) => e.stopPropagation()}>
+          <Link
+            to={`/contracts/${encodeURIComponent(c.row.original.code)}`}
+            className="font-semibold"
+            onClick={(e) => e.stopPropagation()}
+          >
             {c.row.original.code}
           </Link>
         ),
@@ -38,8 +42,18 @@ export function ContractsPage() {
           </span>
         ),
       },
-      { header: 'Severity', accessorKey: 'severity', cell: (c) => <Chip tone={severityTone(c.row.original.severity)}>{c.row.original.severity}</Chip>, size: 80 },
-      { header: 'Kind', accessorKey: 'kind', cell: (c) => <Chip tone={c.row.original.kind === 'JUDGED' ? 'teal' : 'neutral'}>{c.row.original.kind}</Chip>, size: 110 },
+      {
+        header: 'Severity',
+        accessorKey: 'severity',
+        cell: (c) => <Chip tone={severityTone(c.row.original.severity)}>{c.row.original.severity}</Chip>,
+        size: 80,
+      },
+      {
+        header: 'Kind',
+        accessorKey: 'kind',
+        cell: (c) => <Chip tone={c.row.original.kind === 'JUDGED' ? 'teal' : 'neutral'}>{c.row.original.kind}</Chip>,
+        size: 110,
+      },
       {
         header: 'Rule',
         accessorKey: 'rule_code',

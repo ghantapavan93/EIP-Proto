@@ -37,7 +37,8 @@ const CONTENTS: Record<EvidenceRequest['scope'], string[]> = {
 
 /** One sentence a reviewer can repeat: what the bundle of this scope lets them show. */
 const PROVES: Record<EvidenceRequest['scope'], string> = {
-  rules: 'Which artifacts still encode a superseded version of this rule on the date, the exact text each one quotes, and what reviewers decided.',
+  rules:
+    'Which artifacts still encode a superseded version of this rule on the date, the exact text each one quotes, and what reviewers decided.',
   runs: 'Exactly which prompt, model and call set were tested, what every contract concluded on every call, and the gate that followed.',
   tasks: 'What was flagged, the exact span it rests on, and who decided it, with the reason code.',
 };
@@ -140,10 +141,22 @@ export function EvidenceExport({
         width={480}
         footer={
           <div role="group" aria-label="Export evidence" className="flex flex-wrap items-center justify-end gap-2">
-            <button type="button" className="btn btn-outline" disabled={exportEvidence.isPending} onClick={() => go('md')} title="Download the evidence bundle as Markdown">
+            <button
+              type="button"
+              className="btn btn-outline"
+              disabled={exportEvidence.isPending}
+              onClick={() => go('md')}
+              title="Download the evidence bundle as Markdown"
+            >
               <Download size={14} aria-hidden /> Download Markdown
             </button>
-            <button type="button" className="btn" disabled={exportEvidence.isPending} onClick={() => go('json')} title="Download the evidence bundle as JSON">
+            <button
+              type="button"
+              className="btn"
+              disabled={exportEvidence.isPending}
+              onClick={() => go('json')}
+              title="Download the evidence bundle as JSON"
+            >
               <Download size={14} aria-hidden /> Download JSON
             </button>
           </div>
@@ -163,7 +176,14 @@ export function EvidenceExport({
                   {preview.map((row) => (
                     <div key={row.label} className="grid grid-cols-[104px_minmax(0,1fr)] gap-3 py-2">
                       <dt className="text-ink-2">{row.label}</dt>
-                      <dd className={cn('min-w-0 text-ink [overflow-wrap:anywhere]', !row.mono && 'font-sans text-[13px]')}>{row.value}</dd>
+                      <dd
+                        className={cn(
+                          'min-w-0 text-ink [overflow-wrap:anywhere]',
+                          !row.mono && 'font-sans text-[13px]',
+                        )}
+                      >
+                        {row.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -172,16 +192,25 @@ export function EvidenceExport({
                 {chain ? (
                   <div className="grid grid-cols-[104px_minmax(0,1fr)] items-center gap-3">
                     <span className="text-ink-2">Audit chain</span>
-                    <span className={cn('inline-flex flex-wrap items-center gap-1.5 font-sans text-[13px]', chain.verified ? 'text-green-ink' : 'text-red')}>
+                    <span
+                      className={cn(
+                        'inline-flex flex-wrap items-center gap-1.5 font-sans text-[13px]',
+                        chain.verified ? 'text-green-ink' : 'text-red',
+                      )}
+                    >
                       {chain.verified ? <ShieldCheck size={14} aria-hidden /> : <ShieldAlert size={14} aria-hidden />}
-                      <span className="font-semibold uppercase tracking-[0.04em]">{chain.verified ? '✓ verified' : 'broken'}</span>
+                      <span className="font-semibold uppercase tracking-[0.04em]">
+                        {chain.verified ? '✓ verified' : 'broken'}
+                      </span>
                       <span className="text-ink-2">
                         · <span className="font-mono">{fmtNumber(chain.rows)}</span> rows
                       </span>
                     </span>
                   </div>
                 ) : (
-                  <div className="font-sans text-[13px] text-ink-3">{status.isLoading ? 'Checking the audit chain…' : 'Audit chain status unavailable'}</div>
+                  <div className="font-sans text-[13px] text-ink-3">
+                    {status.isLoading ? 'Checking the audit chain…' : 'Audit chain status unavailable'}
+                  </div>
                 )}
                 {last ? (
                   <div className="text-ink-2" role="status">
@@ -205,7 +234,9 @@ export function EvidenceExport({
                 ) : (
                   <div className="grid grid-cols-[104px_minmax(0,1fr)] gap-3">
                     <span className="text-ink-2">Bundle sha256</span>
-                    <span className="font-sans text-[13px] text-ink-2">Computed by the server on download and written to the audit chain as evidence.exported.</span>
+                    <span className="font-sans text-[13px] text-ink-2">
+                      Computed by the server on download and written to the audit chain as evidence.exported.
+                    </span>
                   </div>
                 )}
               </div>
@@ -215,7 +246,10 @@ export function EvidenceExport({
           <section>
             <div className="eyebrow mb-2">The bundle contains</div>
             <ul className="space-y-1.5 text-[13px] text-ink">
-              {[...CONTENTS[scope], 'Every related audit row with its chain hash, the chain verification result, and the bundle’s own SHA-256'].map((line) => (
+              {[
+                ...CONTENTS[scope],
+                'Every related audit row with its chain hash, the chain verification result, and the bundle’s own SHA-256',
+              ].map((line) => (
                 <li key={line} className="flex gap-2">
                   <Check size={14} className="mt-[3px] shrink-0 text-teal-ink" aria-hidden />
                   <span>{line}</span>

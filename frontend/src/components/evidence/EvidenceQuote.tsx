@@ -17,9 +17,10 @@ export function EvidenceQuote({ span, context, offset, className, unverified = f
   let before = '';
   let after = '';
   if (context) {
-    const start = offset !== undefined && offset >= 0 && context.slice(offset, offset + span.length) === span
-      ? offset
-      : context.indexOf(span);
+    const start =
+      offset !== undefined && offset >= 0 && context.slice(offset, offset + span.length) === span
+        ? offset
+        : context.indexOf(span);
     if (start >= 0) {
       const s = surroundingSentence(context, start, start + span.length);
       before = s.before;

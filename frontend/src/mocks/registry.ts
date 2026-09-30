@@ -1,4 +1,13 @@
-import type { ContractOut, ModelBoardOut, ModelBoardRow, ModelOut, PromptVersionOut, RuleVersionRef, RunOut, WorkflowOut } from '../api/types';
+import type {
+  ContractOut,
+  ModelBoardOut,
+  ModelBoardRow,
+  ModelOut,
+  PromptVersionOut,
+  RuleVersionRef,
+  RunOut,
+  WorkflowOut,
+} from '../api/types';
 import { findAsset } from './assets';
 
 export const CONTRACTS: ContractOut[] = [
@@ -101,7 +110,8 @@ export const CONTRACTS: ContractOut[] = [
     id: 'contract-c-schema-01',
     code: 'C-SCHEMA-01',
     title: 'Output validates against the qa-handoff schema',
-    description: 'The workflow output must be valid JSON matching qa-handoff.schema.json (extraction, composition, route).',
+    description:
+      'The workflow output must be valid JSON matching qa-handoff.schema.json (extraction, composition, route).',
     kind: 'DETERMINISTIC',
     severity: 'BLOCK',
     owner_role: 'AI Enablement',
@@ -147,7 +157,8 @@ export const MODELS: ModelOut[] = [
     model_id: 'sim-small',
     label: 'Simulated · small (drifts on numbers)',
     pinned: true,
-    notes: 'Deterministic simulator that occasionally rounds premiums to $0 and truncates cited spans. Stands in for a vendor model swap.',
+    notes:
+      'Deterministic simulator that occasionally rounds premiums to $0 and truncates cited spans. Stands in for a vendor model swap.',
   },
   {
     id: 'model-claude-haiku',
@@ -204,28 +215,65 @@ export const PROVIDERS: ModelBoardOut['providers'] = {
   ollama: {
     available: true,
     key_env: null,
-    notes: 'Local models on this machine. $0, offline, nothing leaves the laptop. Quality depends on the model you pull.',
+    notes:
+      'Local models on this machine. $0, offline, nothing leaves the laptop. Quality depends on the model you pull.',
     rpm: 0,
     rpd: null,
     local_models: ['qwen2.5:7b-instruct', 'qwen2.5:3b-instruct'],
   },
-  groq: { available: false, key_env: 'GROQ_API_KEY', notes: 'Free tier (console.groq.com). Llama 3.3 70B ≈ 30 RPM / 1K RPD / 100K tokens per day. Very fast.', rpm: 28, rpd: 1000 },
-  gemini: { available: false, key_env: 'GEMINI_API_KEY', notes: 'Google AI Studio free tier (aistudio.google.com). Gemini 2.5 Flash ≈ 10 RPM / 250 RPD.', rpm: 9, rpd: 250 },
-  openrouter: { available: false, key_env: 'OPENROUTER_API_KEY', notes: "Free ':free' models (openrouter.ai). ≈ 20 RPM and 50 requests/day without credits — samples only.", rpm: 18, rpd: 50 },
-  anthropic: { available: false, key_env: 'ANTHROPIC_API_KEY', notes: 'Paid API. Optional; nothing in the demo needs it.' },
-  simulated: { available: true, key_env: null, notes: 'Deterministic stand-ins with declared defect profiles. Not models.' },
+  groq: {
+    available: false,
+    key_env: 'GROQ_API_KEY',
+    notes: 'Free tier (console.groq.com). Llama 3.3 70B ≈ 30 RPM / 1K RPD / 100K tokens per day. Very fast.',
+    rpm: 28,
+    rpd: 1000,
+  },
+  gemini: {
+    available: false,
+    key_env: 'GEMINI_API_KEY',
+    notes: 'Google AI Studio free tier (aistudio.google.com). Gemini 2.5 Flash ≈ 10 RPM / 250 RPD.',
+    rpm: 9,
+    rpd: 250,
+  },
+  openrouter: {
+    available: false,
+    key_env: 'OPENROUTER_API_KEY',
+    notes: "Free ':free' models (openrouter.ai). ≈ 20 RPM and 50 requests/day without credits — samples only.",
+    rpm: 18,
+    rpd: 50,
+  },
+  anthropic: {
+    available: false,
+    key_env: 'ANTHROPIC_API_KEY',
+    notes: 'Paid API. Optional; nothing in the demo needs it.',
+  },
+  simulated: {
+    available: true,
+    key_env: null,
+    notes: 'Deterministic stand-ins with declared defect profiles. Not models.',
+  },
 };
 
 export function modelBoard(runs: RunOut[], prompt: number, ruleDate: string): ModelBoardOut {
   const rows: ModelBoardRow[] = MODELS.map((model) => {
-    const mine = runs.filter((r) => r.model_id === model.model_id && r.status === 'COMPLETE').sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
+    const mine = runs
+      .filter((r) => r.model_id === model.model_id && r.status === 'COMPLETE')
+      .sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
     const matched = mine.find((r) => r.prompt_version === prompt && r.rule_date === ruleDate);
     const latest = matched ?? mine[0] ?? null;
     const isSim = model.provider === 'simulated';
     const local = model.provider === 'ollama';
     const pulled = local && PROVIDERS.ollama.local_models?.includes(model.model_id.split('/', 2)[1]);
     const provider = PROVIDERS[model.provider];
-    const availability = isSim ? 'simulated' : local ? (pulled ? 'ready' : 'not-pulled') : provider?.available ? 'ready' : 'needs-key';
+    const availability = isSim
+      ? 'simulated'
+      : local
+        ? pulled
+          ? 'ready'
+          : 'not-pulled'
+        : provider?.available
+          ? 'ready'
+          : 'needs-key';
     return {
       model,
       tier: isSim ? 'simulated' : model.provider === 'anthropic' ? 'paid' : local ? 'local' : 'free-tier',
@@ -241,7 +289,10 @@ export function modelBoard(runs: RunOut[], prompt: number, ruleDate: string): Mo
             ? `Ollama is up; run 'ollama pull ${model.model_id.split('/', 2)[1]}'`
             : `free key → ${provider?.key_env ?? '?'}`,
       key_env: isSim || local ? null : (provider?.key_env ?? null),
-      cassettes: model.model_id === 'ollama/qwen2.5:7b-instruct' ? [{ prompt_version: 2, prompt_hash: 'e0cc00b5c6409648', generate: 60, judge: 60, canary: 1 }] : [],
+      cassettes:
+        model.model_id === 'ollama/qwen2.5:7b-instruct'
+          ? [{ prompt_version: 2, prompt_hash: 'e0cc00b5c6409648', generate: 60, judge: 60, canary: 1 }]
+          : [],
       latest_run: latest,
       matched: Boolean(matched),
       measured: Boolean(latest) && latest!.adapter !== 'simulated',

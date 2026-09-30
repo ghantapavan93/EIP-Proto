@@ -73,7 +73,11 @@ export function TryPage() {
       </div>
       <Section className="pt-4">
         <div role="tabpanel" id={`try-panel-${tab}`} aria-labelledby={`try-tab-${tab}`}>
-          {tab === 'artifact' ? <ArtifactCheck today={meta.data?.today ?? todayIso()} /> : <TranscriptCheck onUseArtifact={() => select('artifact', true)} />}
+          {tab === 'artifact' ? (
+            <ArtifactCheck today={meta.data?.today ?? todayIso()} />
+          ) : (
+            <TranscriptCheck onUseArtifact={() => select('artifact', true)} />
+          )}
         </div>
       </Section>
     </div>

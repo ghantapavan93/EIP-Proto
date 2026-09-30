@@ -61,7 +61,10 @@ describe('sandbox: placing findings in the pasted text', () => {
 
   it('places a span that straddles a redaction, with its length in the pasted text', () => {
     const pasted = 'Intro. Call 1EG4-TE5-MK73 within 48 hours.';
-    expect(locateSpanRange(pasted, 'Call [REDACTED-MEDICARE_NUMBER] within 48 hours.', 0)).toEqual({ at: 7, length: 'Call 1EG4-TE5-MK73 within 48 hours.'.length });
+    expect(locateSpanRange(pasted, 'Call [REDACTED-MEDICARE_NUMBER] within 48 hours.', 0)).toEqual({
+      at: 7,
+      length: 'Call 1EG4-TE5-MK73 within 48 hours.'.length,
+    });
     expect(locateSpan(pasted, 'Call [SSN] within 48 hours.', 0)).toBe(7);
     // regex metacharacters in the quote are literal
     expect(locateSpan('Pay $12.40 (per month) now.', 'Pay $12.40 (per month) now.', 3)).toBe(0);
@@ -70,7 +73,12 @@ describe('sandbox: placing findings in the pasted text', () => {
 
   it('orders findings most urgent first and splits overlapping spans into shared pieces', () => {
     const text = 'Keep recordings for 10 years. Wait 48 hours after the SOA.';
-    const a = match({ span: 'Keep recordings for 10 years.', offset: 0, direction: 'over_restrictive', rule_code: 'call-recording-retention' });
+    const a = match({
+      span: 'Keep recordings for 10 years.',
+      offset: 0,
+      direction: 'over_restrictive',
+      rule_code: 'call-recording-retention',
+    });
     const b = match({ span: 'Wait 48 hours after the SOA.', offset: 30, direction: 'under_restrictive' });
     const c = match({ span: '48 hours', offset: 35, verdict: 'current', direction: null });
     const placed = placeMatches(text, [a, b, c]);
@@ -93,9 +101,13 @@ describe('sandbox: placing findings in the pasted text', () => {
 
 describe('sandbox: refusals and copy', () => {
   it('explains 413 / 422 / 429 / 409 / 504 in plain words', () => {
-    expect(refusalCopy(new ApiError(413, 'too big', '/sandbox/artifact'), 20000).title).toMatch(/longer than the sandbox takes/);
+    expect(refusalCopy(new ApiError(413, 'too big', '/sandbox/artifact'), 20000).title).toMatch(
+      /longer than the sandbox takes/,
+    );
     expect(refusalCopy(new ApiError(413, 'too big', '/sandbox/artifact'), 20000).detail).toMatch(/20,000 characters/);
-    expect(refusalCopy(new ApiError(422, 'as_of: expected YYYY-MM-DD', '/x'), 1).detail).toBe('as_of: expected YYYY-MM-DD');
+    expect(refusalCopy(new ApiError(422, 'as_of: expected YYYY-MM-DD', '/x'), 1).detail).toBe(
+      'as_of: expected YYYY-MM-DD',
+    );
     expect(refusalCopy(new ApiError(429, 'slow down', '/x'), 1).title).toMatch(/Too many checks/);
     const offline = refusalCopy(new ApiError(409, 'No local model is reachable', '/x'), 1);
     expect(offline.offline).toBe(true);
@@ -115,7 +127,15 @@ describe('sandbox: refusals and copy', () => {
       chars: 40,
       redacted: { medicare_number: 0, ssn: 0, dob: 0 },
       matches: [match({ span: 'Wait 48 hours after the SOA.' })],
-      summary: { matches: 1, stale: 1, current: 0, rules_touched: 1, over_restrictive: 1, under_restrictive: 0, reverify: 0 },
+      summary: {
+        matches: 1,
+        stale: 1,
+        current: 0,
+        rules_touched: 1,
+        over_restrictive: 1,
+        under_restrictive: 0,
+        reverify: 0,
+      },
       persisted: false,
       note: '',
     };
@@ -132,7 +152,14 @@ describe('sandbox: refusals and copy', () => {
       model_id: 'ollama/qwen2.5:7b-instruct',
       latency_ms: 12000,
       redacted: { medicare_number: 0, ssn: 0, dob: 0 },
-      output: { extraction: { disclaimer_span: 'We do not offer every plan.', soa_span: 'a paraphrase the call never said', carrier: 'Humana' }, route: 'BLOCK' },
+      output: {
+        extraction: {
+          disclaimer_span: 'We do not offer every plan.',
+          soa_span: 'a paraphrase the call never said',
+          carrier: 'Humana',
+        },
+        route: 'BLOCK',
+      },
       contracts: [],
       persisted: false,
       note: '',
@@ -168,8 +195,21 @@ describe('roles, guide and test-case helpers', () => {
   });
 
   it("prefers the server's answer and keeps the house refusal sentence", () => {
-    const me = { ...fallbackMe('eng', 'engineer'), permissions: [{ action: 'start_runs', label: 'Start a harness run', allowed: false, why: 'Not allowed: only engineer or admin may do this.' }] };
-    expect(permissionFor(me, 'engineer', 'start_runs')).toMatchObject({ allowed: false, why: 'Engineers and admins can start runs' });
+    const me = {
+      ...fallbackMe('eng', 'engineer'),
+      permissions: [
+        {
+          action: 'start_runs',
+          label: 'Start a harness run',
+          allowed: false,
+          why: 'Not allowed: only engineer or admin may do this.',
+        },
+      ],
+    };
+    expect(permissionFor(me, 'engineer', 'start_runs')).toMatchObject({
+      allowed: false,
+      why: 'Engineers and admins can start runs',
+    });
     expect(permissionFor(null, 'engineer', 'start_runs').allowed).toBe(true);
     expect(permissionFor(null, null, 'start_runs').allowed).toBe(false);
   });
@@ -204,7 +244,9 @@ describe('roles, guide and test-case helpers', () => {
     expect(isSeededExample({ expected: { seeded_example: true }, created_by: 'x' })).toBe(true);
     expect(isSeededExample({ expected: {}, created_by: 'demo-seed:qa-reviewer' })).toBe(true);
     expect(isSeededExample({ expected: {}, created_by: 'analyst' })).toBe(false);
-    expect(whoCanApprove({ created_by: 'analyst', status: 'PENDING_APPROVAL' })).toBe('awaiting an engineer or admin other than analyst');
+    expect(whoCanApprove({ created_by: 'analyst', status: 'PENDING_APPROVAL' })).toBe(
+      'awaiting an engineer or admin other than analyst',
+    );
     expect(whoCanApprove({ created_by: 'analyst', status: 'APPROVED' })).toBe('');
   });
 });

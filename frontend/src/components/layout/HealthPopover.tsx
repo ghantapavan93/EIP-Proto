@@ -21,12 +21,25 @@ export function ComponentList({ components }: { components: HealthComponent[] })
               <span aria-hidden className={cn('inline-block h-1.5 w-1.5 shrink-0 rounded-full', DOT[tone])} />
               {componentLabel(c)}
             </span>
-            <span className={cn('text-[11px] font-semibold uppercase tracking-[0.5px]', tone === 'green' ? 'text-green-ink' : tone === 'red' ? 'text-red' : tone === 'amber' ? 'text-amber-ink' : 'text-ink-3')}>
+            <span
+              className={cn(
+                'text-[11px] font-semibold uppercase tracking-[0.5px]',
+                tone === 'green'
+                  ? 'text-green-ink'
+                  : tone === 'red'
+                    ? 'text-red'
+                    : tone === 'amber'
+                      ? 'text-amber-ink'
+                      : 'text-ink-3',
+              )}
+            >
               {stateWord(c)}
             </span>
             <span className="min-w-0 truncate text-ink-2" title={c.detail}>
               {c.detail}
-              {!c.required && <span className="ml-1 text-[10px] font-semibold uppercase tracking-[0.5px] text-ink-3">· optional</span>}
+              {!c.required && (
+                <span className="ml-1 text-[10px] font-semibold uppercase tracking-[0.5px] text-ink-3">· optional</span>
+              )}
             </span>
           </li>
         );
@@ -70,7 +83,9 @@ export function HealthPopover({ status, fallback }: { status?: string | null; fa
         className={cn(
           'inline-flex h-7 items-center gap-1.5 rounded-[6px] border px-2 text-[11px] font-semibold uppercase tracking-[0.06em]',
           // the single teal wash in the product: around the live system state
-          shown === 'healthy' ? 'border-teal/30 bg-teal/8 hover:bg-teal/14' : 'border-hairline bg-surface hover:bg-band',
+          shown === 'healthy'
+            ? 'border-teal/30 bg-teal/8 hover:bg-teal/14'
+            : 'border-hairline bg-surface hover:bg-band',
           statusTextClass(shown),
         )}
         onClick={() => setOpen((o) => !o)}
@@ -83,7 +98,9 @@ export function HealthPopover({ status, fallback }: { status?: string | null; fa
           aria-hidden
           data-testid="health-dot"
           className={cn(
-            shown === 'healthy' ? 'pulse-dot pulse-health bg-green-ink' : 'inline-block h-1.5 w-1.5 shrink-0 rounded-full',
+            shown === 'healthy'
+              ? 'pulse-dot pulse-health bg-green-ink'
+              : 'inline-block h-1.5 w-1.5 shrink-0 rounded-full',
             shown === 'degraded' ? 'bg-amber' : shown === 'down' ? 'bg-red' : shown === 'healthy' ? null : 'bg-input',
           )}
         />
@@ -91,10 +108,16 @@ export function HealthPopover({ status, fallback }: { status?: string | null; fa
         <ChevronDown size={12} aria-hidden className="hidden sm:block" />
       </button>
       {open && (
-        <div role="dialog" aria-label="System health" className="pop-in absolute right-0 top-full z-40 mt-1.5 w-[360px] max-w-[calc(100vw-24px)] max-sm:fixed max-sm:inset-x-3 max-sm:top-14 max-sm:w-auto rounded-[8px] border border-hairline bg-surface p-3 text-[12px] normal-case tracking-normal shadow-[0_8px_24px_rgba(16,24,40,0.12)]">
+        <div
+          role="dialog"
+          aria-label="System health"
+          className="pop-in absolute right-0 top-full z-40 mt-1.5 w-[360px] max-w-[calc(100vw-24px)] max-sm:fixed max-sm:inset-x-3 max-sm:top-14 max-sm:w-auto rounded-[8px] border border-hairline bg-surface p-3 text-[12px] normal-case tracking-normal shadow-[0_8px_24px_rgba(16,24,40,0.12)]"
+        >
           <div className="mb-2 flex items-center justify-between">
             <span className="eyebrow">Components</span>
-            <span className={cn('text-[11px] font-semibold uppercase tracking-[1px]', statusTextClass(shown))}>{shown ?? '—'}</span>
+            <span className={cn('text-[11px] font-semibold uppercase tracking-[1px]', statusTextClass(shown))}>
+              {shown ?? '—'}
+            </span>
           </div>
           {health.isLoading && !components.length && <LoadingState rows={3} className="px-0 py-1" />}
           {health.error && !h ? <ErrorState error={health.error} title="Health check failed" /> : null}
@@ -102,14 +125,19 @@ export function HealthPopover({ status, fallback }: { status?: string | null; fa
           {h && (
             <div className="mt-2 space-y-0.5 font-mono text-[11px] text-ink-2">
               <div>
-                last scan {h.last_scan ? `${shortHash(h.last_scan.id, 8)} · ${h.last_scan.status} · ${fmtTs(h.last_scan.finished_at)}` : 'none'}
+                last scan{' '}
+                {h.last_scan
+                  ? `${shortHash(h.last_scan.id, 8)} · ${h.last_scan.status} · ${fmtTs(h.last_scan.finished_at)}`
+                  : 'none'}
               </div>
               <div>
                 backstop {h.version} · checked {fmtTs(h.time)}
               </div>
             </div>
           )}
-          <p className="mt-2 text-[11px] leading-snug text-ink-3">Optional components never make the system unhealthy: without Ollama, recorded cassettes still replay.</p>
+          <p className="mt-2 text-[11px] leading-snug text-ink-3">
+            Optional components never make the system unhealthy: without Ollama, recorded cassettes still replay.
+          </p>
         </div>
       )}
     </div>

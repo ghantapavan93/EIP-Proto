@@ -35,7 +35,11 @@ export function HighlightedText({ text, spans, className, tagUnverified = true, 
           data-labels={seg.covering.map((s) => s.label).join(',')}
           data-verified={unverified ? 'false' : 'true'}
           title={labels}
-          className={cn('bg-transparent text-ink', unverified ? 'mark-span-unverified' : 'mark-span', onSpanClick && 'cursor-pointer')}
+          className={cn(
+            'bg-transparent text-ink',
+            unverified ? 'mark-span-unverified' : 'mark-span',
+            onSpanClick && 'cursor-pointer',
+          )}
           onClick={onSpanClick ? () => onSpanClick(last) : undefined}
         >
           {content}

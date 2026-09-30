@@ -2,7 +2,15 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ScanSearch, Upload } from 'lucide-react';
-import { canEdit, useAssets, useHealthDeep, useIngestFormats, useIngestTranscripts, useRole, useTranscripts } from '../api/hooks';
+import {
+  canEdit,
+  useAssets,
+  useHealthDeep,
+  useIngestFormats,
+  useIngestTranscripts,
+  useRole,
+  useTranscripts,
+} from '../api/hooks';
 import type { AssetOut, IngestResultOut, ScanOut, TranscriptOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { PageHeader, Section, Field } from '../components/layout/Page';
@@ -41,14 +49,23 @@ function IngestDrawer({ open, onClose }: { open: boolean; onClose: () => void })
       {
         onSuccess: (r) => {
           setResult(r);
-          toast({ title: `${r.created} transcript${r.created === 1 ? '' : 's'} ingested · ${r.skipped_existing} skipped`, detail: `batch ${shortHash(r.batch_hash, 12)} · redacted MBI ${r.redacted.medicare_number}, SSN ${r.redacted.ssn}, DOB ${r.redacted.dob}`, tone: 'green' });
+          toast({
+            title: `${r.created} transcript${r.created === 1 ? '' : 's'} ingested · ${r.skipped_existing} skipped`,
+            detail: `batch ${shortHash(r.batch_hash, 12)} · redacted MBI ${r.redacted.medicare_number}, SSN ${r.redacted.ssn}, DOB ${r.redacted.dob}`,
+            tone: 'green',
+          });
         },
       },
     );
   };
 
   return (
-    <Drawer open={open} onClose={onClose} title="Ingest transcripts" subtitle="POST /ingest/transcripts — multipart field “file”; PII is redacted before storage; ingested transcripts carry no ground truth">
+    <Drawer
+      open={open}
+      onClose={onClose}
+      title="Ingest transcripts"
+      subtitle="POST /ingest/transcripts — multipart field “file”; PII is redacted before storage; ingested transcripts carry no ground truth"
+    >
       <form onSubmit={submit} className="space-y-3">
         <Field label="Export format" htmlFor="ing-format">
           <select id="ing-format" className="input" value={format} onChange={(e) => setFormat(e.target.value)}>
@@ -87,7 +104,10 @@ function IngestDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           <div className="card p-3">
             <div className="eyebrow mb-1">Documented assumption — column mapping</div>
             <p className="text-[12px] text-ink-2">{selected.description}</p>
-            <KeyValue className="mt-2" rows={Object.entries(selected.columns).map(([k, v]) => ({ key: k, value: v, mono: false }))} />
+            <KeyValue
+              className="mt-2"
+              rows={Object.entries(selected.columns).map(([k, v]) => ({ key: k, value: v, mono: false }))}
+            />
             <div className="mt-2 text-[12px] text-ink-2">
               <span className="font-semibold text-slate">Redaction:</span> {selected.redaction}
             </div>
@@ -102,7 +122,10 @@ function IngestDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                 { key: 'Format', value: result.format },
                 { key: 'Created', value: String(result.created) },
                 { key: 'Skipped (existing)', value: String(result.skipped_existing) },
-                { key: 'Redacted', value: `Medicare numbers ${result.redacted.medicare_number} · SSN ${result.redacted.ssn} · DOB ${result.redacted.dob}` },
+                {
+                  key: 'Redacted',
+                  value: `Medicare numbers ${result.redacted.medicare_number} · SSN ${result.redacted.ssn} · DOB ${result.redacted.dob}`,
+                },
                 { key: 'Batch hash', value: result.batch_hash },
                 { key: 'Note', value: result.note, mono: false },
               ]}
@@ -177,9 +200,24 @@ export function ArtifactsPage() {
         id: 'provenance',
         header: 'Provenance',
         accessorFn: (r) => (r.is_synthetic ? 'synthetic' : r.type === 'workflow_prompt' ? 'repo' : 'real'),
-        cell: (c) => <SourceBadge isSynthetic={c.row.original.is_synthetic} type={c.row.original.type} url={c.row.original.url} stacked />,
+        cell: (c) => (
+          <SourceBadge
+            isSynthetic={c.row.original.is_synthetic}
+            type={c.row.original.type}
+            url={c.row.original.url}
+            stacked
+          />
+        ),
       },
-      { header: 'Owner', accessorKey: 'owner_role', cell: (c) => <span className="text-ink-2" title={c.row.original.owner_role}>{roleLabel(c.row.original.owner_role)}</span> },
+      {
+        header: 'Owner',
+        accessorKey: 'owner_role',
+        cell: (c) => (
+          <span className="text-ink-2" title={c.row.original.owner_role}>
+            {roleLabel(c.row.original.owner_role)}
+          </span>
+        ),
+      },
       {
         header: 'Latest version',
         accessorKey: 'latest_fetched_at',
@@ -194,17 +232,45 @@ export function ArtifactsPage() {
         ),
       },
       { header: 'Edges', accessorKey: 'edge_count', meta: { align: 'right', mono: true }, size: 70 },
-      { id: 'versions', header: 'Versions', accessorFn: (r) => r.versions.length, meta: { align: 'right', mono: true }, size: 90 },
+      {
+        id: 'versions',
+        header: 'Versions',
+        accessorFn: (r) => r.versions.length,
+        meta: { align: 'right', mono: true },
+        size: 90,
+      },
     ],
     [],
   );
 
   const transcriptColumns = useMemo<ColumnDef<TranscriptOut, unknown>[]>(
     () => [
-      { header: 'Code', accessorKey: 'code', meta: { mono: true }, cell: (c) => <span className="font-semibold text-navy">{c.row.original.code}</span>, size: 130 },
-      { id: 'provenance', header: 'Provenance', accessorFn: (t) => (t.synthetic ? 'synthetic' : 'ingested'), cell: (c) => <TranscriptBadge synthetic={c.row.original.synthetic} labels={c.row.original.labels} /> },
-      { header: 'Product line', accessorKey: 'product_line', cell: (c) => <Chip tone="slate">{c.row.original.product_line}</Chip>, size: 110 },
-      { header: 'Duration', accessorKey: 'duration_seconds', meta: { align: 'right', mono: true }, cell: (c) => fmtDuration(c.row.original.duration_seconds * 1000), size: 90 },
+      {
+        header: 'Code',
+        accessorKey: 'code',
+        meta: { mono: true },
+        cell: (c) => <span className="font-semibold text-navy">{c.row.original.code}</span>,
+        size: 130,
+      },
+      {
+        id: 'provenance',
+        header: 'Provenance',
+        accessorFn: (t) => (t.synthetic ? 'synthetic' : 'ingested'),
+        cell: (c) => <TranscriptBadge synthetic={c.row.original.synthetic} labels={c.row.original.labels} />,
+      },
+      {
+        header: 'Product line',
+        accessorKey: 'product_line',
+        cell: (c) => <Chip tone="slate">{c.row.original.product_line}</Chip>,
+        size: 110,
+      },
+      {
+        header: 'Duration',
+        accessorKey: 'duration_seconds',
+        meta: { align: 'right', mono: true },
+        cell: (c) => fmtDuration(c.row.original.duration_seconds * 1000),
+        size: 90,
+      },
       {
         id: 'labels',
         header: 'Labels',
@@ -215,13 +281,17 @@ export function ArtifactsPage() {
           if (!c.row.original.synthetic) {
             return (
               <span className="text-[12px] text-ink-2">
-                {typeof l.format === 'string' ? `${l.format} · ` : ''}agent {str(l.agent)} · started {fmtTs(typeof l.started_at === 'string' ? l.started_at : null)} · ground truth: <span className="text-amber-ink">none</span>
+                {typeof l.format === 'string' ? `${l.format} · ` : ''}agent {str(l.agent)} · started{' '}
+                {fmtTs(typeof l.started_at === 'string' ? l.started_at : null)} · ground truth:{' '}
+                <span className="text-amber-ink">none</span>
               </span>
             );
           }
           return (
             <span className="text-[12px] text-ink-2">
-              scenario {str(l.scenario)} · {str(l.carrier)} · disclaimer {l.disclaimer_delivered === false ? 'missing' : `${str(l.disclaimer_seconds)}s`} · benefits {str(l.benefits_started_seconds)}s · SOA +{str(l.appointment_hours_after_soa)}h
+              scenario {str(l.scenario)} · {str(l.carrier)} · disclaimer{' '}
+              {l.disclaimer_delivered === false ? 'missing' : `${str(l.disclaimer_seconds)}s`} · benefits{' '}
+              {str(l.benefits_started_seconds)}s · SOA +{str(l.appointment_hours_after_soa)}h
               {Array.isArray(l.superlatives) && l.superlatives.length ? ' · superlative' : ''}
             </span>
           );
@@ -268,15 +338,43 @@ export function ArtifactsPage() {
         </Section>
       )}
       <Section>
-        <DataTable columns={columns} data={assets.data} isLoading={assets.isLoading} error={assets.error} retry={() => void assets.refetch()} getRowId={(r) => r.code} onRowClick={(r) => navigate(`/artifacts/${encodeURIComponent(r.code)}`)} initialSort={[{ id: 'edge_count', desc: true }]} emptyTitle="No artifacts" emptyHint="Run a scan to crawl the frozen snapshots and seed the synthetic internals." caption="Artifact inventory" />
+        <DataTable
+          columns={columns}
+          data={assets.data}
+          isLoading={assets.isLoading}
+          error={assets.error}
+          retry={() => void assets.refetch()}
+          getRowId={(r) => r.code}
+          onRowClick={(r) => navigate(`/artifacts/${encodeURIComponent(r.code)}`)}
+          initialSort={[{ id: 'edge_count', desc: true }]}
+          emptyTitle="No artifacts"
+          emptyHint="Run a scan to crawl the frozen snapshots and seed the synthetic internals."
+          caption="Artifact inventory"
+        />
       </Section>
-      <Section band title="Transcript corpus" right={`${transcripts.data?.length ?? 0} transcripts · ${ingestedCount} ingested (redacted, no ground truth)`}>
+      <Section
+        band
+        title="Transcript corpus"
+        right={`${transcripts.data?.length ?? 0} transcripts · ${ingestedCount} ingested (redacted, no ground truth)`}
+      >
         {typeof holdoutCount === 'number' && holdoutCount > 0 && (
           <p className="mb-2 text-[12px] text-ink-2" title={HOLDOUT_TOOLTIP}>
             + {holdoutCount} held-out calls kept out of view (used only to check prompt overfitting)
           </p>
         )}
-        <DataTable columns={transcriptColumns} data={transcripts.data} isLoading={transcripts.isLoading} error={transcripts.error} retry={() => void transcripts.refetch()} getRowId={(t) => t.code} initialSort={[{ id: 'provenance', desc: false }]} maxHeight="52vh" emptyTitle="No transcripts" className="bg-surface" caption="Transcript corpus" />
+        <DataTable
+          columns={transcriptColumns}
+          data={transcripts.data}
+          isLoading={transcripts.isLoading}
+          error={transcripts.error}
+          retry={() => void transcripts.refetch()}
+          getRowId={(t) => t.code}
+          initialSort={[{ id: 'provenance', desc: false }]}
+          maxHeight="52vh"
+          emptyTitle="No transcripts"
+          className="bg-surface"
+          caption="Transcript corpus"
+        />
       </Section>
       <IngestDrawer open={ingestOpen} onClose={() => setIngestOpen(false)} />
     </div>

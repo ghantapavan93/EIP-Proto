@@ -58,7 +58,10 @@ export function filterPalette(items: PaletteItem[], query: string, perGroup = 6)
 /** "⌘" on Apple platforms, "Ctrl" elsewhere — for keyboard hints such as "Ctrl ↵". */
 export function modKeyLabel(): string {
   if (typeof navigator === 'undefined') return 'Ctrl';
-  const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? '';
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    '';
   return /mac|iphone|ipad/i.test(platform) ? '⌘' : 'Ctrl';
 }
 

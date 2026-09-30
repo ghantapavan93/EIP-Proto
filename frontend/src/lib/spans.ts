@@ -20,9 +20,7 @@ export interface Segment {
  * disjoint segments, each carrying the spans that cover it.
  */
 export function segmentText(text: string, spans: HighlightSpan[]): Segment[] {
-  const valid = spans.filter(
-    (s) => s.offset >= 0 && s.length > 0 && s.offset < text.length,
-  );
+  const valid = spans.filter((s) => s.offset >= 0 && s.length > 0 && s.offset < text.length);
   const cuts = new Set<number>([0, text.length]);
   for (const s of valid) {
     cuts.add(Math.max(0, s.offset));
@@ -39,7 +37,6 @@ export function segmentText(text: string, spans: HighlightSpan[]): Segment[] {
   }
   return segments;
 }
-
 
 /** Find the sentence boundaries around [start, end) in text. */
 export function surroundingSentence(text: string, start: number, end: number): { before: string; after: string } {

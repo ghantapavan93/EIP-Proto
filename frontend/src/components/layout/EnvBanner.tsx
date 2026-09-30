@@ -10,7 +10,9 @@ export function EnvBanner({ label, notice }: { label: string; notice?: string })
     >
       <TriangleAlert size={12} className="shrink-0" aria-hidden />
       <span className="shrink-0">{label}</span>
-      {notice && <span className="min-w-0 truncate font-medium normal-case tracking-normal text-ink-2">— {notice}</span>}
+      {notice && (
+        <span className="min-w-0 truncate font-medium normal-case tracking-normal text-ink-2">— {notice}</span>
+      )}
     </div>
   );
 }

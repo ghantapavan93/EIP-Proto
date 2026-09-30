@@ -39,7 +39,16 @@ const FILLED: Record<Tone, string> = {
  * 20px status chip: 11px uppercase on a soft tint of its tone with darker
  * text; solid only when `filled` (gate states). 4px radius; never a pill.
  */
-export function Chip({ tone = 'neutral', filled = false, mono = false, wrap = false, size = 'sm', title, className, children }: ChipProps) {
+export function Chip({
+  tone = 'neutral',
+  filled = false,
+  mono = false,
+  wrap = false,
+  size = 'sm',
+  title,
+  className,
+  children,
+}: ChipProps) {
   return (
     <span
       title={title}
@@ -48,7 +57,11 @@ export function Chip({ tone = 'neutral', filled = false, mono = false, wrap = fa
       className={cn(
         'inline-flex items-center gap-1 rounded-[4px] border align-middle font-semibold uppercase tracking-[0.04em]',
         size === 'xs' ? 'px-1 text-[10px]' : 'px-1.5 text-[11px]',
-        wrap ? 'min-h-5 whitespace-normal py-[3px] leading-tight' : size === 'xs' ? 'h-4 whitespace-nowrap leading-none' : 'h-5 whitespace-nowrap leading-none',
+        wrap
+          ? 'min-h-5 whitespace-normal py-[3px] leading-tight'
+          : size === 'xs'
+            ? 'h-4 whitespace-nowrap leading-none'
+            : 'h-5 whitespace-nowrap leading-none',
         mono && 'font-mono normal-case tracking-normal',
         filled ? FILLED[tone] : SOFT[tone],
         className,

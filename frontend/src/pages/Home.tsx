@@ -2,7 +2,16 @@ import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, ChevronDown, Cpu, FileCode2, ListChecks, ScanText } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useCompare, useContracts, useImpact, useMeta, useReviewTasks, useRules, useRuns, useStatus } from '../api/hooks';
+import {
+  useCompare,
+  useContracts,
+  useImpact,
+  useMeta,
+  useReviewTasks,
+  useRules,
+  useRuns,
+  useStatus,
+} from '../api/hooks';
 import type { CompareOut, RunOut, StatusOut } from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { Section } from '../components/layout/Page';
@@ -11,7 +20,16 @@ import { AdapterChip } from '../components/runs/AdapterChip';
 import { ModelId } from '../components/runs/ModelId';
 import { Chip } from '../components/ui/Chip';
 import { JudgeChip, RunFacts } from '../components/runs/RunFacts';
-import { baselineFor, blockingFailures, costLabel, judgeModelId, latestByTrigger, latestPerConfiguration, runStats, sumOutcomes } from '../lib/runStats';
+import {
+  baselineFor,
+  blockingFailures,
+  costLabel,
+  judgeModelId,
+  latestByTrigger,
+  latestPerConfiguration,
+  runStats,
+  sumOutcomes,
+} from '../lib/runStats';
 import { CorpusChip } from '../components/runs/CorpusChip';
 import { OutcomeBar } from '../components/charts/OutcomeBar';
 import { groupActionable, taskLane } from '../lib/review';
@@ -74,7 +92,17 @@ const METRIC_TONE: Record<MetricTone, string> = {
 };
 
 /** One big number with its label: "22 newly failing". */
-function Metric({ value, label, tone = 'ink', size = 'lg' }: { value: ReactNode; label: ReactNode; tone?: MetricTone; size?: 'lg' | 'md' }) {
+function Metric({
+  value,
+  label,
+  tone = 'ink',
+  size = 'lg',
+}: {
+  value: ReactNode;
+  label: ReactNode;
+  tone?: MetricTone;
+  size?: 'lg' | 'md';
+}) {
   return (
     <span className="inline-flex items-baseline gap-1.5">
       <span className={cn('stat', size === 'lg' ? 'text-[24px]' : 'text-[17px]', METRIC_TONE[tone])}>{value}</span>
@@ -103,7 +131,11 @@ function CurrentStateBlock({ state, empty }: { state: CurrentState; empty: strin
   return (
     <>
       <MetricRow>
-        <Metric value={blocking} tone={blocking ? 'red' : 'green'} label={`blocking ${blocking === 1 ? 'failure' : 'failures'} ${blocking ? 'remain' : '— none remain'}`} />
+        <Metric
+          value={blocking}
+          tone={blocking ? 'red' : 'green'}
+          label={`blocking ${blocking === 1 ? 'failure' : 'failures'} ${blocking ? 'remain' : '— none remain'}`}
+        />
       </MetricRow>
       {outcomes && <OutcomeBar counts={outcomes} className="mt-2" caption="contract results" />}
     </>
@@ -152,7 +184,10 @@ function TriggerCard({
       <header className="px-4 pb-3 pt-3.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <span aria-hidden className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-band text-slate">
+            <span
+              aria-hidden
+              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-band text-slate"
+            >
               {icon}
             </span>
             <span className="eyebrow truncate">{eyebrow}</span>
@@ -167,9 +202,15 @@ function TriggerCard({
           <LoadingState rows={2} className="px-0 pb-0 pt-3" />
         ) : error ? null : (
           <>
-            <h2 className="mt-2.5 line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-ink">{title}</h2>
+            <h2 className="mt-2.5 line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-ink">
+              {title}
+            </h2>
             {subtitle && <p className="mt-0.5 line-clamp-1 text-[12.5px] leading-snug text-ink-2">{subtitle}</p>}
-            {subline && <div className="mt-1.5 font-mono text-[11.5px] leading-snug text-slate [overflow-wrap:anywhere]">{subline}</div>}
+            {subline && (
+              <div className="mt-1.5 font-mono text-[11.5px] leading-snug text-slate [overflow-wrap:anywhere]">
+                {subline}
+              </div>
+            )}
           </>
         )}
       </header>
@@ -186,7 +227,9 @@ function TriggerCard({
             {delta}
           </div>
           <div className="border-y border-hairline px-4 py-2.5">
-            <BlockLabel right={stateTotal !== null ? `${fmtNumber(stateTotal)} results` : undefined}>Current state · latest run</BlockLabel>
+            <BlockLabel right={stateTotal !== null ? `${fmtNumber(stateTotal)} results` : undefined}>
+              Current state · latest run
+            </BlockLabel>
             <CurrentStateBlock state={state} empty={stateEmpty} />
           </div>
         </>
@@ -210,13 +253,21 @@ function TriggerCard({
                 onClick={() => setDetailsOpen((v) => !v)}
               >
                 Details
-                <ChevronDown size={13} aria-hidden className={cn('transition-transform motion-reduce:transition-none', detailsOpen && 'rotate-180')} />
+                <ChevronDown
+                  size={13}
+                  aria-hidden
+                  className={cn('transition-transform motion-reduce:transition-none', detailsOpen && 'rotate-180')}
+                />
               </button>
             )}
           </div>
         )}
         {meta && !loading && (
-          <div id={detailsId} hidden={!detailsOpen} className="mt-3 space-y-1 border-t border-hairline pt-2.5 font-mono text-[11px] leading-relaxed text-ink-3">
+          <div
+            id={detailsId}
+            hidden={!detailsOpen}
+            className="mt-3 space-y-1 border-t border-hairline pt-2.5 font-mono text-[11px] leading-relaxed text-ink-3"
+          >
             {meta}
           </div>
         )}
@@ -226,20 +277,36 @@ function TriggerCard({
 }
 
 /** Product line, live system state from /status, all real counts. */
-function Hero({ status, guideHidden, onShowGuide }: { status: StatusOut | undefined; guideHidden: boolean; onShowGuide: () => void }) {
+function Hero({
+  status,
+  guideHidden,
+  onShowGuide,
+}: {
+  status: StatusOut | undefined;
+  guideHidden: boolean;
+  onShowGuide: () => void;
+}) {
   const healthy = status?.status === 'healthy';
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-4 pb-4 pt-5 sm:px-6">
       <div className="min-w-0 max-w-[620px]">
         <div className="eyebrow mb-1">Backstop · Change triggers</div>
-        <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-[24px]">Change control for business-critical AI workflows</h1>
-        <p className="mt-1 text-[13px] leading-relaxed text-ink-2">When a rule, a prompt or a model changes: what still holds, what broke, the evidence, and who owns the fix.</p>
+        <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-[24px]">
+          Change control for business-critical AI workflows
+        </h1>
+        <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
+          When a rule, a prompt or a model changes: what still holds, what broke, the evidence, and who owns the fix.
+        </p>
         {guideHidden && (
           <div className="mt-2 flex flex-wrap items-center gap-3 text-[12.5px]">
             <Link to="/try" className="inline-flex items-center gap-1 font-semibold">
               <ScanText size={13} aria-hidden /> Try it with your own text
             </Link>
-            <button type="button" className="inline-flex items-center gap-1 text-ink-2 hover:text-teal-ink" onClick={onShowGuide}>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-ink-2 hover:text-teal-ink"
+              onClick={onShowGuide}
+            >
               <ListChecks size={13} aria-hidden /> Show where we are
             </button>
           </div>
@@ -247,10 +314,28 @@ function Hero({ status, guideHidden, onShowGuide }: { status: StatusOut | undefi
       </div>
       {status && (
         <dl className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px]" aria-label="System summary">
-          <div className={cn('inline-flex items-center gap-2 rounded-[6px] border px-2.5 py-1.5', healthy ? 'border-teal/30 bg-teal/8' : 'border-hairline bg-surface')}>
+          <div
+            className={cn(
+              'inline-flex items-center gap-2 rounded-[6px] border px-2.5 py-1.5',
+              healthy ? 'border-teal/30 bg-teal/8' : 'border-hairline bg-surface',
+            )}
+          >
             <dt className="sr-only">System</dt>
-            <span aria-hidden className={cn('h-2 w-2 rounded-full', healthy ? 'bg-green' : status.status === 'degraded' ? 'bg-amber' : 'bg-red')} />
-            <dd className={cn('text-[11px] font-semibold uppercase tracking-[0.08em]', healthy ? 'text-green-ink' : status.status === 'degraded' ? 'text-amber-ink' : 'text-red')}>{status.status}</dd>
+            <span
+              aria-hidden
+              className={cn(
+                'h-2 w-2 rounded-full',
+                healthy ? 'bg-green' : status.status === 'degraded' ? 'bg-amber' : 'bg-red',
+              )}
+            />
+            <dd
+              className={cn(
+                'text-[11px] font-semibold uppercase tracking-[0.08em]',
+                healthy ? 'text-green-ink' : status.status === 'degraded' ? 'text-amber-ink' : 'text-red',
+              )}
+            >
+              {status.status}
+            </dd>
           </div>
           <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5">
             {(
@@ -264,8 +349,18 @@ function Hero({ status, guideHidden, onShowGuide }: { status: StatusOut | undefi
               <div key={label} className="flex items-baseline gap-1.5">
                 <dt className="sr-only">{label}</dt>
                 <dd>
-                  <Link to={to} className="inline-flex items-baseline gap-1.5 whitespace-nowrap text-ink-2 hover:text-teal-ink hover:no-underline">
-                    <span className={cn('stat text-[15px]', label === 'awaiting review' && n > 0 ? 'text-amber-ink' : 'text-ink')}>{fmtNumber(n)}</span>
+                  <Link
+                    to={to}
+                    className="inline-flex items-baseline gap-1.5 whitespace-nowrap text-ink-2 hover:text-teal-ink hover:no-underline"
+                  >
+                    <span
+                      className={cn(
+                        'stat text-[15px]',
+                        label === 'awaiting review' && n > 0 ? 'text-amber-ink' : 'text-ink',
+                      )}
+                    >
+                      {fmtNumber(n)}
+                    </span>
                     {label}
                   </Link>
                 </dd>
@@ -287,7 +382,10 @@ const THESIS: Array<[string, string]> = [
 
 function ThesisStrip() {
   return (
-    <ol aria-label="How Backstop works" className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-[8px] border border-hairline bg-surface px-4 py-2 text-[12px]">
+    <ol
+      aria-label="How Backstop works"
+      className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-[8px] border border-hairline bg-surface px-4 py-2 text-[12px]"
+    >
       {THESIS.map(([head, tail], i) => (
         <li key={head} className="inline-flex items-center gap-2">
           {i > 0 && <ArrowRight size={13} className="text-ink-3" aria-hidden />}
@@ -318,7 +416,10 @@ export function HomePage() {
   const openTasks = useReviewTasks({ state: 'open' });
   const contracts = useContracts();
   const today = meta.data?.today ?? todayIso();
-  const severityByCode = useMemo(() => new Map((contracts.data ?? []).map((c) => [c.code, c.severity])), [contracts.data]);
+  const severityByCode = useMemo(
+    () => new Map((contracts.data ?? []).map((c) => [c.code, c.severity])),
+    [contracts.data],
+  );
   const currentOf = (run: RunOut | undefined): CurrentState => {
     const b = blockingFailures(run, severityByCode);
     return { run, blocking: b.failures, blockingContracts: b.contracts };
@@ -335,9 +436,14 @@ export function HomePage() {
     if (!withLatest.length) return undefined;
     const upcoming = withLatest
       .filter((x) => x.latest.effective_from > today)
-      .sort((a, b) => a.latest.effective_from.localeCompare(b.latest.effective_from) || b.rule.dependents - a.rule.dependents);
+      .sort(
+        (a, b) =>
+          a.latest.effective_from.localeCompare(b.latest.effective_from) || b.rule.dependents - a.rule.dependents,
+      );
     if (upcoming.length) return upcoming[0];
-    return withLatest.sort((a, b) => b.latest.effective_from.localeCompare(a.latest.effective_from) || b.rule.dependents - a.rule.dependents)[0];
+    return withLatest.sort(
+      (a, b) => b.latest.effective_from.localeCompare(a.latest.effective_from) || b.rule.dependents - a.rule.dependents,
+    )[0];
   }, [rules.data, today]);
   const impact = useImpact(featured?.rule.code, featured?.latest.effective_from ?? '');
   const ruleRun = latestByTrigger(runs.data, 'RULE');
@@ -393,9 +499,27 @@ export function HomePage() {
         accessorKey: 'trigger',
         cell: (c) => <Chip tone={triggerTone(c.row.original.trigger)}>{c.row.original.trigger}</Chip>,
       },
-      { id: 'cost', header: 'Cost', accessorFn: (r) => runStats(r).cost?.usd ?? 0, meta: { mono: true, align: 'right', wrap: true }, cell: (c) => <span title={runStats(c.row.original).cost?.basis}>{costLabel(runStats(c.row.original).cost)}</span> },
-      { id: 'judge', header: 'Judge', accessorFn: (r) => (runStats(r).judge_stability?.stable ? 1 : 0), cell: (c) => <JudgeChip run={c.row.original} /> },
-      { header: 'Started', accessorKey: 'started_at', cell: (c) => <span className="text-ink-2">{fmtTs(c.row.original.started_at)}</span>, meta: { mono: true, wrap: true } },
+      {
+        id: 'cost',
+        header: 'Cost',
+        accessorFn: (r) => runStats(r).cost?.usd ?? 0,
+        meta: { mono: true, align: 'right', wrap: true },
+        cell: (c) => (
+          <span title={runStats(c.row.original).cost?.basis}>{costLabel(runStats(c.row.original).cost)}</span>
+        ),
+      },
+      {
+        id: 'judge',
+        header: 'Judge',
+        accessorFn: (r) => (runStats(r).judge_stability?.stable ? 1 : 0),
+        cell: (c) => <JudgeChip run={c.row.original} />,
+      },
+      {
+        header: 'Started',
+        accessorKey: 'started_at',
+        cell: (c) => <span className="text-ink-2">{fmtTs(c.row.original.started_at)}</span>,
+        meta: { mono: true, wrap: true },
+      },
     ],
     [],
   );
@@ -405,22 +529,42 @@ export function HomePage() {
     for (const t of openTasks.data ?? []) if (taskLane(t) === 'actionable') m.set(t.kind, (m.get(t.kind) ?? 0) + 1);
     return m;
   }, [openTasks.data]);
-  const openGroups = useMemo(() => groupActionable((openTasks.data ?? []).filter((t) => taskLane(t) === 'actionable')).groups.length, [openTasks.data]);
-  const openAdvisory = useMemo(() => (openTasks.data ?? []).filter((t) => taskLane(t) === 'advisory').length, [openTasks.data]);
+  const openGroups = useMemo(
+    () => groupActionable((openTasks.data ?? []).filter((t) => taskLane(t) === 'actionable')).groups.length,
+    [openTasks.data],
+  );
+  const openAdvisory = useMemo(
+    () => (openTasks.data ?? []).filter((t) => taskLane(t) === 'advisory').length,
+    [openTasks.data],
+  );
 
   // ---------------------------------------------------------------- RULE card
   const counts = impact.data?.counts;
   const ruleState = currentOf(ruleRun);
   const ruleTitle = featured ? splitTitle(featured.rule.title) : null;
-  const previousVersion = featured ? governingVersions(featured.rule).filter((v) => v.version < featured.latest.version).pop() : undefined;
+  const previousVersion = featured
+    ? governingVersions(featured.rule)
+        .filter((v) => v.version < featured.latest.version)
+        .pop()
+    : undefined;
   const ruleDelta = featured ? (
     <>
       <MetricRow>
-        <Metric value={counts?.artifacts ?? 0} tone={counts?.artifacts ? 'amber' : 'green'} label={`affected ${counts?.artifacts === 1 ? 'artifact' : 'artifacts'}`} />
-        <Metric size="md" value={counts?.total ?? 0} tone="ink" label={`stale ${counts?.total === 1 ? 'encoding' : 'encodings'}`} />
+        <Metric
+          value={counts?.artifacts ?? 0}
+          tone={counts?.artifacts ? 'amber' : 'green'}
+          label={`affected ${counts?.artifacts === 1 ? 'artifact' : 'artifacts'}`}
+        />
+        <Metric
+          size="md"
+          value={counts?.total ?? 0}
+          tone="ink"
+          label={`stale ${counts?.total === 1 ? 'encoding' : 'encodings'}`}
+        />
       </MetricRow>
       <div className="mt-1.5 text-[12px] leading-snug text-ink-2">
-        {counts?.over_restrictive ?? 0} over-restrictive · {counts?.under_restrictive ?? 0} under-restrictive · {counts?.reverify ?? 0} re-verify
+        {counts?.over_restrictive ?? 0} over-restrictive · {counts?.under_restrictive ?? 0} under-restrictive ·{' '}
+        {counts?.reverify ?? 0} re-verify
         {counts?.disputed ? ` · ${counts.disputed} open question${counts.disputed === 1 ? '' : 's'}` : ''}
       </div>
     </>
@@ -436,11 +580,23 @@ export function HomePage() {
     promptCmp.data && promptBase && promptRun ? (
       <>
         <MetricRow>
-          <Metric value={`+${promptCmp.data.newly_passing.length}`} tone={promptCmp.data.newly_passing.length ? 'green' : 'muted'} label="newly passing" />
-          <Metric size="md" value={promptCmp.data.newly_failing.length} tone={promptCmp.data.newly_failing.length ? 'red' : 'muted'} label="newly failing" />
+          <Metric
+            value={`+${promptCmp.data.newly_passing.length}`}
+            tone={promptCmp.data.newly_passing.length ? 'green' : 'muted'}
+            label="newly passing"
+          />
+          <Metric
+            size="md"
+            value={promptCmp.data.newly_failing.length}
+            tone={promptCmp.data.newly_failing.length ? 'red' : 'muted'}
+            label="newly failing"
+          />
         </MetricRow>
         {heldOut && (
-          <p role="note" className="mt-2 rounded-[6px] border border-amber/35 bg-amber/8 px-2.5 py-1.5 text-[12px] leading-snug text-ink">
+          <p
+            role="note"
+            className="mt-2 rounded-[6px] border border-amber/35 bg-amber/8 px-2.5 py-1.5 text-[12px] leading-snug text-ink"
+          >
             <strong className="font-semibold text-amber-ink">Development calls only.</strong> {heldOut.summary}{' '}
             <Link to={`/runs/compare?a=${heldOut.a_run_id}&b=${heldOut.b_run_id}`} className="font-semibold">
               Held-out comparison
@@ -449,7 +605,9 @@ export function HomePage() {
         )}
       </>
     ) : (
-      <div className="text-[13px] leading-snug text-ink-3">{promptRun ? `${promptRun.prompt_label} — no baseline to compare` : 'No prompt-triggered run yet'}</div>
+      <div className="text-[13px] leading-snug text-ink-3">
+        {promptRun ? `${promptRun.prompt_label} — no baseline to compare` : 'No prompt-triggered run yet'}
+      </div>
     );
 
   // ---------------------------------------------------------------- MODEL card
@@ -458,12 +616,23 @@ export function HomePage() {
     modelCmp.data && modelBase && modelRun ? (
       <>
         <MetricRow>
-          <Metric value={modelCmp.data.newly_failing.length} tone={modelCmp.data.newly_failing.length ? 'red' : 'muted'} label="newly failing" />
-          <Metric size="md" value={`+${modelCmp.data.newly_passing.length}`} tone={modelCmp.data.newly_passing.length ? 'green' : 'muted'} label="newly passing" />
+          <Metric
+            value={modelCmp.data.newly_failing.length}
+            tone={modelCmp.data.newly_failing.length ? 'red' : 'muted'}
+            label="newly failing"
+          />
+          <Metric
+            size="md"
+            value={`+${modelCmp.data.newly_passing.length}`}
+            tone={modelCmp.data.newly_passing.length ? 'green' : 'muted'}
+            label="newly passing"
+          />
         </MetricRow>
       </>
     ) : (
-      <div className="text-[13px] leading-snug text-ink-3">{modelRun ? `${modelRun.model_label} — no baseline to compare` : 'No model-triggered run yet'}</div>
+      <div className="text-[13px] leading-snug text-ink-3">
+        {modelRun ? `${modelRun.model_label} — no baseline to compare` : 'No model-triggered run yet'}
+      </div>
     );
 
   const runLine = (run: RunOut) => (
@@ -474,7 +643,10 @@ export function HomePage() {
       · prompt v{run.prompt_version} · rule date {run.rule_date}
     </div>
   );
-  const blockingLine = (s: CurrentState) => (s.blockingContracts.length > 0 ? <div className="text-ink-3">blocking on {s.blockingContracts.join(' · ')}</div> : null);
+  const blockingLine = (s: CurrentState) =>
+    s.blockingContracts.length > 0 ? (
+      <div className="text-ink-3">blocking on {s.blockingContracts.join(' · ')}</div>
+    ) : null;
 
   return (
     <div>
@@ -496,14 +668,19 @@ export function HomePage() {
             subline={
               featured && (
                 <>
-                  {featured.rule.code.toUpperCase()} {previousVersion ? `v${previousVersion.version} → ` : ''}v{featured.latest.version} · applies {fmtDate(featured.latest.effective_from)}
+                  {featured.rule.code.toUpperCase()} {previousVersion ? `v${previousVersion.version} → ` : ''}v
+                  {featured.latest.version} · applies {fmtDate(featured.latest.effective_from)}
                 </>
               )
             }
             delta={ruleDelta}
             state={ruleState}
             stateEmpty="No rule-triggered run yet — start one at the new rule date."
-            to={featured ? `/rules/${encodeURIComponent(featured.rule.code)}?as_of=${featured.latest.effective_from}` : null}
+            to={
+              featured
+                ? `/rules/${encodeURIComponent(featured.rule.code)}?as_of=${featured.latest.effective_from}`
+                : null
+            }
             actionLabel="View blast radius"
             loading={rules.isLoading || runs.isLoading || (Boolean(featured) && impact.isLoading)}
             error={rules.error ?? impact.error}
@@ -511,7 +688,8 @@ export function HomePage() {
               featured && (
                 <>
                   <div>
-                    {featured.rule.regulator} · {featured.rule.citation} · {featured.latest.change_classification.replace('_', ' ').toLowerCase()}
+                    {featured.rule.regulator} · {featured.rule.citation} ·{' '}
+                    {featured.latest.change_classification.replace('_', ' ').toLowerCase()}
                   </div>
                   {ruleRun && (
                     <>
@@ -532,14 +710,21 @@ export function HomePage() {
             subline={
               promptRun && (
                 <>
-                  {promptRun.workflow_code} {promptBase ? `v${promptBase.prompt_version} → ` : ''}v{promptRun.prompt_version} · rule date {promptRun.rule_date}
+                  {promptRun.workflow_code} {promptBase ? `v${promptBase.prompt_version} → ` : ''}v
+                  {promptRun.prompt_version} · rule date {promptRun.rule_date}
                 </>
               )
             }
             delta={promptDelta}
             state={promptState}
             stateEmpty="No prompt-triggered run yet."
-            to={promptBase && promptRun ? `/runs/compare?a=${promptBase.id}&b=${promptRun.id}` : promptRun ? `/runs/${promptRun.id}` : null}
+            to={
+              promptBase && promptRun
+                ? `/runs/compare?a=${promptBase.id}&b=${promptRun.id}`
+                : promptRun
+                  ? `/runs/${promptRun.id}`
+                  : null
+            }
             actionLabel={promptBase ? 'Compare runs' : 'Open run'}
             loading={runs.isLoading || (Boolean(promptRun) && promptCmp.isLoading)}
             error={runs.error ?? promptCmp.error}
@@ -547,7 +732,8 @@ export function HomePage() {
               promptRun && (
                 <>
                   <div>
-                    model {promptRun.model_id} · {promptCmp.data?.unchanged_failing ?? '—'} still failing · {promptCmp.data?.unchanged_passing ?? '—'} still passing
+                    model {promptRun.model_id} · {promptCmp.data?.unchanged_failing ?? '—'} still failing ·{' '}
+                    {promptCmp.data?.unchanged_passing ?? '—'} still passing
                   </div>
                   {runLine(promptRun)}
                   <RunFacts run={promptRun} className="font-sans" />
@@ -559,8 +745,16 @@ export function HomePage() {
           <TriggerCard
             eyebrow="Model changed"
             icon={<Cpu size={14} />}
-            title={modelRun ? (modelBase ? `${shortModelLabel(modelBase.model_label)} → ${shortModelLabel(modelRun.model_label)}` : shortModelLabel(modelRun.model_label)) : 'No model change yet'}
-            subtitle={modelRun ? `prompt v${modelRun.prompt_version} unchanged · rule date ${modelRun.rule_date}` : undefined}
+            title={
+              modelRun
+                ? modelBase
+                  ? `${shortModelLabel(modelBase.model_label)} → ${shortModelLabel(modelRun.model_label)}`
+                  : shortModelLabel(modelRun.model_label)
+                : 'No model change yet'
+            }
+            subtitle={
+              modelRun ? `prompt v${modelRun.prompt_version} unchanged · rule date ${modelRun.rule_date}` : undefined
+            }
             subline={
               modelRun && (
                 <>
@@ -576,7 +770,13 @@ export function HomePage() {
             delta={modelDelta}
             state={modelState}
             stateEmpty="No model-triggered run yet."
-            to={modelBase && modelRun ? `/runs/compare?a=${modelBase.id}&b=${modelRun.id}` : modelRun ? `/runs/${modelRun.id}` : null}
+            to={
+              modelBase && modelRun
+                ? `/runs/compare?a=${modelBase.id}&b=${modelRun.id}`
+                : modelRun
+                  ? `/runs/${modelRun.id}`
+                  : null
+            }
             actionLabel={modelBase ? 'Compare runs' : 'Open run'}
             loading={runs.isLoading || (Boolean(modelRun) && modelCmp.isLoading)}
             error={runs.error ?? modelCmp.error}
@@ -625,7 +825,10 @@ export function HomePage() {
         />
       </Section>
 
-      <Section title={`Open review — actionable${openTasks.data ? ` · ${openGroups} blocking-failure ${openGroups === 1 ? 'group' : 'groups'} · ${openAdvisory} advisory` : ''}`} right={<Link to="/review">Review queue →</Link>}>
+      <Section
+        title={`Open review — actionable${openTasks.data ? ` · ${openGroups} blocking-failure ${openGroups === 1 ? 'group' : 'groups'} · ${openAdvisory} advisory` : ''}`}
+        right={<Link to="/review">Review queue →</Link>}
+      >
         {openTasks.isLoading ? (
           <LoadingState rows={1} />
         ) : openTasks.error && !openTasks.data ? (
@@ -642,7 +845,9 @@ export function HomePage() {
                   <div className="text-[13px] font-semibold text-ink">{kindLabel(kind)}</div>
                   <div className="mt-0.5 font-mono text-[11px] text-ink-3">{kind}</div>
                 </div>
-                <div className={cn('stat text-[24px]', (openByKind.get(kind) ?? 0) > 0 ? 'text-ink' : 'text-ink-3')}>{openByKind.get(kind) ?? 0}</div>
+                <div className={cn('stat text-[24px]', (openByKind.get(kind) ?? 0) > 0 ? 'text-ink' : 'text-ink-3')}>
+                  {openByKind.get(kind) ?? 0}
+                </div>
               </Link>
             ))}
           </div>

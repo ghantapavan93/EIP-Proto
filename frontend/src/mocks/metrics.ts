@@ -62,7 +62,10 @@ interface CallFacts {
 const CALLS: Map<string, CallFacts> = new Map([
   ...SCENARIOS.map((sc): [string, CallFacts] => {
     const labels = transcriptOut(sc, false).labels;
-    return [sc.code, { scenario: typeof labels.scenario === 'string' ? labels.scenario : 'unlabelled', product_line: sc.product_line }];
+    return [
+      sc.code,
+      { scenario: typeof labels.scenario === 'string' ? labels.scenario : 'unlabelled', product_line: sc.product_line },
+    ];
   }),
   ...INGESTED.map((s): [string, CallFacts] => [s.code, { scenario: 'unlabelled', product_line: s.product_line }]),
 ]);
@@ -137,7 +140,10 @@ function runMetrics(rec: MetricsRun, code: string, family: Family, fails: string
       }
     }
     add(total, failed, cls);
-    const values: Record<(typeof SLICE_DIMENSIONS)[number], string> = { scenario: call.scenario, product_line: call.product_line };
+    const values: Record<(typeof SLICE_DIMENSIONS)[number], string> = {
+      scenario: call.scenario,
+      product_line: call.product_line,
+    };
     for (const dim of SLICE_DIMENSIONS) {
       const key = `${dim}|${values[dim]}`;
       if (!slices.has(key)) slices.set(key, blank());
@@ -206,11 +212,20 @@ function runMetrics(rec: MetricsRun, code: string, family: Family, fails: string
         notable: allMissed || aboveOverall,
       };
     })
-    .sort((x, y) => SLICE_DIMENSIONS.indexOf(x.dimension as 'scenario') - SLICE_DIMENSIONS.indexOf(y.dimension as 'scenario') || x.value.localeCompare(y.value));
+    .sort(
+      (x, y) =>
+        SLICE_DIMENSIONS.indexOf(x.dimension as 'scenario') - SLICE_DIMENSIONS.indexOf(y.dimension as 'scenario') ||
+        x.value.localeCompare(y.value),
+    );
   findings.push(
     ...sliceOut
       .filter((x) => x.notable)
-      .sort((x, y) => SLICE_DIMENSIONS.indexOf(x.dimension as 'scenario') - SLICE_DIMENSIONS.indexOf(y.dimension as 'scenario') || (y.fn ?? 0) - (x.fn ?? 0) || y.failure.k - x.failure.k)
+      .sort(
+        (x, y) =>
+          SLICE_DIMENSIONS.indexOf(x.dimension as 'scenario') - SLICE_DIMENSIONS.indexOf(y.dimension as 'scenario') ||
+          (y.fn ?? 0) - (x.fn ?? 0) ||
+          y.failure.k - x.failure.k,
+      )
       .map((x) => x.summary),
   );
 
@@ -310,8 +325,22 @@ function compareOne(
   const shared = [...aMap.keys()].filter((t) => bMap.has(t));
   const table = pairedTable(shared.map((t): [boolean, boolean] => [aMap.get(t) as boolean, bMap.get(t) as boolean]));
   const result = paired
-    ? compareRates(table.both_fail + table.a_only_fail, shared.length, table.both_fail + table.b_only_fail, shared.length, table, what)
-    : compareRates([...aMap.values()].filter(Boolean).length, aMap.size, [...bMap.values()].filter(Boolean).length, bMap.size, null, what);
+    ? compareRates(
+        table.both_fail + table.a_only_fail,
+        shared.length,
+        table.both_fail + table.b_only_fail,
+        shared.length,
+        table,
+        what,
+      )
+    : compareRates(
+        [...aMap.values()].filter(Boolean).length,
+        aMap.size,
+        [...bMap.values()].filter(Boolean).length,
+        bMap.size,
+        null,
+        what,
+      );
   return {
     contract_code: code,
     severity,
@@ -344,7 +373,9 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
         continue;
       }
       if (!out.has(r.contract_code)) out.set(r.contract_code, new Map());
-      out.get(r.contract_code)?.set(r.transcript_code, failureOutcomes(severity.get(r.contract_code) ?? 'BLOCK').includes(r.outcome));
+      out
+        .get(r.contract_code)
+        ?.set(r.transcript_code, failureOutcomes(severity.get(r.contract_code) ?? 'BLOCK').includes(r.outcome));
     }
     return out;
   };
@@ -352,20 +383,31 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
   const fb = failedBy(b);
   const codes = [...severity.keys()].sort();
   const perContract = codes.map((code) =>
-    compareOne(code, severity.get(code) ?? 'BLOCK', fa.get(code) ?? new Map(), fb.get(code) ?? new Map(), paired, excluded.get(code) ?? 0, 'this contract'),
+    compareOne(
+      code,
+      severity.get(code) ?? 'BLOCK',
+      fa.get(code) ?? new Map(),
+      fb.get(code) ?? new Map(),
+      paired,
+      excluded.get(code) ?? 0,
+      'this contract',
+    ),
   );
   holm(perContract.map((r) => r.p_value)).forEach((pHolm, i) => {
     const row = perContract[i];
     row.p_holm = pHolm;
     if (row.significant && pHolm !== null && pHolm >= ALPHA) {
-      row.cautions.push(`Not significant after Holm correction across ${perContract.length} contracts (p_holm=${fmtP(pHolm)}).`);
+      row.cautions.push(
+        `Not significant after Holm correction across ${perContract.length} contracts (p_holm=${fmtP(pHolm)}).`,
+      );
     }
   });
 
   const block = codes.filter((c) => severity.get(c) === 'BLOCK');
   const anyBlock = (f: Map<string, Map<string, boolean>>) => {
     const calls = new Map<string, boolean>();
-    for (const code of block) for (const [t, failed] of f.get(code) ?? []) calls.set(t, (calls.get(t) ?? false) || failed);
+    for (const code of block)
+      for (const [t, failed] of f.get(code) ?? []) calls.set(t, (calls.get(t) ?? false) || failed);
     return calls;
   };
   const overall = compareOne(
@@ -377,9 +419,12 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
     block.reduce((n, c) => n + (excluded.get(c) ?? 0), 0),
     'the release-blocking contracts',
   );
-  if (a.run.contract_set_hash !== b.run.contract_set_hash) overall.cautions.push('The contract sets differ between the runs; ALL-BLOCK compares different checks.');
+  if (a.run.contract_set_hash !== b.run.contract_set_hash)
+    overall.cautions.push('The contract sets differ between the runs; ALL-BLOCK compares different checks.');
 
-  const cautions = ['One generation per call: a repeat of either run could move a few calls. Repeat generations would tighten these intervals.'];
+  const cautions = [
+    'One generation per call: a repeat of either run could move a few calls. Repeat generations would tighten these intervals.',
+  ];
   if (!paired) {
     cautions.unshift(
       "The runs scored different calls (corpus changed), so a paired test is invalid. Rates are compared with Fisher's exact test on each run's own calls; two draws of calls can differ on their own, so this does not isolate the change.",
@@ -389,7 +434,14 @@ export function compareStatistics(a: MetricsRun, b: MetricsRun): CompareStatisti
       'Both runs are on the development calls the prompts were written against. A prompt tuned on these calls can look significantly better here and still regress on unseen calls; confirm on the held-out corpus.',
     );
   }
-  return { mode: paired ? 'paired' : 'unpaired', alpha: ALPHA, failure_definition: FAILURE_DEFINITION, cautions, overall, per_contract: perContract };
+  return {
+    mode: paired ? 'paired' : 'unpaired',
+    alpha: ALPHA,
+    failure_definition: FAILURE_DEFINITION,
+    cautions,
+    overall,
+    per_contract: perContract,
+  };
 }
 
 export const COMPARE_FAILURE_DEFINITION =

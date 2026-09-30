@@ -12,7 +12,17 @@ import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { cn } from '../lib/cn';
 import { fmtDate, hostname, todayIso } from '../lib/format';
-import { countdownLabel, daysLabel, HORIZON_BANDS, isCalendarKind, milestoneKindLabel, milestoneTone, requiredPace, sortOwners, upcoming } from '../lib/readiness';
+import {
+  countdownLabel,
+  daysLabel,
+  HORIZON_BANDS,
+  isCalendarKind,
+  milestoneKindLabel,
+  milestoneTone,
+  requiredPace,
+  sortOwners,
+  upcoming,
+} from '../lib/readiness';
 import { classificationLabel } from '../lib/ruleVersions';
 import { changeTone, kindLabel, roleLabel } from '../lib/vocab';
 
@@ -27,7 +37,9 @@ function Countdown({ days, label, date, tone }: { days: number; label: string; d
     <div className="bg-surface px-4 py-3">
       <div className="eyebrow">{label}</div>
       <div className="mt-1 flex items-baseline gap-2">
-        <span className={cn('stat text-[34px]', tone === 'teal' ? 'text-teal-ink' : 'text-ink')}>{Math.max(0, days)}</span>
+        <span className={cn('stat text-[34px]', tone === 'teal' ? 'text-teal-ink' : 'text-ink')}>
+          {Math.max(0, days)}
+        </span>
         <span className="text-[13px] text-ink-2">{days === 1 ? 'day' : 'days'}</span>
       </div>
       <div className="font-mono text-[11.5px] text-ink-2">
@@ -67,7 +79,13 @@ function StopMarker({ kinds }: { kinds: string[] }) {
       aria-hidden
       className={cn(
         'block h-3 w-3 rounded-full border-2',
-        calendar ? 'border-teal-ink bg-teal-ink' : applies ? 'border-slate bg-slate' : vote ? 'border-slate bg-surface' : 'border-amber bg-surface',
+        calendar
+          ? 'border-teal-ink bg-teal-ink'
+          : applies
+            ? 'border-slate bg-slate'
+            : vote
+              ? 'border-slate bg-surface'
+              : 'border-amber bg-surface',
       )}
     />
   );
@@ -80,7 +98,9 @@ function StopMarker({ kinds }: { kinds: string[] }) {
  */
 function StopText({ stop }: { stop: Stop }) {
   const applies = stop.items.filter((m) => m.kind === 'rule_applies');
-  const others = stop.items.filter((m) => m.kind !== 'rule_applies').sort((a, b) => Number(isCalendarKind(b.kind)) - Number(isCalendarKind(a.kind)));
+  const others = stop.items
+    .filter((m) => m.kind !== 'rule_applies')
+    .sort((a, b) => Number(isCalendarKind(b.kind)) - Number(isCalendarKind(a.kind)));
   const grouped = applies.length > 2;
   const rows = grouped ? others : [...others, ...applies];
   return (
@@ -128,7 +148,14 @@ function StopText({ stop }: { stop: Stop }) {
  */
 function MilestoneTimeline({ milestones, asOf }: { milestones: ReadinessMilestone[]; asOf: string }) {
   const stops = groupByDate(upcoming(milestones));
-  if (!stops.length) return <EmptyState title="No upcoming milestones" hint="Nothing applies, is voted on or lands in the window." className="py-5" />;
+  if (!stops.length)
+    return (
+      <EmptyState
+        title="No upcoming milestones"
+        hint="Nothing applies, is voted on or lands in the window."
+        className="py-5"
+      />
+    );
   // A busy date (several rule versions applying) gets a wider column; each marker sits over its own column.
   const columns = stops.map((s) => `minmax(0, ${s.items.length > 3 ? 1.8 : 1}fr)`).join(' ');
   return (
@@ -136,7 +163,9 @@ function MilestoneTimeline({ milestones, asOf }: { milestones: ReadinessMileston
       <div className="relative hidden md:block" role="list" aria-label="Milestones">
         <span aria-hidden className="absolute left-0 right-0 top-[29px] h-px bg-hairline" />
         <div className="relative h-[18px]">
-          <span className="absolute left-0 top-0 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.06em] text-teal-ink">As of {fmtDate(asOf)}</span>
+          <span className="absolute left-0 top-0 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.06em] text-teal-ink">
+            As of {fmtDate(asOf)}
+          </span>
         </div>
         <span aria-hidden className="absolute left-0 top-[18px] h-[22px] w-[2px] rounded-full bg-teal-ink" />
         <div className="grid gap-3 pl-6" style={{ gridTemplateColumns: columns }}>
@@ -148,7 +177,9 @@ function MilestoneTimeline({ milestones, asOf }: { milestones: ReadinessMileston
                 </span>
               </div>
               <div className="font-mono text-[12px] font-semibold text-ink">{fmtDate(s.date)}</div>
-              <div className={cn('mb-1 text-[11px]', s.days <= 7 ? 'font-semibold text-amber-ink' : 'text-ink-2')}>{countdownLabel(s.days)}</div>
+              <div className={cn('mb-1 text-[11px]', s.days <= 7 ? 'font-semibold text-amber-ink' : 'text-ink-2')}>
+                {countdownLabel(s.days)}
+              </div>
               <StopText stop={s} />
             </div>
           ))}
@@ -156,14 +187,19 @@ function MilestoneTimeline({ milestones, asOf }: { milestones: ReadinessMileston
       </div>
       <ol className="space-y-2 md:hidden" aria-label="Milestones">
         {stops.map((s) => (
-          <li key={s.date} className="grid grid-cols-[14px_minmax(0,1fr)] gap-x-2.5 border-t border-hairline pt-2 first:border-t-0 first:pt-0">
+          <li
+            key={s.date}
+            className="grid grid-cols-[14px_minmax(0,1fr)] gap-x-2.5 border-t border-hairline pt-2 first:border-t-0 first:pt-0"
+          >
             <span className="mt-1">
               <StopMarker kinds={stopKinds(s)} />
             </span>
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-[12px] font-semibold text-ink">{fmtDate(s.date)}</span>
-                <span className={cn('text-[11px]', s.days <= 7 ? 'font-semibold text-amber-ink' : 'text-ink-2')}>{countdownLabel(s.days)}</span>
+                <span className={cn('text-[11px]', s.days <= 7 ? 'font-semibold text-amber-ink' : 'text-ink-2')}>
+                  {countdownLabel(s.days)}
+                </span>
               </div>
               <StopText stop={s} />
             </div>
@@ -175,7 +211,14 @@ function MilestoneTimeline({ milestones, asOf }: { milestones: ReadinessMileston
 }
 
 function HorizonTable({ items, asOf }: { items: ReadinessHorizonItem[]; asOf: string }) {
-  if (!items.length) return <EmptyState title="Nothing flips in this window" hint={`No enacted rule version starts to apply in this band, counted from ${fmtDate(asOf)}.`} className="py-5" />;
+  if (!items.length)
+    return (
+      <EmptyState
+        title="Nothing flips in this window"
+        hint={`No enacted rule version starts to apply in this band, counted from ${fmtDate(asOf)}.`}
+        className="py-5"
+      />
+    );
   return (
     <div className="overflow-x-auto">
       <table className="dt" aria-label="Rule versions that start to apply">
@@ -194,7 +237,10 @@ function HorizonTable({ items, asOf }: { items: ReadinessHorizonItem[]; asOf: st
             <tr key={`${it.rule_code}-${it.version}`}>
               <td className="wrap">
                 <span className="cell-primary">
-                  <Link to={`${ruleLink(it.rule_code)}?as_of=${it.applies_from}`} className="font-mono text-[12px] font-semibold">
+                  <Link
+                    to={`${ruleLink(it.rule_code)}?as_of=${it.applies_from}`}
+                    className="font-mono text-[12px] font-semibold"
+                  >
                     {it.rule_code} v{it.version}
                   </Link>
                   <span className="cell-sub max-w-[440px]">{it.rule_title}</span>
@@ -204,8 +250,17 @@ function HorizonTable({ items, asOf }: { items: ReadinessHorizonItem[]; asOf: st
               <td>
                 <Chip tone={changeTone(it.change_classification)}>{classificationLabel(it.change_classification)}</Chip>
               </td>
-              <td className={cn('text-right font-mono', it.stale_encodings_on_that_date ? 'font-semibold text-amber-ink' : 'text-ink-3')}>{it.stale_encodings_on_that_date}</td>
-              <td className={cn('text-right font-mono', it.artifacts_on_that_date ? 'text-ink' : 'text-ink-3')}>{it.artifacts_on_that_date}</td>
+              <td
+                className={cn(
+                  'text-right font-mono',
+                  it.stale_encodings_on_that_date ? 'font-semibold text-amber-ink' : 'text-ink-3',
+                )}
+              >
+                {it.stale_encodings_on_that_date}
+              </td>
+              <td className={cn('text-right font-mono', it.artifacts_on_that_date ? 'text-ink' : 'text-ink-3')}>
+                {it.artifacts_on_that_date}
+              </td>
               <td className={cn('text-right font-mono', it.open_tasks ? 'text-ink' : 'text-ink-3')}>{it.open_tasks}</td>
             </tr>
           ))}
@@ -241,12 +296,23 @@ function OwnersTable({ owners }: { owners: ReadinessOut['owners'] }) {
               </td>
               <td className="text-right font-mono">{o.open}</td>
               <td className="text-right font-mono">{o.actionable}</td>
-              <td className={cn('text-right font-mono', (o.oldest_days ?? 0) >= 7 ? 'font-semibold text-amber-ink' : 'text-ink')}>{daysLabel(o.oldest_days)}</td>
+              <td
+                className={cn(
+                  'text-right font-mono',
+                  (o.oldest_days ?? 0) >= 7 ? 'font-semibold text-amber-ink' : 'text-ink',
+                )}
+              >
+                {daysLabel(o.oldest_days)}
+              </td>
               <td className="text-right font-mono text-ink-2">{daysLabel(o.median_age_days)}</td>
               <td className="wrap">
                 <span className="flex flex-wrap gap-1 py-1">
                   {Object.entries(o.by_kind).map(([kind, n]) => (
-                    <Link key={kind} to={`/review?kind=${encodeURIComponent(kind)}&state=open`} className="hover:no-underline">
+                    <Link
+                      key={kind}
+                      to={`/review?kind=${encodeURIComponent(kind)}&state=open`}
+                      className="hover:no-underline"
+                    >
                       <Chip tone="neutral" size="xs">
                         {kindLabel(kind)} {n}
                       </Chip>
@@ -278,13 +344,20 @@ function BurnDown({ b, horizon }: { b: ReadinessOut['burn_down']; horizon: Readi
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <div className={cn('stat text-[26px]', b.open_actionable_now ? 'text-ink' : 'text-green-ink')}>{b.open_actionable_now}</div>
-          <div className="text-[12px] leading-tight text-ink-2" title="Every actionable task not yet closed: open, in review, or verified and waiting to be republished. The status bar counts only untouched (open) tasks.">
+          <div className={cn('stat text-[26px]', b.open_actionable_now ? 'text-ink' : 'text-green-ink')}>
+            {b.open_actionable_now}
+          </div>
+          <div
+            className="text-[12px] leading-tight text-ink-2"
+            title="Every actionable task not yet closed: open, in review, or verified and waiting to be republished. The status bar counts only untouched (open) tasks."
+          >
             actionable, not closed
           </div>
         </div>
         <div>
-          <div className={cn('stat text-[26px]', b.stale_encodings_on_target ? 'text-amber-ink' : 'text-green-ink')}>{b.stale_encodings_on_target}</div>
+          <div className={cn('stat text-[26px]', b.stale_encodings_on_target ? 'text-amber-ink' : 'text-green-ink')}>
+            {b.stale_encodings_on_target}
+          </div>
           <div className="text-[12px] leading-tight text-ink-2">stale encodings on {fmtDate(b.target)}</div>
           {alreadyStale > 0 && flipping > 0 && (
             <div className="mt-0.5 text-[11px] leading-tight text-ink-3" data-testid="stale-breakdown">
@@ -317,7 +390,10 @@ function HonestPanels({ data }: { data: ReadinessOut }) {
           <Ban size={14} className="text-slate" aria-hidden />
           <h3 className="text-[14px] font-semibold text-slate">Vacated — Backstop will not enforce</h3>
         </div>
-        <p className="mb-2 text-[12px] leading-snug text-ink-2">A court set these versions aside (or stayed them). They are kept for the record, never checked against, and never raise a task.</p>
+        <p className="mb-2 text-[12px] leading-snug text-ink-2">
+          A court set these versions aside (or stayed them). They are kept for the record, never checked against, and
+          never raise a task.
+        </p>
         {data.vacated.length ? (
           <ul className="divide-y divide-hairline">
             {data.vacated.map((v) => (
@@ -340,7 +416,13 @@ function HonestPanels({ data }: { data: ReadinessOut }) {
                 <div className="mt-0.5 text-[12.5px] leading-snug text-ink">{v.why}</div>
                 {v.source &&
                   (v.source_url ? (
-                    <a href={v.source_url} target="_blank" rel="noreferrer noopener" className="mt-0.5 block font-mono text-[11px] [overflow-wrap:anywhere]" title={v.source_url}>
+                    <a
+                      href={v.source_url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="mt-0.5 block font-mono text-[11px] [overflow-wrap:anywhere]"
+                      title={v.source_url}
+                    >
                       {v.source} · {hostname(v.source_url)}
                     </a>
                   ) : (
@@ -358,7 +440,9 @@ function HonestPanels({ data }: { data: ReadinessOut }) {
           <Vote size={14} className="text-slate" aria-hidden />
           <h3 className="text-[14px] font-semibold text-slate">Proposed — not law yet</h3>
         </div>
-        <p className="mb-2 text-[12px] leading-snug text-ink-2">Backstop treats a proposal as a what-if only. Nothing is re-scored until the text is enacted in reviewed YAML.</p>
+        <p className="mb-2 text-[12px] leading-snug text-ink-2">
+          Backstop treats a proposal as a what-if only. Nothing is re-scored until the text is enacted in reviewed YAML.
+        </p>
         {data.proposed.length ? (
           <ul className="divide-y divide-hairline">
             {data.proposed.map((p) => (
@@ -367,8 +451,12 @@ function HonestPanels({ data }: { data: ReadinessOut }) {
                   <Link to={ruleLink(p.rule_code)} className="font-mono text-[12.5px] font-semibold">
                     {p.rule_code}
                   </Link>
-                  <span className="rounded-[4px] border border-dashed border-teal-ink/60 px-1 font-mono text-[11.5px] text-teal-ink">v{p.version} proposed</span>
-                  <span className="text-[12px] font-semibold text-ink">{p.vote_date ? `vote on ${fmtDate(p.vote_date)}` : 'no vote scheduled'}</span>
+                  <span className="rounded-[4px] border border-dashed border-teal-ink/60 px-1 font-mono text-[11.5px] text-teal-ink">
+                    v{p.version} proposed
+                  </span>
+                  <span className="text-[12px] font-semibold text-ink">
+                    {p.vote_date ? `vote on ${fmtDate(p.vote_date)}` : 'no vote scheduled'}
+                  </span>
                   <span className="text-[11.5px] text-ink-2">
                     · {p.effective_from ? `would apply from ${fmtDate(p.effective_from)}` : 'no date to apply from yet'}
                     {p.origin === 'api' ? ' · recorded from the UI' : ''}
@@ -424,13 +512,25 @@ export function ReadinessPage() {
         <>
           <Section className="pt-0">
             <div className="card grid grid-cols-1 gap-px overflow-hidden bg-hairline sm:grid-cols-3">
-              <Countdown days={d.burn_down.days_left} label={`To ${fmtDate(d.burn_down.target)} — ${d.burn_down.label}`} date={d.burn_down.target} tone="ink" />
-              <Countdown days={d.burn_down.aep.days_left} label="To AEP — Annual Enrollment opens" date={d.burn_down.aep.date} tone="teal" />
+              <Countdown
+                days={d.burn_down.days_left}
+                label={`To ${fmtDate(d.burn_down.target)} — ${d.burn_down.label}`}
+                date={d.burn_down.target}
+                tone="ink"
+              />
+              <Countdown
+                days={d.burn_down.aep.days_left}
+                label="To AEP — Annual Enrollment opens"
+                date={d.burn_down.aep.date}
+                tone="teal"
+              />
               <div className="bg-surface px-4 py-3">
                 <div className="eyebrow">Next vote</div>
                 {d.proposed.find((p) => p.vote_date) ? (
                   (() => {
-                    const p = d.proposed.filter((x) => x.vote_date).sort((a, b) => (a.vote_date ?? '').localeCompare(b.vote_date ?? ''))[0];
+                    const p = d.proposed
+                      .filter((x) => x.vote_date)
+                      .sort((a, b) => (a.vote_date ?? '').localeCompare(b.vote_date ?? ''))[0];
                     return (
                       <>
                         <div className="mt-1 font-mono text-[13px] font-semibold text-ink">{fmtDate(p.vote_date)}</div>
@@ -456,12 +556,23 @@ export function ReadinessPage() {
             </div>
           </Section>
 
-          <Section title="What flips, and what is not ready for it" right={<span>bands do not overlap: 0–30, 31–60, 61–90 days</span>}>
+          <Section
+            title="What flips, and what is not ready for it"
+            right={<span>bands do not overlap: 0–30, 31–60, 61–90 days</span>}
+          >
             <div className="card overflow-hidden">
               <div role="tablist" aria-label="Horizon" className="flex border-b border-hairline px-2">
                 {HORIZONS.map((h) => (
-                  <button key={h} type="button" role="tab" className="tab" aria-selected={horizon === h} onClick={() => set('h', h)}>
-                    {HORIZON_BANDS.find(([key]) => key === h)?.[1]} <span className="ml-1 font-mono text-[11px] text-ink-3">{d.horizon[h]?.length ?? 0}</span>
+                  <button
+                    key={h}
+                    type="button"
+                    role="tab"
+                    className="tab"
+                    aria-selected={horizon === h}
+                    onClick={() => set('h', h)}
+                  >
+                    {HORIZON_BANDS.find(([key]) => key === h)?.[1]}{' '}
+                    <span className="ml-1 font-mono text-[11px] text-ink-3">{d.horizon[h]?.length ?? 0}</span>
                   </button>
                 ))}
               </div>

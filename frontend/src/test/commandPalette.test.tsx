@@ -8,10 +8,27 @@ vi.mock('../api/hooks', () => ({
   canEdit: (role: string | null) => role === 'engineer' || role === 'admin',
   useRole: () => 'engineer',
   useExportEvidence: () => ({ mutate, isPending: false }),
-  useRules: () => ({ data: [{ code: 'soa-48h-wait', title: 'Scope of Appointment — 48-hour wait', citation: '42 CFR 422.2264(c)(3)' }], isLoading: false }),
-  useAssets: () => ({ data: [{ code: 'sc-12', name: 'Attention scorecard item SC-12', type: 'scorecard_item' }], isLoading: false }),
+  useRules: () => ({
+    data: [{ code: 'soa-48h-wait', title: 'Scope of Appointment — 48-hour wait', citation: '42 CFR 422.2264(c)(3)' }],
+    isLoading: false,
+  }),
+  useAssets: () => ({
+    data: [{ code: 'sc-12', name: 'Attention scorecard item SC-12', type: 'scorecard_item' }],
+    isLoading: false,
+  }),
   useRuns: () => ({
-    data: [{ id: '7d5698c9-0441', workflow_code: 'qa-handoff', prompt_version: 3, model_id: 'ollama/qwen2.5:7b-instruct', gate: 'RED', started_at: '2026-09-23T07:28:00Z', trigger: 'PROMPT', rule_date: '2026-10-01' }],
+    data: [
+      {
+        id: '7d5698c9-0441',
+        workflow_code: 'qa-handoff',
+        prompt_version: 3,
+        model_id: 'ollama/qwen2.5:7b-instruct',
+        gate: 'RED',
+        started_at: '2026-09-23T07:28:00Z',
+        trigger: 'PROMPT',
+        rule_date: '2026-10-01',
+      },
+    ],
     isLoading: false,
   }),
 }));
@@ -58,7 +75,11 @@ describe('palette model', () => {
   it('knows which pages can export evidence', () => {
     expect(evidenceForLocation('/runs/abc', '')).toEqual({ scope: 'runs', id: 'abc' });
     expect(evidenceForLocation('/runs/compare', '?a=1')).toBeNull();
-    expect(evidenceForLocation('/rules/soa-48h-wait', '?as_of=2026-10-01')).toEqual({ scope: 'rules', id: 'soa-48h-wait', asOf: '2026-10-01' });
+    expect(evidenceForLocation('/rules/soa-48h-wait', '?as_of=2026-10-01')).toEqual({
+      scope: 'rules',
+      id: 'soa-48h-wait',
+      asOf: '2026-10-01',
+    });
     expect(evidenceForLocation('/review', '?task=t-1')).toEqual({ scope: 'tasks', id: 't-1' });
     expect(evidenceForLocation('/review', '')).toBeNull();
   });
@@ -66,7 +87,12 @@ describe('palette model', () => {
   it('filters by every word, keeps group order and caps list groups', () => {
     const items: PaletteItem[] = [
       { id: 'a', group: 'Actions', label: 'Open review queue' },
-      ...Array.from({ length: 9 }, (_, i) => ({ id: `r${i}`, group: 'Runs' as const, label: `qa-handoff run ${i}`, hint: `id${i}` })),
+      ...Array.from({ length: 9 }, (_, i) => ({
+        id: `r${i}`,
+        group: 'Runs' as const,
+        label: `qa-handoff run ${i}`,
+        hint: `id${i}`,
+      })),
       { id: 'x', group: 'Rules', label: 'Scope of Appointment', hint: 'soa-48h-wait' },
     ];
     expect(filterPalette(items, '').map((i) => i.group)).toEqual(['Actions', 'Rules', ...Array(6).fill('Runs')]);

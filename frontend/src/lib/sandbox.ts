@@ -94,16 +94,16 @@ export function locateSpanRange(text: string, span: string, offset: number): { a
   if (!span) return none;
   if (offset >= 0 && text.slice(offset, offset + span.length) === span) return { at: offset, length: span.length };
   const nearest = (hits: Array<{ at: number; length: number }>) =>
-    hits.reduce<{ at: number; length: number } | null>((best, h) => (best === null || Math.abs(h.at - offset) < Math.abs(best.at - offset) ? h : best), null);
+    hits.reduce<{ at: number; length: number } | null>(
+      (best, h) => (best === null || Math.abs(h.at - offset) < Math.abs(best.at - offset) ? h : best),
+      null,
+    );
   const verbatim: Array<{ at: number; length: number }> = [];
   for (let i = text.indexOf(span); i >= 0; i = text.indexOf(span, i + 1)) verbatim.push({ at: i, length: span.length });
   const v = nearest(verbatim);
   if (v) return v;
   if (!new RegExp(REDACTION_TOKEN.source).test(span)) return none;
-  const pattern = span
-    .split(REDACTION_TOKEN)
-    .map(escapeRegExp)
-    .join('[^\\n]{1,40}?');
+  const pattern = span.split(REDACTION_TOKEN).map(escapeRegExp).join('[^\\n]{1,40}?');
   const re = new RegExp(pattern, 'g');
   const fuzzy: Array<{ at: number; length: number }> = [];
   let m: RegExpExecArray | null;
@@ -174,15 +174,25 @@ export function refusalCopy(err: unknown, limit: number): RefusalCopy {
   const message = err instanceof Error ? err.message : String(err);
   switch (status) {
     case 413:
-      return { title: 'That is longer than the sandbox takes', detail: `Paste up to ${limit.toLocaleString('en-US')} characters — one script section, email or page at a time.` };
+      return {
+        title: 'That is longer than the sandbox takes',
+        detail: `Paste up to ${limit.toLocaleString('en-US')} characters — one script section, email or page at a time.`,
+      };
     case 422:
       return { title: 'The server could not read that request', detail: message };
     case 429:
-      return { title: 'Too many checks in a minute', detail: 'The sandbox is rate-limited so one visitor cannot hog it. Wait a few seconds and try again.' };
+      return {
+        title: 'Too many checks in a minute',
+        detail: 'The sandbox is rate-limited so one visitor cannot hog it. Wait a few seconds and try again.',
+      };
     case 409:
       return { title: 'The live model is offline', detail: message, offline: true };
     case 504:
-      return { title: 'The model took too long', detail: 'A local model gets about 75 seconds per call. Try a shorter transcript, or try again once the machine is less busy.' };
+      return {
+        title: 'The model took too long',
+        detail:
+          'A local model gets about 75 seconds per call. Try a shorter transcript, or try again once the machine is less busy.',
+      };
     case 0:
       return { title: 'Could not reach the server', detail: message };
     default:
@@ -229,9 +239,14 @@ export function findingsMarkdown(result: SandboxArtifactOut, label?: string): st
     lines.push(`## ${m.rule_code} — ${verdictLabel(m)}`);
     lines.push(`- Rule: ${m.rule_title}`);
     lines.push(`- Citation: ${m.citation}`);
-    lines.push(`- Encodes v${m.bound_version}; in force: ${m.in_force_version === null ? 'none' : `v${m.in_force_version}`}`);
+    lines.push(
+      `- Encodes v${m.bound_version}; in force: ${m.in_force_version === null ? 'none' : `v${m.in_force_version}`}`,
+    );
     if (m.reason) lines.push(`- Why: ${m.reason}`);
-    if (m.applies_from) lines.push(`- Applies from ${m.applies_from}${m.regulation_effective && m.regulation_effective !== m.applies_from ? ` (regulation effective ${m.regulation_effective})` : ''}`);
+    if (m.applies_from)
+      lines.push(
+        `- Applies from ${m.applies_from}${m.regulation_effective && m.regulation_effective !== m.applies_from ? ` (regulation effective ${m.regulation_effective})` : ''}`,
+      );
     if (m.disputed) lines.push('- Disputed reading on the path — verify with counsel');
     lines.push(`- Text: > ${m.span}`);
     lines.push('');

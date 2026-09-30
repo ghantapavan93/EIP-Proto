@@ -52,7 +52,8 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
       <div className="overflow-x-auto px-4 pb-3 pt-3">
         <table className="border-separate border-spacing-[2px] text-[11px]" aria-describedby="change-matrix-legend">
           <caption className="sr-only">
-            Changed cells by contract and call: {compare.newly_failing.length} newly failing, {compare.newly_passing.length} newly passing
+            Changed cells by contract and call: {compare.newly_failing.length} newly failing,{' '}
+            {compare.newly_passing.length} newly passing
           </caption>
           <thead>
             <tr>
@@ -60,8 +61,14 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
                 Contract
               </th>
               {calls.map((code) => (
-                <th key={code} scope="col" className="h-10 w-3.5 p-0 align-bottom font-mono text-[9.5px] font-medium text-ink-3">
-                  <span className="inline-block rotate-180 whitespace-nowrap leading-none [writing-mode:vertical-rl]">{code}</span>
+                <th
+                  key={code}
+                  scope="col"
+                  className="h-10 w-3.5 p-0 align-bottom font-mono text-[9.5px] font-medium text-ink-3"
+                >
+                  <span className="inline-block rotate-180 whitespace-nowrap leading-none [writing-mode:vertical-rl]">
+                    {code}
+                  </span>
                 </th>
               ))}
               <th scope="col" className="sr-only">
@@ -74,19 +81,34 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
               const t = rowTotals.get(contract);
               return (
                 <tr key={contract}>
-                  <th scope="row" className="whitespace-nowrap pr-2 text-left font-mono text-[11px] font-semibold text-ink">
+                  <th
+                    scope="row"
+                    className="whitespace-nowrap pr-2 text-left font-mono text-[11px] font-semibold text-ink"
+                  >
                     {contract}
                   </th>
                   {calls.map((call) => {
                     const cell = cells.get(`${contract}|${call}`);
                     const base = 'block h-3.5 w-3.5 rounded-[2px]';
-                    if (!cell) return <td key={call} className="p-0"><span className={cn(base, 'bg-band')} title={`${call} · ${contract}: not in either delta list`} /></td>;
+                    if (!cell)
+                      return (
+                        <td key={call} className="p-0">
+                          <span
+                            className={cn(base, 'bg-band')}
+                            title={`${call} · ${contract}: not in either delta list`}
+                          />
+                        </td>
+                      );
                     const label = `${call} · ${contract}: ${cell.a} → ${cell.b} (newly ${cell.dir}) — open ${call} in run B`;
                     return (
                       <td key={call} className="p-0">
                         <Link
                           to={`/runs/${runB}/transcripts/${encodeURIComponent(call)}`}
-                          className={cn(base, 'outline-offset-1 transition-[box-shadow] hover:shadow-[0_0_0_2px_var(--color-ink)] hover:no-underline', cell.dir === 'failing' ? 'bg-red' : 'bg-green-ink')}
+                          className={cn(
+                            base,
+                            'outline-offset-1 transition-[box-shadow] hover:shadow-[0_0_0_2px_var(--color-ink)] hover:no-underline',
+                            cell.dir === 'failing' ? 'bg-red' : 'bg-green-ink',
+                          )}
                           title={label}
                           aria-label={label}
                         />
@@ -94,9 +116,17 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
                     );
                   })}
                   <td className="whitespace-nowrap pl-2 font-mono text-[11px] tabular-nums">
-                    {t?.failing ? <span className="font-semibold text-red" title="newly failing in this contract">{t.failing} failing</span> : null}
+                    {t?.failing ? (
+                      <span className="font-semibold text-red" title="newly failing in this contract">
+                        {t.failing} failing
+                      </span>
+                    ) : null}
                     {t?.failing && t?.passing ? <span className="text-ink-3"> · </span> : null}
-                    {t?.passing ? <span className="font-semibold text-green-ink" title="newly passing in this contract">+{t.passing} passing</span> : null}
+                    {t?.passing ? (
+                      <span className="font-semibold text-green-ink" title="newly passing in this contract">
+                        +{t.passing} passing
+                      </span>
+                    ) : null}
                     {!t && <span className="text-ink-3">—</span>}
                   </td>
                 </tr>
@@ -105,7 +135,10 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
           </tbody>
         </table>
       </div>
-      <div id="change-matrix-legend" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-hairline bg-canvas px-4 py-2 text-[11px] text-ink-2">
+      <div
+        id="change-matrix-legend"
+        className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-hairline bg-canvas px-4 py-2 text-[11px] text-ink-2"
+      >
         <span className="inline-flex items-center gap-1.5">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-red" /> newly failing (passed in A)
         </span>
@@ -113,7 +146,8 @@ export function ChangeMatrix({ compare, runB }: { compare: CompareOut; runB: str
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-green-ink" /> newly passing (failed or flagged in A)
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden className="h-2.5 w-2.5 rounded-[2px] border border-hairline bg-band" /> not in either delta list
+          <span aria-hidden className="h-2.5 w-2.5 rounded-[2px] border border-hairline bg-band" /> not in either delta
+          list
         </span>
         <span className="ml-auto text-ink-3">
           {calls.length} {calls.length === 1 ? 'call' : 'calls'} moved · click a cell to open that call in run B

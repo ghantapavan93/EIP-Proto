@@ -6,7 +6,15 @@
 
 const WIDTHS = ['72%', '48%', '86%', '60%', '38%', '66%', '54%', '80%'];
 
-export function SkeletonRows({ columns, rows = 6, label = 'Loading' }: { columns: number; rows?: number; label?: string }) {
+export function SkeletonRows({
+  columns,
+  rows = 6,
+  label = 'Loading',
+}: {
+  columns: number;
+  rows?: number;
+  label?: string;
+}) {
   return (
     <>
       {Array.from({ length: rows }, (_, r) => (

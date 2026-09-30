@@ -21,7 +21,14 @@ export const CHANGE_CLASSIFICATIONS = [
  * What a proposal may be classified as (the API's RuleVersionCreate): not
  * INITIAL, and not RESTORES_PRIOR, which only a court decision produces.
  */
-export const PROPOSABLE_CLASSIFICATIONS = ['ADDS_REQUIREMENT', 'REMOVES_REQUIREMENT', 'TIGHTENS', 'LOOSENS', 'MODIFIES', 'CLARIFIES'] as const;
+export const PROPOSABLE_CLASSIFICATIONS = [
+  'ADDS_REQUIREMENT',
+  'REMOVES_REQUIREMENT',
+  'TIGHTENS',
+  'LOOSENS',
+  'MODIFIES',
+  'CLARIFIES',
+] as const;
 
 export const RULE_VERSION_STATUSES = ['in_force', 'eliminated', 'amended', 'proposed', 'vacated', 'stayed'] as const;
 

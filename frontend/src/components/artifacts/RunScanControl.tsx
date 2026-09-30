@@ -11,7 +11,13 @@ import { defaultScanKey, resolveScanKey, scanToast } from '../../lib/scan';
  * shows an optional idempotency-key field — blank means one manual scan per
  * day (`YYYY-MM-DD-manual`), so a repeated click is deduplicated, not re-run.
  */
-export function RunScanControl({ onScanned, withKeyInput = false }: { onScanned?: (scan: ScanOut) => void; withKeyInput?: boolean }) {
+export function RunScanControl({
+  onScanned,
+  withKeyInput = false,
+}: {
+  onScanned?: (scan: ScanOut) => void;
+  withKeyInput?: boolean;
+}) {
   const runScan = useRunScan();
   const { toast } = useToast();
   const [key, setKey] = useState('');
@@ -32,7 +38,12 @@ export function RunScanControl({ onScanned, withKeyInput = false }: { onScanned?
   };
 
   const button = (
-    <button type={withKeyInput ? 'submit' : 'button'} className="btn btn-outline" onClick={withKeyInput ? undefined : () => submit()} disabled={runScan.isPending}>
+    <button
+      type={withKeyInput ? 'submit' : 'button'}
+      className="btn btn-outline"
+      onClick={withKeyInput ? undefined : () => submit()}
+      disabled={runScan.isPending}
+    >
       <ScanSearch size={13} aria-hidden /> {runScan.isPending ? 'Scanning…' : 'Run scan'}
     </button>
   );

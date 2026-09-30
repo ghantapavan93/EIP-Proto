@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /*
   Backstop design tokens — navy chrome, one teal accent, a cool canvas under white data surfaces.
@@ -43,8 +43,8 @@
   --color-on-navy-faint: #9aa3c7; /* 5.17:1 on navy — nav group labels */
 
   /* system-first: no network font. Inter when the machine has it, else the platform UI face. */
-  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'Consolas', 'SFMono-Regular', Menlo, monospace;
 
   --text-eyebrow: 11px;
   --text-table: 13px;
@@ -88,7 +88,7 @@ body {
   background: var(--color-canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "cv11", "ss01";
+  font-feature-settings: 'cv11', 'ss01';
   overflow-x: hidden;
 }
 
@@ -163,16 +163,19 @@ pre,
     letter-spacing: 0;
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 120ms, border-color 120ms, color 120ms;
+    transition:
+      background-color 120ms,
+      border-color 120ms,
+      color 120ms;
   }
-  .btn:hover:not(:disabled):not([aria-disabled="true"]) {
+  .btn:hover:not(:disabled):not([aria-disabled='true']) {
     background: var(--color-teal-ink-hover);
     border-color: var(--color-teal-ink-hover);
     color: var(--color-on-navy);
     text-decoration: none;
   }
   .btn:disabled,
-  .btn[aria-disabled="true"] {
+  .btn[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
   }
@@ -181,7 +184,7 @@ pre,
     border-color: var(--color-input);
     color: var(--color-teal-ink);
   }
-  .btn-outline:hover:not(:disabled):not([aria-disabled="true"]) {
+  .btn-outline:hover:not(:disabled):not([aria-disabled='true']) {
     background: color-mix(in srgb, var(--color-teal) 8%, var(--color-surface));
     border-color: var(--color-teal);
     color: var(--color-teal-ink);
@@ -191,7 +194,7 @@ pre,
     border-color: var(--color-input);
     color: var(--color-slate);
   }
-  .btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) {
+  .btn-ghost:hover:not(:disabled):not([aria-disabled='true']) {
     background: var(--color-band);
     border-color: var(--color-input);
     color: var(--color-ink);
@@ -200,7 +203,7 @@ pre,
     background: var(--color-red);
     border-color: var(--color-red);
   }
-  .btn-danger:hover:not(:disabled):not([aria-disabled="true"]) {
+  .btn-danger:hover:not(:disabled):not([aria-disabled='true']) {
     background: color-mix(in srgb, var(--color-red) 85%, black);
     border-color: color-mix(in srgb, var(--color-red) 85%, black);
     color: var(--color-on-navy);
@@ -288,7 +291,7 @@ pre,
     border-left: 0;
     border-right: 0;
   }
-  .tab[aria-selected="true"] {
+  .tab[aria-selected='true'] {
     color: var(--color-teal-ink);
     border-bottom-color: var(--color-teal-ink);
   }
@@ -375,20 +378,20 @@ pre,
   padding-top: 6px;
   padding-bottom: 6px;
 }
-.dt tbody tr[data-clickable="true"] {
+.dt tbody tr[data-clickable='true'] {
   cursor: pointer;
 }
-.dt tbody tr[data-clickable="true"]:hover,
-.dt tbody tr[data-clickable="true"]:focus-visible {
+.dt tbody tr[data-clickable='true']:hover,
+.dt tbody tr[data-clickable='true']:focus-visible {
   background: color-mix(in srgb, var(--color-teal) 6%, transparent);
   outline: none;
 }
 /* keyboard focus on a row: a 2px teal-ink edge instead of the (clipped) outline */
-.dt tbody tr[data-clickable="true"]:focus-visible > td:first-child,
-.dt tbody tr[data-selected="true"] > td:first-child {
+.dt tbody tr[data-clickable='true']:focus-visible > td:first-child,
+.dt tbody tr[data-selected='true'] > td:first-child {
   box-shadow: inset 2px 0 0 0 var(--color-teal-ink);
 }
-.dt tbody tr[data-selected="true"] {
+.dt tbody tr[data-selected='true'] {
   background: color-mix(in srgb, var(--color-teal) 12%, transparent);
 }
 
@@ -623,7 +626,7 @@ pre,
   border-radius: 9999px;
 }
 .pulse-dot::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -690,7 +693,7 @@ pre,
   background: color-mix(in srgb, var(--color-teal) 12%, transparent);
   border-bottom: 2px dashed var(--color-teal-ink);
 }
-.hl[data-active="true"] {
+.hl[data-active='true'] {
   box-shadow: 0 0 0 2px var(--color-teal-ink);
 }
 .hl:focus-visible {
@@ -709,8 +712,11 @@ pre,
 
 /* the one accent surface in the product: the "where we are" / try-it card */
 .accent-card {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--color-teal) 6%, var(--color-surface)) 0%, var(--color-surface) 70%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-teal) 6%, var(--color-surface)) 0%,
+    var(--color-surface) 70%
+  );
   border-color: color-mix(in srgb, var(--color-teal) 35%, var(--color-hairline));
 }
 

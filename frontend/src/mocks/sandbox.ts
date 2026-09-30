@@ -30,13 +30,21 @@ export const sandboxModel = { online: false, latencyMs: 900 };
 // ------------------------------------------------------------------ redaction
 
 const REDACTIONS: Array<[keyof RedactionCounts & string, RegExp, string]> = [
-  ['medicare_number', /\b[1-9][A-Za-z][A-Za-z0-9]\d-?[A-Za-z][A-Za-z0-9]\d-?[A-Za-z]{2}\d{2}\b/g, '[REDACTED-MEDICARE_NUMBER]'],
+  [
+    'medicare_number',
+    /\b[1-9][A-Za-z][A-Za-z0-9]\d-?[A-Za-z][A-Za-z0-9]\d-?[A-Za-z]{2}\d{2}\b/g,
+    '[REDACTED-MEDICARE_NUMBER]',
+  ],
   ['ssn', /\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED-SSN]'],
   ['dob', /\b(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])\/(?:19|20)\d{2}\b/g, '[REDACTED-DOB]'],
   ['email', /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[REDACTED-EMAIL]'],
   // US numbers: (813) 555-0142, 813-555-0142, 813.555.0142. The SSN shape (3-2-4) was taken above.
   ['phone', /(?:\(\d{3}\)\s?|\b\d{3}[-. ])\d{3}[-. ]\d{4}\b/g, '[REDACTED-PHONE]'],
-  ['address', /\b\d{1,6}\s+(?:[A-Z][a-z]+\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Court|Ct|Way|Place|Pl)\b\.?/g, '[REDACTED-ADDRESS]'],
+  [
+    'address',
+    /\b\d{1,6}\s+(?:[A-Z][a-z]+\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Court|Ct|Way|Place|Pl)\b\.?/g,
+    '[REDACTED-ADDRESS]',
+  ],
 ];
 
 export function redact(text: string): { text: string; counts: RedactionCounts } {
@@ -80,23 +88,99 @@ const DISCLAIMER = /disclaimer|we do not offer every plan/i;
 const RECORDING = /\brecord(ed|ing|ings)?\b|\bcalls?\b/i;
 
 const MATCHERS: MockMatcher[] = [
-  { name: 'soa-48h-explicit', rule: 'soa-48h-wait', version: 1, pattern: /\b48[- ]?hours?\b|\bforty[- ]eight hours\b/gi, all: [SOA] },
-  { name: 'soa-two-days-semantic', rule: 'soa-48h-wait', version: 1, pattern: /\btwo (business |working )?days\b/gi, all: [SOA], status: 'proposed', confidence: 0.7 },
-  { name: 'soa-no-waiting-period', rule: 'soa-48h-wait', version: 2, pattern: /\bno (minimum )?waiting period\b/gi, all: [SOA] },
-  { name: 'disclaimer-first-minute', rule: 'tpmo-disclaimer-timing', version: 1, pattern: /(within|in) the first (minute|60 seconds|sixty seconds)|one-minute mark|first 60 seconds/gi, all: [DISCLAIMER] },
-  { name: 'disclaimer-before-benefits', rule: 'tpmo-disclaimer-timing', version: 2, pattern: /(prior to|before) (the )?(discussion of |discussing )?(any )?(plan )?benefits?/gi, all: [DISCLAIMER] },
-  { name: 'disclaimer-text-ship', rule: 'tpmo-disclaimer-text', version: 1, pattern: /State Health Insurance (Assistance )?Program|\(SHIP\)/gi, all: [/1-800-MEDICARE|medicare\.gov/i] },
-  { name: 'disclaimer-text-current', rule: 'tpmo-disclaimer-text', version: 2, pattern: /Please contact Medicare\.gov or 1-800-MEDICARE to get information on all of your options/gi },
-  { name: 'retention-10-years-recording', rule: 'call-recording-retention', version: 1, pattern: /\b(10|ten)[- ]years?\b/gi, all: [RECORDING], none: [/scope of appointment forms?|SOA forms?/i] },
-  { name: 'retention-6-years-recording', rule: 'call-recording-retention', version: 2, pattern: /\b(6|six)[- ]years?\b/gi, all: [RECORDING] },
-  { name: 'superlatives-substantiation', rule: 'superlatives', version: 1, pattern: /superlatives?|"best"|\bthe best plan\b/gi, all: [/substantiat|data|prohibit|unless|not use|cannot/i], none: [/superlatives are permitted/i] },
+  {
+    name: 'soa-48h-explicit',
+    rule: 'soa-48h-wait',
+    version: 1,
+    pattern: /\b48[- ]?hours?\b|\bforty[- ]eight hours\b/gi,
+    all: [SOA],
+  },
+  {
+    name: 'soa-two-days-semantic',
+    rule: 'soa-48h-wait',
+    version: 1,
+    pattern: /\btwo (business |working )?days\b/gi,
+    all: [SOA],
+    status: 'proposed',
+    confidence: 0.7,
+  },
+  {
+    name: 'soa-no-waiting-period',
+    rule: 'soa-48h-wait',
+    version: 2,
+    pattern: /\bno (minimum )?waiting period\b/gi,
+    all: [SOA],
+  },
+  {
+    name: 'disclaimer-first-minute',
+    rule: 'tpmo-disclaimer-timing',
+    version: 1,
+    pattern: /(within|in) the first (minute|60 seconds|sixty seconds)|one-minute mark|first 60 seconds/gi,
+    all: [DISCLAIMER],
+  },
+  {
+    name: 'disclaimer-before-benefits',
+    rule: 'tpmo-disclaimer-timing',
+    version: 2,
+    pattern: /(prior to|before) (the )?(discussion of |discussing )?(any )?(plan )?benefits?/gi,
+    all: [DISCLAIMER],
+  },
+  {
+    name: 'disclaimer-text-ship',
+    rule: 'tpmo-disclaimer-text',
+    version: 1,
+    pattern: /State Health Insurance (Assistance )?Program|\(SHIP\)/gi,
+    all: [/1-800-MEDICARE|medicare\.gov/i],
+  },
+  {
+    name: 'disclaimer-text-current',
+    rule: 'tpmo-disclaimer-text',
+    version: 2,
+    pattern: /Please contact Medicare\.gov or 1-800-MEDICARE to get information on all of your options/gi,
+  },
+  {
+    name: 'retention-10-years-recording',
+    rule: 'call-recording-retention',
+    version: 1,
+    pattern: /\b(10|ten)[- ]years?\b/gi,
+    all: [RECORDING],
+    none: [/scope of appointment forms?|SOA forms?/i],
+  },
+  {
+    name: 'retention-6-years-recording',
+    rule: 'call-recording-retention',
+    version: 2,
+    pattern: /\b(6|six)[- ]years?\b/gi,
+    all: [RECORDING],
+  },
+  {
+    name: 'superlatives-substantiation',
+    rule: 'superlatives',
+    version: 1,
+    pattern: /superlatives?|"best"|\bthe best plan\b/gi,
+    all: [/substantiat|data|prohibit|unless|not use|cannot/i],
+    none: [/superlatives are permitted/i],
+  },
   { name: 'superlatives-permitted', rule: 'superlatives', version: 2, pattern: /superlatives are permitted/gi },
-  { name: 'soa-educational-events-prohibited', rule: 'soa-educational-events', version: 1, pattern: /educational events?/gi, all: [SOA, /do not|may not|cannot|not collect|prohibit/i] },
-  { name: 'educational-events-12-hour-gap', rule: 'soa-educational-events', version: 1, pattern: /\b12[- ]hours?\b|\btwelve hours\b/gi, all: [/educational events?/i] },
+  {
+    name: 'soa-educational-events-prohibited',
+    rule: 'soa-educational-events',
+    version: 1,
+    pattern: /educational events?/gi,
+    all: [SOA, /do not|may not|cannot|not collect|prohibit/i],
+  },
+  {
+    name: 'educational-events-12-hour-gap',
+    rule: 'soa-educational-events',
+    version: 1,
+    pattern: /\b12[- ]hours?\b|\btwelve hours\b/gi,
+    all: [/educational events?/i],
+  },
   { name: 'recording-notice', rule: 'eip-recording-notice', version: 1, pattern: /\bcall (is|may be) recorded\b/gi },
 ];
 
-const ENFORCE = /\b(must|required|require|shall|need to|at least|score 0|do not|does not|may not|cannot|prohibit|prohibited|no later than|within the first|minimum of|retain|retained|flag)\b/i;
+const ENFORCE =
+  /\b(must|required|require|shall|need to|at least|score 0|do not|does not|may not|cannot|prohibit|prohibited|no later than|within the first|minimum of|retain|retained|flag)\b/i;
 const PERMIT = /\b(permitted|allowed|may|can be completed|is permitted)\b/i;
 
 function polarityOf(sentence: string): string {
@@ -108,7 +192,8 @@ function polarityOf(sentence: string): string {
 /** The sentence (or line) around [start, end), trimmed; a verbatim substring of text. */
 export function enclosingSentence(text: string, start: number, end: number): { span: string; offset: number } {
   // a sentence ends at . ! ? followed by whitespace (so "Medicare.gov" stays whole), or at a newline
-  const endsAt = (i: number) => text[i] === '\n' || (/[.!?]/.test(text[i]) && (i + 1 >= text.length || /\s/.test(text[i + 1])));
+  const endsAt = (i: number) =>
+    text[i] === '\n' || (/[.!?]/.test(text[i]) && (i + 1 >= text.length || /\s/.test(text[i + 1])));
   let lo = start;
   while (lo > 0 && !endsAt(lo - 1)) lo -= 1;
   let hi = end;
@@ -173,10 +258,16 @@ function edgeFor(rule: RuleOut, version: number, raw: RawMatch): EdgeOut {
   };
 }
 
-export async function sandboxArtifact(body: JsonObject, rules: RuleOut[], today: string, path: string): Promise<SandboxArtifactOut> {
+export async function sandboxArtifact(
+  body: JsonObject,
+  rules: RuleOut[],
+  today: string,
+  path: string,
+): Promise<SandboxArtifactOut> {
   const text = typeof body.text === 'string' ? body.text : '';
   if (!text.trim()) throw new ApiError(422, 'text: paste some text to check', path);
-  if (text.length > ARTIFACT_MAX) throw new ApiError(413, `text is ${text.length} characters; the sandbox takes up to ${ARTIFACT_MAX}`, path);
+  if (text.length > ARTIFACT_MAX)
+    throw new ApiError(413, `text is ${text.length} characters; the sandbox takes up to ${ARTIFACT_MAX}`, path);
   const asOf = typeof body.as_of === 'string' && body.as_of ? body.as_of : today;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf)) throw new ApiError(422, 'as_of: expected YYYY-MM-DD', path);
   const label = typeof body.label === 'string' && body.label.trim() ? body.label.trim().slice(0, 120) : null;
@@ -271,11 +362,17 @@ function secondsAt(text: string, span: string | null): number | null {
 export async function sandboxTranscript(body: JsonObject, path: string): Promise<SandboxTranscriptOut> {
   const text = typeof body.text === 'string' ? body.text : '';
   if (!text.trim()) throw new ApiError(422, 'text: paste a call transcript', path);
-  if (text.length > TRANSCRIPT_MAX) throw new ApiError(413, `text is ${text.length} characters; the sandbox takes up to ${TRANSCRIPT_MAX}`, path);
+  if (text.length > TRANSCRIPT_MAX)
+    throw new ApiError(413, `text is ${text.length} characters; the sandbox takes up to ${TRANSCRIPT_MAX}`, path);
   if (!sandboxModel.online) {
-    throw new ApiError(409, 'No local model is reachable (Ollama is not running on this host). Recorded runs still replay.', path, {
-      detail: 'No local model is reachable (Ollama is not running on this host). Recorded runs still replay.',
-    });
+    throw new ApiError(
+      409,
+      'No local model is reachable (Ollama is not running on this host). Recorded runs still replay.',
+      path,
+      {
+        detail: 'No local model is reachable (Ollama is not running on this host). Recorded runs still replay.',
+      },
+    );
   }
   await new Promise((r) => setTimeout(r, sandboxModel.latencyMs));
   const { text: clean, counts } = redact(text);
@@ -315,18 +412,54 @@ export async function sandboxTranscript(body: JsonObject, path: string): Promise
   )
     .filter((x): x is [string, string] => Boolean(x[1]))
     .map(([label, s]) => ({ label, text: s, offset: clean.indexOf(s), length: s.length, verified: clean.includes(s) }));
-  const needsLabel = 'Rule verdicts compare the model against a labelled call. A pasted call has no label yet — that is the QA sample you would add.';
+  const needsLabel =
+    'Rule verdicts compare the model against a labelled call. A pasted call has no label yet — that is the QA sample you would add.';
   const contracts: SandboxContractResult[] = [
-    { code: 'C-SCHEMA-01', title: 'Output validates against the qa-handoff schema', severity: 'BLOCK', outcome: 'PASS', evidence: {}, why: 'The model returned every required field.' },
-    { code: 'C-SPAN-01', title: 'Cited spans are verbatim', severity: 'BLOCK', outcome: spans.every((s) => s.verified) ? 'PASS' : 'FAIL', evidence: { spans: spans.length }, why: `${spans.length} cited spans, all found word-for-word in the call.` },
-    { code: 'C-PII-01', title: 'No Medicare number or SSN in the CRM record', severity: 'BLOCK', outcome: 'PASS', evidence: {}, why: 'Identifiers were redacted before the model saw the call.' },
-    { code: 'C-FACT-01', title: 'Numeric claims must appear in the transcript', severity: 'BLOCK', outcome: 'PASS', evidence: {}, why: 'Every dollar figure in the output appears in the call.' },
+    {
+      code: 'C-SCHEMA-01',
+      title: 'Output validates against the qa-handoff schema',
+      severity: 'BLOCK',
+      outcome: 'PASS',
+      evidence: {},
+      why: 'The model returned every required field.',
+    },
+    {
+      code: 'C-SPAN-01',
+      title: 'Cited spans are verbatim',
+      severity: 'BLOCK',
+      outcome: spans.every((s) => s.verified) ? 'PASS' : 'FAIL',
+      evidence: { spans: spans.length },
+      why: `${spans.length} cited spans, all found word-for-word in the call.`,
+    },
+    {
+      code: 'C-PII-01',
+      title: 'No Medicare number or SSN in the CRM record',
+      severity: 'BLOCK',
+      outcome: 'PASS',
+      evidence: {},
+      why: 'Identifiers were redacted before the model saw the call.',
+    },
+    {
+      code: 'C-FACT-01',
+      title: 'Numeric claims must appear in the transcript',
+      severity: 'BLOCK',
+      outcome: 'PASS',
+      evidence: {},
+      why: 'Every dollar figure in the output appears in the call.',
+    },
     {
       code: 'C-TPMO-01',
       title: 'TPMO disclaimer judged under the in-force timing basis',
       severity: 'BLOCK',
       outcome: 'NEEDS_LABEL',
-      evidence: { model_says: { disclaimer_delivered: extraction.disclaimer_delivered, disclaimer_seconds: dSec, benefits_started_seconds: bSec, disclaimer_compliant: disclaimerCompliant } },
+      evidence: {
+        model_says: {
+          disclaimer_delivered: extraction.disclaimer_delivered,
+          disclaimer_seconds: dSec,
+          benefits_started_seconds: bSec,
+          disclaimer_compliant: disclaimerCompliant,
+        },
+      },
       why: needsLabel,
     },
     {
@@ -337,7 +470,14 @@ export async function sandboxTranscript(body: JsonObject, path: string): Promise
       evidence: { model_says: { soa_collected: extraction.soa_collected, soa_wait_compliant: true } },
       why: needsLabel,
     },
-    { code: 'C-SUP-01', title: 'Superlative flags follow the in-force substantiation rule', severity: 'FLAG', outcome: 'NEEDS_LABEL', evidence: { model_says: { superlatives: extraction.superlatives } }, why: needsLabel },
+    {
+      code: 'C-SUP-01',
+      title: 'Superlative flags follow the in-force substantiation rule',
+      severity: 'FLAG',
+      outcome: 'NEEDS_LABEL',
+      evidence: { model_says: { superlatives: extraction.superlatives } },
+      why: needsLabel,
+    },
   ];
   return {
     model_id: typeof body.model_id === 'string' && body.model_id ? body.model_id : 'ollama/qwen2.5:7b-instruct',
@@ -347,8 +487,15 @@ export async function sandboxTranscript(body: JsonObject, path: string): Promise
       extraction,
       composition: {
         summary: `${productLine} call. ${disclaimerSpan ? 'Disclaimer delivered' : 'No disclaimer heard'}${bSec !== null ? `; benefits discussed from ${bSec}s` : ''}.`,
-        coaching_note: disclaimerCompliant ? 'Disclaimer came before benefits — keep that order.' : 'Read the TPMO disclaimer before any plan benefits come up.',
-        crm_record: { disposition: 'follow_up', product_line: productLine, carrier: extraction.carrier, next_step: 'appointment' },
+        coaching_note: disclaimerCompliant
+          ? 'Disclaimer came before benefits — keep that order.'
+          : 'Read the TPMO disclaimer before any plan benefits come up.',
+        crm_record: {
+          disposition: 'follow_up',
+          product_line: productLine,
+          carrier: extraction.carrier,
+          next_step: 'appointment',
+        },
       },
       route,
     },

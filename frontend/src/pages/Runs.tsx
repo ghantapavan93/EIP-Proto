@@ -16,7 +16,16 @@ import { Drawer } from '../components/ui/Drawer';
 import { ErrorState } from '../components/ui/ErrorState';
 import { useToast } from '../components/ui/useToast';
 import { durationBetween, fmtDuration, fmtTs, shortHash, todayIso } from '../lib/format';
-import { ADAPTERS, adaptersForModel, defaultAdapterForModel, RUN_CORPORA, RUN_CORPUS_LABELS, TRIGGERS, triggerTone, type Adapter } from '../lib/vocab';
+import {
+  ADAPTERS,
+  adaptersForModel,
+  defaultAdapterForModel,
+  RUN_CORPORA,
+  RUN_CORPUS_LABELS,
+  TRIGGERS,
+  triggerTone,
+  type Adapter,
+} from '../lib/vocab';
 import { JudgeChip } from '../components/runs/RunFacts';
 import { costLabel, holdoutPair, runStats } from '../lib/runStats';
 import { CorpusChip, HOLDOUT_TOOLTIP } from '../components/runs/CorpusChip';
@@ -26,7 +35,14 @@ import { cn } from '../lib/cn';
 export function ContractCell({ summary }: { summary: ContractSummary | undefined }) {
   if (!summary) return <span className="text-ink-3">—</span>;
   const bad = summary.failed + summary.flagged + summary.errored;
-  const worst = summary.failed + summary.errored > 0 ? (summary.severity === 'BLOCK' ? 'text-red' : 'text-amber-ink') : summary.flagged > 0 ? 'text-amber-ink' : 'text-green-ink';
+  const worst =
+    summary.failed + summary.errored > 0
+      ? summary.severity === 'BLOCK'
+        ? 'text-red'
+        : 'text-amber-ink'
+      : summary.flagged > 0
+        ? 'text-amber-ink'
+        : 'text-green-ink';
   return (
     <span
       className={cn('font-mono text-[12px] tabular-nums', bad > 0 ? `${worst} font-semibold` : 'text-ink-2')}
@@ -83,7 +99,10 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
   const selectedModel = models.data?.find((m) => m.model_id === form.model_id);
   const allowedAdapters = adaptersForModel(selectedModel);
   // If the model list arrives after the form was initialised, keep the adapter consistent with it.
-  const adapter = form.adapter && allowedAdapters.includes(form.adapter as Adapter) ? form.adapter : defaultAdapterForModel(selectedModel);
+  const adapter =
+    form.adapter && allowedAdapters.includes(form.adapter as Adapter)
+      ? form.adapter
+      : defaultAdapterForModel(selectedModel);
   const isDevCorpus = (form.corpus ?? 'synthetic') === 'synthetic';
 
   const chooseModel = (modelId: string) => {
@@ -99,9 +118,16 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
       {
         onSuccess: (run) => {
           if (run.deduplicated) {
-            toast({ title: 'Identical inputs — returning the existing run', detail: `${run.id} · run key ${shortHash(run.run_key, 40)}`, tone: 'teal' });
+            toast({
+              title: 'Identical inputs — returning the existing run',
+              detail: `${run.id} · run key ${shortHash(run.run_key, 40)}`,
+              tone: 'teal',
+            });
           } else {
-            toast({ title: `Run ${run.id} ${run.status.toLowerCase()} · gate ${run.gate}`, tone: run.gate === 'RED' ? 'red' : run.gate === 'AMBER' ? 'amber' : 'green' });
+            toast({
+              title: `Run ${run.id} ${run.status.toLowerCase()} · gate ${run.gate}`,
+              tone: run.gate === 'RED' ? 'red' : run.gate === 'AMBER' ? 'amber' : 'green',
+            });
           }
           onClose();
           navigate(`/runs/${run.id}`);
@@ -111,10 +137,20 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
   };
 
   return (
-    <Drawer open={open} onClose={onClose} title="New run" subtitle="Same inputs → same run. The run key covers workflow, prompt hash, model, adapter, corpus hash, contract set hash and rule date.">
+    <Drawer
+      open={open}
+      onClose={onClose}
+      title="New run"
+      subtitle="Same inputs → same run. The run key covers workflow, prompt hash, model, adapter, corpus hash, contract set hash and rule date."
+    >
       <form onSubmit={submit} className="space-y-3">
         <Field label="Workflow" htmlFor="nr-workflow">
-          <select id="nr-workflow" className="input" value={workflow?.code ?? ''} onChange={(e) => setForm({ ...form, workflow: e.target.value })}>
+          <select
+            id="nr-workflow"
+            className="input"
+            value={workflow?.code ?? ''}
+            onChange={(e) => setForm({ ...form, workflow: e.target.value })}
+          >
             {(workflows.data ?? []).map((w) => (
               <option key={w.code} value={w.code}>
                 {w.code} — {w.name}
@@ -123,7 +159,12 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           </select>
         </Field>
         <Field label="Prompt version" htmlFor="nr-prompt">
-          <select id="nr-prompt" className="input" value={form.prompt_version} onChange={(e) => setForm({ ...form, prompt_version: Number(e.target.value) })}>
+          <select
+            id="nr-prompt"
+            className="input"
+            value={form.prompt_version}
+            onChange={(e) => setForm({ ...form, prompt_version: Number(e.target.value) })}
+          >
             {(workflow?.prompt_versions ?? []).map((p) => (
               <option key={p.id} value={p.version}>
                 v{p.version} — {p.label} · {shortHash(p.prompt_hash, 10)}
@@ -140,8 +181,17 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
             ))}
           </select>
         </Field>
-        <Field label="Adapter" htmlFor="nr-adapter" hint="Follows the model: simulated models run simulated; real models replay their cassette by default, or go live on the model's provider (local Ollama, or a free-tier key). Options are disabled when they don't fit the model or /meta reports no configured provider.">
-          <select id="nr-adapter" className="input" value={adapter} onChange={(e) => setForm({ ...form, adapter: e.target.value })}>
+        <Field
+          label="Adapter"
+          htmlFor="nr-adapter"
+          hint="Follows the model: simulated models run simulated; real models replay their cassette by default, or go live on the model's provider (local Ollama, or a free-tier key). Options are disabled when they don't fit the model or /meta reports no configured provider."
+        >
+          <select
+            id="nr-adapter"
+            className="input"
+            value={adapter}
+            onChange={(e) => setForm({ ...form, adapter: e.target.value })}
+          >
             {ADAPTERS.map((a) => {
               const fits = allowedAdapters.includes(a);
               return (
@@ -155,10 +205,22 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Rule date" htmlFor="nr-date">
-            <input id="nr-date" type="date" className="input font-mono" value={form.rule_date} onChange={(e) => setForm({ ...form, rule_date: e.target.value })} required />
+            <input
+              id="nr-date"
+              type="date"
+              className="input font-mono"
+              value={form.rule_date}
+              onChange={(e) => setForm({ ...form, rule_date: e.target.value })}
+              required
+            />
           </Field>
           <Field label="Trigger" htmlFor="nr-trigger">
-            <select id="nr-trigger" className="input" value={form.trigger} onChange={(e) => setForm({ ...form, trigger: e.target.value })}>
+            <select
+              id="nr-trigger"
+              className="input"
+              value={form.trigger}
+              onChange={(e) => setForm({ ...form, trigger: e.target.value })}
+            >
               {TRIGGERS.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -172,7 +234,12 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           htmlFor="nr-corpus"
           hint="Ingested transcripts have no ground truth; rule contracts report ERROR for them. The 60 held-out calls are replayed from the CLI only."
         >
-          <select id="nr-corpus" className="input" value={form.corpus ?? 'synthetic'} onChange={(e) => setForm({ ...form, corpus: e.target.value as RunRequest['corpus'] })}>
+          <select
+            id="nr-corpus"
+            className="input"
+            value={form.corpus ?? 'synthetic'}
+            onChange={(e) => setForm({ ...form, corpus: e.target.value as RunRequest['corpus'] })}
+          >
             {RUN_CORPORA.map((c) => (
               <option key={c} value={c}>
                 {RUN_CORPUS_LABELS[c]}
@@ -201,7 +268,11 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
               onChange={(e) => setForm({ ...form, limit: e.target.value ? Number(e.target.value) : null })}
             />
           </Field>
-          <Field label="Judge model" htmlFor="nr-judge-model" hint="default: the run's model. Use a cheaper free-tier model to spare quota.">
+          <Field
+            label="Judge model"
+            htmlFor="nr-judge-model"
+            hint="default: the run's model. Use a cheaper free-tier model to spare quota."
+          >
             <select
               id="nr-judge-model"
               className="input"
@@ -232,20 +303,33 @@ function NewRunDrawer({ open, onClose: close }: { open: boolean; onClose: () => 
           </Field>
         </div>
         <div className="flex gap-2">
-          <button type="button" className="btn btn-ghost btn-sm font-mono normal-case" onClick={() => setForm({ ...form, rule_date: '2026-09-30' })}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm font-mono normal-case"
+            onClick={() => setForm({ ...form, rule_date: '2026-09-30' })}
+          >
             2026-09-30
           </button>
-          <button type="button" className="btn btn-ghost btn-sm font-mono normal-case" onClick={() => setForm({ ...form, rule_date: '2026-10-01' })}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm font-mono normal-case"
+            onClick={() => setForm({ ...form, rule_date: '2026-10-01' })}
+          >
             2026-10-01
           </button>
-          <button type="button" className="btn btn-ghost btn-sm font-mono normal-case" onClick={() => setForm({ ...form, rule_date: todayIso() })}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm font-mono normal-case"
+            onClick={() => setForm({ ...form, rule_date: todayIso() })}
+          >
             today
           </button>
         </div>
         {create.error ? <ErrorState error={create.error} title="Run refused" /> : null}
         {create.isPending && adapter === 'live' ? (
           <p role="status" className="text-[12px] text-ink-2">
-            Live run in progress — each transcript is a real model call, so this can take a few minutes. Keep this drawer open; the run opens when it finishes.
+            Live run in progress — each transcript is a real model call, so this can take a few minutes. Keep this
+            drawer open; the run opens when it finishes.
           </p>
         ) : null}
         <div className="flex justify-end gap-2 pt-1">
@@ -334,7 +418,10 @@ export function RunsPage() {
         header: 'Prompt',
         accessorKey: 'prompt_version',
         cell: (c) => (
-          <span className="font-mono text-[12px]" title={`${c.row.original.workflow_code} · ${c.row.original.prompt_label} · ${c.row.original.prompt_hash}`}>
+          <span
+            className="font-mono text-[12px]"
+            title={`${c.row.original.workflow_code} · ${c.row.original.prompt_label} · ${c.row.original.prompt_hash}`}
+          >
             v{c.row.original.prompt_version}
           </span>
         ),
@@ -346,7 +433,10 @@ export function RunsPage() {
         // Stacked: model id (wrapping after its provider prefix) over the adapter chip.
         meta: { wrap: true },
         cell: (c) => (
-          <span className="flex flex-col items-start gap-0.5 py-1" title={`${c.row.original.model_id} · ${c.row.original.model_label} · adapter ${c.row.original.adapter}`}>
+          <span
+            className="flex flex-col items-start gap-0.5 py-1"
+            title={`${c.row.original.model_id} · ${c.row.original.model_label} · adapter ${c.row.original.adapter}`}
+          >
             <span className="font-mono text-[11px] leading-tight [overflow-wrap:anywhere]">
               <ModelId id={c.row.original.model_id} />
             </span>
@@ -356,13 +446,26 @@ export function RunsPage() {
         ),
         size: 114,
       },
-      { header: 'Rule date', accessorKey: 'rule_date', cell: (c) => <span className="font-mono text-[11px]">{c.row.original.rule_date}</span>, size: 78 },
-      { header: 'Trigger', accessorKey: 'trigger', cell: (c) => <Chip tone={triggerTone(c.row.original.trigger)}>{c.row.original.trigger}</Chip>, size: 88 },
+      {
+        header: 'Rule date',
+        accessorKey: 'rule_date',
+        cell: (c) => <span className="font-mono text-[11px]">{c.row.original.rule_date}</span>,
+        size: 78,
+      },
+      {
+        header: 'Trigger',
+        accessorKey: 'trigger',
+        cell: (c) => <Chip tone={triggerTone(c.row.original.trigger)}>{c.row.original.trigger}</Chip>,
+        size: 88,
+      },
       ...contractCodes.map<ColumnDef<RunOut, unknown>>((code) => ({
         id: `c_${code}`,
         header: () => (
           // "C-SCHEMA-01" → "SCHEMA-" / "01" on two lines; the full code is in the tooltip.
-          <span className="block whitespace-normal font-mono text-[9px] normal-case leading-tight tracking-normal" title={code}>
+          <span
+            className="block whitespace-normal font-mono text-[9px] normal-case leading-tight tracking-normal"
+            title={code}
+          >
             <ContractCode code={code.replace(/^[CJ]-/, '')} />
           </span>
         ),
@@ -382,7 +485,10 @@ export function RunsPage() {
         cell: (c) => {
           const s = runStats(c.row.original);
           return (
-            <span className="flex flex-wrap items-center gap-x-1 gap-y-0.5 py-1" title={`${costLabel(s.cost)} · ${s.cost?.basis ?? ''} · ${fmtDuration(s.latency_ms_per_transcript ?? null)} per transcript`}>
+            <span
+              className="flex flex-wrap items-center gap-x-1 gap-y-0.5 py-1"
+              title={`${costLabel(s.cost)} · ${s.cost?.basis ?? ''} · ${fmtDuration(s.latency_ms_per_transcript ?? null)} per transcript`}
+            >
               <span className="font-mono text-[11px]">{costLabel(s.cost).split(' · ')[0]}</span>
               <JudgeChip run={c.row.original} compact />
             </span>
@@ -402,7 +508,12 @@ export function RunsPage() {
         description="One row per run, one column per contract — runs replay the 60 development calls unless marked HELD-OUT or INGESTED; select two to compare."
         actions={
           <>
-            <button type="button" className="btn btn-outline" disabled={selected.length !== 2} onClick={() => navigate(`/runs/compare?a=${selected[0]}&b=${selected[1]}`)}>
+            <button
+              type="button"
+              className="btn btn-outline"
+              disabled={selected.length !== 2}
+              onClick={() => navigate(`/runs/compare?a=${selected[0]}&b=${selected[1]}`)}
+            >
               <GitCompareArrows size={13} aria-hidden /> Compare{selected.length ? ` (${selected.length}/2)` : ''}
             </button>
             <GatedButton action="start_runs" className="btn" onClick={() => setDrawer(true)}>
@@ -413,9 +524,13 @@ export function RunsPage() {
       />
       <Section>
         {holdout && (
-          <p className="mb-3 rounded-[8px] border border-hairline bg-surface px-4 py-2.5 text-[13px] text-ink" role="note" title={HOLDOUT_TOOLTIP}>
-            <strong className="font-semibold text-ink">Held-out check:</strong> prompt v{holdout.after.prompt_version} vs v
-            {holdout.before.prompt_version} on 60 unseen calls →{' '}
+          <p
+            className="mb-3 rounded-[8px] border border-hairline bg-surface px-4 py-2.5 text-[13px] text-ink"
+            role="note"
+            title={HOLDOUT_TOOLTIP}
+          >
+            <strong className="font-semibold text-ink">Held-out check:</strong> prompt v{holdout.after.prompt_version}{' '}
+            vs v{holdout.before.prompt_version} on 60 unseen calls →{' '}
             <Link to={holdoutCompareHref} className="font-semibold">
               Compare
             </Link>
@@ -438,7 +553,8 @@ export function RunsPage() {
           className="lg:overflow-x-hidden"
         />
         <div className="mt-2 text-[11px] text-ink-3">
-          Cells read passed/failing per contract. Red = BLOCK-severity failures or errors; amber = FLAG-severity flags. Hover a run id for its start time, duration and requester. Pick two rows and press Compare.
+          Cells read passed/failing per contract. Red = BLOCK-severity failures or errors; amber = FLAG-severity flags.
+          Hover a run id for its start time, duration and requester. Pick two rows and press Compare.
         </div>
       </Section>
       <NewRunDrawer open={drawer} onClose={() => setDrawer(false)} />

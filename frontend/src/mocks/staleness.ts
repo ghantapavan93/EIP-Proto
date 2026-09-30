@@ -17,11 +17,7 @@ const TABLE: Record<string, [string, string, string]> = {
     REVERIFY,
     'the basis of the rule changed; both over- and under-restrictive encodings are possible',
   ],
-  CLARIFIES: [
-    REVERIFY,
-    REVERIFY,
-    "wording was clarified; confirm the artifact's text matches the current clause",
-  ],
+  CLARIFIES: [REVERIFY, REVERIFY, "wording was clarified; confirm the artifact's text matches the current clause"],
   RESTORES_PRIOR: [
     REVERIFY,
     REVERIFY,

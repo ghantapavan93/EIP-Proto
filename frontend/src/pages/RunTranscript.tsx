@@ -28,21 +28,35 @@ function usageLine(usage: Record<string, unknown> | null | undefined): string {
   const parts: string[] = [];
   const tin = usage.input_tokens;
   const tout = usage.output_tokens;
-  if (typeof tin === 'number' && typeof tout === 'number') parts.push(`${tin.toLocaleString()} / ${tout.toLocaleString()} tokens`);
+  if (typeof tin === 'number' && typeof tout === 'number')
+    parts.push(`${tin.toLocaleString()} / ${tout.toLocaleString()} tokens`);
   if (typeof usage.mode === 'string') parts.push(`mode ${usage.mode}`);
   if (Array.isArray(usage.attempts) && usage.attempts.length > 1) parts.push(`attempts ${usage.attempts.join(' → ')}`);
-  if (usage.cassette === true) parts.push(typeof usage.recorded_at === 'string' ? `replayed (recorded ${usage.recorded_at})` : 'replayed');
+  if (usage.cassette === true)
+    parts.push(typeof usage.recorded_at === 'string' ? `replayed (recorded ${usage.recorded_at})` : 'replayed');
   return parts.join(' · ');
 }
 
 type Tab = 'extraction' | 'composition' | 'contracts' | 'judge';
 
-function JudgmentCard({ label, ok, basis, detail }: { label: string; ok: boolean | null; basis?: string; detail?: string }) {
+function JudgmentCard({
+  label,
+  ok,
+  basis,
+  detail,
+}: {
+  label: string;
+  ok: boolean | null;
+  basis?: string;
+  detail?: string;
+}) {
   return (
     <div className={cn('border px-3 py-2', ok === false ? 'border-amber' : 'border-hairline')}>
       <div className="flex items-center gap-2">
         <span className="font-mono text-[12px] font-semibold text-navy">{label}</span>
-        <Chip tone={ok === false ? 'amber' : ok === true ? 'green' : 'neutral'}>{ok === false ? 'violation' : ok === true ? 'compliant' : 'n/a'}</Chip>
+        <Chip tone={ok === false ? 'amber' : ok === true ? 'green' : 'neutral'}>
+          {ok === false ? 'violation' : ok === true ? 'compliant' : 'n/a'}
+        </Chip>
       </div>
       {basis && (
         <div className="mt-1 text-[12px] text-ink-2">
@@ -83,7 +97,13 @@ function RuleDependentJudgments({ extraction }: { extraction: JsonObject }) {
           label="superlatives"
           ok={superlatives.length === 0 ? true : flagged.length === 0 ? true : false}
           basis={superlatives.length ? `${superlatives.length} found · ${flagged.length} flagged` : 'none on the call'}
-          detail={superlatives.length ? superlatives.map((s) => (isObject(s) ? `"${str(s.text)}"${s.flagged === true ? ' (flagged)' : ''}` : str(s))).join(' · ') : undefined}
+          detail={
+            superlatives.length
+              ? superlatives
+                  .map((s) => (isObject(s) ? `"${str(s.text)}"${s.flagged === true ? ' (flagged)' : ''}` : str(s)))
+                  .join(' · ')
+              : undefined
+          }
         />
       )}
     </div>
@@ -97,15 +117,25 @@ export function RunTranscriptPage() {
   // Until the reader picks a tab: a call with a failing contract opens on its contracts (why it is red).
   const [picked, setTab] = useState<Tab | null>(null);
 
-  useTopBar([{ label: 'Runs', to: '/runs' }, { label: id.slice(0, 8), to: `/runs/${id}` }, { label: code }], run.data?.rule_date ?? null);
+  useTopBar(
+    [{ label: 'Runs', to: '/runs' }, { label: id.slice(0, 8), to: `/runs/${id}` }, { label: code }],
+    run.data?.rule_date ?? null,
+  );
 
-  const lines = useMemo(() => (rt.data?.transcript.text ? splitTranscript(rt.data.transcript.text, rt.data.spans) : []), [rt.data]);
+  const lines = useMemo(
+    () => (rt.data?.transcript.text ? splitTranscript(rt.data.transcript.text, rt.data.spans) : []),
+    [rt.data],
+  );
 
   if (rt.isLoading) return <LoadingState className="p-6" rows={6} />;
   if (rt.error && !rt.data) {
     return (
       <div className="p-6">
-        <ErrorState error={rt.error} title={`Could not load ${code} for ${id.slice(0, 8)}`} retry={() => void rt.refetch()} />
+        <ErrorState
+          error={rt.error}
+          title={`Could not load ${code} for ${id.slice(0, 8)}`}
+          retry={() => void rt.refetch()}
+        />
       </div>
     );
   }
@@ -143,7 +173,8 @@ export function RunTranscriptPage() {
             <Link to={`/runs/${id}`} className="font-mono" title={id}>
               {id.slice(0, 8)}
             </Link>{' '}
-            · prompt v{run.data?.prompt_version ?? '?'} · {run.data?.model_id ?? ''} · rule date <span className="font-mono">{run.data?.rule_date ?? ''}</span> · latency {d.latency_ms} ms
+            · prompt v{run.data?.prompt_version ?? '?'} · {run.data?.model_id ?? ''} · rule date{' '}
+            <span className="font-mono">{run.data?.rule_date ?? ''}</span> · latency {d.latency_ms} ms
             {usageLine(d.usage) && <span className="font-mono text-[12px]"> · {usageLine(d.usage)}</span>}
             {d.error && <span className="ml-2 text-red">· {d.error}</span>}
             {run.data && <RunFacts run={run.data} className="mt-1" />}
@@ -174,7 +205,9 @@ export function RunTranscriptPage() {
             ))}
             {notLocated.length > 0 && (
               <div className="mt-3 border border-red px-3 py-2 text-[12px]">
-                <div className="mb-1 font-sans font-semibold text-red">Cited by the model but not found in the transcript</div>
+                <div className="mb-1 font-sans font-semibold text-red">
+                  Cited by the model but not found in the transcript
+                </div>
                 <ul className="space-y-1">
                   {notLocated.map((s, i) => (
                     <li key={i} className="flex flex-wrap items-center gap-2">
@@ -182,7 +215,9 @@ export function RunTranscriptPage() {
                         {s.label}
                       </Chip>
                       <span className="mark-span-unverified">{s.text}</span>
-                      <span className="inline-flex h-4 items-center border border-red px-1 font-sans text-[10px] font-semibold uppercase tracking-[0.5px] text-red">not found in transcript</span>
+                      <span className="inline-flex h-4 items-center border border-red px-1 font-sans text-[10px] font-semibold uppercase tracking-[0.5px] text-red">
+                        not found in transcript
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -194,7 +229,14 @@ export function RunTranscriptPage() {
         <div className="min-h-0">
           <div role="tablist" aria-label="Workflow output" className="flex border-b border-hairline bg-band px-2">
             {TABS.map(([key, label, count]) => (
-              <button key={key} role="tab" type="button" aria-selected={tab === key} className="tab" onClick={() => setTab(key)}>
+              <button
+                key={key}
+                role="tab"
+                type="button"
+                aria-selected={tab === key}
+                className="tab"
+                onClick={() => setTab(key)}
+              >
                 {label}
                 {count !== null && count > 0 && <span className="ml-1 font-mono text-[11px] text-red">{count}</span>}
               </button>
@@ -222,7 +264,16 @@ export function RunTranscriptPage() {
                   )}
                   {Array.isArray(extraction.pii_detected) && (
                     <div className="mb-3 text-[12px] text-ink-2">
-                      PII detected: {strList(extraction.pii_detected).length ? strList(extraction.pii_detected).map((p) => <Chip key={p} tone="amber" className="ml-1">{p}</Chip>) : <span className="text-green-ink">none</span>}
+                      PII detected:{' '}
+                      {strList(extraction.pii_detected).length ? (
+                        strList(extraction.pii_detected).map((p) => (
+                          <Chip key={p} tone="amber" className="ml-1">
+                            {p}
+                          </Chip>
+                        ))
+                      ) : (
+                        <span className="text-green-ink">none</span>
+                      )}
                     </div>
                   )}
                   <div className="eyebrow mb-1">Extraction JSON</div>
@@ -244,7 +295,17 @@ export function RunTranscriptPage() {
                   </div>
                   <div>
                     <div className="eyebrow mb-1">CRM record</div>
-                    {isObject(composition.crm_record) ? <KeyValue rows={Object.entries(composition.crm_record).map(([k, v]) => ({ key: k, value: str(v), mono: true }))} /> : <JsonView value={composition.crm_record} />}
+                    {isObject(composition.crm_record) ? (
+                      <KeyValue
+                        rows={Object.entries(composition.crm_record).map(([k, v]) => ({
+                          key: k,
+                          value: str(v),
+                          mono: true,
+                        }))}
+                      />
+                    ) : (
+                      <JsonView value={composition.crm_record} />
+                    )}
                   </div>
                 </div>
               ) : (

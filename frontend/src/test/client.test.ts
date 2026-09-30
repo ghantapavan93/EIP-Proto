@@ -48,7 +48,9 @@ describe('api client', () => {
   });
 
   it('builds query strings and skips empty values', () => {
-    expect(toQuery({ as_of: '2026-10-01', contract: '', outcome: undefined, limit: 25 })).toBe('?as_of=2026-10-01&limit=25');
+    expect(toQuery({ as_of: '2026-10-01', contract: '', outcome: undefined, limit: 25 })).toBe(
+      '?as_of=2026-10-01&limit=25',
+    );
     expect(toQuery(undefined)).toBe('');
   });
 });

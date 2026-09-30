@@ -88,7 +88,14 @@ export function eventTone(row: Pick<AuditOut, 'event_type' | 'payload'>): Tone {
     return gate === 'RED' ? 'red' : gate === 'AMBER' ? 'amber' : gate === 'GREEN' ? 'green' : 'neutral';
   }
   if (t === 'rule.source_checked') return row.payload.changed === true ? 'amber' : 'teal';
-  if (t.endsWith('rejected') || t.endsWith('refused') || t === 'auth.denied' || t.endsWith('failed') || t.endsWith('fetch_error')) return 'red';
+  if (
+    t.endsWith('rejected') ||
+    t.endsWith('refused') ||
+    t === 'auth.denied' ||
+    t.endsWith('failed') ||
+    t.endsWith('fetch_error')
+  )
+    return 'red';
   if (t === 'task.opened' || t === 'edge.proposed' || t === 'artifact.content_changed') return 'amber';
   if (t === 'test_case.approved' || t === 'edge.confirmed' || t === 'audit.checkpoint') return 'green';
   if (t in EVENT_LABELS) return 'teal';
@@ -183,21 +190,37 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
         p.aggregate === true ? 'advisory aggregate' : null,
       ]);
     case 'task.transitioned':
-      return join([`${s(p.from) || '?'} → ${s(p.to) || '?'}`, s(p.reason_code), s(p.note) && `“${excerpt(s(p.note), 60)}”`, s(p.test_case_id) && 'test case created']);
+      return join([
+        `${s(p.from) || '?'} → ${s(p.to) || '?'}`,
+        s(p.reason_code),
+        s(p.note) && `“${excerpt(s(p.note), 60)}”`,
+        s(p.test_case_id) && 'test case created',
+      ]);
     case 'task.transition_rejected':
       return join([`${s(p.from) || '?'} → ${s(p.to) || '?'} refused`, excerpt(s(p.reason) || s(p.error), 80)]);
     case 'evidence.exported':
-      return join([`${s(p.format) || 'json'} bundle ${shortHash(s(p.bundle_sha256), 12)}`, n(p.audit_rows) !== null ? `${plural(n(p.audit_rows) ?? 0, 'audit row')} included` : null]);
+      return join([
+        `${s(p.format) || 'json'} bundle ${shortHash(s(p.bundle_sha256), 12)}`,
+        n(p.audit_rows) !== null ? `${plural(n(p.audit_rows) ?? 0, 'audit row')} included` : null,
+      ]);
     case 'export.generated':
       return join([s(p.format), n(p.rows) !== null ? plural(n(p.rows) ?? 0, 'row') : null]);
     case 'edge.superseded':
       return join([s(p.asset), s(p.span) && `“${excerpt(s(p.span), 70)}” no longer in the artifact`]);
     case 'edge.restored':
-      return join([s(p.asset), s(p.rule) && `${s(p.rule)}${n(p.version) !== null ? `@v${p.version as number}` : ''}`, 'quoted span is back']);
+      return join([
+        s(p.asset),
+        s(p.rule) && `${s(p.rule)}${n(p.version) !== null ? `@v${p.version as number}` : ''}`,
+        'quoted span is back',
+      ]);
     case 'edge.confirmed':
     case 'edge.proposed': {
       const version = n(p.version) !== null ? `@v${p.version as number}` : '';
-      return join([s(p.asset) && s(p.rule) ? `${s(p.asset)} → ${s(p.rule)}${version}` : s(p.asset) || s(p.rule), s(p.polarity), s(p.matcher)]);
+      return join([
+        s(p.asset) && s(p.rule) ? `${s(p.asset)} → ${s(p.rule)}${version}` : s(p.asset) || s(p.rule),
+        s(p.polarity),
+        s(p.matcher),
+      ]);
     }
     case 'edge.rejected':
       return join([s(p.via_task) && `via task ${s(p.via_task).slice(0, 8)}`, s(p.reason_code)]);
@@ -225,7 +248,11 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
       return join([
         `${s(p.rule)} proposal v${s(p.from_version)} → v${s(p.to_version)}`,
         excerpt(s(p.reason), 60),
-        p.yaml_matches_proposal === true ? 'enacted as proposed' : p.yaml_matches_proposal === false ? 'enacted text differs from the proposal' : null,
+        p.yaml_matches_proposal === true
+          ? 'enacted as proposed'
+          : p.yaml_matches_proposal === false
+            ? 'enacted text differs from the proposal'
+            : null,
       ]);
     case 'contract.version_created': {
       const changed = Array.isArray(p.changed) ? p.changed.map(s).filter(Boolean) : [];
@@ -236,7 +263,10 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
       ]);
     }
     case 'run.egress_refused':
-      return join([shortModel(s(p.model_id) || s(p.model)), excerpt(s(p.reason) || s(p.error) || 'model call blocked by the egress policy', 90)]);
+      return join([
+        shortModel(s(p.model_id) || s(p.model)),
+        excerpt(s(p.reason) || s(p.error) || 'model call blocked by the egress policy', 90),
+      ]);
     case 'sandbox.artifact_checked':
       return join([
         s(p.label),
@@ -250,13 +280,22 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
       const failing = outcomes.filter((o) => o === 'FAIL' || o === 'ERROR').length;
       return join([
         shortModel(s(p.model_id)),
-        s(p.error) ? `failed: ${s(p.error)}` : outcomes.length ? `${plural(outcomes.length, 'contract')} · ${failing} failing` : null,
+        s(p.error)
+          ? `failed: ${s(p.error)}`
+          : outcomes.length
+            ? `${plural(outcomes.length, 'contract')} · ${failing} failing`
+            : null,
         n(p.latency_ms) !== null ? `${n(p.latency_ms)} ms` : null,
         s(p.text_sha256) && `sha256 ${shortHash(s(p.text_sha256), 10)} · text not stored`,
       ]);
     }
     case 'rule.source_checked':
-      return join([s(p.rule), p.changed === true ? 'source changed' : 'unchanged', hostname(s(p.source_url)), s(p.mode)]);
+      return join([
+        s(p.rule),
+        p.changed === true ? 'source changed' : 'unchanged',
+        hostname(s(p.source_url)),
+        s(p.mode),
+      ]);
     case 'rules.reloaded':
       return join([
         n(p.rules_created) !== null ? `${plural(n(p.rules_created) ?? 0, 'rule')} created` : null,
@@ -264,7 +303,11 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
         n(p.unchanged) !== null ? `${n(p.unchanged)} unchanged` : null,
       ]);
     case 'scan.started':
-      return join([s(p.idempotency_key), p.live === true ? 'live fetch' : 'snapshot', s(p.as_of) && `as of ${s(p.as_of)}`]);
+      return join([
+        s(p.idempotency_key),
+        p.live === true ? 'live fetch' : 'snapshot',
+        s(p.as_of) && `as of ${s(p.as_of)}`,
+      ]);
     case 'scan.completed': {
       const st = isObject(p.stats) ? p.stats : p;
       return join([
@@ -297,11 +340,24 @@ export function auditSummary(row: AuditOut, ctx: AuditContext = {}): string {
     case 'test_case.approved':
       return join([s(p.created_by) && `created by ${s(p.created_by)}`, 'approved by a different user']);
     case 'ingest.completed':
-      return join([s(p.format), n(p.created) !== null ? `${n(p.created)} created` : null, n(p.skipped_existing) ? `${n(p.skipped_existing)} skipped` : null, s(p.batch_hash) && `batch ${shortHash(s(p.batch_hash), 10)}`]);
+      return join([
+        s(p.format),
+        n(p.created) !== null ? `${n(p.created)} created` : null,
+        n(p.skipped_existing) ? `${n(p.skipped_existing)} skipped` : null,
+        s(p.batch_hash) && `batch ${shortHash(s(p.batch_hash), 10)}`,
+      ]);
     case 'access.reviewed':
-      return join([n(p.accounts) !== null ? `${n(p.accounts)} accounts` : null, n(p.default_credential_accounts) ? `${n(p.default_credential_accounts)} on default passwords` : null, n(p.denied_24h) !== null ? `${n(p.denied_24h)} denied in 24 h` : null]);
+      return join([
+        n(p.accounts) !== null ? `${n(p.accounts)} accounts` : null,
+        n(p.default_credential_accounts) ? `${n(p.default_credential_accounts)} on default passwords` : null,
+        n(p.denied_24h) !== null ? `${n(p.denied_24h)} denied in 24 h` : null,
+      ]);
     case 'audit.checkpoint':
-      return join([n(p.through_id) !== null ? `through row ${n(p.through_id)}` : null, s(p.tip) && `tip ${shortHash(s(p.tip), 12)}`, n(p.rows_verified) !== null ? `${n(p.rows_verified)} rows verified` : null]);
+      return join([
+        n(p.through_id) !== null ? `through row ${n(p.through_id)}` : null,
+        s(p.tip) && `tip ${shortHash(s(p.tip), 12)}`,
+        n(p.rows_verified) !== null ? `${n(p.rows_verified)} rows verified` : null,
+      ]);
     case 'auth.denied':
       return Array.isArray(p.required)
         ? `role ${s(p.role)} lacks ${p.required.map(s).join(' / ')}`
@@ -329,7 +385,10 @@ export function auditEntityLink(row: AuditOut): { to: string; label: string } | 
     case 'run':
       return { to: `/runs/${encodeURIComponent(row.entity_id)}`, label: `Run ${row.entity_id.slice(0, 8)}` };
     case 'review_task':
-      return { to: `/review?lane=all&task=${encodeURIComponent(row.entity_id)}`, label: `Task ${row.entity_id.slice(0, 8)}` };
+      return {
+        to: `/review?lane=all&task=${encodeURIComponent(row.entity_id)}`,
+        label: `Task ${row.entity_id.slice(0, 8)}`,
+      };
     case 'rule':
     case 'rule_version':
       return typeof p.rule === 'string' ? { to: `/rules/${encodeURIComponent(p.rule)}`, label: p.rule } : null;
@@ -340,7 +399,9 @@ export function auditEntityLink(row: AuditOut): { to: string; label: string } | 
     case 'test_case':
       return { to: '/test-cases', label: 'Test cases' };
     case 'contract':
-      return typeof p.contract === 'string' ? { to: `/contracts/${encodeURIComponent(p.contract)}`, label: p.contract } : null;
+      return typeof p.contract === 'string'
+        ? { to: `/contracts/${encodeURIComponent(p.contract)}`, label: p.contract }
+        : null;
     default:
       return null;
   }

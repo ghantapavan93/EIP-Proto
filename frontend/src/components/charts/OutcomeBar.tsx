@@ -20,11 +20,23 @@ const SEGMENTS: Array<{ key: keyof OutcomeCounts; label: string; bar: string; do
  * equivalent. Segments are proportional; a non-zero minority gets at least
  * 2px so a single failure never disappears.
  */
-export function OutcomeBar({ counts, className, caption = 'contract results' }: { counts: OutcomeCounts & { total: number }; className?: string; caption?: string }) {
+export function OutcomeBar({
+  counts,
+  className,
+  caption = 'contract results',
+}: {
+  counts: OutcomeCounts & { total: number };
+  className?: string;
+  caption?: string;
+}) {
   const summary = SEGMENTS.map((s) => `${fmtNumber(counts[s.key])} ${s.label}`).join(' · ');
   return (
     <div className={cn('min-w-0', className)}>
-      <div className="flex h-1.5 w-full gap-px overflow-hidden rounded-[2px] bg-band" role="img" aria-label={`${summary} of ${fmtNumber(counts.total)} ${caption}`}>
+      <div
+        className="flex h-1.5 w-full gap-px overflow-hidden rounded-[2px] bg-band"
+        role="img"
+        aria-label={`${summary} of ${fmtNumber(counts.total)} ${caption}`}
+      >
         {SEGMENTS.map((s) =>
           counts[s.key] > 0 ? (
             <span
@@ -36,11 +48,17 @@ export function OutcomeBar({ counts, className, caption = 'contract results' }: 
           ) : null,
         )}
       </div>
-      <div aria-hidden className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] leading-none text-ink-2 tabular-nums">
+      <div
+        aria-hidden
+        className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] leading-none text-ink-2 tabular-nums"
+      >
         {SEGMENTS.map((s) => (
           <span key={s.key} className={cn('inline-flex items-center gap-1', counts[s.key] === 0 && 'text-ink-3')}>
             <span className={cn('h-1.5 w-1.5 rounded-[1px]', counts[s.key] ? s.dot : 'bg-input')} />
-            <span className={cn('font-mono', counts[s.key] > 0 && s.key !== 'PASS' ? 'font-semibold text-ink' : '')}>{fmtNumber(counts[s.key])}</span> {s.label}
+            <span className={cn('font-mono', counts[s.key] > 0 && s.key !== 'PASS' ? 'font-semibold text-ink' : '')}>
+              {fmtNumber(counts[s.key])}
+            </span>{' '}
+            {s.label}
           </span>
         ))}
       </div>

@@ -84,7 +84,11 @@ export function binomTwoSidedHalf(k: number, n: number): number {
 /** Exact McNemar on discordant pairs b (failed only in B) and c (failed only in A). No pairs: p = 1. */
 export function mcnemarExact(b: number, c: number): { discordant: number; p_value: number; test: string } {
   const n = b + c;
-  return { discordant: n, p_value: binomTwoSidedHalf(Math.min(b, c), n), test: 'McNemar exact (two-sided binomial on discordant pairs, p=0.5)' };
+  return {
+    discordant: n,
+    p_value: binomTwoSidedHalf(Math.min(b, c), n),
+    test: 'McNemar exact (two-sided binomial on discordant pairs, p=0.5)',
+  };
 }
 
 /** Two-sided Fisher exact test for [[a, b], [c, d]] (rows = draws, columns = fail, pass). */
@@ -195,7 +199,14 @@ export interface CompareRatesResult {
 }
 
 /** Compare failure rates of A and B: McNemar with a paired table, Fisher without; phrase a verdict. */
-export function compareRates(aFail: number, aN: number, bFail: number, bN: number, paired: PairedTableOut | null, what = 'this contract'): CompareRatesResult {
+export function compareRates(
+  aFail: number,
+  aN: number,
+  bFail: number,
+  bN: number,
+  paired: PairedTableOut | null,
+  what = 'this contract',
+): CompareRatesResult {
   const cautions: string[] = [];
   let p: number;
   let test: string;
@@ -207,7 +218,8 @@ export function compareRates(aFail: number, aN: number, bFail: number, bN: numbe
     test = m.test;
     discordant = m.discordant;
     worse = paired.b_only_fail > paired.a_only_fail;
-    if (discordant < MIN_DISCORDANT) cautions.push(`Only ${discordant} call(s) changed outcome: too few changed calls to conclude.`);
+    if (discordant < MIN_DISCORDANT)
+      cautions.push(`Only ${discordant} call(s) changed outcome: too few changed calls to conclude.`);
   } else {
     const f = fisherExact2x2(aFail, aN - aFail, bFail, bN - bFail);
     p = f.p_value;
@@ -225,5 +237,15 @@ export function compareRates(aFail: number, aN: number, bFail: number, bN: numbe
     const tail = discordant !== null ? `n=${discordant} discordant pairs` : `n=${aN} vs ${bN} cells`;
     verdict = `No significant difference (p=${fmtP(p)}, ${tail})`;
   }
-  return { a: rate(aFail, aN), b: rate(bFail, bN), discordant, test, p_value: p, significant, direction, verdict, cautions };
+  return {
+    a: rate(aFail, aN),
+    b: rate(bFail, bN),
+    discordant,
+    test,
+    p_value: p,
+    significant,
+    direction,
+    verdict,
+    cautions,
+  };
 }

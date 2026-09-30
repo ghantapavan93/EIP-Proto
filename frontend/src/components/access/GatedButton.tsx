@@ -9,7 +9,17 @@ import { usePermission } from './usePermission';
  * swallows the click, and shows why after a 300 ms hover or on focus.
  * Hiding the control would hide the separation of duties from the reader.
  */
-export function ReasonTip({ reason, children, align = 'right', className }: { reason: ReactNode; children: (describedBy: string) => ReactNode; align?: 'left' | 'right'; className?: string }) {
+export function ReasonTip({
+  reason,
+  children,
+  align = 'right',
+  className,
+}: {
+  reason: ReactNode;
+  children: (describedBy: string) => ReactNode;
+  align?: 'left' | 'right';
+  className?: string;
+}) {
   const id = useId();
   return (
     <span className={cn('tip-host', className)}>
@@ -24,7 +34,13 @@ export function ReasonTip({ reason, children, align = 'right', className }: { re
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 /** A button refused with a reason: focusable, inert, explained. */
-export function DisabledWithReason({ reason, className, children, align, ...rest }: ButtonProps & { reason: ReactNode; align?: 'left' | 'right' }) {
+export function DisabledWithReason({
+  reason,
+  className,
+  children,
+  align,
+  ...rest
+}: ButtonProps & { reason: ReactNode; align?: 'left' | 'right' }) {
   return (
     <ReasonTip reason={reason} align={align}>
       {(describedBy) => (
@@ -44,7 +60,12 @@ export function DisabledWithReason({ reason, className, children, align, ...rest
 }
 
 /** A button gated on a role action: the real button when allowed, else disabled with the refusal sentence. */
-export function GatedButton({ action, children, align, ...rest }: ButtonProps & { action: RoleAction; align?: 'left' | 'right' }) {
+export function GatedButton({
+  action,
+  children,
+  align,
+  ...rest
+}: ButtonProps & { action: RoleAction; align?: 'left' | 'right' }) {
   const permission = usePermission(action);
   if (!permission.known) {
     // role not known yet (first paint): hold the control inert rather than guess either way

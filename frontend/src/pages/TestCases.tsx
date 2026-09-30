@@ -16,10 +16,25 @@ import { fmtDate, fmtTs, shortHash } from '../lib/format';
 import { testCasesApplied } from '../lib/runStats';
 import { isSeededExample, whoCanApprove } from '../lib/testCases';
 
-function LoopStep({ n, icon, title, body, stat }: { n: number; icon: ReactNode; title: string; body: ReactNode; stat?: ReactNode }) {
+function LoopStep({
+  n,
+  icon,
+  title,
+  body,
+  stat,
+}: {
+  n: number;
+  icon: ReactNode;
+  title: string;
+  body: ReactNode;
+  stat?: ReactNode;
+}) {
   return (
     <li className="flex min-w-0 flex-1 gap-3 px-4 py-3">
-      <span aria-hidden className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-teal/40 bg-teal/10 text-teal-ink">
+      <span
+        aria-hidden
+        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-teal/40 bg-teal/10 text-teal-ink"
+      >
         {icon}
       </span>
       <span className="min-w-0">
@@ -39,7 +54,10 @@ function OverrideLoop({ tcs, applied }: { tcs: TestCaseOut[] | undefined; applie
   const approved = tcs?.filter((t) => t.status === 'APPROVED').length ?? 0;
   const pending = tcs?.filter((t) => t.status === 'PENDING_APPROVAL').length ?? 0;
   return (
-    <ol aria-label="How an override becomes a test case" className="card flex flex-col divide-y divide-hairline md:flex-row md:divide-x md:divide-y-0">
+    <ol
+      aria-label="How an override becomes a test case"
+      className="card flex flex-col divide-y divide-hairline md:flex-row md:divide-x md:divide-y-0"
+    >
       <LoopStep
         n={1}
         icon={<Flag size={14} />}
@@ -60,7 +78,9 @@ function OverrideLoop({ tcs, applied }: { tcs: TestCaseOut[] | undefined; applie
         title="Every later run honours it"
         body={
           <>
-            Runs under the same rule apply the approved expectation and count it in <span className="font-mono text-[12px]">test_cases.applied</span>. A rule change sets it aside, and it expires after 365 days, so an exception never quietly becomes policy.
+            Runs under the same rule apply the approved expectation and count it in{' '}
+            <span className="font-mono text-[12px]">test_cases.applied</span>. A rule change sets it aside, and it
+            expires after 365 days, so an exception never quietly becomes policy.
           </>
         }
         // 0 on the latest run usually means no run has happened since the approval, not a broken loop.
@@ -79,7 +99,10 @@ export function TestCasesPage() {
   const approve = useApproveTestCase();
   const { toast } = useToast();
   const user = me.name;
-  const latestRun = useMemo(() => [...(runs.data ?? [])].sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0], [runs.data]);
+  const latestRun = useMemo(
+    () => [...(runs.data ?? [])].sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0],
+    [runs.data],
+  );
   const applied = testCasesApplied(latestRun);
   const seededCount = tcs.data?.filter(isSeededExample).length ?? 0;
 
@@ -99,14 +122,25 @@ export function TestCasesPage() {
                   tc-{shortHash(tc.id, 8)}
                 </span>
                 {isSeededExample(tc) && (
-                  <Chip tone="teal" size="xs" title="Created by the demo seed so the loop is visible before anyone overrides a call">
+                  <Chip
+                    tone="teal"
+                    size="xs"
+                    title="Created by the demo seed so the loop is visible before anyone overrides a call"
+                  >
                     seeded example
                   </Chip>
                 )}
               </span>
-              <span className="cell-sub whitespace-nowrap text-[11.5px]" title={`created ${fmtTs(tc.created_at)} from review task ${tc.review_task_id}`}>
+              <span
+                className="cell-sub whitespace-nowrap text-[11.5px]"
+                title={`created ${fmtTs(tc.created_at)} from review task ${tc.review_task_id}`}
+              >
                 {fmtDate(tc.created_at)} · from{' '}
-                <Link to={`/review?task=${encodeURIComponent(tc.review_task_id)}`} className="font-mono" onClick={(e) => e.stopPropagation()}>
+                <Link
+                  to={`/review?task=${encodeURIComponent(tc.review_task_id)}`}
+                  className="font-mono"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   task-{shortHash(tc.review_task_id, 8)}
                 </Link>
               </span>
@@ -184,7 +218,9 @@ export function TestCasesPage() {
           const tc = c.row.original;
           return (
             <span className="cell-primary">
-              <Chip tone={tc.status === 'APPROVED' ? 'green' : tc.status === 'EXPIRED' ? 'neutral' : 'amber'}>{tc.status.replace('_', ' ').toLowerCase()}</Chip>
+              <Chip tone={tc.status === 'APPROVED' ? 'green' : tc.status === 'EXPIRED' ? 'neutral' : 'amber'}>
+                {tc.status.replace('_', ' ').toLowerCase()}
+              </Chip>
               <span className="cell-sub whitespace-nowrap font-mono text-[11px]">expires {fmtDate(tc.expires_at)}</span>
             </span>
           );
@@ -211,7 +247,10 @@ export function TestCasesPage() {
           }
           if (tc.created_by === user) {
             return (
-              <DisabledWithReason className="btn btn-outline btn-sm" reason="You wrote this override — a different person must approve it">
+              <DisabledWithReason
+                className="btn btn-outline btn-sm"
+                reason="You wrote this override — a different person must approve it"
+              >
                 {label}
               </DisabledWithReason>
             );
@@ -225,7 +264,8 @@ export function TestCasesPage() {
               onClick={(e) => {
                 e.stopPropagation();
                 approve.mutate(tc.id, {
-                  onSuccess: (t) => toast({ title: `tc-${shortHash(t.id, 8)} approved by ${t.approver}`, tone: 'green' }),
+                  onSuccess: (t) =>
+                    toast({ title: `tc-${shortHash(t.id, 8)} approved by ${t.approver}`, tone: 'green' }),
                   onError: (err) => toast({ title: 'Approval refused', detail: err.message, tone: 'red' }),
                 });
               }}
@@ -255,8 +295,18 @@ export function TestCasesPage() {
         <OverrideLoop tcs={tcs.data} applied={applied} />
       </Section>
       <Section
-        title={tcs.data ? `${tcs.data.length} pinned ${tcs.data.length === 1 ? 'expectation' : 'expectations'}` : 'Pinned expectations'}
-        right={seededCount > 0 ? <span className="normal-case tracking-normal text-ink-3">{seededCount} seeded by the demo · same rules as real ones</span> : undefined}
+        title={
+          tcs.data
+            ? `${tcs.data.length} pinned ${tcs.data.length === 1 ? 'expectation' : 'expectations'}`
+            : 'Pinned expectations'
+        }
+        right={
+          seededCount > 0 ? (
+            <span className="normal-case tracking-normal text-ink-3">
+              {seededCount} seeded by the demo · same rules as real ones
+            </span>
+          ) : undefined
+        }
       >
         {approve.error ? <ErrorState error={approve.error} title="Approval refused" className="mb-3" /> : null}
         <DataTable

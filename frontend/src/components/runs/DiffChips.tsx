@@ -18,7 +18,11 @@ export function DiffChips({ whatChanged, className }: { whatChanged: WhatChanged
         {ORDER.map(({ key, label }) => {
           const changed = whatChanged[key] === true;
           return (
-            <Chip key={key} tone={changed ? 'teal' : 'neutral'} title={changed ? `${label} differs` : `${label} unchanged`}>
+            <Chip
+              key={key}
+              tone={changed ? 'teal' : 'neutral'}
+              title={changed ? `${label} differs` : `${label} unchanged`}
+            >
               {changed && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-teal-ink" />}
               {label}
               {changed ? ' · changed' : ' · same'}

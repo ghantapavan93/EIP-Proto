@@ -19,7 +19,12 @@ import { useElapsedSeconds, useLiveBusy } from './useSandboxTimers';
 
 const PRODUCT_LINES: SandboxProductLine[] = ['MA', 'PDP', 'MEDIGAP', 'LIFE'];
 
-const STAGES = ['Redact identifiers', 'Extract with the local model', 'Score the 7 contracts', 'Route: PASS / FLAG / BLOCK'];
+const STAGES = [
+  'Redact identifiers',
+  'Extract with the local model',
+  'Score the 7 contracts',
+  'Route: PASS / FLAG / BLOCK',
+];
 
 /** The fields worth reading first; everything else stays in the raw output. */
 const EXTRACTION_KEYS = [
@@ -55,11 +60,25 @@ function Progress({ seconds, onCancel }: { seconds: number; onCancel: () => void
           <Square size={11} aria-hidden /> Cancel
         </button>
       </div>
-      <p className="mt-1 text-[12.5px] text-ink-2">A local 7B model usually takes 10–60 seconds per call. Nothing is stored while you wait.</p>
+      <p className="mt-1 text-[12.5px] text-ink-2">
+        A local 7B model usually takes 10–60 seconds per call. Nothing is stored while you wait.
+      </p>
       <ol className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[12px]" aria-label="Stages">
         {STAGES.map((s, i) => (
-          <li key={s} className={cn('inline-flex items-center gap-1.5', i < stage ? 'text-green-ink' : i === stage ? 'font-semibold text-ink' : 'text-ink-3')}>
-            <span aria-hidden className={cn('inline-block h-1.5 w-1.5 rounded-full', i < stage ? 'bg-green-ink' : i === stage ? 'bg-teal-ink' : 'bg-input')} />
+          <li
+            key={s}
+            className={cn(
+              'inline-flex items-center gap-1.5',
+              i < stage ? 'text-green-ink' : i === stage ? 'font-semibold text-ink' : 'text-ink-3',
+            )}
+          >
+            <span
+              aria-hidden
+              className={cn(
+                'inline-block h-1.5 w-1.5 rounded-full',
+                i < stage ? 'bg-green-ink' : i === stage ? 'bg-teal-ink' : 'bg-input',
+              )}
+            />
             {s}
           </li>
         ))}
@@ -69,17 +88,30 @@ function Progress({ seconds, onCancel }: { seconds: number; onCancel: () => void
 }
 
 /** 409: the model is simply not running. Calm, and it points at what still works. */
-function OfflineCard({ detail, recordedHref, onUseArtifact }: { detail: string; recordedHref: string | null; onUseArtifact: () => void }) {
+function OfflineCard({
+  detail,
+  recordedHref,
+  onUseArtifact,
+}: {
+  detail: string;
+  recordedHref: string | null;
+  onUseArtifact: () => void;
+}) {
   return (
     <div className="card px-5 py-4" role="status">
       <div className="flex items-start gap-3">
-        <span aria-hidden className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-band text-slate">
+        <span
+          aria-hidden
+          className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-band text-slate"
+        >
           <CircleSlash size={16} />
         </span>
         <div className="min-w-0">
           <div className="text-[14px] font-semibold text-ink">The live model is offline right now</div>
           <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-ink-2">
-            This check sends the call to a model running on the presenter&apos;s own machine (Ollama), so no call text leaves it. That machine isn&apos;t answering at the moment. Nothing about the prototype depends on it: recorded runs from real models still replay, and the artifact check needs no model at all.
+            This check sends the call to a model running on the presenter&apos;s own machine (Ollama), so no call text
+            leaves it. That machine isn&apos;t answering at the moment. Nothing about the prototype depends on it:
+            recorded runs from real models still replay, and the artifact check needs no model at all.
           </p>
           {detail && <p className="mt-1 font-mono text-[11.5px] text-ink-3">{detail}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
@@ -133,14 +165,21 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
   const needsLabel = out.contracts.filter((c) => c.outcome === 'NEEDS_LABEL');
   const unverified = spans.filter((s) => !s.verified);
   const rows = extraction
-    ? EXTRACTION_KEYS.filter((k) => k in extraction).map((k) => ({ key: k, value: valueCell((extraction as JsonObject)[k]), mono: typeof (extraction as JsonObject)[k] !== 'boolean' }))
+    ? EXTRACTION_KEYS.filter((k) => k in extraction).map((k) => ({
+        key: k,
+        value: valueCell((extraction as JsonObject)[k]),
+        mono: typeof (extraction as JsonObject)[k] !== 'boolean',
+      }))
     : [];
   return (
     <section aria-label="Transcript result" className="space-y-3">
       <div className="card card-hero flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
         {route && (
           <span className="inline-flex items-center gap-2 text-[13px] text-ink-2">
-            route <Chip filled tone={route === 'BLOCK' ? 'red' : route === 'FLAG' ? 'amber' : 'green'}>{route}</Chip>
+            route{' '}
+            <Chip filled tone={route === 'BLOCK' ? 'red' : route === 'FLAG' ? 'amber' : 'green'}>
+              {route}
+            </Chip>
           </span>
         )}
         <span className="text-[12.5px] text-ink-2">
@@ -170,14 +209,16 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
                 </span>
               </div>
             ))}
-            {unverified.filter((s) => s.offset < 0).map((s) => (
-              <div key={s.label} className="mt-2 text-[12px]">
-                <Chip tone="red" mono>
-                  {s.label}
-                </Chip>{' '}
-                <span className="mark-span-unverified">{s.text}</span> — cited by the model, not found in the call
-              </div>
-            ))}
+            {unverified
+              .filter((s) => s.offset < 0)
+              .map((s) => (
+                <div key={s.label} className="mt-2 text-[12px]">
+                  <Chip tone="red" mono>
+                    {s.label}
+                  </Chip>{' '}
+                  <span className="mark-span-unverified">{s.text}</span> — cited by the model, not found in the call
+                </div>
+              ))}
           </div>
         </div>
         <div className="min-w-0 space-y-3">
@@ -203,7 +244,10 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
                     </span>
                     {c.outcome === 'NEEDS_LABEL' ? (
                       modelSays(c.evidence) && (
-                        <span className="mt-0.5 block font-mono text-[11.5px] leading-snug text-ink-2" title={c.why ?? undefined}>
+                        <span
+                          className="mt-0.5 block font-mono text-[11.5px] leading-snug text-ink-2"
+                          title={c.why ?? undefined}
+                        >
                           model says {modelSays(c.evidence)}
                         </span>
                       )
@@ -211,7 +255,10 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
                       <span className="mt-0.5 block text-[12px] leading-snug text-ink-2">{c.why}</span>
                     ) : (
                       evidenceLine(c.evidence) && (
-                        <span className="mt-0.5 block truncate font-mono text-[11.5px] text-ink-3" title={evidenceLine(c.evidence) ?? undefined}>
+                        <span
+                          className="mt-0.5 block truncate font-mono text-[11.5px] text-ink-3"
+                          title={evidenceLine(c.evidence) ?? undefined}
+                        >
                           {evidenceLine(c.evidence)}
                         </span>
                       )
@@ -221,8 +268,13 @@ function Result({ out, text }: { out: SandboxTranscriptOut; text: string }) {
               ))}
             </ul>
             {needsLabel.length > 0 && (
-              <div className="border-t border-hairline bg-band px-4 py-2.5 text-[12.5px] leading-relaxed text-ink-2" role="note">
-                <span className="font-semibold text-ink">Why {needsLabel.length} say “needs label”:</span> rule verdicts compare the model against a labelled call. A pasted call has no label yet — that&apos;s the QA sample you&apos;d add. Grounding checks (spans, numbers, PII, schema) need no label and ran above.
+              <div
+                className="border-t border-hairline bg-band px-4 py-2.5 text-[12.5px] leading-relaxed text-ink-2"
+                role="note"
+              >
+                <span className="font-semibold text-ink">Why {needsLabel.length} say “needs label”:</span> rule verdicts
+                compare the model against a labelled call. A pasted call has no label yet — that&apos;s the QA sample
+                you&apos;d add. Grounding checks (spans, numbers, PII, schema) need no label and ran above.
               </div>
             )}
           </div>
@@ -267,7 +319,9 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
 
   // A recorded real-model run to fall back on: the newest cassette/live run.
   const recordedHref = useMemo(() => {
-    const real = [...(runs.data ?? [])].filter((r) => r.adapter === 'cassette' || r.adapter === 'live').sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0];
+    const real = [...(runs.data ?? [])]
+      .filter((r) => r.adapter === 'cassette' || r.adapter === 'live')
+      .sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0];
     return real ? `/runs/${real.id}` : null;
   }, [runs.data]);
 
@@ -348,7 +402,9 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
             <textarea
               id={areaId}
               className={cn('input min-h-[220px] font-mono text-[12.5px] leading-[1.65]', tooLong && 'border-red')}
-              placeholder={'[00:04] AGENT: Thanks for calling…\n[00:19] CUSTOMER: …\n\nOne "[mm:ss] SPEAKER:" line per turn works best.'}
+              placeholder={
+                '[00:04] AGENT: Thanks for calling…\n[00:19] CUSTOMER: …\n\nOne "[mm:ss] SPEAKER:" line per turn works best.'
+              }
               value={text}
               onChange={(e) => setText(e.target.value)}
               spellCheck={false}
@@ -363,7 +419,12 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
             <label htmlFor={plId} className="label">
               Product line
             </label>
-            <select id={plId} className="input" value={productLine} onChange={(e) => setProductLine(e.target.value as SandboxProductLine)}>
+            <select
+              id={plId}
+              className="input"
+              value={productLine}
+              onChange={(e) => setProductLine(e.target.value as SandboxProductLine)}
+            >
               {PRODUCT_LINES.map((p) => (
                 <option key={p} value={p}>
                   {p}
@@ -371,13 +432,20 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
               ))}
             </select>
           </div>
-          <p className="max-w-md text-[12px] leading-snug text-ink-2">Runs the real workflow once — extract → 7 contracts → route — on a local model. 10–60 seconds.</p>
+          <p className="max-w-md text-[12px] leading-snug text-ink-2">
+            Runs the real workflow once — extract → 7 contracts → route — on a local model. 10–60 seconds.
+          </p>
           {!editing && result && (
             <button type="button" className="btn btn-ghost ml-auto" onClick={() => setEditing(true)}>
               <Pencil size={13} aria-hidden /> Edit call
             </button>
           )}
-          <button type="submit" className={cn('btn', (editing || !result) && 'ml-auto')} disabled={!text.trim() || tooLong || run.isPending} aria-keyshortcuts="Control+Enter Meta+Enter">
+          <button
+            type="submit"
+            className={cn('btn', (editing || !result) && 'ml-auto')}
+            disabled={!text.trim() || tooLong || run.isPending}
+            aria-keyshortcuts="Control+Enter Meta+Enter"
+          >
             <Play size={13} aria-hidden /> Run on local model
             <kbd className="kbd ml-1 hidden sm:inline-flex">{mod} ↵</kbd>
           </button>
@@ -387,7 +455,8 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
 
       <div ref={outcomeRef} className="scroll-mb-6">
         {run.isPending && <Progress seconds={seconds} onCancel={cancel} />}
-        {refusal && !run.isPending &&
+        {refusal &&
+          !run.isPending &&
           (refusal.offline ? (
             <OfflineCard detail={refusal.detail} recordedHref={recordedHref} onUseArtifact={onUseArtifact} />
           ) : (
@@ -395,7 +464,9 @@ export function TranscriptCheck({ onUseArtifact }: { onUseArtifact: () => void }
           ))}
       </div>
       <div aria-live="polite" className="sr-only">
-        {result && !run.isPending ? `Transcript checked: route ${routeOf(result.out) ?? 'unknown'}, ${result.out.contracts.length} contracts scored.` : ''}
+        {result && !run.isPending
+          ? `Transcript checked: route ${routeOf(result.out) ?? 'unknown'}, ${result.out.contracts.length} contracts scored.`
+          : ''}
       </div>
       {result && !run.isPending && !refusal && <Result out={result.out} text={result.text} />}
     </div>

@@ -2,7 +2,14 @@ import { useMemo } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { useContractMetrics, useContracts } from '../api/hooks';
-import type { ContractMetricsQuery, RateOut, RunContractMetricsOut, RunCorpus, SliceOut, TrendPointOut } from '../api/types';
+import type {
+  ContractMetricsQuery,
+  RateOut,
+  RunContractMetricsOut,
+  RunCorpus,
+  SliceOut,
+  TrendPointOut,
+} from '../api/types';
 import { useTopBar } from '../components/layout/useShell';
 import { Field, PageHeader, Section } from '../components/layout/Page';
 import { Chip } from '../components/ui/Chip';
@@ -33,12 +40,24 @@ const FAMILY_TEXT: Record<string, string> = {
   judged: 'Judged — an advisory judge score; reported as a FLAG rate. Never gates a release.',
 };
 
-function runLabel(r: Pick<RunContractMetricsOut, 'model_id' | 'prompt_version' | 'rule_date' | 'adapter' | 'run_id'>): string {
+function runLabel(
+  r: Pick<RunContractMetricsOut, 'model_id' | 'prompt_version' | 'rule_date' | 'adapter' | 'run_id'>,
+): string {
   return `${r.model_id} · prompt v${r.prompt_version} · rule date ${r.rule_date} · ${r.adapter} · ${r.run_id.slice(0, 8)}`;
 }
 
 /** One rate with its interval: "Recall 67%  [CI 42–85%]  8/12" plus a bar on 0–100%. */
-function MetricLine({ label, hint, rate, tone = 'slate' }: { label: string; hint: string; rate: RateOut | null | undefined; tone?: 'slate' | 'green' | 'red' | 'amber' }) {
+function MetricLine({
+  label,
+  hint,
+  rate,
+  tone = 'slate',
+}: {
+  label: string;
+  hint: string;
+  rate: RateOut | null | undefined;
+  tone?: 'slate' | 'green' | 'red' | 'amber';
+}) {
   if (!rate) return null;
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-hairline py-2 last:border-b-0">
@@ -61,8 +80,16 @@ function Excluded({ run }: { run: RunContractMetricsOut }) {
   const c = run.confusion;
   const rows: Array<[string, number, string]> = [
     ['Not applicable', c?.not_applicable ?? 0, 'Medigap calls: these CMS rules do not govern them'],
-    ['Unlabelled', c?.not_evaluated ?? run.excluded_not_evaluated, 'ingested calls with no ground truth — neither pass nor fail'],
-    ['No usable output', c?.no_output ?? 0, 'ERROR: the model returned nothing to classify (counts as a failure in the failure rate)'],
+    [
+      'Unlabelled',
+      c?.not_evaluated ?? run.excluded_not_evaluated,
+      'ingested calls with no ground truth — neither pass nor fail',
+    ],
+    [
+      'No usable output',
+      c?.no_output ?? 0,
+      'ERROR: the model returned nothing to classify (counts as a failure in the failure rate)',
+    ],
   ];
   return (
     <ul className="mt-2 space-y-1 text-[12px]" aria-label="Excluded from the matrix">
@@ -78,7 +105,15 @@ function Excluded({ run }: { run: RunContractMetricsOut }) {
   );
 }
 
-function AccuracyCard({ run, family, positive }: { run: RunContractMetricsOut; family: string; positive: string | null }) {
+function AccuracyCard({
+  run,
+  family,
+  positive,
+}: {
+  run: RunContractMetricsOut;
+  family: string;
+  positive: string | null;
+}) {
   const c = run.confusion;
   if (!c) {
     const f = run.failure;
@@ -92,13 +127,16 @@ function AccuracyCard({ run, family, positive }: { run: RunContractMetricsOut; f
           </div>
           <RateRange rate={f} max={1} tone={f.k ? 'red' : 'green'} className="mt-2" label="Failure rate" />
           <p className="mt-2 text-[12px] leading-snug text-ink-2">
-            No confusion matrix: this contract has no violation ground truth to compare against. It is pass/fail per call.
+            No confusion matrix: this contract has no violation ground truth to compare against. It is pass/fail per
+            call.
           </p>
         </div>
         <div>
           <div className="eyebrow mb-1">Outcomes</div>
           <KeyValue rows={Object.entries(run.outcomes).map(([k, v]) => ({ key: k, value: String(v) }))} />
-          {run.excluded_not_evaluated > 0 && <div className="mt-1 text-[12px] text-ink-2">{run.excluded_not_evaluated} unlabelled calls excluded.</div>}
+          {run.excluded_not_evaluated > 0 && (
+            <div className="mt-1 text-[12px] text-ink-2">{run.excluded_not_evaluated} unlabelled calls excluded.</div>
+          )}
         </div>
       </div>
     );
@@ -113,9 +151,26 @@ function AccuracyCard({ run, family, positive }: { run: RunContractMetricsOut; f
       </div>
       <div className="min-w-0">
         <div className="eyebrow mb-1">Rates, with 95% Wilson intervals</div>
-        <MetricLine label="Recall" hint="of the real violations, how many it caught" rate={c.recall} tone={c.fn ? 'red' : 'green'} />
-        <MetricLine label="Precision" hint="of what it called a violation, how much was one" rate={c.precision} tone={c.fp ? 'amber' : 'green'} />
-        {c.false_flag_rate && <MetricLine label="False-alarm rate" hint="of the compliant calls, how many it flagged" rate={c.false_flag_rate} tone={c.fp ? 'amber' : 'green'} />}
+        <MetricLine
+          label="Recall"
+          hint="of the real violations, how many it caught"
+          rate={c.recall}
+          tone={c.fn ? 'red' : 'green'}
+        />
+        <MetricLine
+          label="Precision"
+          hint="of what it called a violation, how much was one"
+          rate={c.precision}
+          tone={c.fp ? 'amber' : 'green'}
+        />
+        {c.false_flag_rate && (
+          <MetricLine
+            label="False-alarm rate"
+            hint="of the compliant calls, how many it flagged"
+            rate={c.false_flag_rate}
+            tone={c.fp ? 'amber' : 'green'}
+          />
+        )}
         <div className="flex items-baseline justify-between border-b border-hairline py-2">
           <div>
             <div className="text-[13px] font-semibold text-ink">F1</div>
@@ -133,12 +188,17 @@ function SliceGroup({ title, slices, max }: { title: string; slices: SliceOut[];
   if (!slices.length) return null;
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-hairline bg-band px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-2">{title}</div>
+      <div className="border-b border-hairline bg-band px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-ink-2">
+        {title}
+      </div>
       <ul>
         {slices.map((s) => (
           <li
             key={`${s.dimension}-${s.value}`}
-            className={cn('grid grid-cols-[minmax(0,1fr)_minmax(110px,160px)] items-center gap-x-4 border-b border-hairline px-3 py-2 last:border-b-0', s.notable && 'bg-amber/6 shadow-[inset_3px_0_0_0_var(--color-amber)]')}
+            className={cn(
+              'grid grid-cols-[minmax(0,1fr)_minmax(110px,160px)] items-center gap-x-4 border-b border-hairline px-3 py-2 last:border-b-0',
+              s.notable && 'bg-amber/6 shadow-[inset_3px_0_0_0_var(--color-amber)]',
+            )}
             data-notable={s.notable ? 'true' : 'false'}
           >
             <div className="min-w-0">
@@ -157,7 +217,13 @@ function SliceGroup({ title, slices, max }: { title: string; slices: SliceOut[];
               <div className="text-right font-mono text-[12px] text-ink">
                 {fmtPct(s.failure.rate)} <span className="text-[11px] text-ink-3">({fmtCi(s.failure)})</span>
               </div>
-              <RateRange rate={s.failure} max={max} tone={s.notable ? 'amber' : 'slate'} className="mt-1" label={`${s.dimension} ${s.value} failure rate`} />
+              <RateRange
+                rate={s.failure}
+                max={max}
+                tone={s.notable ? 'amber' : 'slate'}
+                className="mt-1"
+                label={`${s.dimension} ${s.value} failure rate`}
+              />
             </div>
           </li>
         ))}
@@ -191,10 +257,19 @@ function TrendTable({ points }: { points: TrendPointOut[] }) {
               <td className="font-mono text-[12px]">
                 <ModelId id={p.model_id} /> · v{p.prompt_version}
               </td>
-              <td>{p.corpus === 'synthetic' ? <span className="text-[12px] text-ink-2">development</span> : <CorpusChip run={{ stats: {}, corpus: p.corpus }} size="xs" />}</td>
+              <td>
+                {p.corpus === 'synthetic' ? (
+                  <span className="text-[12px] text-ink-2">development</span>
+                ) : (
+                  <CorpusChip run={{ stats: {}, corpus: p.corpus }} size="xs" />
+                )}
+              </td>
               <td className="font-mono text-[12px]">{p.rule_date}</td>
               <td className="text-right font-mono text-[12px]">
-                {fmtPct(p.failure.rate)} <span className="text-ink-3">· {fmtCi(p.failure)} · {p.failure.k}/{p.failure.n}</span>
+                {fmtPct(p.failure.rate)}{' '}
+                <span className="text-ink-3">
+                  · {fmtCi(p.failure)} · {p.failure.k}/{p.failure.n}
+                </span>
               </td>
               <td className="font-mono text-[12px] text-ink-2">{fmtTs(p.started_at)}</td>
             </tr>
@@ -233,7 +308,11 @@ export function ContractDetailPage() {
     return (
       <div className="p-6">
         {metrics.error ? (
-          <ErrorState error={metrics.error} title={`Could not load contract ${code}`} retry={() => void metrics.refetch()} />
+          <ErrorState
+            error={metrics.error}
+            title={`Could not load contract ${code}`}
+            retry={() => void metrics.refetch()}
+          />
         ) : (
           <EmptyState title="No such contract" hint={`${code} is not in the contract registry.`} />
         )}
@@ -251,7 +330,9 @@ export function ContractDetailPage() {
         eyebrow={
           <span className="inline-flex items-center gap-2">
             <span className="font-mono text-[12px] font-semibold tracking-[0.04em] text-slate">{code}</span>
-            <span aria-hidden className="text-input">·</span>
+            <span aria-hidden className="text-input">
+              ·
+            </span>
             <span>Behavioral contract</span>
           </span>
         }
@@ -260,13 +341,19 @@ export function ContractDetailPage() {
           <div className="space-y-1.5">
             {contract?.description && <p className="m-0">{contract.description}</p>}
             <div className="flex flex-wrap items-center gap-1.5">
-              <Chip tone={severityTone(severity)} title={severity === 'BLOCK' ? 'A failure can gate a release' : 'Advisory: visible, never gates'}>
+              <Chip
+                tone={severityTone(severity)}
+                title={severity === 'BLOCK' ? 'A failure can gate a release' : 'Advisory: visible, never gates'}
+              >
                 {severity}
               </Chip>
               <Chip tone={kind === 'JUDGED' ? 'teal' : 'neutral'}>{kind}</Chip>
               {contract && <span className="text-[12px] text-ink-2">owner {roleLabel(contract.owner_role)}</span>}
               {contract?.rule_code && (
-                <Link to={`/rules/${encodeURIComponent(contract.rule_code)}`} className="inline-flex items-center gap-1 font-mono text-[12px]">
+                <Link
+                  to={`/rules/${encodeURIComponent(contract.rule_code)}`}
+                  className="inline-flex items-center gap-1 font-mono text-[12px]"
+                >
                   rule {contract.rule_code} <ExternalLink size={11} aria-hidden />
                 </Link>
               )}
@@ -280,7 +367,12 @@ export function ContractDetailPage() {
         actions={
           <div className="flex flex-wrap items-end gap-2">
             <Field label="Calls" htmlFor="cd-corpus">
-              <select id="cd-corpus" className="input w-auto" value={corpus} onChange={(e) => set('corpus', e.target.value === 'synthetic' ? null : e.target.value)}>
+              <select
+                id="cd-corpus"
+                className="input w-auto"
+                value={corpus}
+                onChange={(e) => set('corpus', e.target.value === 'synthetic' ? null : e.target.value)}
+              >
                 {CORPORA.map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -289,7 +381,13 @@ export function ContractDetailPage() {
               </select>
             </Field>
             <Field label="Run (latest per model · prompt)" htmlFor="cd-run">
-              <select id="cd-run" className="input w-auto max-w-[min(420px,90vw)]" value={run?.run_id ?? ''} onChange={(e) => set('run', e.target.value)} disabled={!m?.runs.length}>
+              <select
+                id="cd-run"
+                className="input w-auto max-w-[min(420px,90vw)]"
+                value={run?.run_id ?? ''}
+                onChange={(e) => set('run', e.target.value)}
+                disabled={!m?.runs.length}
+              >
                 {(m?.runs ?? []).map((r) => (
                   <option key={r.run_id} value={r.run_id}>
                     {runLabel(r)}
@@ -313,7 +411,11 @@ export function ContractDetailPage() {
           <div className="card">
             <EmptyState
               title="No completed run on these calls"
-              hint={corpus === 'holdout' ? 'Held-out calls are replayed from the CLI; nothing has been scored on them yet.' : 'Start a run to measure this contract.'}
+              hint={
+                corpus === 'holdout'
+                  ? 'Held-out calls are replayed from the CLI; nothing has been scored on them yet.'
+                  : 'Start a run to measure this contract.'
+              }
               action={
                 <Link to="/runs" className="btn btn-outline btn-sm hover:no-underline">
                   Go to Runs
@@ -347,17 +449,34 @@ export function ContractDetailPage() {
           <Section title="Findings">
             <ol className="card space-y-0 p-0" aria-label="Findings">
               {run.findings.map((f, i) => (
-                <li key={f} className={cn('border-b border-hairline px-4 py-2 text-[13px] leading-snug last:border-b-0', i === 0 ? 'font-semibold text-ink' : 'text-ink')}>
+                <li
+                  key={f}
+                  className={cn(
+                    'border-b border-hairline px-4 py-2 text-[13px] leading-snug last:border-b-0',
+                    i === 0 ? 'font-semibold text-ink' : 'text-ink',
+                  )}
+                >
                   {f}
                 </li>
               ))}
             </ol>
           </Section>
 
-          <Section title="Where it fails" right={<span>amber rows: every violation missed, or the interval sits above the overall rate</span>}>
+          <Section
+            title="Where it fails"
+            right={<span>amber rows: every violation missed, or the interval sits above the overall rate</span>}
+          >
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <SliceGroup title="By scenario" slices={run.slices.filter((s) => s.dimension === 'scenario')} max={sliceMax} />
-              <SliceGroup title="By product line" slices={run.slices.filter((s) => s.dimension === 'product_line')} max={sliceMax} />
+              <SliceGroup
+                title="By scenario"
+                slices={run.slices.filter((s) => s.dimension === 'scenario')}
+                max={sliceMax}
+              />
+              <SliceGroup
+                title="By product line"
+                slices={run.slices.filter((s) => s.dimension === 'product_line')}
+                max={sliceMax}
+              />
             </div>
           </Section>
         </>
@@ -375,7 +494,8 @@ export function ContractDetailPage() {
       {m && (
         <Section>
           <p className="text-[11.5px] leading-snug text-ink-3">
-            <span className="font-semibold text-ink-2">How failure is counted.</span> {m.failure_definition} <span className="font-mono">Selection: {m.selection}.</span>
+            <span className="font-semibold text-ink-2">How failure is counted.</span> {m.failure_definition}{' '}
+            <span className="font-mono">Selection: {m.selection}.</span>
           </p>
         </Section>
       )}

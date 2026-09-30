@@ -29,11 +29,28 @@ function count(n: unknown): number | null {
  * Three proof points. Numbers appear only when /health/deep reported them
  * (never in mock mode, never invented); otherwise the line stands without one.
  */
-function proofPoints(health: HealthDeepOut | undefined): Array<{ icon: ReactNode; n: number | null; head: string; tail: string }> {
+function proofPoints(
+  health: HealthDeepOut | undefined,
+): Array<{ icon: ReactNode; n: number | null; head: string; tail: string }> {
   return [
-    { icon: <BookOpen size={15} />, n: count(health?.rules), head: 'versioned rules', tail: 'Every change is a new version with an effective date; nothing is edited in place.' },
-    { icon: <ListChecks size={15} />, n: count(health?.artifacts), head: 'linked artifacts', tail: 'Scripts, prompts, templates and pages, each tied to the clause it encodes.' },
-    { icon: <Link2 size={15} />, n: null, head: 'Hash-chained audit', tail: 'Every decision is recorded against a named role, and the chain verifies end to end.' },
+    {
+      icon: <BookOpen size={15} />,
+      n: count(health?.rules),
+      head: 'versioned rules',
+      tail: 'Every change is a new version with an effective date; nothing is edited in place.',
+    },
+    {
+      icon: <ListChecks size={15} />,
+      n: count(health?.artifacts),
+      head: 'linked artifacts',
+      tail: 'Scripts, prompts, templates and pages, each tied to the clause it encodes.',
+    },
+    {
+      icon: <Link2 size={15} />,
+      n: null,
+      head: 'Hash-chained audit',
+      tail: 'Every decision is recorded against a named role, and the chain verifies end to end.',
+    },
   ];
 }
 
@@ -41,7 +58,10 @@ function ProofPoint({ icon, n, head, tail }: { icon: ReactNode; n: number | null
   return (
     <li className="flex gap-3">
       {/* teal on navy 4.94:1; the icon is decorative */}
-      <span aria-hidden className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] bg-on-navy/10 text-teal">
+      <span
+        aria-hidden
+        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] bg-on-navy/10 text-teal"
+      >
         {icon}
       </span>
       <span className="min-w-0">

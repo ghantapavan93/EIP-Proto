@@ -25,11 +25,16 @@ export function numList(v: unknown): number[] {
   return Array.isArray(v) ? v.filter((x): x is number => typeof x === 'number') : [];
 }
 
-export type EvidenceFamily = 'rule' | 'span' | 'fact' | 'pii' | 'schema' | 'superlative' | 'judge' | 'no-truth' | 'unknown';
+export type EvidenceFamily =
+  'rule' | 'span' | 'fact' | 'pii' | 'schema' | 'superlative' | 'judge' | 'no-truth' | 'unknown';
 
 /** Decide which purpose-built block renders this evidence, by keys first, contract code second. */
 export function evidenceFamily(contractCode: string, ev: JsonObject): EvidenceFamily {
-  if ('model_says' in ev || ('error' in ev && !('raw_keys' in ev) && !('fields' in ev) && contractCode !== 'C-SCHEMA-01')) return 'no-truth';
+  if (
+    'model_says' in ev ||
+    ('error' in ev && !('raw_keys' in ev) && !('fields' in ev) && contractCode !== 'C-SCHEMA-01')
+  )
+    return 'no-truth';
   if (Array.isArray(ev.scores) || contractCode.startsWith('J-')) return 'judge';
   if ('not_in_transcript' in ev || 'checked' in ev || contractCode === 'C-SPAN-01') return 'span';
   if ('invented_figures' in ev || 'summary_figures' in ev || contractCode === 'C-FACT-01') return 'fact';
@@ -78,12 +83,23 @@ export function explainRuleVerdict(ev: JsonObject, outcome: string): RuleExplana
   } else if (logic.basis === 'timer' && disclaimer !== null && num(logic.window_seconds) !== null) {
     const window = num(logic.window_seconds) as number;
     derived = disclaimer <= window;
-    check = derived ? `${disclaimer}s ≤ ${window}s window → compliant` : `${disclaimer}s > ${window}s window → violation`;
-  } else if (num(logic.min_hours) !== null && ev.soa_exception == null && num(ev.appointment_hours_after_soa) !== null) {
+    check = derived
+      ? `${disclaimer}s ≤ ${window}s window → compliant`
+      : `${disclaimer}s > ${window}s window → violation`;
+  } else if (
+    num(logic.min_hours) !== null &&
+    ev.soa_exception == null &&
+    num(ev.appointment_hours_after_soa) !== null
+  ) {
     const min = num(logic.min_hours) as number;
     const hours = num(ev.appointment_hours_after_soa) as number;
     derived = hours >= min;
-    check = min === 0 ? 'no waiting period in force → compliant' : derived ? `${hours}h ≥ ${min}h wait → compliant` : `${hours}h < ${min}h wait → violation`;
+    check =
+      min === 0
+        ? 'no waiting period in force → compliant'
+        : derived
+          ? `${hours}h ≥ ${min}h wait → compliant`
+          : `${hours}h < ${min}h wait → violation`;
   }
   if (derived === null || derived !== ev.expected) return null;
   if (outcome === 'PASS' || typeof ev.got !== 'boolean' || ev.got === ev.expected) return { check, finding: null };
@@ -109,7 +125,9 @@ export function evidenceSummary(contractCode: string, ev: JsonObject): string {
     }
     case 'span': {
       const missing = isObject(ev.not_in_transcript) ? Object.keys(ev.not_in_transcript) : [];
-      return missing.length ? `${missing.length} span(s) not verbatim: ${missing.join(', ')} · ${str(ev.checked)} checked` : `${str(ev.checked)} spans verbatim`;
+      return missing.length
+        ? `${missing.length} span(s) not verbatim: ${missing.join(', ')} · ${str(ev.checked)} checked`
+        : `${str(ev.checked)} spans verbatim`;
     }
     case 'fact': {
       const invented = strList(ev.invented_figures);
@@ -127,7 +145,9 @@ export function evidenceSummary(contractCode: string, ev: JsonObject): string {
       return reported.length ? `reported: ${reported.join(', ')}` : 'no PII reported';
     }
     case 'schema':
-      return typeof ev.error === 'string' ? `invalid: ${ev.error}${Array.isArray(ev.raw_keys) ? ` (keys: ${strList(ev.raw_keys).join(', ')})` : ''}` : `${str(ev.fields)} fields valid`;
+      return typeof ev.error === 'string'
+        ? `invalid: ${ev.error}${Array.isArray(ev.raw_keys) ? ` (keys: ${strList(ev.raw_keys).join(', ')})` : ''}`
+        : `${str(ev.fields)} fields valid`;
     case 'superlative': {
       const exp = strList(ev.expected_flags);
       const got = strList(ev.got_flags);
@@ -141,7 +161,12 @@ export function evidenceSummary(contractCode: string, ev: JsonObject): string {
     }
     default: {
       const keys = Object.keys(ev);
-      return keys.length ? keys.map((k) => `${k}: ${str(ev[k])}`).join(' · ').slice(0, 160) : '—';
+      return keys.length
+        ? keys
+            .map((k) => `${k}: ${str(ev[k])}`)
+            .join(' · ')
+            .slice(0, 160)
+        : '—';
     }
   }
 }

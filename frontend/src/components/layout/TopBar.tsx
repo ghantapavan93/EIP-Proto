@@ -14,7 +14,10 @@ import { MOBILE_NAV_ID } from './shellContext';
 /** "⌘K" on Apple platforms, "Ctrl K" elsewhere. */
 function paletteShortcut(): string {
   if (typeof navigator === 'undefined') return 'Ctrl K';
-  const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? '';
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    navigator.platform ??
+    '';
   return /mac|iphone|ipad/i.test(platform) ? '⌘K' : 'Ctrl K';
 }
 
@@ -66,7 +69,11 @@ export function TopBar({
         </Link>
         {topBar.crumbs.map((c, i) => (
           <Fragment key={`${c.label}-${i}`}>
-            <ChevronRight size={14} className={i === 0 ? 'hidden shrink-0 text-ink-3 sm:block' : 'shrink-0 text-ink-3'} aria-hidden />
+            <ChevronRight
+              size={14}
+              className={i === 0 ? 'hidden shrink-0 text-ink-3 sm:block' : 'shrink-0 text-ink-3'}
+              aria-hidden
+            />
             {c.to ? (
               <Link to={c.to} className="shrink-0 text-ink-2 hover:text-teal-ink">
                 {c.label}

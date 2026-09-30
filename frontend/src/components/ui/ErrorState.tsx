@@ -23,7 +23,9 @@ export function ErrorState({
       <div className="min-w-0">
         <div className="font-semibold text-red">
           {title ?? 'Request failed'}
-          {status !== null && status > 0 && <span className="ml-2 font-mono text-[12px] font-medium">HTTP {status}</span>}
+          {status !== null && status > 0 && (
+            <span className="ml-2 font-mono text-[12px] font-medium">HTTP {status}</span>
+          )}
         </div>
         <div className="break-words text-ink-2">{errorMessage(error)}</div>
         {retry && (

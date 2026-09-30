@@ -28,12 +28,19 @@ export function RedactionTally({ counts, className }: { counts: RedactionCounts 
   if (!counts || !kinds.length) return null;
   const total = kinds.reduce((n, [key]) => n + (counts[key] ?? 0), 0);
   return (
-    <div className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px]', className)} aria-label="Redacted before matching">
+    <div
+      className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px]', className)}
+      aria-label="Redacted before matching"
+    >
       <span className="text-ink-2">{total ? 'Redacted before matching:' : 'Nothing needed redacting:'}</span>
       {kinds.map(([key, one, many]) => {
         const n = counts[key] ?? 0;
         return (
-          <span key={key} className={cn('whitespace-nowrap', n ? 'font-semibold text-ink' : 'text-ink-3')} data-testid={`redacted-${key}`}>
+          <span
+            key={key}
+            className={cn('whitespace-nowrap', n ? 'font-semibold text-ink' : 'text-ink-3')}
+            data-testid={`redacted-${key}`}
+          >
             <span className="font-mono">{n}</span> {n === 1 ? one : many}
           </span>
         );
@@ -43,16 +50,34 @@ export function RedactionTally({ counts, className }: { counts: RedactionCounts 
 }
 
 /** A refused check in plain words (too long, rate-limited, invalid, timed out), with the HTTP code for the technical reader. */
-export function RefusalNote({ error, limit, retry, className }: { error: unknown; limit: number; retry?: () => void; className?: string }) {
+export function RefusalNote({
+  error,
+  limit,
+  retry,
+  className,
+}: {
+  error: unknown;
+  limit: number;
+  retry?: () => void;
+  className?: string;
+}) {
   const copy = refusalCopy(error, limit);
   const status = errorStatus(error);
   return (
-    <div role="alert" className={cn('flex items-start gap-2.5 rounded-[8px] border border-amber/40 bg-amber/8 px-3.5 py-2.5 text-[13px]', className)}>
+    <div
+      role="alert"
+      className={cn(
+        'flex items-start gap-2.5 rounded-[8px] border border-amber/40 bg-amber/8 px-3.5 py-2.5 text-[13px]',
+        className,
+      )}
+    >
       <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-ink" aria-hidden />
       <div className="min-w-0">
         <div className="font-semibold text-ink">
           {copy.title}
-          {status !== null && status > 0 && <span className="ml-2 font-mono text-[11.5px] font-medium text-ink-2">HTTP {status}</span>}
+          {status !== null && status > 0 && (
+            <span className="ml-2 font-mono text-[11.5px] font-medium text-ink-2">HTTP {status}</span>
+          )}
         </div>
         <div className="mt-0.5 break-words text-ink-2">{copy.detail}</div>
         {retry && (
