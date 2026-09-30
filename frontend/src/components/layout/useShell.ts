@@ -13,6 +13,6 @@ export function useTopBar(crumbs: Crumb[], asOf?: string | null): void {
   const key = JSON.stringify(crumbs) + (asOf ?? '');
   useEffect(() => {
     setTopBar({ crumbs, asOf });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- key is a stable serialization of the crumbs and as-of date
   }, [key, setTopBar]);
 }

@@ -249,7 +249,7 @@ class OpenAICompatibleAdapter:
                 data = self._post(body, judge=True)
                 text = (data["choices"][0]["message"].get("content") or "").strip()
                 scores.append(parse_judge_score(text))
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001 - a failed judge sample is NaN, never a score
                 scores.append(float("nan"))
         return scores, {"judge_model": self.judge_model_id, "temperature": 1.0, "provider": self.judge_provider.name}
 
@@ -289,5 +289,5 @@ def probe_ollama(base_url: str = "http://127.0.0.1:11434", timeout: float = 1.5)
         resp.raise_for_status()
         names = [m.get("name") for m in resp.json().get("models", [])]
         return {"reachable": True, "models": names}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001 - a probe reports unreachable; it never raises
         return {"reachable": False, "models": [], "error": f"{type(exc).__name__}"}

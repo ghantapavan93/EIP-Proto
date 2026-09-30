@@ -80,7 +80,7 @@ def test_dev_compare_finds_a_significant_improvement(client, runs_7b):
     assert row["significant"] and row["direction"] == "better"
     assert row["verdict"] == "B is significantly better on this contract (p=0.00073)"
     assert row["p_holm"] < 0.05, "survives correction across the eight contracts"
-    # The product says out loud why this number is not the end of the story: the held-out
+    # The response says why this number is not enough on its own: the held-out
     # replay of the same change leads the cautions, with its own verdict.
     assert st["cautions"][0].startswith("Held-out check:")
     assert "significantly worse" in st["cautions"][0] and "trust the held-out result" in st["cautions"][0]

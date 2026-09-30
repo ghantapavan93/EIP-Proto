@@ -622,7 +622,7 @@ def execute_run(
 
     ``reuse_pre_override_run`` is for ``backstop demo`` only: when approved test cases
     change the key, a COMPLETE run under the key *without* them is returned instead of
-    executing again, so restarting the demo never re-scores its story runs (their
+    executing again, so restarting the demo never re-scores its seeded runs (their
     numbers are asserted). Every other caller leaves it off and honours the overrides.
     """
     workflow = session.scalar(select(Workflow).where(Workflow.code == workflow_code))

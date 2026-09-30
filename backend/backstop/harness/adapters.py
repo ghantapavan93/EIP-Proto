@@ -340,7 +340,7 @@ class AnthropicAdapter:
                     "<transcript>\n" + transcript_text + "\n</transcript>"
                 )}],
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001 - any SDK failure is an adapter error on the row, not a crash
             return AdapterResult(raw={}, latency_ms=int((time.perf_counter() - started) * 1000), usage={},
                                  error=f"{type(exc).__name__}: {exc}")
         latency = int((time.perf_counter() - started) * 1000)
@@ -362,7 +362,7 @@ class AnthropicAdapter:
                     messages=[{"role": "user", "content": f"<coaching_note>\n{coaching_note}\n</coaching_note>\n\nReply with a single number from 1 to 5."}],
                 )
                 scores.append(parse_judge_score("".join(getattr(b, "text", "") for b in msg.content)))
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001 - a failed judge sample is NaN, never a score
                 scores.append(float("nan"))
         return scores, {"judge_model": self.judge_model_id, "temperature": applied_temperature(self.judge_model_id, 1.0)}
 

@@ -165,7 +165,7 @@ def demo() -> None:
             by_hash = {p.prompt_hash: p.version for p in session.scalars(_select(_PV)).all()}
             safe_ids = {re.sub(r"[^A-Za-z0-9._-]+", "_", m.model_id): m.model_id
                         for m in session.scalars(_select(_Model)).all()}
-            # Replay order is the story order. Prompt versions ascend, so a model's first run is
+            # Replay order sets which change each run represents. Prompt versions ascend, so a model's first run is
             # the MODEL swap and its later prompt is the PROMPT change; within a prompt, the
             # strongest local model comes before the smallest, so the home page's MODEL card
             # compares 7B → 3B; a cross-judged set runs before the self-judged one so the

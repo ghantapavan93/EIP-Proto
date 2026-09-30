@@ -31,6 +31,8 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.11",
     "httpx>=0.27",
+    # The dependency audit recorded in SECURITY.md; pinned in requirements.lock.
+    "pip-audit>=2.7",
 ]
 
 [project.scripts]
