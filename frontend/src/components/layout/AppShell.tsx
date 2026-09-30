@@ -12,7 +12,7 @@ import { StatusRail } from './StatusRail';
 import { CommandPalette } from './CommandPalette';
 
 const FOOTER =
-  'Prototype built for a conversation with EIP. Not affiliated with or endorsed by Elite Insurance Partners or any government agency. All call transcripts and internal artifacts are synthetic; public pages are real and attributed.';
+  'A prototype. Not affiliated with or endorsed by Elite Insurance Partners or any government agency. All call transcripts and internal artifacts are synthetic; public pages are real and attributed.';
 
 /** Mirrors document.visibilityState onto <html data-tab-hidden> so live pulses pause in a background tab. */
 function useTabVisibilityFlag() {
