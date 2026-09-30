@@ -14,6 +14,7 @@ import { cn } from '../lib/cn';
 import { fmtDate, hostname, todayIso } from '../lib/format';
 import {
   countdownLabel,
+  dayUnit,
   daysLabel,
   HORIZON_BANDS,
   isCalendarKind,
@@ -40,7 +41,7 @@ function Countdown({ days, label, date, tone }: { days: number; label: string; d
         <span className={cn('stat text-[34px]', tone === 'teal' ? 'text-teal-ink' : 'text-ink')}>
           {Math.max(0, days)}
         </span>
-        <span className="text-[13px] text-ink-2">{days === 1 ? 'day' : 'days'}</span>
+        <span className="text-[13px] text-ink-2">{dayUnit(Math.max(0, days))}</span>
       </div>
       <div className="font-mono text-[11.5px] text-ink-2">
         {fmtDate(date)} · {countdownLabel(days)}
@@ -367,7 +368,7 @@ function BurnDown({ b, horizon }: { b: ReadinessOut['burn_down']; horizon: Readi
         </div>
         <div>
           <div className="stat text-[26px] text-ink">{Math.max(0, b.days_left)}</div>
-          <div className="text-[12px] leading-tight text-ink-2">days left</div>
+          <div className="text-[12px] leading-tight text-ink-2">{dayUnit(Math.max(0, b.days_left))} left</div>
         </div>
       </div>
       <p className="mt-3 border-t border-hairline pt-2 text-[12.5px] leading-snug text-ink-2">

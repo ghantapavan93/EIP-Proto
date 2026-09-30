@@ -46,6 +46,11 @@ export const HORIZON_BANDS: ReadonlyArray<readonly [string, string]> = [
   ['90', '61–90 days'],
 ];
 
+/** The unit after a whole-day count: "1 day", "0 days", "6 days". */
+export function dayUnit(count: number): string {
+  return count === 1 ? 'day' : 'days';
+}
+
 /** "today" · "tomorrow" · "in 6 days" · "2 days ago". */
 export function countdownLabel(days: number): string {
   if (days === 0) return 'today';

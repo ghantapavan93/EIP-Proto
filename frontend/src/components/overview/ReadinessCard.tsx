@@ -3,6 +3,7 @@ import { ArrowRight, CalendarClock } from 'lucide-react';
 import { useReadiness } from '../../api/hooks';
 import { cn } from '../../lib/cn';
 import { fmtDate } from '../../lib/format';
+import { dayUnit } from '../../lib/readiness';
 
 /**
  * The change-triggers view of /readiness in one row: days to the next rule
@@ -16,9 +17,11 @@ export function ReadinessCard({ asOf, className }: { asOf: string; className?: s
   const vote = data.proposed
     .filter((p) => p.vote_date)
     .sort((x, y) => (x.vote_date ?? '').localeCompare(y.vote_date ?? ''))[0];
+  const toTarget = Math.max(0, b.days_left);
+  const toAep = Math.max(0, b.aep.days_left);
   const facts: Array<[string, string, boolean]> = [
-    [String(Math.max(0, b.days_left)), `days to ${fmtDate(b.target)}`, false],
-    [String(Math.max(0, b.aep.days_left)), 'days to AEP', false],
+    [String(toTarget), `${dayUnit(toTarget)} to ${fmtDate(b.target)}`, false],
+    [String(toAep), `${dayUnit(toAep)} to AEP`, false],
     // Not the status bar's number: that counts untouched (state open) items; this counts all actionable work not yet closed.
     [String(b.open_actionable_now), 'actionable, not closed', b.open_actionable_now > 0],
     [String(b.stale_encodings_on_target), `stale on ${fmtDate(b.target).slice(0, 6)}`, b.stale_encodings_on_target > 0],

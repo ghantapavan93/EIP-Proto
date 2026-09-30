@@ -20,7 +20,7 @@ import {
   statusPresentation,
   versionStatusAsOf,
 } from '../lib/ruleVersions';
-import { countdownLabel, daysLabel, milestoneKindLabel, requiredPace, sortOwners } from '../lib/readiness';
+import { countdownLabel, dayUnit, daysLabel, milestoneKindLabel, requiredPace, sortOwners } from '../lib/readiness';
 import { auditSummary, eventLabel, eventTone } from '../lib/audit';
 import { AUDIT_EVENT_TYPES } from '../lib/vocab';
 import { redactionLine } from '../lib/sandbox';
@@ -332,6 +332,7 @@ describe('readiness wording', () => {
     expect(countdownLabel(0)).toBe('today');
     expect(countdownLabel(6)).toBe('in 6 days');
     expect(countdownLabel(-2)).toBe('2 days ago');
+    expect([dayUnit(0), dayUnit(1), dayUnit(6)]).toEqual(['days', 'day', 'days']);
     expect(milestoneKindLabel('deferral_ends')).toBe('deferral ends');
     expect(milestoneKindLabel('aep_start')).toBe('AEP opens');
     expect(daysLabel(0)).toBe('<1 day');
