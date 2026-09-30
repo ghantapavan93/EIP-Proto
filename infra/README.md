@@ -1,44 +1,43 @@
 # Infrastructure
 
-`terraform/main.tf` is the production shape ADR-004 names — **not applied**.
+`terraform/` is the production shape ADR-004 names. It is **not applied**;
+CI runs `terraform fmt -check` and `terraform validate` on every push so it
+cannot rot silently.
 
 | Piece | What | Why this size |
 |---|---|---|
-| ECS Fargate service (0.5 vCPU / 1 GB) behind an ALB | the API (the UI container is **not** in the file yet — see gaps) | 60-transcript runs finish in seconds simulated (live model runs: minutes to an hour on a laptop GPU); one task is plenty |
-| RDS Postgres `db.t4g.micro`, 7-day backups | the only state | prototype volumes; grows without a rewrite |
-| Scheduled ECS task (02:00 ET) | `backstop scan` → `check-sources` → `run --gate` | the nightly answer to "what still holds" |
-| S3 (versioned) | intended for snapshots, cassettes, exports — **the app does not use S3 yet** | the frozen evidence trail, later |
-| Secrets Manager | the model key | never in an image (the DB URL still is — see gaps) |
-| CloudWatch Logs, 90 days | JSON logs with request ids | "if the platform provides adequate logs" |
+| ECS Fargate task (1 vCPU / 2 GB): nginx UI gateway + API | Same two containers as `docker-compose.yml`; nginx is the only port the load balancer reaches and proxies `/api` over the task's loopback | 60-transcript runs finish in seconds simulated; one task is plenty |
+| ALB, HTTPS only (TLS 1.3 policy), HTTP → 301 | Ingress limited to `allowed_ingress_cidrs`; the variable rejects `0.0.0.0/0` | call transcripts are PHI-adjacent; nothing about this should be world-reachable |
+| RDS Postgres `db.t4g.micro` | Encrypted, 7-day backups, deletion protection, final snapshot | the audit log lives here |
+| Secrets Manager | Database URL, user list, optional model key | nothing sensitive is a plain task variable |
+| EventBridge Scheduler, 02:00 America/New_York | `check-sources --live` → `scan` → `run --gate` | a timezone-aware schedule, so it does not drift an hour at DST |
+| EventBridge rule → SNS | Any non-zero exit of the nightly task (gate RED or a failed step) | "tell me when something flips" |
+| S3, private + KMS + versioned | Intended for snapshots, cassettes, exports — **the app does not write to S3 yet** | the frozen evidence trail, later |
+| CloudWatch Logs, 90 days | JSON logs with request ids | |
 
-Rough run cost: tens of dollars a month. No Kubernetes, no queue, no
-vector store — the workload does not need them, and a three-engineer team
-should not operate them.
+Migrations run before the API starts (`alembic upgrade head`); seeding is
+idempotent, so a restarted task converges on the same state.
 
-Before applying: narrow the ALB ingress to EIP's egress IPs, put TLS on the
-listener (ACM certificate + 443), point `BACKSTOP_USERS` at SSO instead of the
-demo stub, and decide who owns the `rules/` repository's branch protection.
+Rough run cost: tens of dollars a month. No Kubernetes, no queue, no vector
+store — the workload does not need them, and a three-engineer team should not
+operate them.
 
-## Known gaps in `main.tf` (found in review, 2026-09-23; not fixed because it is not applied)
+## Assumptions and what is still open
 
-This file is a sketch of the target shape, not a deployable stack. Before it
-could be applied:
-
-- **UI not deployed.** Only the backend image runs; the ALB sends `/` to
-  FastAPI. Add the nginx UI container (as in `docker-compose.yml`) or S3 +
-  CloudFront.
-- **Credentials.** `BACKSTOP_USERS` is unset, so the demo defaults would apply;
-  the database URL (with its password) is a plain task-definition variable.
-  Both belong in Secrets Manager. The listener is plain HTTP on `0.0.0.0/0`.
-- **RDS.** No `storage_encrypted`, `skip_final_snapshot = true`,
-  `deletion_protection = false` — prototype settings.
-- **Networking.** Tasks sit in private subnets with no NAT gateway or VPC
-  endpoints declared, so image pulls, secrets and logs would fail.
-- **Migrations.** Nothing runs `alembic upgrade head`; `create_all` does not
-  alter existing tables.
-- **Nightly task.** It replays frozen snapshots (`check-sources` without
-  `--live`, crawler off), so it cannot detect a changed source, and nothing
-  alerts when the gate goes RED. Needs `--live` and an EventBridge → SNS rule
-  on task exit.
-- **Anthropic secret.** An empty default secret value likely fails the apply;
-  make the secret conditional.
+- **Network.** The VPC and subnets are inputs. Private subnets need a NAT
+  gateway or VPC endpoints (ECR, Secrets Manager, CloudWatch Logs, S3).
+- **Identity.** `backstop_users` is the demo's basic-auth list, now in
+  Secrets Manager. Real use means SSO (EIP's IdP) in front of the ALB or in
+  the API.
+- **Rate limiting.** nginx keys its limit on `CF-Connecting-IP`, else the peer
+  address. Behind an ALB the peer is the load balancer, so the limit becomes
+  global; add `set_real_ip_from <VPC CIDR>` + `real_ip_header X-Forwarded-For`
+  or use AWS WAF rate rules.
+- **Alerts.** A task that fails to start (image pull, secret access) stops
+  without a container exit code and does not match the alert rule; add a
+  `stopCode = TaskFailedToStart` pattern if that matters.
+- **Artifact crawling** stays off (`BACKSTOP_CRAWLER_LIVE=false`): the nightly
+  job re-checks public rule sources live but replays artifact snapshots until
+  the site owner signs off on crawling.
+- **State backend.** No remote state is configured; pick the S3 + DynamoDB
+  (or HCP) backend EIP already uses.
