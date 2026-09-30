@@ -135,7 +135,7 @@ def fisher_exact_2x2(a: int, b: int, c: int, d: int) -> dict[str, Any]:
         logs = [lp for x in range(lo, hi + 1) if (lp := log_p(x)) <= threshold]
         p = min(1.0, math.exp(_logsumexp(logs)))
     if b * c == 0:
-        odds_ratio = math.inf if a * d > 0 else (0.0 if b * c > 0 else math.nan)
+        odds_ratio = math.inf if a * d > 0 else math.nan
     else:
         odds_ratio = (a * d) / (b * c)
     return {"table": [[a, b], [c, d]], "odds_ratio": odds_ratio, "p_value": p,
@@ -214,6 +214,10 @@ def compare_rates(a_fail: int, a_n: int, b_fail: int, b_n: int,
     With a paired table (same calls in both runs) the test is exact McNemar on
     the discordant pairs; without one (different calls) it is Fisher exact on
     the two rates, and the result says so.
+
+    ``significant`` is the test alone (p < alpha). ``direction`` and the verdict claim a
+    difference only when it is also supported: a paired test needs at least
+    MIN_DISCORDANT changed calls, however small p is.
     """
     cautions: list[str] = []
     if paired is not None:
@@ -230,9 +234,13 @@ def compare_rates(a_fail: int, a_n: int, b_fail: int, b_n: int,
         discordant = None
         worse = (b_fail / b_n if b_n else 0.0) > (a_fail / a_n if a_n else 0.0)
     significant = p < alpha and (discordant is None or discordant > 0)
-    if significant:
+    if significant and (discordant is None or discordant >= MIN_DISCORDANT):
         direction = "worse" if worse else "better"
         verdict = f"B is significantly {direction} on {what} (p={fmt_p(p)})"
+    elif significant:
+        direction = "none"
+        verdict = (f"No conclusion: B looks {'worse' if worse else 'better'} (p={fmt_p(p)}), but only "
+                   f"{discordant} call(s) changed outcome")
     else:
         direction = "none"
         tail = f"n={discordant} discordant pairs" if discordant is not None else f"n={a_n} vs {b_n} cells"

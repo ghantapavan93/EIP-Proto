@@ -32,6 +32,7 @@ import yaml
 
 from backstop.harness import workflow as wf
 from backstop.harness.anthropic_params import applied_temperature, sampling
+from backstop.harness.judge_score import parse_judge_score
 
 if TYPE_CHECKING:  # anthropic is optional at runtime
     from anthropic.types import ToolParam
@@ -360,9 +361,7 @@ class AnthropicAdapter:
                     system=rubric,
                     messages=[{"role": "user", "content": f"<coaching_note>\n{coaching_note}\n</coaching_note>\n\nReply with a single number from 1 to 5."}],
                 )
-                text = "".join(getattr(b, "text", "") for b in msg.content)
-                m = re.search(r"[1-5](?:\.\d)?", text)
-                scores.append(float(m.group(0)) if m else 1.0)
+                scores.append(parse_judge_score("".join(getattr(b, "text", "") for b in msg.content)))
             except Exception:  # noqa: BLE001
                 scores.append(float("nan"))
         return scores, {"judge_model": self.judge_model_id, "temperature": applied_temperature(self.judge_model_id, 1.0)}

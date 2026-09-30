@@ -8,14 +8,13 @@
 
 from __future__ import annotations
 
-from datetime import date
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
 from backstop import schemas as s
 from backstop.api.deps import SessionDep, SettingsDep, User, UserDep, require_role
 from backstop.api.serializers import asset_out
+from backstop.core.clock import compliance_today
 from backstop.models import Asset, Scan
 from backstop.scanner.service import run_scan
 
@@ -39,8 +38,8 @@ def get_asset(code: str, session: SessionDep, user: UserDep):
 @router.post("/scans", response_model=s.ScanOut)
 def create_scan(body: s.ScanRequest, session: SessionDep, settings: SettingsDep,
                 user: User = Depends(require_role("engineer", "admin"))):
-    as_of = (body.as_of or date.today()).isoformat()
-    key = body.idempotency_key or f"{date.today().isoformat()}:{user.name}:manual:{as_of}:{'live' if body.live else 'snapshot'}"
+    as_of = (body.as_of or compliance_today()).isoformat()
+    key = body.idempotency_key or f"{compliance_today().isoformat()}:{user.name}:manual:{as_of}:{'live' if body.live else 'snapshot'}"
     outcome = run_scan(session, settings, idempotency_key=key, live=body.live, as_of=body.as_of, actor=user.name)
     out = s.ScanOut.model_validate(outcome.scan)
     out.deduplicated = outcome.deduplicated

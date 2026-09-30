@@ -7,13 +7,12 @@
 
 from __future__ import annotations
 
-from datetime import date
-
 from fastapi import APIRouter
 
 from backstop import __version__
 from backstop import schemas as s
 from backstop.api.deps import SettingsDep, UserDep
+from backstop.core.clock import compliance_today
 
 router = APIRouter(tags=["meta"])
 
@@ -52,7 +51,7 @@ def meta(settings: SettingsDep, user: UserDep):
             "fetched read-only and attributed. Simulated model runs use declared defect profiles; "
             "cassette runs replay recorded model output; live runs use a local Ollama model or a free-tier provider."
         ),
-        today=date.today(),
+        today=compliance_today(),
         user=user.name,
         role=user.role,
     )

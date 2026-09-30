@@ -21,11 +21,12 @@ from sqlalchemy.orm import selectinload
 
 from backstop import schemas as s
 from backstop.api.deps import SessionDep, UserDep
+from backstop.core.clock import compliance_today
 from backstop.core.impact import version_views
 from backstop.core.lanes import lane_for
 from backstop.core.rules_loader import is_api_proposal
 from backstop.core.staleness import NEVER_IN_FORCE, SET_ASIDE, EdgeView, VersionView, evaluate
-from backstop.core.state_machine import TRANSITIONS
+from backstop.core.state_machine import is_open, open_states
 from backstop.models import ReviewTask, Rule, RuleAssetEdge, utcnow
 
 router = APIRouter(tags=["readiness"])
@@ -60,16 +61,6 @@ def _calendar(as_of: date) -> list[dict]:
     ]
 
 
-def _is_open(kind: str, state: str) -> bool:
-    """Open = the state machine still allows a move out of this state for this kind."""
-    moves = TRANSITIONS.get(kind)
-    return bool(moves.get(state)) if moves is not None else state == "open"
-
-
-def _open_states() -> set[str]:
-    return {state for moves in TRANSITIONS.values() for state, nxt in moves.items() if nxt} | {"open"}
-
-
 def _age_days(opened_at: datetime, now: datetime) -> float:
     opened = opened_at if opened_at.tzinfo is not None else opened_at.replace(tzinfo=UTC)
     return max(0.0, (now - opened).total_seconds() / 86_400)
@@ -85,7 +76,7 @@ def _why(summary: str, clause: str) -> str:
 
 
 @router.get("/readiness", response_model=s.ReadinessOut)
-def readiness(session: SessionDep, user: UserDep, as_of: date = Query(default_factory=date.today)):
+def readiness(session: SessionDep, user: UserDep, as_of: date = Query(default_factory=compliance_today)):
     """Are we ready? Milestones for the next year, the 30/60/90-day horizon of rule versions that
     start applying (with the stale encodings they would expose that day), open work per owner,
     and the countdown to the next marketing season. Nothing is written."""
@@ -106,9 +97,9 @@ def readiness(session: SessionDep, user: UserDep, as_of: date = Query(default_fa
         row for row in session.execute(
             select(ReviewTask.kind, ReviewTask.state, ReviewTask.assignee_role, ReviewTask.opened_at,
                    ReviewTask.payload, ReviewTask.rule_version_id)
-            .where(ReviewTask.state.in_(_open_states()))
+            .where(ReviewTask.state.in_(open_states()))
         )
-        if _is_open(row.kind, row.state)
+        if is_open(row.kind, row.state)
     ]
     views: dict[str, list[VersionView]] = {r.id: version_views(r) for r in rules}
 

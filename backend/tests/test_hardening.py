@@ -366,8 +366,7 @@ def test_unlabelled_calls_gate_amber_not_red():
 
     from backstop.harness.runner import gate_for
 
-    block = SimpleNamespace(severity="BLOCK")
     not_evaluated = SimpleNamespace(outcome="ERROR", contract_version_id="cv", evidence={"not_evaluated": True})
     real_failure = SimpleNamespace(outcome="FAIL", contract_version_id="cv", evidence={})
-    assert gate_for([not_evaluated], {"cv": block}) == "AMBER"
-    assert gate_for([not_evaluated, real_failure], {"cv": block}) == "RED"
+    assert gate_for([not_evaluated], {"cv": "BLOCK"}) == "AMBER"
+    assert gate_for([not_evaluated, real_failure], {"cv": "BLOCK"}) == "RED"

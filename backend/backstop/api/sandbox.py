@@ -7,7 +7,6 @@ by size and rate-limited per user.
 
 from __future__ import annotations
 
-from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -17,6 +16,7 @@ from backstop.api.deps import SessionDep, User, current_user
 from backstop.api.ratelimit import TokenBucket
 from backstop.core import audit
 from backstop.core import sandbox as sb
+from backstop.core.clock import compliance_today
 from backstop.core.pii import redact
 from backstop.harness import sandbox as tsb
 
@@ -74,7 +74,7 @@ def check_artifact(body: s.SandboxArtifactRequest, session: SessionDep,
         label = sb.check_label(body.label)
     except sb.SandboxTextError as exc:
         raise HTTPException(422, str(exc)) from exc
-    as_of = body.as_of or date.today()
+    as_of = body.as_of or compliance_today()
     result = sb.check_artifact(session, text, as_of=as_of, label=label)
     audit.record(session, actor=user.name, role=user.role, event_type="sandbox.artifact_checked",
                  entity_type="sandbox", entity_id=result["text_sha256"],

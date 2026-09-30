@@ -23,6 +23,7 @@ from typing import Any
 
 import httpx
 
+from backstop.harness.judge_score import parse_judge_score
 from backstop.harness.providers import Provider, provider_for, spec_for
 
 _JSON_BLOCK = re.compile(r"\{.*\}", re.S)
@@ -247,9 +248,7 @@ class OpenAICompatibleAdapter:
             try:
                 data = self._post(body, judge=True)
                 text = (data["choices"][0]["message"].get("content") or "").strip()
-                m = re.search(r"[1-5](?:\.\d)?", text)
-                # An unparseable reply is missing data, not a score of 1; the contract filters NaN.
-                scores.append(float(m.group(0)) if m else float("nan"))
+                scores.append(parse_judge_score(text))
             except Exception:  # noqa: BLE001
                 scores.append(float("nan"))
         return scores, {"judge_model": self.judge_model_id, "temperature": 1.0, "provider": self.judge_provider.name}

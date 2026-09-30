@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from backstop.config import Settings
 from backstop.core import audit
+from backstop.core.clock import compliance_today
 from backstop.core.impact import in_force_version
 from backstop.core.staleness import NEVER_IN_FORCE
 from backstop.models import ReviewTask, Rule, RuleSourceCheck
@@ -59,7 +60,7 @@ def _excerpt(text: str, limit: int = 600) -> str:
 
 def _version_for_task(rule: Rule, as_of: date | None) -> str | None:
     """The version a source-change task is about: the one in force, else the newest enacted one."""
-    current = in_force_version(rule, as_of or date.today())
+    current = in_force_version(rule, as_of or compliance_today())
     if current is None:
         enacted = [v for v in rule.versions if v.status not in NEVER_IN_FORCE]
         current = enacted[-1] if enacted else (rule.versions[-1] if rule.versions else None)

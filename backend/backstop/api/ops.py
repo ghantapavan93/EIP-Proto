@@ -1,8 +1,14 @@
-"""Operational endpoints: evals, rule-source watch, exports, prompt diff, ingest, deep health.
+"""Operational endpoints.
 
-These are the answers to "why not Braintrust?", "what's your false-positive
-rate?", "who tells the corpus the CFR changed?", "how does my data get in?",
-and "where are the logs?".
+    GET  /api/health/deep              component readiness: database, corpus, runner, providers
+    GET  /api/status                   the console's status rail (live counts, last run, audit chain)
+    GET  /api/evals/matchers[.md]      matcher precision and recall on the golden set
+    GET  /api/rules/{code}/sources     source-page check history for one rule
+    POST /api/sources/check            re-check the regulators' source pages (engineer)
+    GET  /api/prompts/diff             unified diff of two prompt versions and their rule dependencies
+    GET  /api/runs/{id}/export         one run as Braintrust or LangSmith records, or flat CSV
+    POST /api/ingest/transcripts       load transcripts from an export file (engineer)
+    GET  /api/ingest/formats           the export formats ingest understands
 """
 
 from __future__ import annotations
@@ -23,6 +29,7 @@ from backstop import __version__
 from backstop import schemas as s
 from backstop.api.deps import SessionDep, SettingsDep, User, UserDep, require_role
 from backstop.core import audit
+from backstop.core import state_machine as sm
 from backstop.harness import ingest as ingest_mod
 from backstop.models import (
     Asset,
@@ -70,7 +77,7 @@ def _health(session, settings) -> dict[str, object]:
         checks["holdout_transcripts"] = holdout
         checks["artifact_versions"] = session.scalar(select(func.count(AssetVersion.id))) or 0
         checks["artifacts"] = session.scalar(select(func.count(Asset.id))) or 0
-        last_scan = session.scalar(select(Scan).order_by(Scan.started_at.desc()))
+        last_scan = session.scalar(select(Scan).order_by(Scan.started_at.desc()).limit(1))
         checks["last_scan"] = {"id": last_scan.id, "status": last_scan.status,
                                "finished_at": s._as_utc(last_scan.finished_at).isoformat() if last_scan.finished_at else None} if last_scan else None
         checks["database"] = "ok"
@@ -120,16 +127,16 @@ def status_rail(session: SessionDep, settings: SettingsDep, user: UserDep):
     health = _health(session, settings)
     golden = yaml.safe_load((settings.fixtures_dir / "matcher_golden.yaml").read_text(encoding="utf-8"))
     last_run = session.scalar(select(Run).where(Run.status.in_(("COMPLETE", "FAILED")))
-                              .order_by(Run.finished_at.desc().nulls_last()))
-    # Same definition as /api/readiness: everything not yet closed (open, in review,
-    # verified awaiting republish) is outstanding work, not just untouched tasks.
-    from backstop.api.readiness import _open_states
-
-    open_tasks = session.scalars(select(ReviewTask).where(ReviewTask.state.in_(_open_states()))).all()
+                              .order_by(Run.finished_at.desc().nulls_last()).limit(1))
+    # Same definition as /api/readiness: everything the state machine still lets move
+    # (open, in review, a stale artifact verified but not yet republished) is outstanding.
     lanes = {"actionable": 0, "advisory": 0}
-    for t in open_tasks:
-        lanes[task_lane(t)] += 1
-    chain = audit.verify_chain(session) if health["database"] == "ok" else {"ok": False, "checked": 0}
+    for t in session.scalars(select(ReviewTask).where(ReviewTask.state.in_(sm.open_states()))):
+        if sm.is_open(t.kind, t.state):
+            lanes[task_lane(t)] += 1
+    # Incremental: only rows appended since the last poll are hashed. GET /api/audit/verify
+    # re-verifies the whole chain.
+    chain = audit.verify_new_rows(session) if health["database"] == "ok" else {"ok": False, "checked": 0}
     return {
         "status": health["status"],
         "components": health["components"],
@@ -216,13 +223,14 @@ def prompt_diff(session: SessionDep, user: UserDep, a: str = Query(...), b: str 
 
 def _results_rows(session, run: Run):
     for rr in session.scalars(select(RunResult).where(RunResult.run_id == run.id)).all():
-        contract = rr.contract_version.contract
+        cv = rr.contract_version
+        contract = cv.contract
         yield {
             "run_id": run.id, "run_key": run.run_key, "workflow": run.workflow.code, "prompt_version": run.prompt_version.version,
             "prompt_hash": run.prompt_version.prompt_hash, "model_id": run.model.model_id, "adapter": run.adapter,
             "rule_date": run.rule_date.isoformat(), "trigger": run.trigger, "gate": run.gate,
             "transcript": rr.transcript.code, "product_line": rr.transcript.product_line,
-            "contract": contract.code, "severity": contract.severity, "kind": contract.kind, "outcome": rr.outcome,
+            "contract": contract.code, "severity": cv.severity, "kind": contract.kind, "outcome": rr.outcome,
             "evidence": rr.evidence, "latency_ms": rr.latency_ms,
         }
 
@@ -291,11 +299,13 @@ def export_run(run_id: str, session: SessionDep, user: UserDep,
 
 
 @router.post("/ingest/transcripts")
-async def ingest_transcripts(file: UploadFile, session: SessionDep,
-                             user: User = Depends(require_role("engineer", "admin")), format: str = Query("attention-snowflake")):
+def ingest_transcripts(file: UploadFile, session: SessionDep,
+                       user: User = Depends(require_role("engineer", "admin")), format: str = Query("attention-snowflake")):
     """Load transcripts from an export file. Nothing here is EIP's data; the shape is documented in
     fixtures/attention_export_sample.csv and must be confirmed against the real export."""
-    data = await file.read(MAX_INGEST_BYTES + 1)
+    # A plain def: parsing, redaction and the inserts are synchronous, so FastAPI runs this in
+    # its threadpool instead of blocking the event loop. The upload is already spooled to disk.
+    data = file.file.read(MAX_INGEST_BYTES + 1)
     if len(data) > MAX_INGEST_BYTES:
         raise HTTPException(413, f"export larger than {MAX_INGEST_BYTES // 1_000_000} MB; split it or use the batch loader")
     try:
@@ -314,9 +324,3 @@ async def ingest_transcripts(file: UploadFile, session: SessionDep,
 @router.get("/ingest/formats")
 def ingest_formats(user: UserDep):
     return ingest_mod.FORMATS
-
-
-# ------------------------------------------------------------------ schemas re-exported for docs
-
-
-_ = s

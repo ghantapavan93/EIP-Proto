@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from backstop.config import Settings
 from backstop.core import audit, impact
+from backstop.core.clock import compliance_today
 from backstop.models import (
     Asset,
     AssetVersion,
@@ -103,14 +104,14 @@ def _propose_with_llm(session: Session, settings: Settings, assets: list[Asset],
     rules = session.scalars(select(Rule)).all()
     for asset in assets:
         latest = session.scalar(
-            select(AssetVersion).where(AssetVersion.asset_id == asset.id).order_by(AssetVersion.fetched_at.desc())
+            select(AssetVersion).where(AssetVersion.asset_id == asset.id).order_by(AssetVersion.fetched_at.desc()).limit(1)
         )
         if latest is None:
             continue
         for rule in rules:
             # The version in force today: never a proposal, and never a vacated text that a
             # public source (eCFR) may still print.
-            current = impact.in_force_version(rule, date.today())
+            current = impact.in_force_version(rule, compliance_today())
             if current is None:
                 continue
             summary["pairs"] += 1
@@ -360,7 +361,7 @@ def run_scan(
         stats["llm"] = {"skipped": "ANTHROPIC_API_KEY not set — deterministic matchers only"}
 
     # Re-evaluate staleness for every rule as of the requested date.
-    as_of = as_of or date.today()
+    as_of = as_of or compliance_today()
     stats["staleness"] = impact.evaluate_all(session, as_of, actor=actor)
     stats["as_of"] = as_of.isoformat()
 

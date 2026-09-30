@@ -20,6 +20,7 @@ from datetime import date
 import typer
 
 from backstop.config import get_settings
+from backstop.core.clock import compliance_today
 from backstop.db import SessionLocal, init_schema
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -61,7 +62,8 @@ def seed(rules_only: bool = False) -> None:
             typer.echo("This database was seeded from different rule text. Reset it: "
                        "scripts/demo-up.ps1 -Fresh (or docker compose down -v), or delete backstop.db.", err=True)
             raise typer.Exit(code=1) from exc
-        typer.echo(f"rules: +{report.rules_created} rules, +{report.versions_created} versions, {report.unchanged} unchanged")
+        typer.echo(f"rules: +{report.rules_created} rules, +{report.versions_created} versions, "
+                   f"{report.versions_updated} updated, {report.unchanged} unchanged")
         if rules_only:
             return
         runner.seed_models(session)
@@ -86,7 +88,7 @@ def scan(live: bool = False, as_of: str | None = None, key: str | None = None, l
     with SessionLocal() as session:
         outcome = run_scan(
             session, settings,
-            idempotency_key=key or (f"cli:{date.today().isoformat()}:{as_of or 'today'}:"
+            idempotency_key=key or (f"cli:{compliance_today().isoformat()}:{as_of or 'today'}:"
                                     f"{'live' if live else 'snapshot'}{':llm' if llm else ''}"),
             live=live, as_of=date.fromisoformat(as_of) if as_of else None, actor="system:scanner", use_llm=llm,
         )

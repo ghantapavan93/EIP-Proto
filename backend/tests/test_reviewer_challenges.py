@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import base64
 import threading
-from datetime import date
+from datetime import UTC, date, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -119,10 +119,16 @@ def test_ingest_flags_an_assumed_product_line(client):
 # ---------------------------------------------------------------- reads never write the past
 
 
-def test_reading_a_past_date_opens_no_review_tasks(client):
+def test_reading_a_past_date_opens_no_review_tasks(client, monkeypatch):
+    from backstop.core import clock
+
+    # After the October flip, 2024 reads soa-48h-wait v1: history, not today's work.
+    monkeypatch.setattr(clock, "_now", lambda: datetime(2026, 10, 2, 15, 0, tzinfo=UTC))
     before = len(client.get("/api/review", headers=auth("engineer")).json())
     r = client.get("/api/rules/soa-48h-wait/impact?as_of=2024-01-01", headers=auth("engineer"))
     assert r.status_code == 200
+    r = client.post("/api/rules/soa-48h-wait/impact/evaluate?as_of=2024-01-01", headers=auth("engineer"))
+    assert r.status_code == 409 and "in force today" in r.json()["detail"]
     assert len(client.get("/api/review", headers=auth("engineer")).json()) == before
 
 
@@ -193,9 +199,9 @@ def test_a_later_version_cannot_start_inside_an_open_window(tmp_path):
 
 
 def test_percentages_round_the_same_way_as_the_console():
-    from backstop.api.contracts_metrics import _pct
+    from backstop.core.metrics import fmt_pct
 
-    assert [_pct(v) for v in (0.625, 0.0833, 0.05, 0.0, 1.0, None)] == ["63%", "8.3%", "5%", "0%", "100%", "n/a"]
+    assert [fmt_pct(v) for v in (0.625, 0.0833, 0.05, 0.0, 1.0, None)] == ["63%", "8.3%", "5%", "0%", "100%", "n/a"]
 
 
 def test_the_audit_actor_filter_lists_people_who_acted_not_demo_defaults(client):

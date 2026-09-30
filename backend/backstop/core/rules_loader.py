@@ -15,11 +15,14 @@ version may have ``effective_from: null`` (no date until the regulator acts)
 plus a ``vote_date``. Only a proposed version may be undated.
 
 Annotations. ``vote_date``, ``deferrals`` (``[{provision, deferred_to,
-source}]``: a clause whose compliance date moved while the text did not) and
-``sources`` are not part of a version's fingerprint. They describe the version;
-they do not change what it says. ``vote_date`` and ``deferrals`` are refreshed
-in place on reload (audited as ``rule.version_annotated``), because a regulator
-can move a vote or extend a waiver without touching the text.
+source}]``: a clause whose compliance date moved while the text did not),
+``sources``, ``source_url``, ``summary``, ``regulation_effective``, ``disputed``
+and ``dispute_note`` are not part of a version's fingerprint. They describe the
+version; they do not change what it says. They are refreshed in place on reload
+(audited as ``rule.version_annotated``), because a regulator can move a vote or
+extend a waiver, and counsel can dispute a reading, without touching the text.
+The fingerprinted fields (status, clause text, start date, classification,
+params) stay append-only.
 """
 
 from __future__ import annotations
@@ -29,6 +32,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import yaml
 from sqlalchemy import select
@@ -59,6 +63,8 @@ class RuleCorpusError(ValueError):
 class LoadReport:
     rules_created: int = 0
     versions_created: int = 0
+    # Existing versions whose window was closed or whose annotations were refreshed.
+    versions_updated: int = 0
     unchanged: int = 0
     files: list[str] = field(default_factory=list)
 
@@ -223,21 +229,52 @@ def _renumber_colliding_proposals(session: Session, rule: Rule, doc: dict, path:
     session.expire(rule, ["versions"])
 
 
-def _refresh_annotations(session: Session, rule: Rule, stored: RuleVersion, yaml_v: dict, path: Path,
-                         actor: str) -> None:
-    """Bring ``vote_date`` and ``deferrals`` of an existing version in line with the YAML.
+def _annotations(v: dict, path: Path) -> dict[str, Any]:
+    """The descriptive fields of a YAML version, normalised the way they are stored."""
+    return {
+        "vote_date": _as_date(v.get("vote_date")),
+        "deferrals": _validated_deferrals(v.get("deferrals"), path, v["version"]),
+        "sources": _validated_sources(v.get("sources"), path, v["version"]),
+        "source_url": v.get("source_url", ""),
+        "summary": str(v.get("summary") or "").strip(),
+        "regulation_effective": _as_date(v.get("regulation_effective")),
+        "disputed": bool(v.get("disputed", False)),
+        "dispute_note": str(v.get("dispute_note") or "").strip(),
+    }
 
-    They are annotations, not history: a regulator can reschedule a vote or extend a
-    waiver without changing a word of the version. The change is audited.
+
+def _stored_annotations(stored: RuleVersion) -> dict[str, Any]:
+    return {
+        "vote_date": stored.vote_date,
+        "deferrals": list(stored.deferrals or []),
+        "sources": list(stored.sources or []),
+        "source_url": stored.source_url or "",
+        "summary": stored.summary or "",
+        "regulation_effective": stored.regulation_effective,
+        "disputed": bool(stored.disputed),
+        "dispute_note": stored.dispute_note or "",
+    }
+
+
+def _jsonable(value: Any) -> Any:
+    return value.isoformat() if isinstance(value, date) else value
+
+
+def _refresh_annotations(session: Session, rule: Rule, stored: RuleVersion, yaml_v: dict, path: Path,
+                         actor: str) -> bool:
+    """Bring the annotations of an existing version in line with the YAML. Returns True on a change.
+
+    They describe the version rather than define it: a regulator can reschedule a vote or
+    extend a waiver, and counsel can dispute a reading, without a word of the version
+    changing. Each change is audited with the before and after of the fields that moved.
     """
-    vote_date = _as_date(yaml_v.get("vote_date"))
-    deferrals = _validated_deferrals(yaml_v.get("deferrals"), path, yaml_v["version"])
-    if stored.vote_date == vote_date and list(stored.deferrals or []) == deferrals:
-        return
-    before = {"vote_date": stored.vote_date.isoformat() if stored.vote_date else None,
-              "deferrals": list(stored.deferrals or [])}
-    stored.vote_date = vote_date
-    stored.deferrals = deferrals
+    wanted = _annotations(yaml_v, path)
+    current = _stored_annotations(stored)
+    changed = sorted(k for k in wanted if wanted[k] != current[k])
+    if not changed:
+        return False
+    for key in changed:
+        setattr(stored, key, wanted[key])
     audit.record(
         session,
         actor=actor,
@@ -247,11 +284,13 @@ def _refresh_annotations(session: Session, rule: Rule, stored: RuleVersion, yaml
         payload={
             "rule": rule.code,
             "version": stored.version,
-            "before": before,
-            "after": {"vote_date": vote_date.isoformat() if vote_date else None, "deferrals": deferrals},
+            "changed": changed,
+            "before": {k: _jsonable(current[k]) for k in changed},
+            "after": {k: _jsonable(wanted[k]) for k in changed},
             "source": path.name,
         },
     )
+    return True
 
 
 def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> LoadReport:
@@ -298,6 +337,7 @@ def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> L
                         f"{path.name}: version {v['version']} was edited in place. "
                         "History is append-only — add a new version instead."
                     )
+                updated = False
                 if stored.effective_to != yaml_to:
                     # Only legal window change: closing an open version once.
                     if stored.effective_to is not None:
@@ -307,6 +347,7 @@ def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> L
                         )
                     assert yaml_to is not None  # stored window was open and differs, so YAML closed it
                     stored.effective_to = yaml_to
+                    updated = True
                     audit.record(
                         session,
                         actor=actor,
@@ -323,8 +364,11 @@ def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> L
                 if stored_fp != fp:
                     # Upgrade a legacy fingerprint in place (new dict so the JSON column is dirtied).
                     stored.params = {**stored.params, "_fingerprint": fp}
-                _refresh_annotations(session, rule, stored, v, path, actor)
-                report.unchanged += 1
+                updated = _refresh_annotations(session, rule, stored, v, path, actor) or updated
+                if updated:
+                    report.versions_updated += 1
+                else:
+                    report.unchanged += 1
                 continue
             params = dict(v.get("params") or {})
             params["_fingerprint"] = fp
@@ -377,6 +421,7 @@ def load_rules(session: Session, rules_dir: Path, *, actor: str = "system") -> L
             "files": report.files,
             "rules_created": report.rules_created,
             "versions_created": report.versions_created,
+            "versions_updated": report.versions_updated,
             "unchanged": report.unchanged,
         },
     )

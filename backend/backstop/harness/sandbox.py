@@ -23,6 +23,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backstop.core.clock import compliance_today
 from backstop.core.impact import in_force_version
 from backstop.harness import contracts as ct
 from backstop.harness import workflow as wf
@@ -196,7 +197,7 @@ def check_transcript(
     """Run one pasted transcript. Raises SandboxError subclasses; writes nothing."""
     chosen = pick_model(model_id, (probe_fn or probe)())
     redacted_text, counts = redact(text)
-    logic = _logic_in_force(session, date.today())
+    logic = _logic_in_force(session, compliance_today())
     try:
         result = _generate_with_deadline(adapter_factory or make_adapter, chosen, wf.PROMPTS[PROMPT_VERSION]["text"],
                                          redacted_text, logic, TIMEOUT_SECONDS if timeout is None else timeout)

@@ -271,6 +271,25 @@ def test_redaction_covers_the_audit_probe_formats(text, kind):
     assert counts[kind] == 1 and text not in redacted
 
 
+@pytest.mark.parametrize("text, kept, kind", [
+    # The address starts inside the phone number ("0187 Harbor View Drive").
+    ("reach me 212-555-0187 Harbor View Drive", "reach me ", "phone"),
+    # Same shape after an SSN: "6789 Harbor View Drive" reads as an address.
+    ("social 123-45-6789 Harbor View Drive", "social ", "ssn"),
+])
+def test_overlapping_hits_redact_their_union(text, kept, kind):
+    redacted, counts = pii.redact(text)
+    assert redacted == f"{kept}[REDACTED-{kind.upper()}]", redacted
+    assert sum(counts.values()) == 1 and counts[kind] == 1
+
+
+def test_detect_merges_a_chain_of_overlaps_into_one_hit():
+    text = "call me 212-555-0187 Harbor View Drive now"
+    hits = pii.detect(text)
+    assert len(hits) == 1
+    assert text[hits[0].start:hits[0].end] == "212-555-0187 Harbor View Drive"
+
+
 @pytest.mark.parametrize("text", [
     "Plan H1234-001 has a $1,234.56 deductible.",
     "Call started 2026-10-02T14:03:11Z; [00:01:20] AGENT: hello.",
@@ -279,6 +298,48 @@ def test_redaction_covers_the_audit_probe_formats(text, kind):
 ])
 def test_redaction_leaves_plan_ids_money_timestamps_and_toll_free_numbers(text):
     assert pii.redact(text)[0] == text
+
+
+def _pii_check(summary: str, labels: dict | None = None):
+    from backstop.harness import contracts as ct
+    from backstop.harness import corpus as cp
+    from backstop.harness import workflow as wf
+
+    call = cp.generate(2026, "T")[0]
+    profiles = ad.load_profiles(REPO / "fixtures")
+    raw = ad.SimulatedAdapter("sim-large", profiles["sim-large"]).generate(
+        wf.PROMPTS[2]["text"], call["text"], call["code"], call["labels"], wf.rule_logic_from_params({})).raw
+    output, error = wf.validate_output(raw)
+    assert output is not None, error
+    output.composition = wf.Composition(summary=summary, coaching_note="", crm_record={})
+    ctx = ct.CheckContext(raw=raw, output=output, validation_error=None, transcript=call["text"],
+                          transcript_code=call["code"], labels=labels or {}, logic={}, spec={}, adapter=None)
+    return ct.pii_redacted(ctx)
+
+
+@pytest.mark.parametrize("summary, kind", [
+    ("Member MBI 1EG4-TE5-MK73 confirmed.", "medicare_number"),
+    ("Member MBI 1eg4 te5 mk73 confirmed.", "medicare_number"),  # the old check missed spaces and case
+    ("Member was born 03/14/1948.", "dob"),
+    ("Call back on (512) 555-0142.", "phone"),
+    ("Sent the summary to jane.doe@example.com.", "email"),
+    ("Member lives at 742 Evergreen Terrace.", "address"),
+])
+def test_pii_contract_uses_the_redaction_detector(summary, kind):
+    verdict = _pii_check(summary)
+    assert verdict.outcome == "FAIL" and kind in verdict.evidence["pii_in_output"], verdict.evidence
+    assert all(isinstance(v, str) for v in verdict.evidence["pii_in_output"][kind])
+
+
+def test_pii_contract_passes_call_dates_and_toll_free_numbers():
+    # A 20xx date is a call or effective date; the old check failed it as a date of birth.
+    verdict = _pii_check("Appointment set for 10/03/2026; Medicare is 1-800-633-4227.")
+    assert verdict.outcome == "PASS", verdict.evidence
+
+
+def test_pii_contract_still_catches_known_values_the_detector_cannot():
+    verdict = _pii_check("Spoke with Margaret Ellison.", {"pii": [{"type": "name", "value": "Margaret Ellison"}]})
+    assert verdict.outcome == "FAIL" and verdict.evidence["pii_in_output"] == {"name": ["[known value present]"]}
 
 
 CSV = (

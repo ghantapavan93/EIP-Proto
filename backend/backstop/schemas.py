@@ -430,7 +430,9 @@ class ContractComparisonOut(BaseModel):
     test: str
     p_value: float
     p_holm: float | None = None  # Holm-adjusted across the per-contract family
-    significant: bool
+    significant: bool  # the raw test: p < alpha
+    # Per-contract rows: still significant after Holm. None for ALL-BLOCK (a single test).
+    significant_holm: bool | None = None
     direction: Literal["worse", "better", "none"]
     verdict: str
     cautions: list[str] = []

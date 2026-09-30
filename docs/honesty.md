@@ -129,12 +129,12 @@ piece real. Written so a skeptical reader can find the seams without asking.
 | Notifications | one webhook stub would be trivial; wiring it is not the point | Slack/email on `task.opened` |
 | Background workers / queue | 60 transcripts run synchronously: seconds simulated; live, minutes to an hour on a laptop GPU (9–55 min measured) | scheduled ECS task for nightly scans and canary runs |
 | Embedding-based candidate discovery | 24 artifacts do not need it | interface slot only |
-| Terraform apply | `infra/terraform/main.tf` is the shape, reviewed for plausibility, never applied | apply after account owner review; TLS + IP allow-list first |
+| Terraform apply | `infra/terraform/` is the shape (TLS, IP allow-list, encrypted RDS, secrets, nightly alert); CI runs `fmt` and `validate`, never `apply` | apply after the account owner reviews the variables, network and state backend |
 | LLM edge proposer in the demo | written, tested with a fake client, key-gated; not exercised against a live model here | `backstop scan --llm` with a key |
 | Hosted free-tier runs (Groq, Google AI Studio, OpenRouter) | adapter written, paced and tested with a mock transport; no key was created for this build | set the key, `backstop record --model groq/… --limit 20` → cassettes |
 | Paid API runs (Anthropic) | not needed; adapter kept for the comparison | `ANTHROPIC_API_KEY` + `backstop record` |
 
-(An initial Alembic migration exists under `backend/alembic/versions/`; the prototype still creates tables directly on start for zero-setup runs.)
+(Alembic owns the Postgres schema: the container runs `alembic upgrade head` before it starts, and the API refuses to start on a Postgres database that is not at head. SQLite, for tests and zero-setup local runs, still creates tables directly; `test_migrations.py` checks the two paths produce the same schema.)
 
 ## Known limitations
 
@@ -214,6 +214,30 @@ disclosed here rather than rushed in before an external review.
   typical 4,096-token local context).
 
 ## Corrections
+
+- **2026-09-30 — code review pass.** A line-by-line review of the backend found
+  real defects, now fixed and pinned by tests:
+  - The status rail counted confirmed edges and verified source changes as open
+    work, and those tasks never got a `closed_at`. Terminal states now depend on
+    the task kind, and one definition of "open" is shared by the status rail and
+    readiness.
+  - PII redaction dropped the second of two overlapping hits, so
+    `212-555-0187 Harbor View Drive` kept the address. Overlapping hits now merge.
+  - `C-PII-01` used weaker patterns than the redactor. It now uses the same
+    detector registry. Re-scoring every simulated profile and all four recorded
+    model sets changed no outcome.
+  - Historical comparisons joined a contract's current severity. Each contract
+    version now snapshots its severity, and old runs are read under the severity
+    they were scored with.
+  - "Today" was the server's local date. Rule flips are Eastern calendar dates,
+    so a UTC container flipped at 8 p.m. on Sept 30. One compliance clock
+    (`America/New_York`) is now used everywhere.
+  - `GET /rules/{code}/impact` opened tasks as a side effect. The GET is now
+    read-only, and `POST …/impact/evaluate` does the write.
+  - A crash while scoring left a run `RUNNING` that later requests deduplicated
+    to. It is now marked `FAILED`.
+  - A "significantly better" verdict could survive Holm correction or rest on
+    six changed calls. The verdict now needs both (`significant_holm`).
 
 - **2026-09-25 — TPMO disclaimer, second wording.** `tpmo-disclaimer-text` v2
   carried only the wording for a TPMO that does *not* sell for every MA

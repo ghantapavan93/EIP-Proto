@@ -75,9 +75,10 @@ def transition_task(
     task.state = to
     task.reason_code = reason_code or task.reason_code
     task.note = note or task.note
-    if sm.is_terminal(to) or to == sm.VERIFIED:
+    closes = sm.is_terminal(task.kind, to)
+    if closes or to == sm.VERIFIED:
         task.decided_by = actor
-    if sm.is_terminal(to):
+    if closes:
         task.closed_at = utcnow()
 
     # Side effects that make the loop real.

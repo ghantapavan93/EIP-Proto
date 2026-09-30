@@ -42,19 +42,38 @@ def test_analysts_cannot_start_runs_or_scans(client):
     assert r.status_code == 403
 
 
+def _audit_rows(client) -> int:
+    return client.get("/api/audit?limit=1", headers=auth("analyst")).json()["total"]
+
+
 def test_impact_flips_on_the_effective_date(client):
     before = client.get("/api/rules/soa-48h-wait/impact?as_of=2026-09-30", headers=auth("analyst")).json()
-    # An analyst's read is pure: same verdicts, but it opens no review tasks.
+    # A read is pure for every role: it opens no review tasks and writes no audit rows.
     tasks_before = len(client.get("/api/review?kind=STALE_ASSET", headers=auth("analyst")).json())
-    read_only = client.get("/api/rules/soa-48h-wait/impact?as_of=2026-10-01", headers=auth("analyst")).json()
+    audit_before = _audit_rows(client)
+    read_only = client.get("/api/rules/soa-48h-wait/impact?as_of=2026-10-01", headers=auth("engineer")).json()
     assert len(client.get("/api/review?kind=STALE_ASSET", headers=auth("analyst")).json()) == tasks_before
-    after = client.get("/api/rules/soa-48h-wait/impact?as_of=2026-10-01", headers=auth("engineer")).json()
+    assert _audit_rows(client) == audit_before
+    after = client.post("/api/rules/soa-48h-wait/impact/evaluate?as_of=2026-10-01", headers=auth("engineer")).json()
     assert read_only["counts"] == after["counts"]
     assert before["in_force_version"] == 1 and before["counts"]["total"] == 0
     assert after["in_force_version"] == 2 and after["counts"]["over_restrictive"] >= 5
     assert any(not item["edge"]["asset_is_synthetic"] for item in after["stale"]), "a real page must be in the blast radius"
     assert all(item["task_state"] == "open" for item in after["stale"])
     assert any(p["version"] == 1 and p["stale"] for p in after["prompt_versions"])
+
+
+def test_opening_stale_tasks_is_an_idempotent_operator_write(client):
+    url = "/api/rules/soa-48h-wait/impact/evaluate?as_of=2026-10-01"
+    assert client.post(url, headers=auth("analyst")).status_code == 403
+    first = client.post(url, headers=auth("engineer")).json()
+    audit_after_first = _audit_rows(client)
+    again = client.post(url, headers=auth("admin")).json()
+    assert [i["task_id"] for i in again["stale"]] == [i["task_id"] for i in first["stale"]]
+    assert _audit_rows(client) == audit_after_first, "nothing new to open, nothing to audit"
+    # A read shows the tasks already open for the stale items.
+    read = client.get("/api/rules/soa-48h-wait/impact?as_of=2026-10-01", headers=auth("analyst")).json()
+    assert [i["task_id"] for i in read["stale"]] == [i["task_id"] for i in first["stale"]]
 
 
 def test_disputed_rule_is_carried_not_resolved(client):

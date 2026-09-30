@@ -134,7 +134,7 @@ def _address(text: str) -> list[Hit]:
     return [Hit("address", m.start(), m.end()) for p in (_ADDRESS, _PO_BOX) for m in p.finditer(text)]
 
 
-# Order matters only for overlaps: earlier detectors win a tie on the same span.
+# Order matters only for overlaps: earlier detectors win a tie on the same start and length.
 DETECTORS: dict[str, Callable[[str], list[Hit]]] = {
     "medicare_number": _mbi,
     "ssn": _ssn,
@@ -147,13 +147,21 @@ KINDS: tuple[str, ...] = tuple(DETECTORS)
 
 
 def detect(text: str) -> list[Hit]:
-    """Non-overlapping hits, left to right. On overlap the longer hit wins, then registry order."""
+    """Non-overlapping hits, left to right.
+
+    Overlapping hits merge into one hit covering their union, so no detected character
+    survives redaction ("212-555-0187 Harbor View Drive" is a phone number and an address
+    sharing "0187"). The merged hit keeps the kind of the earliest hit, the longest on a
+    tie, then registry order.
+    """
     rank = {k: i for i, k in enumerate(KINDS)}
     candidates = [h for fn in DETECTORS.values() for h in fn(text)]
     candidates.sort(key=lambda h: (h.start, -(h.end - h.start), rank[h.kind]))
     out: list[Hit] = []
     for h in candidates:
         if out and h.start < out[-1].end:
+            if h.end > out[-1].end:
+                out[-1] = Hit(out[-1].kind, out[-1].start, h.end)
             continue
         out.append(h)
     return out

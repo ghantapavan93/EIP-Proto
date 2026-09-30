@@ -7,8 +7,8 @@ Every row is derived from, or tested against, the code that enforces it:
 * write endpoints list the (method, path) they guard; a test walks the app's
   routes and fails if any `require_role(...)` disagrees with this table or is
   missing from it;
-* "open stale-artifact tasks from the impact view" is OPEN_STALE_TASK_ROLES,
-  which `api/rules.py` reads directly.
+* "open stale-artifact tasks" is OPEN_STALE_TASK_ROLES, which `api/rules.py`
+  passes to require_role on POST /api/rules/{code}/impact/evaluate.
 
 Nothing here grants anything: it describes. Enforcement stays where it is.
 """
@@ -28,7 +28,7 @@ OPERATOR_ROLES = frozenset({"engineer", "admin"})
 # Governance: who has access, which rule corpus is adopted, and anchoring the audit trail.
 ADMIN_ROLES = frozenset({"admin"})
 EVERYONE = frozenset(VALID_ROLES)
-# api/rules.py reads this to decide whether an impact read may open STALE_ASSET tasks.
+# Who may open STALE_ASSET tasks from a rule's impact (api/rules.py guards the endpoint with it).
 OPEN_STALE_TASK_ROLES = OPERATOR_ROLES
 
 ROLE_INFO: dict[str, tuple[str, str]] = {
@@ -92,8 +92,9 @@ ACTIONS: tuple[Action, ...] = (
            (("GET", "/api/admin/audit-checkpoints"), ("POST", "/api/admin/audit-checkpoints"))),
     Action("ingest_transcripts", "Ingest transcripts from an export file", OPERATOR_ROLES, "",
            (("POST", "/api/ingest/transcripts"),)),
-    Action("open_stale_tasks", "Open stale-artifact review tasks by reading a rule's impact", OPEN_STALE_TASK_ROLES,
-           "an analyst's impact read shows the same verdicts and changes nothing"),
+    Action("open_stale_tasks", "Open stale-artifact review tasks from a rule's impact", OPEN_STALE_TASK_ROLES,
+           "reading the impact never opens tasks, for any role",
+           (("POST", "/api/rules/{code}/impact/evaluate"),)),
     Action("export_evidence", "Export evidence bundles and run results", EVERYONE,
            "every export is audit-logged"),
     Action("use_sandbox", "Check pasted text in the sandbox", EVERYONE,

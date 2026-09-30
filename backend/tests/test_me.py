@@ -133,6 +133,6 @@ def test_every_other_route_is_open_to_any_signed_in_role():
     assert sandbox_paths and not (sandbox_paths & set(guarded))
 
 
-def test_impact_read_uses_the_same_roles_as_the_table():
+def test_opening_stale_tasks_uses_the_same_roles_as_the_table():
     by_action = {a.action: a for a in permissions.ACTIONS}
     assert by_action["open_stale_tasks"].roles == permissions.OPEN_STALE_TASK_ROLES

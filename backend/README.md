@@ -8,7 +8,7 @@ Python 3.12, FastAPI, SQLAlchemy 2, Pydantic v2, Typer. SQLite for tests and loc
 
 | Module | Purpose |
 |---|---|
-| `backstop/__init__.py` | Package version (`0.1.0`). |
+| `backstop/__init__.py` | Package version (`0.2.0`). |
 | `backstop/main.py` | FastAPI app: lifespan (logging, credential check, schema), CORS, request-id middleware, mounts every router under `/api`. |
 | `backstop/cli.py` | Typer command line (`backstop ...`); see [Command line](#command-line). |
 | `backstop/config.py` | Settings from the environment or `.env`; locates the repository root. |

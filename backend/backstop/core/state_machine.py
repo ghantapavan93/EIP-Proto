@@ -12,8 +12,10 @@ transitions raise and are audit-logged as rejected attempts by the caller.
   RULE_SOURCE_CHANGED
                   open -> in_review -> verified (a new rule version was added) | dismissed (no material change)
 
-Terminal states: republished, dismissed, upheld, overridden; `verified` is
-terminal for RULE_SOURCE_CHANGED.
+A state is terminal for a kind when that kind has no move out of it, so
+`verified` is terminal for PROPOSED_EDGE and RULE_SOURCE_CHANGED but not for
+STALE_ASSET (which still awaits republishing). `is_terminal` / `is_open` are the
+one definition of "outstanding work" for the queue, readiness and the status rail.
 """
 
 from __future__ import annotations
@@ -25,8 +27,6 @@ REPUBLISHED = "republished"
 DISMISSED = "dismissed"
 UPHELD = "upheld"
 OVERRIDDEN = "overridden"
-
-TERMINAL = {REPUBLISHED, DISMISSED, UPHELD, OVERRIDDEN}
 
 TRANSITIONS: dict[str, dict[str, set[str]]] = {
     "STALE_ASSET": {
@@ -97,5 +97,20 @@ def allowed_for_role(kind: str, current: str, role: str) -> set[str]:
     return out
 
 
-def is_terminal(state: str) -> bool:
-    return state in TERMINAL
+def is_terminal(kind: str, state: str) -> bool:
+    """No move out of `state` exists for `kind`. A kind the machine does not know is
+    closed unless it is still untouched (`open`), so stray rows never vanish from queues."""
+    moves = TRANSITIONS.get(kind)
+    if moves is None:
+        return state != OPEN
+    return not moves.get(state)
+
+
+def is_open(kind: str, state: str) -> bool:
+    return not is_terminal(kind, state)
+
+
+def open_states() -> frozenset[str]:
+    """Every state that is open for at least one kind: a SQL prefilter. Callers must still
+    apply `is_open(kind, state)`, because `verified` is open for STALE_ASSET only."""
+    return frozenset({OPEN} | {state for moves in TRANSITIONS.values() for state, nxt in moves.items() if nxt})

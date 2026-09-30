@@ -5,14 +5,15 @@ A run is keyed by everything that could change its outcome:
     run_key = workflow : prompt_hash : model : adapter : corpus_hash : contract_set_hash : rule_date
 
 Submitting the same key twice returns the first run (`deduplicated=True`) and
-writes a `run.deduplicated` audit event. Results are unique per
-(run, transcript, contract version), so a crashed run can be resumed and
-converges to the same state.
+writes a `run.deduplicated` audit event. Runs are not resumed: a run that fails,
+or that a crashed process left RUNNING for longer than ABANDONED_AFTER, gives
+up its key, and the next identical request scores from scratch.
 """
 
 from __future__ import annotations
 
 import hashlib
+import logging
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -23,6 +24,7 @@ from sqlalchemy.orm import Session
 
 from backstop.config import Settings
 from backstop.core import audit
+from backstop.core.clock import compliance_today
 from backstop.core.impact import in_force_version
 from backstop.harness import adapters as ad
 from backstop.harness import canary, cost, providers
@@ -49,6 +51,8 @@ from backstop.models import (
 )
 
 WORKFLOW_CODE = "qa-handoff"
+
+log = logging.getLogger("backstop.runner")
 
 MODELS = [
     {"provider": "simulated", "model_id": "sim-large", "label": "Simulated — large (clean profile)", "pinned": True,
@@ -209,6 +213,12 @@ def _contract_definition(spec: dict, rule: Rule | None) -> dict[str, Any]:
     }
 
 
+def _snapshot(definition: dict[str, Any]) -> dict[str, Any]:
+    """The row fields a version keeps in its spec, so it keeps its meaning (e.g. its
+    severity) after a later edit moves the Contract row. Read by `models.version_severity`."""
+    return {f: definition[f] for f in _CONTRACT_ROW_FIELDS}
+
+
 def _stored_definition(contract: Contract) -> dict[str, Any]:
     latest = contract.versions[-1]
     return {
@@ -246,7 +256,7 @@ def seed_contracts(session: Session, contracts_dir, *, actor: str = "system:seed
                 ContractVersion(
                     contract_id=contract.id,
                     version=1,
-                    spec=wanted["spec"],
+                    spec={**wanted["spec"], "_definition": _snapshot(wanted)},
                     effective_from=date(2026, 9, 1),
                     judge_model_id=wanted["judge_model_id"],
                     n_runs=wanted["n_runs"],
@@ -259,16 +269,18 @@ def seed_contracts(session: Session, contracts_dir, *, actor: str = "system:seed
             if stored != wanted:
                 changed = sorted(k for k in wanted if stored[k] != wanted[k])
                 previous = contract.versions[-1]
+                if "_definition" not in (previous.spec or {}):
+                    # Seeded before versions carried a snapshot. Until this edit the row still
+                    # describes it, so record that now; afterwards the row describes the new one.
+                    previous.spec = {**(previous.spec or {}), "_definition": _snapshot(stored)}
                 for f in _CONTRACT_ROW_FIELDS:
                     setattr(contract, f, wanted[f])
                 contract.rule_id = wanted["rule_id"]
                 cv = ContractVersion(
                     contract_id=contract.id,
                     version=previous.version + 1,
-                    # The row fields are snapshotted so this version keeps its meaning
-                    # (e.g. its severity) after the next edit moves the Contract row.
-                    spec={**wanted["spec"], "_definition": {f: wanted[f] for f in _CONTRACT_ROW_FIELDS}},
-                    effective_from=utcnow().date(),
+                    spec={**wanted["spec"], "_definition": _snapshot(wanted)},
+                    effective_from=compliance_today(),
                     judge_model_id=wanted["judge_model_id"],
                     n_runs=wanted["n_runs"],
                 )
@@ -347,7 +359,9 @@ def _rule_params_declared(session: Session, pv: PromptVersion) -> dict[str, dict
     return params
 
 
-def gate_for(results: list[RunResult], contracts_by_version: dict[str, Contract]) -> str:
+def gate_for(results: list[RunResult], severity_by_version: dict[str, str]) -> str:
+    """RED on a failed BLOCK-severity check, AMBER on anything else not passing, else GREEN.
+    `severity_by_version` maps contract version id to the severity that version was scored with."""
     red = amber = False
     for r in results:
         if overridden(r):
@@ -356,8 +370,7 @@ def gate_for(results: list[RunResult], contracts_by_version: dict[str, Contract]
             # An unlabelled call can't be judged: that needs a human (amber), it isn't a failure (red).
             amber = True
             continue
-        contract = contracts_by_version[r.contract_version_id]
-        if r.outcome in ("FAIL", "ERROR") and contract.severity == "BLOCK":
+        if r.outcome in ("FAIL", "ERROR") and severity_by_version[r.contract_version_id] == "BLOCK":
             red = True
         elif r.outcome in ("FLAG", "FAIL", "ERROR"):
             amber = True
@@ -684,7 +697,29 @@ def execute_run(
                                    judge_model_id=judge_model_id, record=record)
     except ValueError as exc:
         return _fail_run(session, run, actor, str(exc))
+    try:
+        return _score_and_close(session, settings, run, adapter, pv, transcripts, overrides, corpus=corpus,
+                                rule_date=rule_date, model_id=model_id, adapter_kind=adapter_kind,
+                                judge_model_id=judge_model_id, judge_n=judge_n, actor=actor)
+    except Exception as exc:
+        # The run was committed as RUNNING; left that way, every identical request would
+        # dedupe to it until it counts as abandoned. Discard the partial results, record
+        # the failure (which retires the key on the next attempt), then let the caller see it.
+        log.exception("run %s failed while scoring", run.id)
+        session.rollback()
+        try:
+            _fail_run(session, run, actor, f"{type(exc).__name__}: {exc}")
+        except Exception:
+            session.rollback()
+            log.exception("could not mark run %s FAILED; it will be retried once abandoned", run.id)
+        raise
 
+
+def _score_and_close(session: Session, settings: Settings, run: Run, adapter, pv: PromptVersion,
+                     transcripts: list[Transcript], overrides: dict[tuple[str, str], TestCase], *, corpus: str,
+                     rule_date: date, model_id: str, adapter_kind: str, judge_model_id: str,
+                     judge_n: int | None, actor: str) -> RunOutcome:
+    """Score every transcript, open review items, set the gate and stats, and commit."""
     # ---- score
     contracts = list(session.scalars(select(Contract)).all())
     versions = {c.id: c.versions[-1] for c in contracts}
@@ -706,7 +741,8 @@ def execute_run(
 
     # ---- gate: a run whose adapter produced nothing has no verdict — GREY, not RED
     run.status = "COMPLETE" if errors < len(transcripts) else "FAILED"
-    run.gate = gate_for(results, contracts_by_version) if run.status == "COMPLETE" else "GREY"
+    run.gate = (gate_for(results, {v.id: v.severity for v in versions.values()})
+                if run.status == "COMPLETE" else "GREY")
     run.finished_at = utcnow()
     summary: dict[str, dict[str, int]] = {}
     for rr in results:

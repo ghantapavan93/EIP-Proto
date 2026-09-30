@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backstop import schemas as s
+from backstop.core.clock import compliance_today
 from backstop.core.impact import in_force_version
 from backstop.core.lanes import task_lane  # noqa: F401 — re-exported for api modules
 from backstop.core.state_machine import allowed_for_role
@@ -62,7 +63,7 @@ def _version_out(v: RuleVersion) -> s.RuleVersionOut:
 
 
 def rule_out(session: Session, rule: Rule, as_of: date | None = None) -> s.RuleOut:
-    as_of = as_of or date.today()
+    as_of = as_of or compliance_today()
     current = in_force_version(rule, as_of)
     version_ids = [v.id for v in rule.versions]
     dependents = 0
@@ -90,7 +91,7 @@ def rule_out(session: Session, rule: Rule, as_of: date | None = None) -> s.RuleO
 
 def asset_out(session: Session, asset: Asset, *, detail: bool = False) -> s.AssetOut | s.AssetDetailOut:
     latest = session.scalar(
-        select(AssetVersion).where(AssetVersion.asset_id == asset.id).order_by(AssetVersion.fetched_at.desc())
+        select(AssetVersion).where(AssetVersion.asset_id == asset.id).order_by(AssetVersion.fetched_at.desc()).limit(1)
     )
     edge_count = session.scalar(select(func.count(RuleAssetEdge.id)).where(RuleAssetEdge.asset_id == asset.id)) or 0
     versions = [
@@ -118,27 +119,31 @@ def contract_out(contract: Contract) -> s.ContractOut:
         id=contract.id, code=contract.code, title=contract.title, description=contract.description,
         kind=contract.kind, severity=contract.severity, owner_role=contract.owner_role, check=contract.check,
         rule_code=contract.rule.code if contract.rule else None,
-        version=cv.version if cv else 1, spec=dict(cv.spec or {}) if cv else {},
+        version=cv.version if cv else 1,
+        # "_"-prefixed keys are seeding bookkeeping (the definition snapshot), not the check's spec.
+        spec={k: v for k, v in (cv.spec or {}).items() if not k.startswith("_")} if cv else {},
         judge_model_id=cv.judge_model_id if cv else None, n_runs=cv.n_runs if cv else None,
     )
 
 
 def run_out(session: Session, run: Run, *, deduplicated: bool = False) -> s.RunOut:
     contracts = session.scalars(select(Contract)).all()
-    by_version = {c.versions[-1].id: c for c in contracts if c.versions}
+    # Severity as this run was scored; a contract the run did not score shows today's.
+    scored = {cv.contract_id: cv.severity for cv in session.scalars(
+        select(ContractVersion).where(ContractVersion.id.in_(
+            select(RunResult.contract_version_id).where(RunResult.run_id == run.id).distinct())))}
     summary = run.stats.get("contracts", {}) if run.stats else {}
     contract_rows = []
     for c in contracts:
         counts = summary.get(c.code, {})
         contract_rows.append(
             s.ContractSummary(
-                code=c.code, title=c.title, severity=c.severity, kind=c.kind,
+                code=c.code, title=c.title, severity=scored.get(c.id, c.severity), kind=c.kind,
                 rule_code=c.rule.code if c.rule else None,
                 passed=counts.get("PASS", 0), failed=counts.get("FAIL", 0),
                 flagged=counts.get("FLAG", 0), errored=counts.get("ERROR", 0),
             )
         )
-    _ = by_version
     return s.RunOut(
         id=run.id, run_key=run.run_key, workflow_code=run.workflow.code,
         prompt_version=run.prompt_version.version, prompt_label=run.prompt_version.label,
@@ -154,7 +159,7 @@ def run_out(session: Session, run: Run, *, deduplicated: bool = False) -> s.RunO
 def result_out(rr: RunResult) -> s.RunResultOut:
     return s.RunResultOut(
         id=rr.id, transcript_code=rr.transcript.code, contract_code=rr.contract_version.contract.code,
-        severity=rr.contract_version.contract.severity, outcome=rr.outcome, evidence=rr.evidence,
+        severity=rr.contract_version.severity, outcome=rr.outcome, evidence=rr.evidence,
         latency_ms=rr.latency_ms,
     )
 

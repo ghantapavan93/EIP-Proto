@@ -184,7 +184,8 @@ def record(
     return event
 
 
-def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None) -> dict[str, Any]:
+def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None, *,
+                 after: tuple[int, str] | None = None) -> dict[str, Any]:
     """Recompute every row's hash in id order. Reports the first break, if any.
 
     The chain alone is tamper-evident, not tamper-proof: someone able to drop the
@@ -192,12 +193,18 @@ def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None) ->
     A checkpoint closes that gap. It is (row id, row hash) taken earlier and kept
     outside the database; if the chain no longer contains that exact hash at that
     row, history before the checkpoint was rewritten, and the result is not ok.
+
+    ``after`` = (row id, row hash) of a row already verified: only later rows are
+    checked, linking from that hash. ``checked`` then counts the later rows only.
     """
-    expected_prev = GENESIS
+    expected_prev = after[1] if after else GENESIS
     checked = 0
-    tip_id: int | None = None
+    tip_id: int | None = after[0] if after else None
     seen_at_checkpoint: str | None = None
-    for row in session.scalars(select(AuditEvent).order_by(AuditEvent.id)).yield_per(500):
+    rows = select(AuditEvent).order_by(AuditEvent.id)
+    if after is not None:
+        rows = rows.where(AuditEvent.id > after[0])
+    for row in session.scalars(rows).yield_per(500):
         digest = row_digest(row.prev_hash, ts=row.ts, actor=row.actor, actor_role=row.actor_role,
                             event_type=row.event_type, entity_type=row.entity_type, entity_id=row.entity_id,
                             payload=row.payload or {}, correlation_id=row.correlation_id)
@@ -216,6 +223,36 @@ def verify_chain(session: Session, checkpoint: tuple[int, str] | None = None) ->
         result["ok"] = False
         result["reason"] = result["checkpoint"]["reason"]
     return result
+
+
+# The status rail polls; re-hashing the whole log on every poll grows without bound. Rows
+# are append-only (database triggers), so a verified prefix stays verified unless someone
+# with DDL rights rewrites it, which the full check (GET /api/audit/verify) and admin
+# checkpoints exist to catch. Per database URL: (tip row id, tip hash, rows verified).
+_verified_tips: dict[str, tuple[int, str, int]] = {}
+_VERIFIED_TIPS_LOCK = threading.Lock()
+
+
+def verify_new_rows(session: Session) -> dict[str, Any]:
+    """`verify_chain` for rows appended since the last successful call in this process.
+
+    The cached tip row is re-read first: if its hash changed, the cache is dropped and the
+    whole chain is verified again. ``checked`` is the total number of rows verified so far.
+    """
+    key = session.get_bind().engine.url.render_as_string(hide_password=True)
+    with _VERIFIED_TIPS_LOCK:
+        cached = _verified_tips.get(key)
+        if cached is not None:
+            tip_now = session.scalar(select(AuditEvent.row_hash).where(AuditEvent.id == cached[0]))
+            if tip_now != cached[1]:
+                cached = None
+        result = verify_chain(session, after=(cached[0], cached[1]) if cached else None)
+        result["checked"] += cached[2] if cached else 0
+        if result["ok"] and result["tip_id"] is not None:
+            _verified_tips[key] = (result["tip_id"], result["tip"], result["checked"])
+        elif not result["ok"]:
+            _verified_tips.pop(key, None)
+        return result
 
 
 def _checkpoint_result(checkpoint: tuple[int, str] | None, seen: str | None) -> dict[str, Any] | None:

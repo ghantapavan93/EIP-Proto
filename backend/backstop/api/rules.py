@@ -3,7 +3,9 @@
     GET  /api/rules                   every rule with its versions, as of a date
     POST /api/rules/reload            adopt rules/*.yaml (admin; append-only; edited versions are refused)
     GET  /api/rules/{code}            one rule and its versions, as of a date
-    GET  /api/rules/{code}/impact     what-if: which artifacts go stale on a given date
+    GET  /api/rules/{code}/impact     which artifacts are stale on a given date (read-only; what-if capable)
+    POST /api/rules/{code}/impact/evaluate
+                                      open review tasks for that stale set (engineer/admin)
     POST /api/rules/{code}/versions   propose a new version (never in force until adopted)
 """
 
@@ -14,13 +16,15 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from backstop import schemas as s
 from backstop.api.deps import SessionDep, SettingsDep, User, UserDep, require_role
 from backstop.api.serializers import edge_out, rule_out
 from backstop.core import audit, impact, permissions, staleness
+from backstop.core.clock import compliance_today
 from backstop.core.rules_loader import RuleCorpusError, _fingerprint, load_rules
-from backstop.models import PromptVersion, Rule, RuleAssetEdge, RuleVersion, utcnow
+from backstop.models import PromptVersion, ReviewTask, Rule, RuleAssetEdge, RuleVersion, utcnow
 
 router = APIRouter(prefix="/rules", tags=["rules"])
 
@@ -61,7 +65,7 @@ def reload_rules(session: SessionDep, settings: SettingsDep, user: User = Depend
     except RuleCorpusError as exc:
         raise HTTPException(422, str(exc)) from exc
     return {"rules_created": report.rules_created, "versions_created": report.versions_created,
-            "unchanged": report.unchanged, "files": report.files}
+            "versions_updated": report.versions_updated, "unchanged": report.unchanged, "files": report.files}
 
 
 @router.get("/{code}", response_model=s.RuleOut)
@@ -98,46 +102,9 @@ def _views_assuming(rule: Rule, assumed: RuleVersion, assumed_from: date) -> lis
     return views
 
 
-@router.get("/{code}/impact", response_model=ImpactWhatIfOut)
-def rule_impact(code: str, session: SessionDep, user: UserDep, as_of: date = Query(default_factory=date.today),
-                include_proposed: bool = False, assume_version: int | None = None):
-    """Blast radius of a rule as of a date.
-
-    Default: evaluates the enacted history and (for owning roles) opens STALE_ASSET tasks.
-    ``include_proposed=true`` is a what-if: it evaluates as if a proposed version were enacted
-    (``assume_version`` if given, else the newest dated proposal effective on ``as_of``). An
-    undated proposal (e.g. awaiting a vote) is assumed to take effect on ``as_of``. A what-if
-    writes nothing: no tasks, no audit events.
-    """
-    rule = _rule(session, code)
-    want_what_if = include_proposed or assume_version is not None
-    assumed = _assumed_proposal(rule, as_of, assume_version) if want_what_if else None
-    tasks: dict = {}
-    note = ""
-    if assumed is not None:
-        assumed_from = assumed.effective_from or as_of
-        views = _views_assuming(rule, assumed, assumed_from)
-        verdicts = staleness.evaluate(views, impact.edge_views(session, rule), as_of)
-        counts = staleness.summarize(verdicts)
-        current_view = staleness.version_in_force(views, as_of)
-        current = next((v for v in rule.versions if current_view is not None and v.id == current_view.id), None)
-        dated = (f"from {assumed.effective_from.isoformat()}" if assumed.effective_from else
-                 f"no effective date yet{f', vote {assumed.vote_date.isoformat()}' if assumed.vote_date else ''}; "
-                 f"assumed from {as_of.isoformat()}")
-        note = (f"what-if: v{assumed.version} (proposed, {dated}) treated as "
-                "enacted; no tasks were opened and nothing was written")
-    else:
-        if want_what_if:
-            note = f"no proposed version of {rule.code} is effective on {as_of.isoformat()}; enacted history shown"
-        # Reading the blast radius upserts STALE_ASSET tasks (idempotent) only for
-        # roles that own them; an analyst's read changes nothing.
-        # Reading an older state of the rule ("what was stale in 2024?") must not put that
-        # period's work into today's queue.
-        may_open = (user.role in permissions.OPEN_STALE_TASK_ROLES
-                    and not impact.reads_past_rule_state(rule, as_of, date.today()))
-        verdicts, counts, tasks = impact.evaluate_rule(session, rule, as_of, actor=user.name, open_tasks=may_open)
-        session.commit()
-        current = impact.in_force_version(rule, as_of)
+def _impact_out(session: Session, rule: Rule, as_of: date, verdicts: list[staleness.StaleVerdict],
+                counts: dict[str, int], tasks: dict[str, ReviewTask], current: RuleVersion | None, *,
+                assumed: RuleVersion | None = None, note: str = "") -> ImpactWhatIfOut:
     edges_by_id = {e.id: e for e in session.scalars(
         select(RuleAssetEdge).where(RuleAssetEdge.rule_version_id.in_([v.id for v in rule.versions]))
     ).all()}
@@ -166,6 +133,62 @@ def rule_impact(code: str, session: SessionDep, user: UserDep, as_of: date = Que
         stale=stale, current_edges=healthy, contracts=[c.code for c in rule.contracts], prompt_versions=declaring,
         hypothetical=assumed is not None, assumed_version=assumed.version if assumed else None, note=note,
     )
+
+
+@router.get("/{code}/impact", response_model=ImpactWhatIfOut)
+def rule_impact(code: str, session: SessionDep, user: UserDep, as_of: date = Query(default_factory=compliance_today),
+                include_proposed: bool = False, assume_version: int | None = None):
+    """Blast radius of a rule as of a date. Read-only for every role: it opens no tasks and
+    writes no audit events. Stale items show the review task already open for them, if any;
+    POST /rules/{code}/impact/evaluate opens the missing ones.
+
+    ``include_proposed=true`` is a what-if: it evaluates as if a proposed version were enacted
+    (``assume_version`` if given, else the newest dated proposal effective on ``as_of``). An
+    undated proposal (e.g. awaiting a vote) is assumed to take effect on ``as_of``.
+    """
+    rule = _rule(session, code)
+    want_what_if = include_proposed or assume_version is not None
+    assumed = _assumed_proposal(rule, as_of, assume_version) if want_what_if else None
+    if assumed is None:
+        note = (f"no proposed version of {rule.code} is effective on {as_of.isoformat()}; enacted history shown"
+                if want_what_if else "")
+        verdicts, counts, tasks = impact.evaluate_rule(session, rule, as_of, actor=user.name, open_tasks=False)
+        return _impact_out(session, rule, as_of, verdicts, counts, tasks, impact.in_force_version(rule, as_of),
+                           note=note)
+    assumed_from = assumed.effective_from or as_of
+    views = _views_assuming(rule, assumed, assumed_from)
+    verdicts = staleness.evaluate(views, impact.edge_views(session, rule), as_of)
+    current_view = staleness.version_in_force(views, as_of)
+    current = next((v for v in rule.versions if current_view is not None and v.id == current_view.id), None)
+    dated = (f"from {assumed.effective_from.isoformat()}" if assumed.effective_from else
+             f"no effective date yet{f', vote {assumed.vote_date.isoformat()}' if assumed.vote_date else ''}; "
+             f"assumed from {as_of.isoformat()}")
+    note = f"what-if: v{assumed.version} (proposed, {dated}) treated as enacted; no tasks were opened and nothing was written"
+    return _impact_out(session, rule, as_of, verdicts, staleness.summarize(verdicts), {}, current,
+                       assumed=assumed, note=note)
+
+
+@router.post("/{code}/impact/evaluate", response_model=ImpactWhatIfOut)
+def evaluate_rule_impact(code: str, session: SessionDep,
+                         as_of: date = Query(default_factory=compliance_today),
+                         user: User = Depends(require_role(*sorted(permissions.OPEN_STALE_TASK_ROLES)))):
+    """Open a STALE_ASSET review task for every stale artifact not yet in the queue (idempotent:
+    one task per version in force and artifact), audit it, and return the blast radius.
+
+    Refused (409) when ``as_of`` reads an older version than the one in force today: that
+    period's staleness is history, not today's work.
+    """
+    rule = _rule(session, code)
+    today = compliance_today()
+    if impact.reads_past_rule_state(rule, as_of, today):
+        then = impact.in_force_version(rule, as_of)
+        now = impact.in_force_version(rule, today)
+        shown = f"v{then.version}" if then else "no version"
+        raise HTTPException(409, f"{rule.code} on {as_of.isoformat()} is {shown}; v{now.version if now else '?'} "
+                                 f"is in force today. Tasks are opened only for the version in force.")
+    verdicts, counts, tasks = impact.evaluate_rule(session, rule, as_of, actor=user.name, open_tasks=True)
+    session.commit()
+    return _impact_out(session, rule, as_of, verdicts, counts, tasks, impact.in_force_version(rule, as_of))
 
 
 @router.post("/{code}/versions", response_model=s.RuleVersionOut, status_code=201)

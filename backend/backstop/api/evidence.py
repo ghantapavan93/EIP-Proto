@@ -12,6 +12,7 @@ from sqlalchemy import select
 
 from backstop.api.deps import SessionDep, UserDep
 from backstop.core import audit, evidence
+from backstop.core.clock import compliance_today
 from backstop.models import ReviewTask, Rule, Run
 
 router = APIRouter(prefix="/evidence", tags=["evidence"])
@@ -53,7 +54,7 @@ def run_bundle(run_id: str, session: SessionDep, user: UserDep, format: Fmt = Qu
 
 @router.get("/rules/{code}")
 def rule_bundle(code: str, session: SessionDep, user: UserDep, format: Fmt = Query("json"),
-                as_of: date = Query(default_factory=date.today)):
+                as_of: date = Query(default_factory=compliance_today)):
     rule = session.scalar(select(Rule).where(Rule.code == code))
     if rule is None:
         raise HTTPException(404, "rule not found")

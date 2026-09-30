@@ -1,8 +1,8 @@
 """Change-impact evaluation: rule versions × edges × as-of date → stale set + review tasks.
 
-Shared by the API (`GET /rules/{code}/impact`) and the scanner (which
-re-evaluates after every scan). Task creation is idempotent by construction:
-one STALE_ASSET task per (rule version in force, artifact).
+Shared by the API (GET `/rules/{code}/impact` reads; POST `/rules/{code}/impact/evaluate`
+opens tasks) and the scanner, which re-evaluates after every scan. Task creation is
+idempotent by construction: one STALE_ASSET task per (rule version in force, artifact).
 """
 
 from __future__ import annotations

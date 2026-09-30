@@ -233,6 +233,22 @@ class ContractVersion(Base):
 
     contract: Mapped[Contract] = relationship(back_populates="versions")
 
+    @property
+    def severity(self) -> str:
+        """The severity results under this version were scored with (see `version_severity`)."""
+        return version_severity(self.spec, self.contract.severity)
+
+
+def version_severity(spec: dict | None, current: str) -> str:
+    """A contract version's own severity, from the definition snapshotted into its spec.
+
+    The Contract row mirrors the latest definition, so reading `Contract.severity` for an old
+    result would re-grade history after a severity edit. `current` (the Contract row) is the
+    fallback for versions written before snapshots existed.
+    """
+    snapshot = (spec or {}).get("_definition") or {}
+    return str(snapshot.get("severity") or current)
+
 
 # ------------------------------------------------------------------------ workflows
 

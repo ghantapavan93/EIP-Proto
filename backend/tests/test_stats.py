@@ -9,9 +9,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from backstop.api.contracts_metrics import _run_metrics
-from backstop.api.runs import _Cells, _compare_statistics
 from backstop.core import stats
+from backstop.core.compare import Cells, compare_statistics
+from backstop.core.metrics import run_metrics
 
 # ------------------------------------------------------------------ Wilson
 
@@ -99,6 +99,20 @@ def test_compare_rates_verdicts():
     assert unpaired["discordant"] is None
 
 
+def test_a_small_p_on_few_changed_calls_is_not_called_significant():
+    # Six calls changed, all the same way: exact p = 2/64 < 0.05, but six calls cannot carry a claim.
+    few = stats.compare_rates(0, 20, 6, 20, {"both_pass": 14, "a_only_fail": 0, "b_only_fail": 6, "both_fail": 0})
+    assert few["significant"] and few["p_value"] == pytest.approx(2 / 64)
+    assert few["direction"] == "none" and "significantly" not in few["verdict"]
+    assert few["verdict"].startswith("No conclusion: B looks worse")
+
+
+def test_fisher_odds_ratio_edges():
+    assert stats.fisher_exact_2x2(1, 0, 0, 1)["odds_ratio"] == math.inf
+    assert math.isnan(stats.fisher_exact_2x2(0, 0, 0, 5)["odds_ratio"])
+    assert stats.fisher_exact_2x2(2, 1, 1, 2)["odds_ratio"] == 4.0
+
+
 # ------------------------------------------------------------------ compare on hand-built cells
 
 
@@ -108,7 +122,7 @@ def _run(corpus_hash="c1", corpus="synthetic", prompt="p2", contract_set="cs"):
 
 
 def _cells(rows, not_evaluated=()):
-    cells = _Cells()
+    cells = Cells()
     for t, c, sev, outcome in rows:
         cells.outcomes[(t, c)] = outcome
         cells.severity[c] = sev
@@ -126,7 +140,7 @@ def test_compare_statistics_paired_with_errors_and_unlabelled_cells():
                + [("T0", "C-SUP", "FLAG", "PASS"), ("T1", "C-SUP", "FLAG", "PASS"),
                   ("U1", "C-X", "BLOCK", "ERROR")],
                not_evaluated={("U1", "C-X")})
-    out = _compare_statistics(None, _run(prompt="p2"), _run(prompt="p3"), a, b)
+    out = compare_statistics(None, _run(prompt="p2"), _run(prompt="p3"), a, b)
     assert out.mode == "paired" and "ERROR" in out.failure_definition
     x = next(r for r in out.per_contract if r.contract_code == "C-X")
     assert x.paired.model_dump() == {"both_pass": 2, "a_only_fail": 0, "b_only_fail": 10, "both_fail": 0}
@@ -144,7 +158,7 @@ def test_compare_statistics_paired_with_errors_and_unlabelled_cells():
 def test_compare_statistics_unpaired_when_the_corpus_changed():
     a = _cells([(f"T{i}", "C-X", "BLOCK", "FAIL" if i < 20 else "PASS") for i in range(60)])
     b = _cells([(f"H{i}", "C-X", "BLOCK", "FAIL" if i < 5 else "PASS") for i in range(60)])
-    out = _compare_statistics(None, _run("dev"), _run("held", "holdout", contract_set="other"), a, b)
+    out = compare_statistics(None, _run("dev"), _run("held", "holdout", contract_set="other"), a, b)
     assert out.mode == "unpaired" and "paired test is invalid" in out.cautions[0]
     x = out.per_contract[0]
     assert x.paired is None and x.n_shared == 0 and x.test == "Fisher exact (two-sided)"
@@ -157,11 +171,30 @@ def test_compare_holm_caution_when_only_raw_p_is_significant():
     for code in ("C-A", "C-B", "C-C", "C-D"):
         rows_a += [(f"T{i}", code, "BLOCK", "PASS") for i in range(10)]
         rows_b += [(f"T{i}", code, "BLOCK", "FAIL" if (code == "C-A" and i < 6) else "PASS") for i in range(10)]
-    out = _compare_statistics(None, _run(), _run(), _cells(rows_a), _cells(rows_b))
+    out = compare_statistics(None, _run(), _run(), _cells(rows_a), _cells(rows_b))
     first = out.per_contract[0]
     assert first.p_value == pytest.approx(2 / 64) and first.significant
-    assert first.p_holm == pytest.approx(4 * 2 / 64)
+    assert first.p_holm == pytest.approx(4 * 2 / 64) and first.significant_holm is False
     assert any("Holm" in c for c in first.cautions)
+    assert first.direction == "none" and "significantly" not in first.verdict
+    assert out.overall.significant_holm is None, "ALL-BLOCK is one test, not part of the family"
+
+
+def test_a_raw_finding_that_does_not_survive_holm_is_not_reported_as_one():
+    codes = [f"C-{i}" for i in range(8)]
+    rows_a, rows_b = [], []
+    for code in codes:
+        rows_a += [(f"T{i}", code, "BLOCK", "FAIL" if (code == "C-0" and i == 0) else "PASS") for i in range(12)]
+        # C-0: nine calls newly fail, one newly passes: McNemar p = 22/1024 on ten changed calls.
+        rows_b += [(f"T{i}", code, "BLOCK", "FAIL" if (code == "C-0" and 1 <= i <= 9) else "PASS")
+                   for i in range(12)]
+    out = compare_statistics(None, _run(), _run(), _cells(rows_a), _cells(rows_b))
+    row = next(r for r in out.per_contract if r.contract_code == "C-0")
+    assert row.discordant == 10 and row.p_value == pytest.approx(22 / 1024) and row.significant
+    assert row.p_holm == pytest.approx(8 * 22 / 1024) and row.significant_holm is False
+    assert row.direction == "none" and "significantly" not in row.verdict and "Holm" in row.verdict
+    for other in out.per_contract:
+        assert "significantly" not in other.verdict
 
 
 # ------------------------------------------------------------------ metrics on hand-built results
@@ -188,7 +221,7 @@ def test_judgment_confusion_matrix_is_exact():
         + [("ERROR", {"error": "no valid output"}, "MA", {"scenario": "D"})]
         + [("ERROR", {"error": "no ground truth", "not_evaluated": True}, "MA", {"ingested": True})]
     )
-    out = _run_metrics(_fake_run(), rows, "judgment", stats.failure_outcomes("BLOCK"))
+    out = run_metrics(_fake_run(), rows, "judgment", stats.failure_outcomes("BLOCK"))
     c = out.confusion
     assert (c.tp, c.fn, c.fp, c.tn) == (3, 4, 2, 10)
     assert (c.not_applicable, c.no_output, c.not_evaluated) == (1, 1, 1)
@@ -210,7 +243,7 @@ def test_flag_metrics_count_phrases_and_have_no_true_negatives():
          {"scenario": "F"}),
         ("PASS", {"expected_flags": [], "got_flags": []}, "MA", {"scenario": "A"}),
     ]
-    out = _run_metrics(_fake_run(), rows, "flags", stats.failure_outcomes("FLAG"))
+    out = run_metrics(_fake_run(), rows, "flags", stats.failure_outcomes("FLAG"))
     c = out.confusion
     assert (c.tp, c.fp, c.fn, c.tn) == (1, 1, 1, None) and c.unit == "flagged phrase"
     assert c.specificity is None and out.failure.k == 1
@@ -218,7 +251,7 @@ def test_flag_metrics_count_phrases_and_have_no_true_negatives():
 
 def test_grounding_contracts_report_a_failure_rate_only():
     rows = [("FAIL", {}, "MA", {"scenario": "F"})] * 2 + [("PASS", {}, "MA", {"scenario": "A"})] * 18
-    out = _run_metrics(_fake_run(), rows, "grounding", stats.failure_outcomes("BLOCK"))
+    out = run_metrics(_fake_run(), rows, "grounding", stats.failure_outcomes("BLOCK"))
     assert out.confusion is None and out.failure.k == 2 and out.failure.n == 20
     assert out.findings[0].startswith("Failed 2/20 (10%, 95% CI")
     f = next(sl for sl in out.slices if sl.value == "F")

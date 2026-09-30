@@ -15,14 +15,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from backstop.core import pii
 from backstop.harness import workflow as wf
 
 _WS = re.compile(r"\s+")
 # "$3,400", "$3400", "$0", "$12.50" — but never a trailing comma or period.
 _MONEY = re.compile(r"\$\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?(?![\d,])")
-_MBI_LIKE = re.compile(r"\b[1-9][A-Z][A-Z0-9]\d-?[A-Z][A-Z0-9]\d-?[A-Z]{2}\d{2}\b")
-_SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-_DOB = re.compile(r"\b(0?[1-9]|1[0-2])/(0?[1-9]|[12]\d|3[01])/(19|20)\d{2}\b")
 
 
 @dataclass
@@ -92,11 +90,12 @@ def pii_redacted(ctx: CheckContext) -> Verdict:
         return Verdict("ERROR", {"error": "no valid output"})
     comp = ctx.output.composition
     prose = " ".join([comp.summary, comp.coaching_note, str(comp.crm_record)])
+    # The detector that redacts ingested transcripts: output is held to the same bar as input.
     hits: dict[str, list[str]] = {}
-    for label, pattern in (("medicare_number", _MBI_LIKE), ("ssn", _SSN), ("dob", _DOB)):
-        found = pattern.findall(prose)
-        if found:
-            hits[label] = [f if isinstance(f, str) else "".join(f) for f in found][:3]
+    for hit in pii.detect(prose):
+        found = hits.setdefault(hit.kind, [])
+        if len(found) < 3:
+            found.append(prose[hit.start:hit.end])
     # Known PII values from labels must not appear either (belt and braces).
     for item in ctx.labels.get("pii", []):
         if item.get("value") and item["value"] in prose:

@@ -189,6 +189,49 @@ def test_a_moved_vote_or_extended_deferral_is_refreshed_in_place_and_audited(scr
                               .where(AuditEvent.event_type == "rule.version_annotated")) == 2
 
 
+def test_edited_annotations_are_refreshed_reported_and_audited(scratch_rules):
+    rules_dir, Session = scratch_rules
+    path = rules_dir / "soa-48h-wait.yaml"
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    v2 = doc["versions"][1]
+    v2.update(disputed=True, dispute_note="Counsel reads the preamble differently.",
+              summary="Waiting period removed (disputed).", regulation_effective=date(2026, 6, 2),
+              sources=[{"authority": "secondary", "cite": "Trade summary", "url": "https://example.test/s",
+                        "reading": "Wait removed."}])
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    with Session() as session:
+        before = session.scalar(select(func.count(AuditEvent.id))
+                                .where(AuditEvent.event_type == "rule.version_annotated"))
+        report = load_rules(session, rules_dir, actor="tests")
+        assert report.versions_created == 0 and report.versions_updated == 1
+        rule = session.scalar(select(Rule).where(Rule.code == "soa-48h-wait"))
+        stored = next(v for v in rule.versions if v.version == 2)
+        assert stored.disputed and stored.dispute_note == "Counsel reads the preamble differently."
+        assert stored.summary == "Waiting period removed (disputed)."
+        assert stored.regulation_effective == date(2026, 6, 2)
+        assert [src["authority"] for src in stored.sources] == ["secondary"]
+        event = session.scalars(select(AuditEvent).where(AuditEvent.event_type == "rule.version_annotated")
+                                .order_by(AuditEvent.id.desc())).first()
+        assert event.payload["version"] == 2
+        assert event.payload["changed"] == ["dispute_note", "disputed", "regulation_effective", "sources", "summary"]
+        assert event.payload["after"]["regulation_effective"] == "2026-06-02"
+        assert session.scalar(select(func.count(AuditEvent.id))
+                              .where(AuditEvent.event_type == "rule.version_annotated")) == before + 1
+        # Idempotent: the next reload finds nothing to change.
+        again = load_rules(session, rules_dir, actor="tests")
+        assert again.versions_updated == 0 and again.unchanged == report.unchanged + 1
+
+
+def test_the_legal_text_of_a_loaded_version_stays_append_only(scratch_rules):
+    rules_dir, Session = scratch_rules
+    path = rules_dir / "soa-48h-wait.yaml"
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    doc["versions"][1]["clause_text"] += " Amended in place."
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    with Session() as session, pytest.raises(RuleCorpusError, match="edited in place"):
+        load_rules(session, rules_dir, actor="tests")
+
+
 # ------------------------------------------------------------------ the loaded corpus
 
 

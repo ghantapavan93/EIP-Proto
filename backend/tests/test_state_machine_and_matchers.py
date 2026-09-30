@@ -27,8 +27,25 @@ def test_only_engineers_and_admins_republish():
 
 
 def test_terminal_states():
-    assert sm.is_terminal("dismissed") and sm.is_terminal("overridden")
-    assert not sm.is_terminal("in_review")
+    assert sm.is_terminal("STALE_ASSET", "dismissed") and sm.is_terminal("FLAGGED_RESULT", "overridden")
+    assert not sm.is_terminal("STALE_ASSET", "in_review")
+
+
+def test_verified_is_terminal_only_where_nothing_follows_it():
+    # A confirmed edge and an adopted rule change are done; a verified stale artifact
+    # still has to be republished.
+    assert sm.is_terminal("PROPOSED_EDGE", "verified")
+    assert sm.is_terminal("RULE_SOURCE_CHANGED", "verified")
+    assert sm.is_open("STALE_ASSET", "verified")
+    assert "verified" in sm.open_states()
+
+
+def test_every_state_is_open_or_terminal_per_kind():
+    for kind, moves in sm.TRANSITIONS.items():
+        reachable = set(moves) | {t for targets in moves.values() for t in targets}
+        for state in reachable:
+            assert sm.is_open(kind, state) == bool(moves.get(state)), (kind, state)
+    assert sm.is_open("UNKNOWN_KIND", "open") and sm.is_terminal("UNKNOWN_KIND", "verified")
 
 
 # ------------------------------------------------------------------ matchers
@@ -98,3 +115,16 @@ def test_spans_are_verbatim_substrings_with_correct_offsets():
     text = "Intro sentence here. SC-12: at least 48 hours before any personal marketing appointment. Trailing text."
     for hit in matchers.run_all(text):
         assert text[hit.offset : hit.offset + len(hit.span)] == hit.span
+
+
+def test_every_matcher_points_at_a_rule_version_in_the_corpus(settings):
+    import yaml
+
+    corpus = set()
+    for path in settings.rules_dir.glob("*.yaml"):
+        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        corpus |= {(doc["code"], int(v["version"])) for v in doc["versions"]}
+    dangling = sorted({(m.name, m.rule_code, m.version) for m in matchers.MATCHERS
+                       if (m.rule_code, m.version) not in corpus})
+    assert not dangling, f"matchers bound to rule versions no rules/*.yaml defines: {dangling}"
+    assert len({m.name for m in matchers.MATCHERS}) == len(matchers.MATCHERS), "matcher names must be unique"

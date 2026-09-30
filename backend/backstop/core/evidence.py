@@ -127,7 +127,7 @@ def _result(rr: RunResult) -> dict[str, Any]:
     return {
         "result_id": rr.id,
         "contract": {"code": cv.contract.code, "title": cv.contract.title, "kind": cv.contract.kind,
-                     "severity": cv.contract.severity, "version": cv.version},
+                     "severity": cv.severity, "version": cv.version},
         "transcript": rr.transcript.code,
         "transcript_synthetic": rr.transcript.synthetic,
         "outcome": rr.outcome,

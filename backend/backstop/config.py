@@ -9,8 +9,9 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -65,8 +66,21 @@ class Settings(BaseSettings):
     crawler_delay_seconds: float = Field(default=2.0)
     crawler_live: bool = Field(default=False)  # False = replay frozen snapshots only
 
+    # The time zone whose calendar date is "today" for rule evaluation (see core/clock.py).
+    compliance_tz: str = Field(default="America/New_York")
+
     # UI hints.
     environment_label: str = Field(default="PROTOTYPE · SYNTHETIC DATA")
+
+    @field_validator("compliance_tz")
+    @classmethod
+    def _known_time_zone(cls, value: str) -> str:
+        # Fail at startup, not on every request that needs today's date.
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as exc:
+            raise ValueError(f"BACKSTOP_COMPLIANCE_TZ {value!r} is not an IANA time zone") from exc
+        return value
 
     def user_table(self) -> dict[str, tuple[str, str]]:
         """Parse BACKSTOP_USERS into {username: (password, role)}.
