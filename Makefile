@@ -3,7 +3,11 @@
 
 PY ?= backend/.venv/bin/python
 
-.PHONY: setup seed scan demo run-gate test lint api ui up down reset clean
+.DEFAULT_GOAL := help
+.PHONY: help setup seed scan demo run-gate test lint typecheck check api ui up down reset clean
+
+help:             ## list targets
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
 
 setup:            ## create the backend venv and install everything
 	python -m venv backend/.venv && $(PY) -m pip install -q -c backend/requirements.lock -e "backend[dev]" && cd frontend && npm install
@@ -20,10 +24,10 @@ demo:             ## seed + scan + eleven runs (four simulated, five recorded re
 run-gate:         ## CI-style gate on the updated prompt (exit 1 on RED)
 	$(PY) -m backstop.cli run --prompt 2 --model sim-large --rule-date 2026-10-01 --gate
 
-test:             ## backend + frontend tests
+test:             ## backend (SQLite) + frontend tests; CI also runs the backend suite on Postgres
 	$(PY) -m pytest backend/tests -q && cd frontend && npm run test -- --run
 
-lint:
+lint:             ## ruff + eslint
 	$(PY) -m ruff check backend/backstop backend/tests && cd frontend && npm run lint
 
 api:              ## API on :8000 (SQLite)
@@ -41,5 +45,10 @@ down:            ## stop the stack, keep the database
 reset:           ## stop the stack AND delete the database volume (demo data is reseeded on start)
 	docker compose down -v
 
-clean:
+typecheck:        ## mypy (backend) + tsc (frontend)
+	$(PY) -m mypy --config-file backend/pyproject.toml backend/backstop && cd frontend && npx tsc -p tsconfig.app.json --noEmit
+
+check: lint typecheck test  ## everything CI runs except Postgres, Docker and Terraform
+
+clean:            ## remove local SQLite databases
 	rm -f backstop.db ci.db
