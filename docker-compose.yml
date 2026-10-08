@@ -1,7 +1,7 @@
 # Backstop — one command: `docker compose up --build`
 #
 #   UI   http://localhost:5173   the only public-facing port (nginx: static UI + /api proxy)
-#   API  http://localhost:8000/docs   loopback only; the browser always uses same-origin /api
+#   API  http://localhost:8000/docs   loopback only (BACKSTOP_API_PORT moves it); the browser always uses same-origin /api
 #   DB   no host port; Ollama stays on the host (host.docker.internal)
 #
 # Demo users come from BACKSTOP_USERS (.env). The defaults (analyst/analyst, …)
@@ -54,7 +54,7 @@ services:
     # Loopback only: the API is reached through the UI gateway (/api), never
     # directly. This mapping exists for local /docs; nothing public points at it.
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${BACKSTOP_API_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')\""]
       interval: 10s
